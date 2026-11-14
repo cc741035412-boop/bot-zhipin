@@ -28,6 +28,16 @@ export function clientIp(request: Pick<Request, 'headers'>, env: Pick<Env, 'ALLO
   return request.headers.get('CF-Connecting-IP') || '0.0.0.0'
 }
 
+export function validateClickHeaders(request: Pick<Request, 'headers' | 'url'>) {
+  const mediaType = request.headers.get('Content-Type')?.split(';', 1)[0].trim().toLowerCase()
+  if (mediaType !== 'application/json') throw new ApiError(415, 'unsupported_media_type')
+  const origin = request.headers.get('Origin')
+  if ((origin !== null && origin !== new URL(request.url).origin)
+    || request.headers.get('Sec-Fetch-Site')?.toLowerCase() === 'cross-site') {
+    throw new ApiError(403, 'forbidden')
+  }
+}
+
 export async function readClickBody(request: Pick<Request, 'headers' | 'body'>) {
   if (Number(request.headers.get('Content-Length')) > MAX_BODY_BYTES) {
     throw new ApiError(400, 'bad_request')

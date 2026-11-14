@@ -11,12 +11,12 @@
 
 ## 合法 slug 清单
 
-构建时 `scripts/sync-assets.mjs` 生成 `site/public/api-data/slugs.json`，内容是全部 Bot 的 slug 数组（含外部收录），会进入构建产物，线上路径 `/api-data/slugs.json`。
+构建时 `scripts/sync-assets.mjs` 生成 `site/public/api-data/slugs.json`，内容是 bot.yaml 可解析、slug 合法且与文件夹名相同的 Bot slug 数组（含外部收录，与网站路由一致），会进入构建产物，线上路径 `/api-data/slugs.json`。
 后端用 `context.env.ASSETS.fetch(new URL('/api-data/slugs.json', request.url))` 读取，不在清单里的 slug 一律 404。可以在模块作用域缓存，单元测试里 mock `ASSETS`。
 
 ## POST /api/click
 
-请求：`Content-Type: application/json`，body 不超过 1 KB：
+请求：只接受 `Content-Type: application/json`（允许 `; charset=utf-8` 等参数），body 不超过 1 KB。带 `Origin` 时必须与请求 URL 的 origin 完全相同；`Sec-Fetch-Site: cross-site` 一律拒绝。无 Origin 的非浏览器请求仍可使用，不返回跨域授权头：
 
 ```json
 { "slug": "my-bot", "kind": "import" }
@@ -31,6 +31,8 @@
 | 200 | `{"ok":true,"counted":true,"heat":12}` | 计入了这次点击；`heat` 是这个 Bot 计入后的总热度 |
 | 200 | `{"ok":true,"counted":false,"heat":11}` | 24 小时内这个 IP 已经给这个 Bot 计过一次，这次不算 |
 | 400 | `{"ok":false,"error":"bad_request"}` | body 不是 JSON、太大、slug 格式不对、kind 不是两者之一 |
+| 403 | `{"ok":false,"error":"forbidden"}` | Origin 与请求 origin 不同（包括 `null`），或 Sec-Fetch-Site 为 cross-site |
+| 415 | `{"ok":false,"error":"unsupported_media_type"}` | Content-Type 缺失或媒体类型不是 application/json |
 | 404 | `{"ok":false,"error":"unknown_slug"}` | slug 不在 slugs.json 里 |
 | 405 | `{"ok":false,"error":"method_not_allowed"}` | 不是 POST（带 `Allow: POST`） |
 | 500 | `{"ok":false,"error":"server_error"}` | 数据库出错，或没配置 `IP_SALT` |
@@ -49,7 +51,8 @@
 - **热度 = 去重后的点击次数**。同一个 IP 对同一个 Bot，24 小时内只算一次，**不分是哪个按钮**。
 - 24 小时是滚动窗口，从上一次「被计入」的时间算起；窗口内的重复点击不计入，也不刷新窗口。
 - 被计入的那次点击按它的 `kind` 记到 `byKind` 里。
-- 只存加盐哈希，不存原始 IP：`ip_hash = hex(HMAC-SHA256(key = IP_SALT, message = ip + "|" + slug))`。没有 `IP_SALT` 时直接返回 500，绝不存未加盐的值。
+- 只存加盐哈希，不存原始 IP：`ip_hash = hex(HMAC-SHA256(key = IP_SALT, message = normalizeIp(ip) + "|" + slug))`。没有 `IP_SALT` 时直接返回 500，绝不存未加盐的值。
+- IPv4 原值不变。IPv6 在哈希前展开 `::`、统一为小写四位十六进制组，再取前四组（/64），序列化为 `xxxx:xxxx:xxxx:xxxx::/64`；同 /64 的不同接口地址共享 24 小时去重窗口，不同 /64 独立。IPv4 映射地址（如 `::ffff:1.2.3.4`、等价十六进制写法）转换为 `1.2.3.4`，与该 IPv4 共桶。非法 IPv6 回退为 `0.0.0.0`。
 - IP 来源：`CF-Connecting-IP` 请求头（Cloudflare 会覆盖，客户端伪造不了）。只有 `env.ALLOW_TEST_IP === "1"` 时才额外接受 `X-Test-IP`（本地测试模拟不同 IP 用）。两者都没有时按 `0.0.0.0` 处理。
 - 热度只是按钮点击数，不是导入成功数（导入发生在 Grok Bot App 里，拿不到）。
 
@@ -70,7 +73,7 @@
 - `slugs.json` 必须是合法 slug 的 JSON 数组；模块作用域按 ASSETS 绑定和请求 origin 缓存成功结果 60 秒。HTTP 失败、读取失败、JSON/结构错误均返回通用 500，不缓存失败，也不回退到已过期的清单。
 - `GET /api/stats` 为每个出现的 Bot 同时返回 `import`、`prompt` 两个数字，未计入过的按钮为 0；从未点击的 Bot 仍不出现。读库失败返回 `500 {"ok":false,"error":"server_error"}`。
 - 两个接口的成功及错误响应都带统一 JSON Content-Type 和 `no-store`。click 非 POST 返回 `Allow: POST`，stats 非 GET 返回 `Allow: GET`，包括 OPTIONS 和 HEAD；HEAD 在 HTTP 传输层不发送响应体。
-- POST 缺失或空 `IP_SALT` 时优先返回 500，不读取 IP、不计算哈希、不记录点击。数据库/资源读取错误的内部详情不写日志、不返回客户端。
+- POST 先检查媒体类型（415）、再检查来源（403），拒绝时不读取 body、IP 或 slug 清单、不记录点击。通过请求头检查后，缺失或空 `IP_SALT` 时优先返回 500，不读取 IP、不计算哈希、不记录点击。数据库/资源读取错误的内部详情不写日志、不返回客户端。
 
 ### 去重、清理与故障边界
 

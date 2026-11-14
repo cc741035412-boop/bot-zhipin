@@ -10,6 +10,7 @@ import { onRequestGet, onRequest as statsFallback } from '../../functions/api/st
 import { DAY_MS, DEDUPE_SQL, hashIp, readStats, recordClick } from '../../functions/_lib/clicks.ts'
 import { clientIp, readClickBody, scheduleCleanup } from '../../functions/_lib/http.ts'
 import { loadSlugs } from '../../functions/_lib/slugs.ts'
+import { normalizeIp } from '../../functions/_lib/ip.ts'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
 const slugs = new Set(['demo-prd-reviewer', 'demo-weekly-digest', 'demo-external'])
@@ -303,6 +304,85 @@ describe('HTTP 校验、响应头与错误', () => {
     await expectJson(await stats(), 500, { ok: false, error: 'server_error' })
     expect(log).not.toHaveBeenCalled()
     expect(error).not.toHaveBeenCalled()
+  })
+})
+
+describe('点击请求来源与媒体类型', () => {
+  it.each(['', 'text/plain', 'application/x-www-form-urlencoded', 'application/jsonp', 'multipart/form-data'])('媒体类型 %s 返回 415 且不计数', async (type) => {
+    await expectJson(await post(validBody, { headers: { 'Content-Type': type } }), 415, { ok: false, error: 'unsupported_media_type' })
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled()
+    expect(await dedupeRows()).toHaveLength(0)
+  })
+
+  it('缺 Content-Type 返回 415，拒绝前不读取请求体', async () => {
+    const request = { url: 'https://example.test/api/click', headers: new Headers(), get body() { throw new Error('不应读取') } }
+    await expectJson(await onRequestPost(context(request)), 415, { ok: false, error: 'unsupported_media_type' })
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    { Origin: 'https://other.test' },
+    { Origin: 'http://example.test' },
+    { Origin: 'https://example.test:444' },
+    { Origin: 'null' },
+    { Origin: '' },
+    { 'Sec-Fetch-Site': 'cross-site' },
+    { Origin: 'https://example.test', 'Sec-Fetch-Site': 'cross-site' },
+  ])('跨站头 %j 返回 403 且不读取 body/清单或计数', async (headers) => {
+    const request = {
+      url: 'https://example.test/api/click',
+      headers: new Headers({ 'Content-Type': 'application/json', ...headers }),
+      get body() { throw new Error('不应读取') },
+    }
+    await expectJson(await onRequestPost(context(request)), 403, { ok: false, error: 'forbidden' })
+    expect(env.ASSETS.fetch).not.toHaveBeenCalled()
+    expect(await dedupeRows()).toHaveLength(0)
+  })
+
+  it.each([
+    {},
+    { Origin: 'https://example.test', 'Sec-Fetch-Site': 'same-origin' },
+    { 'Content-Type': 'application/json; charset=utf-8' },
+    { 'Content-Type': 'Application/JSON; Charset=UTF-8' },
+  ])('无 Origin/同源/JSON charset 正常计数：%j', async (headers) => {
+    await expectJson(await post(validBody, { headers }), 200, { ok: true, counted: true, heat: 1 })
+  })
+})
+
+describe('IPv6 规范化与 /64 去重', () => {
+  it.each([
+    ['2001:DB8:1:2::1', '2001:0db8:0001:0002::/64'],
+    ['2001:0db8:0001:0002:0000:0000:0000:0001', '2001:0db8:0001:0002::/64'],
+    ['2001:db8::1:2', '2001:0db8:0000:0000::/64'],
+    ['2001:db8:1:2::', '2001:0db8:0001:0002::/64'],
+    ['::', '0000:0000:0000:0000::/64'],
+    ['::1', '0000:0000:0000:0000::/64'],
+    ['::ffff:1.2.3.4', '1.2.3.4'],
+    ['0:0:0:0:0:FFFF:0102:0304', '1.2.3.4'],
+    ['::ffff:102:304', '1.2.3.4'],
+    ['192.0.2.10', '192.0.2.10'],
+    ['2001::db8::1', '0.0.0.0'],
+  ])('规范化 %s', (address, expected) => {
+    expect(normalizeIp(address)).toBe(expected)
+  })
+
+  it('同 /64 不同 IPv6/大小写写法只计一次，不同 /64 可计入', async () => {
+    expect((await click({ ip: '2001:DB8:1:2::1' })).counted).toBe(true)
+    expect((await click({ ip: '2001:0db8:0001:0002:ffff:ffff:ffff:ffff' })).counted).toBe(false)
+    expect((await click({ ip: '2001:db8:1:3::1' })).counted).toBe(true)
+    expect(await dedupeRows()).toHaveLength(2)
+  })
+
+  it('映射 IPv4 与原 IPv4 共享哈希及去重桶', async () => {
+    expect((await click({ ip: '192.0.2.10' })).counted).toBe(true)
+    expect((await click({ ip: '::FFFF:192.0.2.10' })).counted).toBe(false)
+    expect((await click({ ip: '0:0:0:0:0:ffff:c000:020a' })).counted).toBe(false)
+    expect(await hashIp(salt, '::ffff:c000:20a', slug)).toBe(await hashIp(salt, '192.0.2.10', slug))
+  })
+
+  it('IPv6 HMAC 使用规范化 /64 而非原地址', async () => {
+    const expected = createHmac('sha256', salt).update(`2001:0db8:0001:0002::/64|${slug}`).digest('hex')
+    expect(await hashIp(salt, '2001:DB8:1:2::ab', slug)).toBe(expected)
   })
 })
 
