@@ -1,0 +1,23 @@
+# 投稿模板：把整个 _template 文件夹复制一份，改名成你的 slug，再改这个文件。
+# slug 只能用小写字母、数字和短横线，比如 prd-reviewer。
+# 每一行后面的注释说明了怎么填，填完在仓库根目录运行：npm run validate
+
+slug: my-bot                      # 必须和文件夹名一模一样
+name: 我的 Bot                    # Bot 的名字，20 个字以内
+tagline: 一句话说清它帮谁做什么    # 一句话介绍，40 个字以内
+category: 日常                    # 八选一：调研、定义、评审、AI 评测、学习、求职、日常、基础设施
+author:
+  name: 你的名字
+  github: your-github-username    # 你的 GitHub 用户名，不带 @
+templateUrl: https://x.ai/bot/REPLACE-ME   # 在 Grok Bot 里分享模板后得到的链接
+addedAt: 2026-01-01               # 上架日期，填你提交那天，格式 YYYY-MM-DD
+prerequisites:                    # 导入前要准备什么。什么都不用准备，就只留一行「- 无」
+  - 无
+quotaCost: 中                     # 额度消耗：低 / 中 / 高
+permissions:                      # 会用到的权限，只能从这 6 个里选，用不到的删掉：
+  - 联网                          # 云电脑文件、浏览器 Cookie、外部账号、联网、定时自动运行、代我发消息
+                                  # 一个都不用，就写成 permissions: []
+
+# ---- 以下是可选项，不需要就整行删掉 ----
+pitch: 一句自荐台词，鼠标放到头像上时冒出来   # 30 个字以内
+# forkedFrom: other-bot-slug      # 改编自站上哪个 Bot，填它的 slug

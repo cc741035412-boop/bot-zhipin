@@ -1,0 +1,5 @@
+# 只给本地 wrangler pages dev 用，线上不读这个文件。
+# 线上的 IP_SALT 在 Cloudflare Pages 项目设置里配置成加密变量，不要写进仓库。
+IP_SALT=local-dev-salt-not-secret
+# 允许本地测试用 X-Test-IP 请求头模拟不同 IP。线上绝不能设置这个变量。
+ALLOW_TEST_IP=1

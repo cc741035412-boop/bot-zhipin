@@ -1,0 +1,35 @@
+# 提 PR 时检查：校验所有 Bot、跑测试、构建网站。
+# 只用 pull_request 触发（不用 pull_request_target），只读权限，不需要任何密钥。
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-build:
+    name: validate-and-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: 校验所有 Bot
+        run: npm run validate
+      - name: 单元测试
+        run: npm test
+      - name: 构建网站
+        run: npm run build

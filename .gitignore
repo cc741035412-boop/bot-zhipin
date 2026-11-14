@@ -1,0 +1,14 @@
+node_modules/
+site/.vitepress/dist/
+site/.vitepress/cache/
+site/public/bot-assets/
+.wrangler/
+.dev.vars
+.env
+.env.*
+test-results/
+playwright-report/
+artifacts/
+.DS_Store
+*.log
+site/public/api-data/

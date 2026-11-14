@@ -1,0 +1,35 @@
+{
+  "name": "bot-zhipin",
+  "private": true,
+  "type": "module",
+  "description": "Grok Bot 模板货架：一个 Bot 一个文件夹，通过 PR 投稿",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node scripts/sync-assets.mjs && vitepress dev site",
+    "build": "node scripts/sync-assets.mjs && vitepress build site",
+    "preview": "vitepress preview site",
+    "validate": "node scripts/validate.mjs",
+    "test": "vitest run --passWithNoTests",
+    "e2e": "playwright test",
+    "dev:full": "node scripts/ensure-dev-vars.mjs && npm run build && wrangler d1 migrations apply DB --local && wrangler pages dev --port 8788",
+    "new-bot": "node scripts/new-bot.mjs",
+    "check": "npm run validate && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261114.1",
+    "@playwright/test": "^1.65.1",
+    "ajv": "^8.20.0",
+    "vitepress": "^1.6.4",
+    "vitest": "^5.1.0",
+    "wrangler": "^4.162.0",
+    "yaml": "^2.9.1"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "esbuild@0.21.5": true,
+    "workerd@1.20261113.1": true
+  }
+}

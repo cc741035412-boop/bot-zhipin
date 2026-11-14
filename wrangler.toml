@@ -1,0 +1,11 @@
+# Cloudflare Pages 配置。Pages 用 Git 集成构建时也读这个文件（绑定以这里为准）。
+name = "bot-zhipin"
+pages_build_output_dir = "site/.vitepress/dist"
+compatibility_date = "2026-11-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "bot-zhipin"
+# 真实 ID 在 Cloudflare 建好 D1 后填入；本地 --local 模式不受影响
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"
