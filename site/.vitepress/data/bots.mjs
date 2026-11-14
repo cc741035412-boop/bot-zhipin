@@ -1,10 +1,11 @@
 import { loadAllBots, loadEnums } from '../../../scripts/lib/load-bots.mjs'
 import { SITE } from '../meta.mjs'
+import { isPublicBot } from '../../../scripts/lib/public-bot.mjs'
 
 export function readBots() {
   return loadAllBots().filter((bot) => {
-    if (!bot.yamlError && bot.data) return true
-    console.warn(`[货架] 跳过 ${bot.yamlRel}：${bot.yamlError || '无法解析 bot.yaml'}`)
+    if (isPublicBot(bot)) return true
+    console.warn(`[货架] 跳过 ${bot.yamlRel}：${bot.yamlError ? '无法解析 bot.yaml' : 'slug 不合法或与文件夹不同'}`)
     return false
   })
 }

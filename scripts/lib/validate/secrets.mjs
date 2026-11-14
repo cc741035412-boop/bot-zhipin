@@ -27,6 +27,10 @@ export function scanSecrets(bot, report) {
     const bytes = readFileSync(file.path)
     // 看内容而不是扩展名，避免把伪装成 .png 的文本漏掉。
     if (imageFormat(bytes)) continue
+    if (file.size > 100 * 1024) {
+      report(file.path, '文件大小', `非图片文件超过 100KB：实际 ${file.size} 字节`, '将每个非图片文件缩减到 100KB（102400 字节）以内。')
+      continue
+    }
     const lines = bytes.toString('utf8').split(/\r\n|\n|\r/)
     lines.forEach((line, index) => {
       const hits = patterns.flatMap((pattern) => [...line.matchAll(pattern)].map((m) => m[0]))

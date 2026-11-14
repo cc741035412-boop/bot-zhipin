@@ -41,6 +41,9 @@ export function validateBots({ botsDir = BOTS_DIR, now = new Date() } = {}) {
         if (!previous.fix.includes(item.fix)) previous.fix += ` ${item.fix}`
       } else target.push(item)
     }
+    for (const link of bot.symlinks) {
+      report(resolve(bot.dir, '../..', link), '文件类型', '不允许符号链接（文件或目录）', '删除符号链接，改为此 Bot 文件夹内的真实文件或目录；不要引用文件夹外的内容。')
+    }
     // 即使 YAML 坏了也继续检查其他文件和密钥，不回显解析器的原文片段。
     if (bot.yamlError) {
       const line = Number(/at line (\d+)/.exec(bot.yamlError)?.[1] || 1)

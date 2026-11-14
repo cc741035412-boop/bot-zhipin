@@ -1,9 +1,20 @@
 import { join } from 'node:path'
 
-export const stripComments = (text) => text.replace(/<!--[\s\S]*?(?:-->|$)/g, '')
-const headings = (text) => [...stripComments(text).matchAll(/^##[ \t]+(.+?)[ \t]*#*[ \t]*\r?$/gm)].map((m) => m[1])
+import { hasDesignFrontmatter, stripComments } from '../design-content.mjs'
+export { stripComments }
+const headings = (text) => stripComments(text).split(/\r\n|\n|\r/).flatMap((line) => {
+  if (!/^##[ \t]+/.test(line)) return []
+  const value = line.slice(2).trim()
+  let end = value.length
+  while (end > 0 && value[end - 1] === '#') end--
+  const title = value.slice(0, end).trim()
+  return title ? [title] : []
+})
 
 export function validateContent(bot, template, report) {
+  if (bot.design !== null && hasDesignFrontmatter(bot.design)) {
+    report(join(bot.dir, 'DESIGN.md'), 'frontmatter', 'DESIGN.md 不允许 frontmatter', '删除开头 --- 到下一个 --- 的整个 frontmatter 块，只保留 Markdown 正文。')
+  }
   if (bot.data?.external === true) return
   if (bot.role === null || !stripComments(bot.role).trim()) {
     report(join(bot.dir, 'ROLE.md'), '正文', bot.role === null ? '缺少 ROLE.md' : 'ROLE.md 去掉 HTML 注释后为空', '创建或补充 ROLE.md，写清 Bot 的岗位、职责和边界；不要只写注释。')

@@ -2,7 +2,7 @@ import { reactive } from 'vue'
 
 // 只在客户端调用 fetch；SSR 的初始状态不含任何用户数据。
 export const heatState = reactive({
-  values: {} as Record<string, number>,
+  values: Object.create(null) as Record<string, number>,
   status: 'idle' as 'idle' | 'loading' | 'ready' | 'failed',
 })
 let pending: Promise<boolean> | undefined
@@ -15,11 +15,11 @@ export function loadHeat(): Promise<boolean> {
       const response = await fetch('/api/stats')
       const data = await response.json()
       if (!response.ok || data.ok !== true || !data.heat || typeof data.heat !== 'object' || Array.isArray(data.heat)) throw new Error('热度接口不可用')
-      heatState.values = Object.fromEntries(Object.entries(data.heat).filter(([, value]) => typeof value === 'number' && Number.isFinite(value) && value >= 0)) as Record<string, number>
+      heatState.values = Object.assign(Object.create(null), Object.fromEntries(Object.entries(data.heat).filter(([, value]) => typeof value === 'number' && Number.isFinite(value) && value >= 0))) as Record<string, number>
       heatState.status = 'ready'
       return true
     } catch {
-      heatState.values = {}
+      heatState.values = Object.create(null)
       heatState.status = 'failed'
       return false
     } finally {

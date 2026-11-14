@@ -1,5 +1,6 @@
 import type { D1Database } from '@cloudflare/workers-types'
 import { ApiError } from './errors'
+import { normalizeIp } from './ip'
 import type { ClickBody, ClickKind } from './types'
 
 export const DAY_MS = 86_400_000
@@ -31,7 +32,7 @@ export async function hashIp(salt: string | undefined, ip: string, slug: string)
   const key = await crypto.subtle.importKey(
     'raw', encoder.encode(salt), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'],
   )
-  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(`${ip}|${slug}`))
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(`${normalizeIp(ip)}|${slug}`))
   return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, '0')).join('')
 }
 

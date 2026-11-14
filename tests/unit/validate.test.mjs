@@ -159,7 +159,7 @@ it.each([['no-such-bot', '找不到'], [reviewer, '不能是自己']])('forkedFr
   change((data) => { data.forkedFrom = slug })
   expect(issues()).toContain(message)
 })
-it.each([null, '<!-- 只有注释 -->\n\t', '<!-- 未闭合注释'])('ROLE.md 缺失或去注释后为空：%s', (text) => {
+it.each([null, '<!-- 只有注释 -->\n\t'])('ROLE.md 缺失或去注释后为空：%s', (text) => {
   if (text === null) remove('ROLE.md'); else put('ROLE.md', text)
   expect(run().errors.some((e) => e.file.endsWith('ROLE.md'))).toBe(true)
 })

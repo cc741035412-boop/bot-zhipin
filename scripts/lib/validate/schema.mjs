@@ -38,7 +38,7 @@ export function validateSchema(bot, report) {
     let pointer = error.instancePath
     if (error.keyword === 'required') pointer += `/${error.params.missingProperty}`
     if (error.keyword === 'additionalProperties') pointer += `/${error.params.additionalProperty}`
-    if (!selected.has(pointer)) selected.set(pointer, error)
+    if (!selected.has(pointer) || (error.keyword === 'pattern' && ['/name', '/tagline', '/pitch'].includes(pointer))) selected.set(pointer, error)
   }
   for (const [pointer, error] of selected) {
     const where = parts(pointer).join('.') || '整个 bot.yaml'
@@ -81,6 +81,9 @@ export function validateSchema(bot, report) {
             ? `templateUrl 当前值 ${show(value)}，必须以 https://x.ai/bot/ 开头`
             : `templateUrl 当前值 ${show(value)} 格式不正确；要求 https://x.ai/bot/ 后接字母、数字、下划线或短横线组成的非空 ID`
           fix = '将 templateUrl 替换成 Grok Bot 分享得到的完整模板链接，不加空格、查询参数或额外路径。'
+        } else if (['name', 'tagline', 'pitch'].includes(where)) {
+          problem = `${where} 不能使用字符 <、>、"（英文双引号）`
+          fix = `删除 ${where} 中的 <、>、"，用纯文字描述，不要填写 HTML。`
         } else if (where === 'addedAt') {
           problem = `addedAt 当前值 ${show(value)} 不是有效日期；要求 YYYY-MM-DD`
           fix = '填写真实存在的年月日，例如 2026-01-01。'
