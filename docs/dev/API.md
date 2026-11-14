@@ -59,3 +59,30 @@
 - 点按钮时用 `fetch('/api/click', { method: 'POST', keepalive: true, ... })` 发出去，**不等结果**、不阻塞打开链接或复制。收到 200 后把这个 Bot 的热度改成返回的 `heat`。
 - 点击后**数字马上更新，排序不动**；下次进入页面或切换排序时才重排，避免卡片在鼠标底下跳走。
 - 排序：「热门」按 heat 降序，平手按 addedAt 降序，再平手按 name；「最新」按 addedAt 降序，平手按 name。
+
+## 后端实现细节与本地验证
+
+### 输入与响应
+
+- 1 KB 指 **1024 字节**，边界值可接受；先检查 `Content-Length`，再累计实际读取的请求体字节数（UTF-8），不信任客户端声明。没有该头、声明偏小或分块传输也受限；读取超限立即取消后续读取，返回 400。
+- body 必须是 JSON 对象；slug 长度 2–40，匹配 `^[a-z0-9]+(-[a-z0-9]+)*$`。额外字段不参与计数。
+- 本地显式开启 `ALLOW_TEST_IP === "1"` 时，非空 `X-Test-IP` 优先于 `CF-Connecting-IP`；否则不读取测试头。空头值按缺失处理。
+- `slugs.json` 必须是合法 slug 的 JSON 数组；模块作用域按 ASSETS 绑定和请求 origin 缓存成功结果 60 秒。HTTP 失败、读取失败、JSON/结构错误均返回通用 500，不缓存失败，也不回退到已过期的清单。
+- `GET /api/stats` 为每个出现的 Bot 同时返回 `import`、`prompt` 两个数字，未计入过的按钮为 0；从未点击的 Bot 仍不出现。读库失败返回 `500 {"ok":false,"error":"server_error"}`。
+- 两个接口的成功及错误响应都带统一 JSON Content-Type 和 `no-store`。click 非 POST 返回 `Allow: POST`，stats 非 GET 返回 `Allow: GET`，包括 OPTIONS 和 HEAD；HEAD 在 HTTP 传输层不发送响应体。
+- POST 缺失或空 `IP_SALT` 时优先返回 500，不读取 IP、不计算哈希、不记录点击。数据库/资源读取错误的内部详情不写日志、不返回客户端。
+
+### 去重、清理与故障边界
+
+- `last_at` 是服务器毫秒时间戳；24 小时为 `86400000` 毫秒，恰好到达窗口边界即可再次计入。客户端不能指定时间；核心 `recordClick` 接收可注入的 `now`，供单元测试验证边界。
+- 去重用单条条件 UPSERT，只有 `meta.changes === 1` 的请求执行计数 UPSERT。真实本地 D1 实测：首次插入为 1，冲突且 WHERE 不成立为 0，到期更新为 1；窗口内的重复不修改 `last_at`。
+- 每次 API 请求独立以 1/100 概率通过 `context.waitUntil` 删除 `last_at < now - 86400000` 的去重行；恰好位于边界的行不删除，历史 `click_counts` 不清理。清理是尽力而为，失败不影响接口响应。
+- 去重更新与计数累加按约定分两条语句执行，**不是同一事务**：若第二步失败或中途执行中断，去重时间可能已经生效但没有累加成功。接口遇到数据库错误返回 500，窗口内重试不保证补计；后续若要求故障下也严格一致，需要另行设计和确认。并发响应的 heat 是各自查询时的快照，不保证所有请求读到相同值。
+- 盐轮换会改变已有 IP 的哈希，旧窗口无法继续匹配；应把盐作为稳定的部署密钥管理。线上不要设置 `ALLOW_TEST_IP`。
+
+### 运行测试
+
+- `npm test`：`tests/unit/api.test.mjs` 使用 `getPlatformProxy({ persist: false, remoteBindings: false })` 提供的真实本地 D1，配置放在临时目录，不读取开发者的 `.dev.vars`，不用手写数据库替身。ASSETS 在单元测试中 mock；验证时间边界、20 请求并发、D1 changes 语义及错误路径。
+- `bash scripts/accept-click.sh`：复制源码到 `mktemp -d`，生成一次性盐，构建示例 Bot、迁移本地 D1、启动真正的 Pages Functions，以 HTTP 验证响应后查库；不修改现有本地数据库或变量文件。
+- 默认端口 8790 / inspector 9330，可用 `PORT=8792 INSPECTOR_PORT=9332 bash scripts/accept-click.sh` 覆盖。占用端口时直接失败，不清理其他进程；退出时核对 PID/命令，只清理本次启动的独立进程组。
+- 响应头探测使用已计入过的测试地址，不增加额外计数。成功清理临时副本并以 `ACCEPT-CLICK OK` 结束；失败保留临时日志路径，但移除一次性 `.dev.vars`。
