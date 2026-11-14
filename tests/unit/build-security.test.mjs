@@ -35,7 +35,8 @@ it('description 仅进入 head，SSR transformHead 恢复被 VitePress 过滤的
     frontmatter: { description: '旧描述', head: [['meta', { name: 'description', content: '旧描述' }], ['meta', { name: 'other', content: '保留' }]] },
   }
   config.transformPageData(page)
-  expect(page).not.toHaveProperty('description')
+  // 客户端路由切换要用 pageData.description；SSR 因 transformHead 已提供 description 而不输出未转义的那行（见下一条测试）
+  expect(page.description).toBe('一句介绍')
   expect(page.frontmatter).not.toHaveProperty('description')
   expect(page.frontmatter.head).toHaveLength(2)
   expect(config.transformHead({ pageData: page })).toEqual([['meta', { name: 'description', content: '一句介绍' }]])

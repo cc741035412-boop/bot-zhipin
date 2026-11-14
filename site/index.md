@@ -1,5 +1,6 @@
 ---
 layout: page
+pageClass: bz-layout
 ---
 
 <script setup>

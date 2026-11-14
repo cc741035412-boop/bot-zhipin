@@ -14,7 +14,9 @@ export default defineConfig({
     const bot = pageData.params?.bot
     if (bot) {
       pageData.title = bot.name
-      Reflect.deleteProperty(pageData, 'description')
+      // 客户端路由切换时 VitePress 用 setAttribute 写入它（安全）；服务端那行不转义的
+      // description 会因下面 transformHead 已提供 description 而被跳过（isDescriptionOverridden）。
+      pageData.description = bot.tagline
       pageData.frontmatter.title = bot.name
       delete pageData.frontmatter.description
       pageData.frontmatter.head = [

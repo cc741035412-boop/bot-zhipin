@@ -2,7 +2,11 @@
 import { onMounted } from 'vue'
 import BotAvatar from './BotAvatar.vue'
 import BotActions from './BotActions.vue'
-import { heatLabel, loadHeat } from '../heat'
+import { loadHeat } from '../heat'
+import BotHeat from './BotHeat.vue'
+import ExternalHint from './ExternalHint.vue'
+import LiveAnnouncer from './LiveAnnouncer.vue'
+import BotScreenshot from './BotScreenshot.vue'
 defineProps({
   bot: { type: Object, required: true },
   copy: { type: Object, required: true },
@@ -13,59 +17,62 @@ onMounted(loadHeat)
 
 <template>
   <main class="shelf-page bot-detail" data-testid="bot-detail">
-    <a href="/">返回货架</a>
+    <LiveAnnouncer />
+    <a class="back-link" href="/">← 返回货架</a>
     <header class="detail-header">
       <BotAvatar :bot="bot" />
+      <div class="detail-info">
       <h1>{{ bot.name }}</h1>
       <p>{{ bot.tagline }}</p>
       <p class="bot-meta">
-        <a data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">{{ bot.author.name }}</a>
-        <span>{{ bot.category }}</span>
+        <span class="bot-tag">{{ bot.category }}</span>
+        <span v-if="bot.external" class="bot-tag">外部收录</span>
+        <a data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
         <span>上架日期：<time :datetime="bot.addedAt">{{ bot.addedAt }}</time></span>
-        <span data-testid="heat">{{ heatLabel(bot.slug) }}</span>
+        <BotHeat :slug="bot.slug" />
       </p>
-      <template v-if="bot.external">
-        <strong class="external-badge">外部收录</strong>
-        <p>这个 Bot 由原作者在 x.ai 发布，本站只收录链接。</p>
-      </template>
-      <BotActions :bot="bot" />
       <p v-if="bot.forkedFrom" data-testid="forked-from">改编自 <a :href="`/bots/${bot.forkedFrom}`">{{ bot.forkedFromName }}</a></p>
+      <BotActions :bot="bot" />
+      </div>
     </header>
+    <p v-if="bot.external" class="external-notice">这个 Bot 由原作者在 x.ai 发布，本站只收录链接。</p>
     <section data-testid="section-prereq">
       <h2>导入前准备</h2>
       <ul><li v-for="(item, index) in bot.prerequisites" :key="index">{{ item }}</li></ul>
     </section>
     <section data-testid="section-quota">
       <h2>额度消耗</h2>
-      <p>{{ bot.quotaCost }}：{{ copy.quota[bot.quotaCost] }}</p>
+      <p class="quota-line"><span class="bot-tag quota-tag" :data-quota="bot.quotaCost">{{ bot.quotaCost }}</span>{{ copy.quota[bot.quotaCost] }}</p>
     </section>
     <section data-testid="section-permissions">
       <h2>会用到的权限</h2>
-      <ul v-if="bot.permissions.length">
-        <li v-for="permission in bot.permissions" :key="permission">{{ permission }}：{{ copy.permissions[permission] }}</li>
+      <ul v-if="bot.permissions.length" class="permission-list">
+        <li v-for="permission in bot.permissions" :key="permission"><span class="bot-tag">{{ permission }}</span><span>{{ copy.permissions[permission] }}</span></li>
       </ul>
-      <p v-else>无</p>
+      <p v-else>不需要额外权限</p>
     </section>
     <section v-if="!bot.external" data-testid="section-screenshots">
       <h2>截图</h2>
       <div class="bot-screenshots">
-        <img v-for="(url, index) in bot.screenshots" :key="url" :src="url" :alt="`${bot.name}截图 ${index + 1}`" loading="lazy">
+        <BotScreenshot v-for="(url, index) in bot.screenshots" :key="url" :url="url" :alt="`${bot.name}截图 ${index + 1}`" />
       </div>
       <p v-if="!bot.screenshots.length">暂无截图。</p>
     </section>
     <section v-if="!bot.external" data-testid="section-skills">
-      <h2>技能列表</h2>
-      <ul v-if="bot.skills.length">
+      <h2>技能</h2>
+      <ul v-if="bot.skills.length" class="skill-list">
         <li v-for="skill in bot.skills" :key="skill.sourceUrl">
-          <a :href="skill.sourceUrl" target="_blank" rel="noopener noreferrer">{{ skill.name }}</a>
+          <code>{{ skill.name }}</code>
           <p>{{ skill.description }}</p>
+          <a :href="skill.sourceUrl" target="_blank" rel="noopener noreferrer">查看源码<ExternalHint /></a>
         </li>
       </ul>
       <p v-else>暂无技能说明。</p>
     </section>
-    <section v-if="bot.hasRoutines" data-testid="section-routines">
+    <section v-if="!bot.external && bot.hasRoutines" data-testid="section-routines">
       <h2>定时任务</h2>
-      <a :href="bot.routinesUrl" target="_blank" rel="noopener noreferrer">查看定时任务说明（GitHub）</a>
+      <p>这个 Bot 配有定时任务，安装前请查看运行时间与输出位置。</p>
+      <a :href="bot.routinesUrl" target="_blank" rel="noopener noreferrer">查看定时任务<ExternalHint /></a>
     </section>
     <section v-if="!bot.external" data-testid="section-design">
       <h2>设计说明</h2>

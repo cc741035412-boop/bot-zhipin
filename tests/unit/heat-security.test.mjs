@@ -11,7 +11,8 @@ it('热度初始/失败状态没有原型属性，constructor 不会显示函数
   expect(Object.getPrototypeOf(heat.heatState.values)).toBe(null)
   for (const slug of ['constructor', 'toString', '__proto__']) {
     expect(heat.heatState.values[slug]).toBeUndefined()
-    expect(heat.heatLabel(slug)).toBe('热度 —')
+    // 初始（还没拿到数据）显示加载中「…」；失败后才显示「—」（INTERACTION.md §3）
+    expect(heat.heatLabel(slug)).toBe('热度 …')
   }
   vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('离线')))
   expect(await heat.loadHeat()).toBe(false)
