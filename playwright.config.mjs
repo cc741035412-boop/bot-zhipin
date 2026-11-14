@@ -1,8 +1,8 @@
-// 真浏览器验收。默认先跑 npm run dev:full（构建 + 本地 D1 + wrangler pages dev，端口 8788）。
+// 默认用 fixtures 构建并启动本地预览；接口与外链由测试 mock，不接触真实账号。
 // 已经有服务在跑时，用 E2E_BASE_URL=http://127.0.0.1:xxxx npm run e2e 指过去。
 import { defineConfig } from '@playwright/test'
 
-const baseURL = process.env.E2E_BASE_URL || 'http://127.0.0.1:8788'
+const baseURL = process.env.E2E_BASE_URL || 'http://127.0.0.1:4175'
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -12,6 +12,11 @@ export default defineConfig({
   use: { baseURL, screenshot: 'only-on-failure', trace: 'retain-on-failure' },
   webServer: process.env.E2E_BASE_URL
     ? undefined
-    : { command: 'npm run dev:full', url: baseURL, reuseExistingServer: true, timeout: 180_000 },
+    : {
+        command: 'BOTS_DIR=tests/fixtures/bots npm run build && npm run preview -- --host 127.0.0.1 --port 4175',
+        url: baseURL,
+        reuseExistingServer: false,
+        timeout: 180_000,
+      },
   projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
 })
