@@ -8,7 +8,8 @@ import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
-export const BOTS_DIR = join(ROOT, 'bots')
+// 测试时可以用环境变量 BOTS_DIR 指向别的目录（比如 tests/fixtures/bots），相对路径按仓库根目录算
+export const BOTS_DIR = process.env.BOTS_DIR ? resolve(ROOT, process.env.BOTS_DIR) : join(ROOT, 'bots')
 export const SCHEMA_PATH = join(ROOT, 'schema', 'bot.schema.json')
 
 export const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif']

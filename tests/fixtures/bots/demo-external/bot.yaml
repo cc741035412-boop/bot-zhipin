@@ -1,0 +1,13 @@
+slug: demo-external
+name: 示例·外部收录
+tagline: 一个外部收录的示例，只有导入链接
+category: 基础设施
+author:
+  name: 外部作者
+  url: https://x.ai/bot/demo-external-000
+templateUrl: https://x.ai/bot/demo-external-000
+addedAt: 2026-10-20
+prerequisites: 无
+quotaCost: 低
+permissions: []
+external: true
