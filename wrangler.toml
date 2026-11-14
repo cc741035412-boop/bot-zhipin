@@ -6,6 +6,6 @@ compatibility_date = "2026-11-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "bot-zhipin"
-# 真实 ID 在 Cloudflare 建好 D1 后填入；本地 --local 模式不受影响
-database_id = "00000000-0000-0000-0000-000000000000"
+# Cloudflare D1 数据库 bot-zhipin 的 ID（不是密钥，可以公开）
+database_id = "6ac79102-26a2-4be4-bf80-104994606a50"
 migrations_dir = "migrations"
