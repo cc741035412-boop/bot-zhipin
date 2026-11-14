@@ -30,7 +30,7 @@ export function loadHeat(): Promise<boolean> {
 }
 
 export function heatLabel(slug: string) {
-  return `热度 ${heatState.values[slug] ?? (heatState.status === 'ready' ? 0 : '—')}`
+  return `热度 ${heatState.values[slug] ?? (heatState.status === 'ready' ? 0 : heatState.status === 'failed' ? '—' : '…')}`
 }
 
 export function reportClick(slug: string, kind: 'import' | 'prompt') {

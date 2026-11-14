@@ -39,6 +39,14 @@ test('工作区外 BOTS_DIR：首页及动态详情自动刷新，坏 YAML 跳�
     await expect.poll(() => log, { timeout: 15_000 }).toContain('跳过 bots/broken-bot/bot.yaml')
     await page.goto('http://127.0.0.1:4183/')
     await expect(page.getByTestId('bot-card')).toHaveCount(3)
+    // 仅清理本测试的临时数据，覆盖空货架的真实数据加载路径。
+    for (const slug of ['demo-weekly-digest', 'demo-prd-reviewer', 'demo-external']) {
+      await rm(join(bots, slug), { recursive: true })
+    }
+    await expect(page.getByTestId('empty-state')).toContainText('货架上还没有 Bot', { timeout: 15_000 })
+    await expect(page.getByTestId('bot-card')).toHaveCount(0)
+    await expect(page.getByTestId('empty-state').locator('svg')).toBeVisible()
+    await expect(page.getByTestId('empty-state').locator('a')).toContainText('做第一个投稿的人')
   } finally {
     if (server.exitCode === null) {
       const command = execFileSync('ps', ['-o', 'command=', '-p', String(server.pid)], { encoding: 'utf8' })
