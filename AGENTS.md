@@ -22,7 +22,7 @@
 
 ## 第 1 步：一次性向用户收集信息
 
-开工前把下面这张清单一次发给用户，让他补齐。能从对话里或用户的 Grok Bot 配置里直接拿到的，先替他填上、让他确认。
+开工前把下面这张清单一次发给用户，让他补齐基础信息。能从对话里或用户的 Grok Bot 配置里直接拿到的，先替他填上、让他确认。设计说明的 5 个问题（第 4 步）单独、逐个问；如果用户已经一次性写好了完整回答，就逐条和他核对，不用再问一遍。
 
 | 需要什么 | 填到哪里 | 说明 |
 |---|---|---|
@@ -41,7 +41,7 @@
 | 定时任务（可选） | `routines.md` | 什么时候跑、做什么、结果发到哪 |
 | 设计说明的素材 | `DESIGN.md` | 见第 4 步的 5 个问题，**逐个问用户** |
 | 至少一张真实截图 | `screenshots/` | 这个 Bot 真实输出结果的截图，用户提供图片文件 |
-| 头像（可选） | `avatar.png` | 正方形 PNG；没有就自动生成 |
+| 头像（可选） | `avatar.png` | 正方形 PNG。用户没有就**不要放**，网站会按 slug 自动生成一个默认头像，你不需要自己画 |
 
 再和用户确定一个 **slug**：Bot 的英文短名，只能用小写字母、数字和短横线，2 到 40 个字符，比如 `prd-reviewer`。先确认主仓库 `bots/` 下没有同名文件夹。
 
@@ -68,6 +68,8 @@ git clone https://github.com/<用户的 GitHub 用户名>/bot-zhipin.git
 cd bot-zhipin
 git remote add upstream https://github.com/jakob52123/bot-zhipin.git
 ```
+
+如果用户之前已经 fork 并 clone 过这个仓库，跳过上面这些，直接进到仓库目录执行下面的命令。
 
 然后：
 
@@ -109,7 +111,7 @@ bots/<slug>/
 按第 1 步收集的信息填。注意：
 
 - `slug` 必须和文件夹名一模一样。
-- `templateUrl` 必须以 `https://x.ai/bot/` 开头。
+- `templateUrl` 必须以 `https://x.ai/bot/` 开头。校验只检查格式，不会打开链接：你能联网就在**未登录**的浏览器里打开确认能看到模板页；不能就请用户自己用无痕窗口打开确认。
 - `prerequisites` 可以写一句话，也可以写成列表；什么都不用准备就写 `无`。
 - `permissions` 只能用那 6 个词，一个都不用就写 `permissions: []`。
 - 可选字段不用就整行删掉。不要加 schema 里没有的字段（完整定义见 `schema/bot.schema.json`）。
@@ -225,4 +227,4 @@ gh pr create --repo jakob52123/bot-zhipin --base main \
 
 - **修改自己已经上架的 Bot**：同样的流程，只改 `bots/<slug>/`，PR 标题写「更新 Bot：<名字>」。不要改 `addedAt`。
 - **改编站上别人的 Bot**：新建自己的 slug，在 `bot.yaml` 里写 `forkedFrom: <原 Bot 的 slug>`，DESIGN.md 里说明改了什么、为什么。原 Bot 的内容按 CC BY 4.0 授权，必须保留署名。
-- **授权**：提交即表示用户同意以 CC BY 4.0 授权 `bots/<slug>/` 的内容（见 `bots/LICENSE`），提 PR 前要让用户知道这一点。
+- **授权**：提交即表示用户同意以 CC BY 4.0 授权 `bots/<slug>/` 的内容（见 `bots/LICENSE`）：任何人都可以在署名的前提下复制、改编、商用。提 PR 前要向用户说明这一点，并得到他明确同意，同时确认内容和截图是他有权公开的。
