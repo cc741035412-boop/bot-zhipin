@@ -5,9 +5,14 @@
 <script lang="ts">
 import type { ShelfSort } from '../shelf'
 
-// 这一页在本次访问里记住的东西：点进详情再退回来，排序和展开过的分组都还在。
-// 只在浏览器里读写；首次加载（接管服务端渲染出来的页面）不读它，免得和服务端的首帧对不上。
-const memory = { visited: false, sort: 'rec' as ShelfSort, expanded: new Set<string>() }
+// 这一页在本次打开期间记住的东西：点进详情再退回来，排序和展开过的分组都还在。
+// 存在 window 上而不是模块变量里：VitePress 的生产构建给同一个页面出了两份代码（首次加载用的精简版、
+// 站内跳转用的完整版），模块变量会各有一份、互相看不见。只在浏览器里读写。
+interface ShelfMemory { visited: boolean; sort: ShelfSort; expanded: string[] }
+function shelfMemory(): ShelfMemory {
+  const host = window as unknown as { __bzShelfMemory?: ShelfMemory }
+  return host.__bzShelfMemory ??= { visited: false, sort: 'rec', expanded: [] }
+}
 </script>
 
 <script setup lang="ts">
@@ -33,13 +38,15 @@ import ShelfToolbar from './ShelfToolbar.vue'
 const bySlug = new Map(bots.map((bot) => [bot.slug, bot]))
 const known = { categories: enums.categories as string[], collections: curation.collections.map((item) => item.slug) }
 // 站内跳转回到首页时（不是首次加载）可以直接按地址栏和记忆还原，赶在 VitePress 恢复滚动位置之前。
-const restore = inBrowser && memory.visited
+// 首次加载要接管服务端渲染出来的页面，先按默认状态渲染，挂载以后再还原，免得和服务端的首帧对不上。
+const memory = inBrowser ? shelfMemory() : null
+const restore = !!memory?.visited
 const initial = restore ? readShelfQuery(window.location.search, known) : { role: ALL_ROLES, collection: null }
 
-const sort = ref<ShelfSort>(restore ? memory.sort : 'rec')
+const sort = ref<ShelfSort>(memory && restore ? memory.sort : 'rec')
 const role = ref(initial.role)
 const collection = ref<string | null>(initial.collection)
-const expanded = ref(new Set<string>(restore ? memory.expanded : []))
+const expanded = ref(new Set<string>(memory && restore ? memory.expanded : []))
 const entering = ref(false)
 // 每组先露两行：两列时 4 张，单列时 2 张。服务端按两列渲染，单列时多出来的两张先由 CSS 藏住，接管以后再按实际宽度来。
 const narrow = ref(restore && window.matchMedia(NARROW_QUERY).matches)
@@ -116,7 +123,8 @@ function clearCollection() {
 }
 function chooseSort(value: ShelfSort) {
   if (sort.value === value) return
-  sort.value = memory.sort = value
+  sort.value = value
+  if (memory) memory.sort = value
   reorder()
   entering.value = !isReducedMotion()
 }
@@ -125,14 +133,14 @@ function toggleGroup(category: string) {
   const next = new Set(expanded.value)
   if (!next.delete(category)) next.add(category)
   expanded.value = next
-  memory.expanded = new Set(next)
+  if (memory) memory.expanded = [...next]
 }
 
 onMounted(async () => {
   media = window.matchMedia(NARROW_QUERY)
   narrow.value = media.matches
   media.addEventListener('change', resized)
-  if (!memory.visited) {
+  if (memory && !memory.visited) {
     // 首次加载：服务端渲染的是默认状态，接管以后再按地址栏还原。
     memory.visited = true
     const fromUrl = readShelfQuery(window.location.search, known)

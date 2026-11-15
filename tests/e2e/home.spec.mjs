@@ -269,15 +269,44 @@ test('展开 / 收起：每组先露两行，展开露出全部；收起以后�
   expect(head.y).toBeLessThan(400)
 })
 
-test('展开过的分组和排序，点进详情再退回来都还在，位置也还原', async ({ page }) => {
+test('点进详情再退回来：分组、排序、滚动位置都还原（展开过的分组也还在）', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 })
-  await page.goto('/')
+  // 先落在详情页上再走到首页，然后进详情、后退：这样首页前后两次用的是同一份页面代码还是两份，都要能还原。
+  for (const entry of ['/', 'detail']) {
+    if (entry === '/') await page.goto('/')
+    else {
+      await page.goto('/')
+      const first = await cards(page).first().getAttribute('data-slug')
+      await page.goto(`/bots/${first}`)
+      await page.locator('.VPNavBarTitle a').click()
+      await expect(cards(page).first()).toBeVisible()
+    }
+    const tabs = await tabsOf(page)
+    const pick = tabs.reduce((best, item) => item.count > best.count ? item : best)
+    await page.getByTestId('sort-new').click()
+    await tab(page, pick.role).scrollIntoViewIfNeeded()
+    await tab(page, pick.role).click()
+    await expect(page.getByTestId('role-group')).toHaveCount(1)
+    const target = cards(page).last()
+    await target.scrollIntoViewIfNeeded()
+    const scrolled = await page.evaluate(() => window.scrollY)
+    await target.getByTestId('detail-link').click()
+    await expect(page.getByTestId('bot-detail')).toBeVisible()
+    await page.goBack()
+    await expect(page.getByTestId('sort-new'), `从 ${entry} 进来：排序还在`).toHaveAttribute('aria-pressed', 'true')
+    await expect(tab(page, pick.role)).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByTestId('role-group')).toHaveCount(1)
+    await expect(cards(page)).toHaveCount(pick.count)
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrolled - 40)
+    expect(await page.evaluate(() => window.scrollY)).toBeLessThan(scrolled + 40)
+  }
+  // 展开过的分组：示例货架折不起来，只在真实货架上验。
+  await tab(page, 'all').click()
   const folded = firstFolded(page)
-  test.skip(!(await folded.count()), '这份货架上没有折得起来的分组（示例货架每组只有一个 Bot）')
+  if (!(await folded.count())) return
   const role = await folded.getAttribute('data-role')
   const section = group(page, role)
   const total = number(await section.locator('.role-head .bz-count').innerText())
-  await page.getByTestId('sort-new').click()
   await section.getByTestId('group-more').scrollIntoViewIfNeeded()
   await section.getByTestId('group-more').click()
   await expect(section.getByTestId('bot-card')).toHaveCount(total)
@@ -288,7 +317,6 @@ test('展开过的分组和排序，点进详情再退回来都还在，位置�
   await expect(page.getByTestId('bot-detail')).toBeVisible()
   await page.goBack()
   await expect(section.getByTestId('bot-card')).toHaveCount(total)
-  await expect(page.getByTestId('sort-new')).toHaveAttribute('aria-pressed', 'true')
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrolled - 40)
   expect(await page.evaluate(() => window.scrollY)).toBeLessThan(scrolled + 40)
 })
@@ -482,9 +510,12 @@ test('有动效时：切筛选列表淡入 200ms；组头吉祥物悬停睁大�
   await page.setViewportSize({ width: 1280, height: 900 })
   await page.goto('/')
   await page.getByTestId('role-tab').nth(1).scrollIntoViewIfNeeded()
+  // 淡入只有 200ms，机器忙的时候事后去量已经播完了：在动画开始的那一刻记下来。
+  await page.locator('.shelf-list').evaluate((el) => el.addEventListener('animationstart', (event) => {
+    if (event.target === el) el.dataset.entered = `${event.animationName}:${getComputedStyle(el).animationDuration}`
+  }))
   await page.getByTestId('role-tab').nth(1).click()
-  const enter = await page.locator('.shelf-list').evaluate((el) => { const css = getComputedStyle(el); return { name: css.animationName, duration: css.animationDuration } })
-  expect(enter).toEqual({ name: 'bz-grid-enter', duration: '0.2s' })
+  await expect(page.locator('.shelf-list')).toHaveAttribute('data-entered', 'bz-grid-enter:0.2s')
   await expect(page.locator('.shelf-list')).not.toHaveClass(/grid-enter/)
   await page.getByTestId('role-tab').first().click()
   const tile = page.locator('.role-tile').first(), bot = tile.getByTestId('live-bot')
