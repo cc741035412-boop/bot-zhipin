@@ -4,6 +4,7 @@ import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useAttrs, useId,
 
 defineOptions({ inheritAttrs: false })
 import { BotEngine, type BotFrame } from '../vendor/bloub/engine'
+import { EXPRESSION_BY_ID } from '../vendor/bloub/expressions'
 import { NOTIF_BLUE } from '../vendor/bloub/decor'
 import { RAYON, DEMI_VIEWBOX } from '../vendor/bloub/repere'
 import { type StateId } from '../vendor/bloub/states'
@@ -24,9 +25,13 @@ const props = withDefaults(defineProps<{
 const svg = ref<SVGSVGElement>()
 const uid = `bz-${useId()}`
 const maskId = `${uid}-mask`
-const VB = DEMI_VIEWBOX
-const paper = 'var(--bz-eye, var(--vp-c-bg))'
-let engine = new BotEngine(RAYON, props.rest, props.radii)
+const VB = 112
+// 只收紧镜头，不收紧 mask/填色画布，避免临时变身的身体被切掉。
+const PAINT = DEMI_VIEWBOX
+const eyeColor = 'var(--bz-eye, #16161b)'
+const fogColor = 'var(--bz-card, var(--vp-c-bg))'
+const expression = EXPRESSION_BY_ID.get('attentif')!
+let engine = new BotEngine(RAYON, props.rest, props.radii, expression)
 // SSR 和首次客户端渲染都只取 t=0；注册时钟放在 onMounted 里。
 const frame = shallowRef<BotFrame>(engine.sample(0))
 const state = ref<StateId>(props.rest)
@@ -41,7 +46,7 @@ let gaze: ReturnType<typeof createGaze> | undefined
 function staticFrame() {
   gaze?.reset(now())
   playback.reset(now(), true)
-  engine = new BotEngine(RAYON, 'idle', props.radii)
+  engine = new BotEngine(RAYON, 'idle', props.radii, expression)
   frame.value = engine.sample(0)
 }
 
@@ -112,7 +117,7 @@ function dotAttrs(dot: BotFrame['dots'][number]) {
   // CSS color-mix 保留深度雾，同时支持 CSS 变量、rgb() 等非 hex 身体颜色。
   const fill = dot.color ?? (dot.depth === undefined
     ? props.color
-    : `color-mix(in srgb, ${props.color} ${dot.depth * 100}%, ${paper})`)
+    : `color-mix(in srgb, ${props.color} ${dot.depth * 100}%, ${fogColor})`)
   const common = { style: { fill }, opacity: dot.opacity }
   return dot.d
     ? { ...common, d: dot.d, transform: `translate(${dot.x} ${dot.y}) rotate(${dot.rot ?? 0}) scale(${RAYON})` }
@@ -124,7 +129,7 @@ function dotAttrs(dot: BotFrame['dots'][number]) {
   <svg v-bind="svgAttrs">
     <defs>
       <!-- 眼睛是 mask 中的洞，移动到身体边缘时自然裁切。 -->
-      <mask :id="maskId" maskUnits="userSpaceOnUse" :x="-VB" :y="-VB" :width="VB * 2" :height="VB * 2">
+      <mask :id="maskId" maskUnits="userSpaceOnUse" :x="-PAINT" :y="-PAINT" :width="PAINT * 2" :height="PAINT * 2">
         <path :d="frame.bodyPath" fill="#fff" />
         <path
           v-for="(eye, i) in frame.eyes"
@@ -151,7 +156,7 @@ function dotAttrs(dot: BotFrame['dots'][number]) {
       </linearGradient>
     </defs>
 
-    <!-- 圆环后半和爆裂粒子先画；paper 层防止它们从眼洞透出。 -->
+    <!-- 圆环后半和爆裂粒子先画；深色垫底层防止它们从眼洞透出。 -->
     <g fill="none" stroke-linecap="round">
       <path
         v-for="arc in frame.arcs"
@@ -167,9 +172,9 @@ function dotAttrs(dot: BotFrame['dots'][number]) {
       <component :is="dot.d ? 'path' : 'circle'" v-for="(dot, i) in frame.dots" :key="i" data-part="dot" v-bind="dotAttrs(dot)" />
     </g>
     <g :opacity="frame.bodyAlpha">
-      <path data-part="body" :d="frame.bodyPath" :style="{ fill: paper }" />
+      <path data-part="body" :d="frame.bodyPath" :style="{ fill: eyeColor }" />
       <g :mask="`url(#${maskId})`">
-        <rect data-part="fill" :x="-VB" :y="-VB" :width="VB * 2" :height="VB * 2" :style="{ fill: color }" />
+        <rect data-part="fill" :x="-PAINT" :y="-PAINT" :width="PAINT * 2" :height="PAINT * 2" :style="{ fill: color }" />
       </g>
       <path v-if="outline" data-part="outline" :d="frame.bodyPath" fill="none" :style="{ stroke: outline }" stroke-width="1.5" vector-effect="non-scaling-stroke" />
     </g>

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { XAI_SHAPE_IDS, shapeRadii } from '../../site/.vitepress/theme/face'
 import { BotEngine } from '../../site/.vitepress/theme/vendor/bloub/engine'
+import { EXPRESSION_BY_ID } from '../../site/.vitepress/theme/vendor/bloub/expressions'
 
 const numbers = (text) => (text.match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi) ?? []).map(Number)
 
@@ -98,10 +99,10 @@ describe('圆角、重心与朝向', () => {
   })
 })
 
-describe('接触表静态帧的眼睛包含关系（idle，t=0）', () => {
+describe.each(['neutre', 'attentif'])('接触表静态帧的眼睛包含关系（%s，idle，t=0）', (expression) => {
   for (const id of XAI_SHAPE_IDS) {
     it(`${id}：两只眼睛的边界都在身体内`, () => {
-      const frame = new BotEngine(100, 'idle', shapeRadii(id)).sample(0)
+      const frame = new BotEngine(100, 'idle', shapeRadii(id), EXPRESSION_BY_ID.get(expression)).sample(0)
       const body = contour(frame.bodyPath)
       for (const eye of frame.eyes) {
         const outside = eyeBoundary(eye).filter((point) => !inside(point, body))

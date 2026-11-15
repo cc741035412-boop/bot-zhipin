@@ -1,10 +1,10 @@
-# 交互与视觉规格（v2：会动的真脸 + 活泼彩色）
+# 交互与视觉规格（v3：彩色招牌 + Grok 风格正脸）
 
-这是本轮要实现的规格，不代表代码已经完成。真源为 2026-11-14 已批准计划及 LB1、LB2、LB4 契约；接口和数值以契约为准。验收容差由批次目录 `verify/` 的脚本定义，不再统一允许任意 ±2px 微调。
+累计规格的真源为 2026-11-14 已批准计划及 LB1、LB2、LB3、LB4、2026-11-15 LB6 契约；冲突以 LB6 为准。v3 将招牌改为固定品牌吉祥物，货架保留官方配色；所有活体用黑眼睛、正脸和饱满身体。验收容差由批次目录 `verify/` 的脚本定义，不再统一允许任意 ±2px 微调。
 
 ## 0. 原则
 
-1. **活泼彩色**：页面圆润、柔和；舞台、按钮、标签和阴影随 Bot 配色。用户 2026-11-14 推翻旧视觉决定，见决策 19。
+1. **活泼彩色**：页面圆润、柔和；货架舞台、按钮和阴影随 Bot 官方配色，分类标签按分类配色，招牌用固定彩色吉祥物。用户 2026-11-14 推翻旧视觉决定，2026-11-15 明确品牌色与官方色分工，见决策 19、22。
 2. **Bot 是活的**：呼吸、眨眼、视线漂移；全卡悬停有反应，Hero 也能互动。变形只作短暂彩蛋，常驻反应优先保留自身轮廓。
 3. **真脸**：读取官方公开的颜色和形状名；复用 MIT bloub 或原创轮廓，不复制 x.ai 路径、眼睛坐标或代码。
 4. **可用性底线不降**：键盘、触摸、读屏、焦点、对比度、减少动效全部保留；全页只开一个气泡，气泡不能压头像。字体不联网，新增 token 统一 `--bz-`。
@@ -17,6 +17,7 @@
 |---|---|---|
 | `--bz-page` / `--vp-c-bg` | `#f6f5f1` | `#0c0c0f` |
 | `--bz-card` / `--bz-paper` | `#ffffff` | `#16161b` |
+| `--bz-eye` | `#16161b` | `#16161b`（恒定，不随主题切换） |
 | `--bz-ink` | `#141418` | `#f4f4f5` |
 | `--bz-ink-hover` | `#2c2c33` | `#e4e4e7` |
 | `--bz-text-2` | `#4a4a52` | `#c2c2ca` |
@@ -42,15 +43,18 @@
 | `buttonColors(hex)` | fg 从 `#ffffff`、`#141418` 选对比度较高者；仍 < 4.5 时，白字的 bg 每次向黑混 4%，深字的 bg 每次向白混 4%，直到 ≥ 4.5；返回小写 hex `{ bg, fg }` |
 | `botPalette(hex)` | 返回 `--bz-bot-light`、`--bz-bot-dark`、`--bz-btn-bg-light`、`--bz-btn-fg-light`、`--bz-btn-bg-dark`、`--bz-btn-fg-dark`；dark 按 darkSwap 后的颜色计算 |
 
-卡片 article、详情头部、每个 Hero 头像容器均加 `bz-bot-scope` 并绑定 `botPalette`。CSS 将 `--bz-bot-color`、`--bz-btn-bg`、`--bz-btn-fg` 指向 light 或 dark 组，不用 JS 监听主题。颜色来自 `avatarColor(slug)`；自定义头像用中性灰 `#8a8a93`。
+卡片 article、详情头部、每个 Hero 头像容器均加 `bz-bot-scope` 并绑定 `botPalette`。CSS 将 `--bz-bot-color`、`--bz-btn-bg`、`--bz-btn-fg` 指向 light 或 dark 组，不用 JS 监听主题。货架颜色来自 `avatarColor(slug)`，自定义头像用中性灰 `#8a8a93`；Hero 颜色来自 `HERO_MASCOTS`，不读取货架数据。
+
+分类映射唯一位于 `theme/color.ts` 的 `CATEGORY_COLORS`：调研紫 `#8b5cf6`、定义橙 `#ff6a13`、评审粉 `#ff2e93`、AI 评测青绿 `#14b8a6`、学习琥珀 `#f5a623`、求职棕 `#9a6a3a`、日常薄荷绿 `#34d399`、基础设施蓝 `#3b82f6`。分类名来自现有 Bot 数据，schema 仍是合法枚举真源；单测验证映射完整覆盖枚举。`categoryStyle(category)` 仅提供 `--bz-category-color`，首页与详情共用；未知分类回退中性灰。
 
 ## 2. 首页布局和 Hero
 
 - 容器 max-width 1120px（含内边距），左右 24px（≤680px 时 16px），上 32px、下 96px；Hero 上 32px、下 40px。
 - 网格 ≥1100px 三列，680–1099px 两列，<680px 一列且卡片 max-width 520px 居中；间距 20px，窄屏 16px。同一行等高，按钮贴底。
-- Hero 取「最新」前 7 个，不足则按实际数量；<680px 显示 5 个。推荐 SSR 渲染 7 个再由 CSS 隐藏两端，不能 hydration 不一致。
+- Hero 固定使用 `meta.mjs` 的 `HERO_MASCOTS`，每只 `{ key, shape, color }`；与货架数量、排序、自定义头像无关，空货架也有招牌。由左至右：琥珀 hex、紫 tablet、青绿 star、**橙 blob（中央）**、粉 sparkle、薄荷绿 teardrop、棕 pebble。7 种颜色/形状交错，色值见配置。
+- SSR 始终渲染 7 只，<680px 仅 CSS 隐藏两端，保留中间 5 只；不根据 window 决定首帧。`HeroPortrait` 直接用 `shapeRadii(mascot.shape)` 和 mascot.color 渲染 LiveBot，`data-shape` 保持形状 id，填色 rect 保留 `data-part="fill"`。
 - `.hero-portraits` / `.hero-portrait` 保留。按离中心距离 0/1/2/3，盒子宽高为 96/80/68/60px；<680px 乘 0.75，<400px 改乘 0.62（不是叠乘）。底边齐，间距 14px（<680px 为 6px），共用柔和地面阴影。
-- h1 为 `clamp(40px,7vw,64px)` / 800，行高 1.1、字距 -0.03em，balance；介绍 17px / 1.7，最大 34em，balance。装饰光斑不得降低文字对比度。
+- h1 为 `clamp(40px,7vw,64px)` / 800，行高 1.1、字距 -0.03em，balance；介绍 17px / 1.7，最大 34em，balance。招牌上半部有橙、紫、青绿、粉四团淡光晕（浅色 14%、深色 20% 混透明），限定在容器宽度内、不拦截点击；文字对比度不得降低到 4.5 以下。
 - 「我要投稿」仍为墨色胶囊加小加号，高 ≥40px，触摸 ≥44px，左右 20px；圆体 14/700，悬停上浮 2px；链接 CONTRIBUTE_URL。
 - 工具条左侧排序、右侧「共 N 个 Bot」（13px、三级文字色）。Hero 保留 `aria-hidden`，悬停和戳按 §5。
 
@@ -62,9 +66,9 @@
 | 悬停 | 仅 `@media (hover:hover)`；全卡上浮 4px，染色阴影；220ms 弹簧过渡，450ms 内稳定在 -4px |
 | 舞台 `.avatar-stage` | 高 236px，左右抵消 22px，顶角 27px；自身 background-image 上放 2–3 层 radial-gradient，不放伪元素；底色为 Bot 色 10% 混卡片色，深色提高混色比例 |
 | 舞台动效 | 光斑 background-position 以 18 秒 ease-in-out infinite alternate 漂移；脚下约 96×14px 椭圆地面阴影不动 |
-| 头像 | `[data-testid=avatar]` 按钮 112×112px，距舞台底 22px，居中；`--bz-eye: var(--bz-card)`，眼睛挖空露卡片底；自定义图圆形裁切、object-fit cover、1px 边框 |
+| 头像 | `[data-testid=avatar]` 按钮 112×112px，距舞台底 22px，居中；眼睛挖空露出恒定 `--bz-eye: #16161b` 的身体垫底层，浅深模式均为黑眼睛；自定义图圆形裁切、object-fit cover、1px 边框 |
 | 名字 | h2，21px/700/1.3，字距 -0.01em；详情链接 `detail-link`，悬停下划线 |
-| 分类标签 | 圆体 12px/600，Bot 色 14% 混卡片底，`--bz-text-2` 字；高 22px，左右 8px，圆角 999px；外部条目另有「外部收录」 |
+| 分类标签 | 圆体 12px/600，分类色 16% 混卡片底，文字为分类色 40% 混 `--bz-ink`，两主题对比度均 ≥4.5；高 22px，左右 8px，圆角 999px；「外部收录」为中性 `--bz-surface-soft` 底、`--bz-text-2` 字 |
 | 作者 | 「by 名字」，13px、三级文字色，作者主页新标签 |
 | 介绍 | `.bot-tagline`，15px/1.65、二级文字色，最多两行省略，flex:1 |
 | 热度 | 16px 火苗 +「热度 N」，13px 三级文字色，tabular-nums；>0 火苗变 `--bz-flame`，文字不变；加载「热度 …」，失败「热度 —」，title 为「热度暂时获取不到」 |
@@ -87,7 +91,9 @@
 
 ## 4. 活体头像与接口
 
-常驻动作由引擎 liveliness 提供：呼吸、自然眨眼、视线漂移。渲染方式参考 jeremy-prt/bloub `BloubBot.vue`（MIT，b4bb3c1），保留 mask 挖眼及粒子、圆环前后层次，不修改 vendor。
+常驻动作由引擎 liveliness 提供：呼吸、自然眨眼、视线漂移。所有 LiveBot 初始化及减少动效重置时，均在 `new BotEngine` 第四参数传 `EXPRESSION_BY_ID.get('attentif')`，正脸竖胶囊眼，不再用默认往右上的 neutre。临时表情与鼠标跟随保持原行为。渲染方式参考 jeremy-prt/bloub `BloubBot.vue`（MIT，b4bb3c1），保留 mask 挖眼及粒子、圆环前后层次，不修改 vendor。
+
+视口为 ±112，静止身体最长边占头像框 ≥80%；根 SVG `overflow: visible`，特效可画出框外。mask 和填色画布仍为上游 ±158，避免变身时身体被裁小。粒子深度雾混 `--bz-card`（回退 `--vp-c-bg`），与恒定深色眼睛解耦，浅色不发黑、深色仍自然隐入背景。卡片按钮/舞台尺寸与气泡 34px 净距不变，收紧视口后仍逐帧检查尖角净距 ≥8px，并检查 Hero、详情和特效无横滚/裁切。
 
 ### 视线跟随与生命周期
 
@@ -109,7 +115,7 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 
 ### LiveBot DOM 与事件
 
-`components/LiveBot.vue` 根元素就是 svg，不加外包层：class=bz-live、viewBox="-158 -158 316 316"、aria-hidden=true。
+`components/LiveBot.vue` 根元素就是 svg，不加外包层：class=bz-live、viewBox="-112 -112 224 224"、overflow:visible、aria-hidden=true。SSR 和客户端首帧都由相同 attentif 引擎 `sample(0)` 生成。
 
 | 标记 / props | 含义 |
 |---|---|
@@ -118,7 +124,7 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 | `data-running="true|false"` | 当前是否被 tick |
 | `data-follow="pointer|rest"` | 指针跟随或自身视线 |
 | `data-shape` / shapeId | 原样输出形状 id |
-| `data-part="body"` | 身体垫底 path，带 d，填 `var(--bz-eye, var(--vp-c-bg))` |
+| `data-part="body"` | 身体垫底 path，带 d，填 `var(--bz-eye, #16161b)`；眼睛始终为深色 |
 | `data-part="fill"` | mask 内身体填色 rect；DefaultAvatar 传入 `var(--bz-bot-body)` |
 | rest | 基础状态，默认 idle；卡片/Hero 悬停 wide、空货架 sleep、404 thinking |
 | `data-part="eye"` | mask 内两眼 path；transform 直接用引擎 matrix(...)，opacity 用 alpha |
@@ -135,7 +141,7 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 | 鼠标进入整张卡片（不再只限头像） | wide 睁大眼 + 跳一下；气泡先显示「…」打字点 350ms，再按 28ms/字逐字打出（读屏区一开始就有全文） |
 | 离开卡片 | 立即关闭气泡（120ms 淡出），基础状态改 idle；进行中的戳/按钮临时动作不被打断 |
 | Tab 到头像 / Enter / 空格 / Esc / 失焦 | Tab 说一句；Enter/空格换一句并重新跳；Esc 关闭；失焦关闭 |
-| 点击或点按头像（「戳」） | 从 wink, burst, orbit, play, comet, egg, hexagon, thinking 随机选一个，不与上次重复；按引擎 duration 播完回 rest，换戳台词且不连续重复；滚动 3 秒内第 5 次触发 alert，说「别戳啦！」并清零计数。Hero/卡片/详情按 slug 共享历史 |
+| 点击或点按头像（「戳」） | 从 wink, burst, orbit, play, comet, egg, hexagon, thinking 随机选一个，不与上次重复；按引擎 duration 播完回 rest，换戳台词且不连续重复；滚动 3 秒内第 5 次触发 alert，说「别戳啦！」并清零计数。卡片/详情按 slug 共享历史；Hero 使用独立的 `mascot:<key>` 历史，不污染货架 |
 | 点「一键导入」 | 该卡 Bot 播 comet（「嗖」一下） |
 | 复制成功 | wink |
 | 30 秒没有任何输入（减少动效时不触发） | data-running=true 的 Bot 依次进入 sleep，整波次错开 0–800ms；一个全局超时器管理整波 |
@@ -235,4 +241,5 @@ Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的�
 2. **LB2**：真实四条为 feishu-app-keeper / memory-keeper 的 #777777 hex、media-downloader 的 #936439 pebble、quota-saver 的 #ff9800 tablet（存储小写）；离线校验通过、损坏时报中文错误；25 轮廓合法、fixtures 不变；暗色换色对卡片底 ≥3:1；真实构建带官方色。25 形状接触表人工看名字和眼位。
 3. **LB4**：两主题 token、236/112 与详情 280/160 尺寸正确（舞台高容差 ±2）；按钮与全部文字对比度 ≥4.5；1280/1100/1024/900/680/390/320 七宽无横滚，足量数据验证 Hero 7/5 个和中心最大。30 字气泡最多两行、上沿在舞台内、尖角净距 ≥8；按钮 ≥40/44、焦点可见，无 Google 字体请求。浅深 ×1280/390 首页、悬停、详情截图人工目视。
 4. **LB3**：全卡进入 300ms 内 wide，typing 先出现，350+28×字数+300ms 内全文；离开 200ms 内关气泡、600ms 内 idle。键盘、触摸、单开回归通过；戳 200ms 内进集合、状态时长+0.6 秒内回 idle，连戳 alert；导入 200ms 内 comet 且正常上报/开页；复制 wink；30 秒睡眠、输入 300ms 内 exclaim、2.5 秒内 idle；会话首次 1 秒内有 swirl、刷新不重播。Hero、空货架、404 与真实脸接线通过，录屏人工看流畅、眼位、闪跳。
-5. **总验收**：LM1/LB3 后在 feat/living-bots 跑全量检查、真实 bots 构建与本地 preview，复跑 lb1/lb3/lb4，录 1280/390 整体演示。用户看过点头才执行 LB5 推送开 PR；本轮文档不声称这些实现验收已通过。
+5. **LB6**：固定 7/5 只彩色吉祥物、中央橙色、至少 5 种形状；货架保持官方颜色；黑眼睛、attentif 首帧、身体占比 ≥80%、SVG 特效外溢；八类标签浅深对比度 ≥4.5、外部标签中性。补充 SSR/客户端帧一致性和两种表情下 25 形状眼睛包含关系回归。`LB6-check.sh` 在 4196 跑仓库 e2e、LB1/LB4/LB3/LB6 验收与真实 bots 构建，`verify/out/LB6/` 的浅深 ×1280/390 截图必须目视。
+6. **发布边界**：LB6 仅在 feat/living-color 提交，不推送、不开 PR；实际检查结果以交付说明为准。

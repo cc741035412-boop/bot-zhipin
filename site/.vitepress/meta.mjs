@@ -7,6 +7,17 @@ export const SITE = {
   branch: 'main',
 }
 
+// 品牌招牌独立于货架与排序；从左到右，橙色居中，窄屏只隐藏两端。
+export const HERO_MASCOTS = [
+  { key: 'amber', shape: 'hex', color: '#f5a623' },
+  { key: 'violet', shape: 'tablet', color: '#8b5cf6' },
+  { key: 'teal', shape: 'star', color: '#14b8a6' },
+  { key: 'orange', shape: 'blob', color: '#ff6a13' },
+  { key: 'pink', shape: 'sparkle', color: '#ff2e93' },
+  { key: 'mint', shape: 'teardrop', color: '#34d399' },
+  { key: 'brown', shape: 'pebble', color: '#9a6a3a' },
+]
+
 export const POKE_PITCHES = ['哎，痒！', '再戳我就变形了', '好啦好啦，我在呢', '你找我呀？']
 export const ANGRY_PITCH = '别戳啦！'
 export const NOT_FOUND = {
