@@ -121,7 +121,7 @@ async function main(args) {
   const { faces, warnings } = await syncFaces({ bots, previous, fetchText, today: new Date().toISOString().slice(0, 10) })
   const invalid = checkFaces(faces)
   if (invalid.length) throw new Error(invalid.join('\n'))
-  const sorted = Object.fromEntries(Object.entries(faces).sort(([a], [b]) => a.localeCompare(b)))
+  const sorted = Object.fromEntries(Object.keys(faces).sort().map((slug) => [slug, faces[slug]]))
   await writeFile(file, JSON.stringify(sorted, null, 2) + '\n')
   for (const { slug } of bots) {
     const face = faces[slug]

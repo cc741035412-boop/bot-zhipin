@@ -4,7 +4,7 @@ import { profileFromPolygon, unionOfCirclesProfile, type Point } from './vendor/
 // Original geometric constructions, not x.ai paths. Screen coordinates: y points down.
 // All sampling happens once at module load; callers must reuse the resulting arrays.
 const TAU = Math.PI * 2
-const normalize = (radii: number[], peak = 1.08) => {
+const normalize = (radii: number[], peak = 1.18) => {
   const scale = peak / Math.max(...radii)
   return radii.map((r) => r * scale)
 }
@@ -22,8 +22,9 @@ const arc = (cx: number, cy: number, rx: number, ry: number, start: number, end:
   })
 
 export const EXTRA_SHAPES: Readonly<Record<string, number[]>> = {
-  // Bent oval: the second harmonic lifts the lower sides into a bean's shallow cleft.
-  bean: parametric((t) => ({ x: Math.cos(t), y: 0.73 * Math.sin(t) + 0.27 * Math.cos(2 * t) })),
+  // Kidney bean: an upright ellipse with a smooth, shallow indentation on its left.
+  bean: radial((a) => (1 - 0.27 * Math.exp(-(((a - Math.PI) / 0.5) ** 2))) /
+    Math.hypot(Math.cos(a) / 0.85, Math.sin(a))),
   // Two elliptical caps connected by vertical sides (a cylinder's outer silhouette).
   cylinder: polygon([
     ...arc(0, -0.59, 0.72, 0.24, Math.PI, TAU),
@@ -31,8 +32,9 @@ export const EXTRA_SHAPES: Readonly<Record<string, number[]>> = {
   ]),
   // A broad, cut gemstone versus a tall, pointed six-sided crystal.
   gem: polygon([[-0.58, -0.76], [0.58, -0.76], [0.98, -0.24], [0, 1.05], [-0.98, -0.24]]),
-  crystal: polygon([[0, -1.1], [0.66, -0.57], [0.66, 0.57], [0, 1.1], [-0.66, 0.57], [-0.66, -0.57]]),
-  wedge: polygon([[-0.80, -0.95], [1.06, 0], [-0.80, 0.95]]),
+  crystal: polygon([[0, -1.1], [0.78, -0.57], [0.78, 0.57], [0, 1.1], [-0.78, 0.57], [-0.78, -0.57]]),
+  // A pie wedge: a circular outer edge above/right, a pointed heel below/left.
+  wedge: polygon([...arc(0, 0, 1.08, 1.08, -Math.PI / 2, 0), [-0.8, 0.8]]),
   shield: polygon([[-0.83, -0.78], [0.83, -0.78], [0.76, 0.25], [0.45, 0.69], [0, 1.04], [-0.45, 0.69], [-0.76, 0.25]]),
   // Dome: wide half-ellipse on a flat base. Arch: upright walls below a round crown.
   dome: polygon(arc(0, 0.38, 1.04, 1.05, Math.PI, TAU)),
@@ -50,16 +52,19 @@ export const EXTRA_SHAPES: Readonly<Record<string, number[]>> = {
     { x: -0.38, y: -0.38, r: 0.57 }, { x: 0.38, y: -0.38, r: 0.57 },
     { x: 0.38, y: 0.38, r: 0.57 }, { x: -0.38, y: 0.38, r: 0.57 }
   ])),
-  flower: radial((a) => 0.90 + 0.18 * Math.cos(6 * (a + Math.PI / 2))),
+  flower: normalize(unionOfCirclesProfile(Array.from({ length: 6 }, (_, i) => {
+    const a = -Math.PI / 2 + i * TAU / 6
+    return { x: 0.6 * Math.cos(a), y: 0.6 * Math.sin(a), r: 0.48 }
+  }))),
   // Familiar analytic heart: two upper lobes, a real top cleft, one lower point.
   heart: parametric((t) => ({
     x: 16 * Math.sin(t) ** 3 / 17,
-    y: -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 17
+    y: -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 17 - 0.16
   })),
   house: polygon([[0, -1.06], [0.83, -0.34], [0.83, 0.78], [-0.83, 0.78], [-0.83, -0.34]]),
   star: polygon(Array.from({ length: 10 }, (_, i) => {
-    const a = -Math.PI / 2 + i * Math.PI / 5
-    const r = i % 2 ? 0.64 : 1.08
+    const a = -Math.PI * 5 / 12 + i * Math.PI / 5
+    const r = i % 2 ? 0.66 : 1.08
     return [r * Math.cos(a), r * Math.sin(a)]
   }))
 }
