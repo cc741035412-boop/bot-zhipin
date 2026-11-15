@@ -12,7 +12,6 @@ const notices: Record<string, string> = {
   cancelled: '你取消了登录。想继续投稿，再点一次「用 GitHub 登录」就行。',
   failed: '登录没成功，可能是网络不稳。再试一次；还不行就换个网络，或者过一会儿再来。',
   expired: explainError('session_expired').message,
-  switched: '换了账号，截图要重新放一次。',
 }
 const retry = computed(() => props.s.loginRetryAt > props.s.now ? explainError('rate_limited', { stage: 'login', retryAfter: (props.s.loginRetryAt - props.s.now) / 1000 }).message : '')
 </script>

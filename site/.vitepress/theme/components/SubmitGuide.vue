@@ -10,7 +10,7 @@ const input = ref('')
 const steps = [
   { title: '复制提示词', text: '点下面的按钮，把提示词发给你的 AI：Grok Bot、Codex、Claude Code 都行', icon: 'copy' },
   { title: '回答几个问题', text: 'AI 自己能查到的不会问你，查不到的一次问清，最后给你一个投稿链接', icon: 'message' },
-  { title: '打开链接提交', text: '看预览、用 GitHub 登录、放截图、点提交。维护者审核通过就上线', icon: 'upload' },
+  { title: '打开链接提交', text: '看预览、用 GitHub 登录、点提交。维护者审核通过就上线', icon: 'upload' },
 ] as const
 </script>
 <template>

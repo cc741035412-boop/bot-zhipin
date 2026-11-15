@@ -10,8 +10,8 @@ function reload() { location.reload() }
 </script>
 <template>
   <section class="submit-step submit-authorization" data-testid="step-submit" :data-state="s.error ? 'error' : 'current'" :inert="s.phase === 'submitting'">
-    <header class="submit-step-heading"><SubmitStepMark :mark="s.error ? '!' : '4'" /><h2 class="bz-h3">授权并提交</h2></header>
-    <label class="submit-license"><input v-model="s.license" type="checkbox" data-testid="license-checkbox" aria-describedby="submit-license-help" /><span>我同意以 CC BY 4.0 授权这次投稿，并确认内容和截图都是我有权公开的。</span></label>
+    <header class="submit-step-heading"><SubmitStepMark :mark="s.error ? '!' : '3'" /><h2 class="bz-h3">授权并提交</h2></header>
+    <label class="submit-license"><input v-model="s.license" type="checkbox" data-testid="license-checkbox" aria-describedby="submit-license-help" /><span>我同意以 CC BY 4.0 授权这次投稿，并确认内容是我有权公开的。</span></label>
     <p id="submit-license-help" data-testid="license-help" class="submit-muted">意思是：别人可以在注明你是作者的前提下复制、改编、使用这个 Bot。 <a class="submit-link" :href="`${SITE.repo}/blob/${SITE.branch}/bots/LICENSE`" target="_blank" rel="noopener noreferrer">授权全文<ExternalHint /></a></p>
     <div v-if="s.error" class="submit-notice danger" data-testid="submit-error" :data-code="s.error.error">
       <p v-if="s.error.error === 'invalid'">服务器检查发现了问题，见上面第 ① 步。</p>
@@ -33,7 +33,7 @@ function reload() { location.reload() }
           <p v-if="s.fallback.needsPaste">打开的页面里，把投稿包粘进「投稿包」一栏</p>
           <textarea v-if="s.fallback.needsPaste" readonly rows="6" aria-label="备用投稿包" :value="s.plaintext" />
           <SubmitCopyButton v-if="s.fallback.needsPaste" id="issue-fallback-paste" :text="s.plaintext" label="复制投稿包" />
-          <a data-testid="issue-fallback" class="bz-btn shelf-button" :href="s.fallback.url" target="_blank" rel="noopener noreferrer"><SubmitIcon name="arrow-up-right" />改用 GitHub Issue 投稿<span class="bz-sr-only">（在新标签页打开）</span></a><p>在 GitHub 的页面上要再拖一次截图。</p>
+          <a data-testid="issue-fallback" class="bz-btn shelf-button" :href="s.fallback.url" target="_blank" rel="noopener noreferrer"><SubmitIcon name="arrow-up-right" />改用 GitHub Issue 投稿<span class="bz-sr-only">（在新标签页打开）</span></a>
         </div>
       </template>
     </div>

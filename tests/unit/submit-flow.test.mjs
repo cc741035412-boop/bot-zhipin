@@ -52,7 +52,11 @@ describe('网站提交流程（纯注入，无网络）', () => {
     expect(gh.createCommit.mock.calls[0][0].committer).toBeUndefined()
     const pr = gh.createPr.mock.calls[0][0]
     expect(pr.body).toContain('<!-- bot-zhipin-web-submission uid=123 slug=flow-demo -->')
-    expect(pr.body).toContain('截图是这个 Bot 的真实输出，没有露出隐私、密钥或公司内部信息')
+    expect(pr.body).toContain('设计说明「实际效果」里摘的输出像这个 Bot 的真实输出，没有露出隐私、密钥或公司内部信息')
+    expect(pr.body).toContain('并确认内容有权公开')
+    expect(pr.body).not.toContain('截图')
+    // 旧页面带回执提交仍然兼容：照常写入 screenshots/。
+    expect(inner.entries.find((e) => e.path === 'screenshots/review-result.png')).toMatchObject({ mode: '100644', type: 'blob', sha: 'b'.repeat(40) })
     expect(writes.at(-1).sql).toContain('ON CONFLICT')
     expect(writes.at(-1).args).toEqual([123, 'flow-demo', 7, 'submission/web-123-flow-demo', now])
   })
@@ -78,11 +82,39 @@ describe('网站提交流程（纯注入，无网络）', () => {
     await expect(submitBot({ ...input, bundle: 'wrong' }, user, deps)).rejects.toMatchObject({ code: 'bad_request', extra: { errors: [expect.objectContaining({ file: expect.any(String), where: expect.any(String), problem: expect.any(String), fix: expect.any(String) })] } })
     expect(gh.installationToken).not.toHaveBeenCalled()
   })
-  it.each(['forged', 'expired', 'other', 'purpose', 'missing-purpose', 'sha', 'size', 'empty'])('回执 %s 拒绝且带槽位，无 GitHub 请求', async (kind) => {
-    const values = { forged: (await receipt()) + 'x', expired: await receipt({ exp: now }), other: await receipt({ uid: 456 }), purpose: await receipt({ t: 's' }), 'missing-purpose': await receipt({ t: undefined }), sha: await receipt({ sha: '../oops' }), size: await receipt({ size: 2097153 }), empty: null }
-    input.screenshots = kind === 'empty' ? [] : [values[kind]]
+  it.each(['forged', 'expired', 'other', 'purpose', 'missing-purpose', 'sha', 'size', 'not-array'])('回执 %s 拒绝且带槽位，无 GitHub 请求', async (kind) => {
+    const values = { forged: (await receipt()) + 'x', expired: await receipt({ exp: now }), other: await receipt({ uid: 456 }), purpose: await receipt({ t: 's' }), 'missing-purpose': await receipt({ t: undefined }), sha: await receipt({ sha: '../oops' }), size: await receipt({ size: 2097153 }) }
+    input.screenshots = kind === 'not-array' ? 'receipt' : [values[kind]]
     await expect(submitBot(input, user, deps)).rejects.toMatchObject({ code: 'receipt_invalid', extra: { slots: [0] } })
     expect(gh.installationToken).not.toHaveBeenCalled()
+  })
+  it.each(['missing', 'empty'])('不传截图（%s）也能提交：忽略投稿包里残留的文件名，不写 screenshots/（第 43 条）', async (kind) => {
+    if (kind === 'missing') delete input.screenshots
+    else input.screenshots = []
+    const result = await submitBot(input, user, deps)
+    expect(result).toMatchObject({ ok: true, update: false, slug: 'flow-demo' })
+    const [inner] = gh.createTree.mock.calls.map(([v]) => v)
+    expect(inner.entries.map((e) => e.path).sort()).toEqual(rels.slice().sort())
+    expect(inner.entries.some((e) => e.path.startsWith('screenshots/'))).toBe(false)
+  })
+  it('不传截图时 dryRun 的文件清单也没有 screenshots/', async () => {
+    delete input.screenshots
+    const result = await submitBot({ ...input, dryRun: true }, user, deps)
+    expect(result).toMatchObject({ ok: true, dryRun: true, slug: 'flow-demo' })
+    expect(result.files.some((file) => file.includes('/screenshots/'))).toBe(false)
+    noWrites()
+  })
+  it('DESIGN.md 引用了截图却没传图：invalid 带「图片引用」改法，推送前拒绝；旧页面带回执仍可提交', async () => {
+    const withRef = bundle((files) => { files['DESIGN.md'] += '\n![结果](screenshots/review-result.png)\n' })
+    await expect(submitBot({ bundle: withRef, license: true }, user, deps)).rejects.toMatchObject({ code: 'invalid', extra: { errors: [expect.objectContaining({ file: 'bots/flow-demo/DESIGN.md', where: '图片引用', problem: '引用了 screenshots/review-result.png，但没有这张图' })] } })
+    noWrites()
+    limits.clear() // 同 slug 第二次请求本来会被 submit-slug 限流，这里只验证回执兼容
+    expect((await submitBot({ bundle: withRef, screenshots: [await receipt()], license: true }, user, deps)).ok).toBe(true)
+  })
+  it('verifyReceipts：undefined 和空数组返回空，非数组仍拒绝', async () => {
+    expect(await verifyReceipts(undefined, user, secrets, now)).toEqual([])
+    expect(await verifyReceipts([], user, secrets, now)).toEqual([])
+    for (const value of [null, 'receipt', { 0: 'receipt' }]) await expect(verifyReceipts(value, user, secrets, now)).rejects.toMatchObject({ code: 'receipt_invalid', extra: { slots: [0] } })
   })
   it('轮换密钥可验证旧回执，多处失败返回全部下标', async () => {
     const old = await receipt({}, 'old-secret')

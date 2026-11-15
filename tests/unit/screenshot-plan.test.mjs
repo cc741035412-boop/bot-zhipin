@@ -33,8 +33,15 @@ it.each(['jpg', 'jpeg', 'JPEG'])('真实 JPEG 的 %s 后缀不变', (ext) => {
 it.each(['png', 'jpeg', 'webp', 'gif'])('未声明的 %s 自动命名', (format) => {
   expect(planScreenshots(bundle([]), [{ size: 8, format }]).screenshots).toEqual([`screenshot-1.${format === 'jpeg' ? 'jpg' : format}`])
 })
-it('缺图、少图、重名、大小写冲突和文件数超限均拒绝', () => {
-  expect(() => planScreenshots(bundle(), [])).toThrow('至少')
+it('零张图片合法（第 43 条）：忽略残留的文件名声明，文本原样返回，不改输入', () => {
+  const source = bundle(['a.jpg', 'b.png']), original = structuredClone(source)
+  const plan = planScreenshots(source, [])
+  expect(plan).toEqual({ slug: 'test-bot', files: source.files, screenshots: [], images: [] })
+  expect(plan.files).not.toBe(source.files)
+  expect(source).toEqual(original)
+  expect(makeFilePlan(source, [])).toEqual({ slug: 'test-bot', files: source.files })
+})
+it('少图、重名、大小写冲突和文件数超限均拒绝', () => {
   expect(() => planScreenshots(bundle(['a.png', 'b.png']), [image])).toThrow('数量')
   expect(() => planScreenshots(bundle(['a.jpg', 'a.png']), [image, image])).toThrow('冲突')
   expect(() => planScreenshots(bundle(['A.png', 'a.png']), [image, image])).toThrow('重复')

@@ -24,4 +24,4 @@ writeFileSync(
     .replace(/^slug: my-bot(\s)/m, `slug: ${slug}$1`)
     .replace(/^addedAt: \d{4}-\d{2}-\d{2}(\s)/m, `addedAt: ${today}$1`),
 )
-console.log(`已创建 bots/${slug}/。接下来：\n  1. 按注释填写 bots/${slug}/bot.yaml\n  2. 写 ROLE.md、DESIGN.md、skills/ 下的 SKILL.md\n  3. 往 screenshots/ 放至少一张真实截图\n  4. 运行 npm run validate`)
+console.log(`已创建 bots/${slug}/。接下来：\n  1. 按注释填写 bots/${slug}/bot.yaml\n  2. 写 ROLE.md、DESIGN.md、skills/ 下的 SKILL.md\n  3. 运行 npm run validate`)

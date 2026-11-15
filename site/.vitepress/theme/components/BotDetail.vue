@@ -171,15 +171,12 @@ onBeforeUnmount(() => watcher?.disconnect())
           <DetailStarters :lines="starters" />
         </section>
 
-        <section v-if="!bot.external && (preview || list(bot.screenshots).length)" data-testid="section-screenshots">
+        <!-- 截图可选（DECISIONS 第 43 条）：投稿不收截图，只有仓库里放了截图的 Bot 才显示这一区。 -->
+        <section v-if="!bot.external && list(bot.screenshots).length" data-testid="section-screenshots">
           <h2>截图</h2>
           <div class="bot-screenshots">
-            <template v-for="(url, index) in list(bot.screenshots)" :key="index">
-              <span v-if="preview && !url" class="screenshot-error">截图 {{ index + 1 }}（待放入）</span>
-              <BotScreenshot v-else :url="url" :alt="`${called}截图 ${index + 1}`" />
-            </template>
+            <BotScreenshot v-for="(url, index) in list(bot.screenshots)" :key="index" :url="url" :alt="`${called}截图 ${index + 1}`" />
           </div>
-          <p v-if="!list(bot.screenshots).length">暂无截图。</p>
         </section>
 
         <section v-if="skills.length || (preview && !bot.external)" data-testid="section-skills">

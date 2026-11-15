@@ -22,14 +22,14 @@ export function assertImageUrl(value, initial = false) {
 
 /** 同时提取 Markdown 图片和 GitHub 拖图生成的 HTML img，保持原始顺序。 */
 export function extractImageUrls(text) {
-  const matches = [...text.matchAll(/!\[[^\]\n]*\]\(\s*(?:<([^>\n]+)>|([^\s)]+))(?:\s+["'][^\n]*?["'])?\s*\)|<img\b[^>]*>/gi)]
+  // 截图可选（DECISIONS 第 43 条）：新表单没有截图栏，旧表单的截图栏可以留空。
+  const matches = [...(text || '').matchAll(/!\[[^\]\n]*\]\(\s*(?:<([^>\n]+)>|([^\s)]+))(?:\s+["'][^\n]*?["'])?\s*\)|<img\b[^>]*>/gi)]
   const urls = matches.map((match) => {
     if (match[1] || match[2]) return match[1] || match[2]
     const src = /\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(match[0])
     if (!src) bad('图片标签缺少 src 地址。')
     return (src[1] ?? src[2] ?? src[3]).replaceAll('&amp;', '&')
   })
-  if (!urls.length) bad('至少需要一张截图。')
   if (urls.length > LIMITS.files) bad('截图过多，投稿总文件数最多 30 个。')
   urls.forEach((url) => assertImageUrl(url, true))
   return urls
