@@ -1,0 +1,19 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: grok-bot-changelog
+name: "Grok Bot 更新速递"
+tagline: "Grok Bot 一出新版本，就告诉你改了啥、怎么试"
+category: 学习
+author:
+  name: "Mai Yang"
+  url: https://x.com/MaiYangAI
+templateUrl: https://x.ai/bot/lIO-FUTrwcA2r7nbfaXx4
+addedAt: 2026-11-15
+prerequisites:
+  - "无；想看真实用例可以连 X，不连也能用"
+  - "定时任务默认北京时间早上，首次对话可以改"
+quotaCost: 低
+permissions:
+  - 联网
+  - 定时自动运行
+pitch: "Grok Bot 一更新，我就告诉你改了啥。"
+external: true

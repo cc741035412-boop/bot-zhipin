@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: weight-coach
+name: "减重教练"
+tagline: "拍餐前照片估热量，按中国家常饮食帮你减重"
+category: 日常
+author:
+  name: "Cola"
+templateUrl: https://x.ai/bot/MgvqAC7RBf-gsvQl6Jw6n
+addedAt: 2026-11-15
+prerequisites:
+  - "无，发照片就行"
+  - "一天固定提醒 5 次，不用的可以关"
+  - "不是医生，不看诊"
+quotaCost: 中
+permissions:
+  - 定时自动运行
+pitch: "饭前拍一张，我帮你估估热量。"
+external: true

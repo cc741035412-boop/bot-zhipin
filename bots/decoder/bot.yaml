@@ -1,0 +1,19 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: decoder
+name: "Decoder"
+tagline: "丢一份长报告、论文或 PDF，给你五段白话摘要"
+category: 调研
+author:
+  name: "cradrrat"
+  url: https://x.com/cradrrat
+templateUrl: https://x.ai/bot/5N9HO674YlxHiZhyj9ND9
+addedAt: 2026-11-15
+prerequisites:
+  - "粘贴、上传或给公开链接"
+  - "上传的文件会留在共享云电脑上，敏感文件用完删掉"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 联网
+pitch: "几十页的报告丢给我，五段白话讲清楚。"
+external: true

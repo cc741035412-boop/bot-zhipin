@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: memory-cleanup
+name: "记忆清理"
+tagline: "按主题整理 Bot 的记忆，你点头才删旧规则"
+category: 基础设施
+author:
+  name: "Oviya Kapoor"
+  url: https://x.com/lubo0923
+templateUrl: https://x.ai/bot/LzbEuYYioxCKhdpdIc7d8
+addedAt: 2026-11-15
+prerequisites:
+  - "一个记忆攒得很乱、想清理的 Bot"
+  - "批准一个主题后会真的删掉旧记忆；能不能跨 Bot 读写，导入后先试一次"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+pitch: "Bot 记的规矩打架了？我按主题帮你理一遍。"
+external: true

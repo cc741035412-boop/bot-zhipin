@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: grok-deck
+name: "Grok Deck"
+tagline: "把讲稿要点变成浏览器里直接放的 HTML 幻灯片"
+category: 日常
+author:
+  name: "Mai Yang"
+  url: https://x.com/MaiYangAI
+templateUrl: https://x.ai/bot/Ja9NzNTRz2ozzQLNfrJwI
+addedAt: 2026-11-15
+prerequisites:
+  - "讲稿标题、听众、时长和每页要点"
+  - "字体在线加载，国内网络下可能换成系统字体"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+pitch: "讲稿要点给我，我做成浏览器里能放的幻灯片。"
+external: true

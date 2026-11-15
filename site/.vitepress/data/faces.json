@@ -9,6 +9,21 @@
     "shape": "blob",
     "fetchedAt": "2026-11-15"
   },
+  "ai-claim-checker": {
+    "color": "#ff6700",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
+  "ai-daily-radar": {
+    "color": "#ff263c",
+    "shape": "pebble",
+    "fetchedAt": "2026-11-15"
+  },
+  "ai-pm-os": {
+    "color": "#000000",
+    "shape": "blob",
+    "fetchedAt": "2026-11-15"
+  },
   "ai-search-visibility": {
     "color": "#1084fe",
     "shape": "crystal",
@@ -19,9 +34,24 @@
     "shape": "squircle",
     "fetchedAt": "2026-11-15"
   },
+  "bill-import": {
+    "color": "#00c972",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
   "call-follow-ups": {
     "color": "#00bca6",
     "shape": "capsule",
+    "fetchedAt": "2026-11-15"
+  },
+  "campushire": {
+    "color": "#ff263c",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
+  "certification-coach": {
+    "color": "#00bca6",
+    "shape": "teardrop",
     "fetchedAt": "2026-11-15"
   },
   "clip-bot": {
@@ -49,6 +79,16 @@
     "shape": "crystal",
     "fetchedAt": "2026-11-15"
   },
+  "daily-lingo": {
+    "color": "#936439",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
+  "decoder": {
+    "color": "#9159fe",
+    "shape": "wedge",
+    "fetchedAt": "2026-11-15"
+  },
   "dr-eggbot": {
     "color": "#ff263c",
     "shape": "teardrop",
@@ -69,6 +109,11 @@
     "shape": "wedge",
     "fetchedAt": "2026-11-15"
   },
+  "experiment-designer": {
+    "color": "#9159fe",
+    "shape": "teardrop",
+    "fetchedAt": "2026-11-15"
+  },
   "feishu-app-keeper": {
     "color": "#777777",
     "shape": "hex",
@@ -79,9 +124,19 @@
     "shape": "gem",
     "fetchedAt": "2026-11-15"
   },
+  "flashcard-forge": {
+    "color": "#00bca6",
+    "shape": "squircle",
+    "fetchedAt": "2026-11-15"
+  },
   "flora": {
     "color": "#00c972",
     "shape": "leaf",
+    "fetchedAt": "2026-11-15"
+  },
+  "frame": {
+    "color": "#ff263c",
+    "shape": "tablet",
     "fetchedAt": "2026-11-15"
   },
   "game-art-director": {
@@ -89,9 +144,34 @@
     "shape": "teardrop",
     "fetchedAt": "2026-11-15"
   },
+  "grok-bot-changelog": {
+    "color": "#ff6700",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
+  "grok-bot-tutorial": {
+    "color": "#00bca6",
+    "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
+  "grok-deck": {
+    "color": "#00c972",
+    "shape": "squircle",
+    "fetchedAt": "2026-11-15"
+  },
   "idea-stress-test": {
     "color": "#1084fe",
     "shape": "squircle",
+    "fetchedAt": "2026-11-15"
+  },
+  "interview-prep-desk": {
+    "color": "#ff309b",
+    "shape": "wedge",
+    "fetchedAt": "2026-11-15"
+  },
+  "job-map-express": {
+    "color": "#1084fe",
+    "shape": "hex",
     "fetchedAt": "2026-11-15"
   },
   "last30days": {
@@ -102,6 +182,21 @@
   "lead-pipeline-desk": {
     "color": "#00c972",
     "shape": "capsule",
+    "fetchedAt": "2026-11-15"
+  },
+  "learn-by-view": {
+    "color": "#00bca6",
+    "shape": "leaf",
+    "fetchedAt": "2026-11-15"
+  },
+  "learnbot": {
+    "color": "#1084fe",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
+  "ledger-keeper": {
+    "color": "#936439",
+    "shape": "cloud",
     "fetchedAt": "2026-11-15"
   },
   "market-researcher": {
@@ -122,6 +217,11 @@
   "meeting-recap-deck": {
     "color": "#1084fe",
     "shape": "blob",
+    "fetchedAt": "2026-11-15"
+  },
+  "memory-cleanup": {
+    "color": "#00c972",
+    "shape": "leaf",
     "fetchedAt": "2026-11-15"
   },
   "memory-keeper": {
@@ -147,6 +247,16 @@
   "paid-media-report": {
     "color": "#00c972",
     "shape": "blob",
+    "fetchedAt": "2026-11-15"
+  },
+  "palette": {
+    "color": "#00bca6",
+    "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
+  "personal-assistant": {
+    "color": "#00bca6",
+    "shape": "pebble",
     "fetchedAt": "2026-11-15"
   },
   "pfp-bot": {
@@ -189,6 +299,21 @@
     "shape": "tablet",
     "fetchedAt": "2026-11-15"
   },
+  "red-team": {
+    "color": "#ff263c",
+    "shape": "wedge",
+    "fetchedAt": "2026-11-15"
+  },
+  "research-bot": {
+    "color": "#000000",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
+  "resume-tailor-desk": {
+    "color": "#9159fe",
+    "shape": "pebble",
+    "fetchedAt": "2026-11-15"
+  },
   "sales-call-coach": {
     "color": "#ff6700",
     "shape": "shield",
@@ -219,9 +344,19 @@
     "shape": "shield",
     "fetchedAt": "2026-11-15"
   },
+  "steal-this-business": {
+    "color": "#ff9800",
+    "shape": "cloud",
+    "fetchedAt": "2026-11-15"
+  },
   "stills-clips-desk": {
     "color": "#ff309b",
     "shape": "cylinder",
+    "fetchedAt": "2026-11-15"
+  },
+  "sweeper": {
+    "color": "#1084fe",
+    "shape": "pebble",
     "fetchedAt": "2026-11-15"
   },
   "talent-discovery": {
@@ -249,6 +384,16 @@
     "shape": "squircle",
     "fetchedAt": "2026-11-15"
   },
+  "wechat-article-catcher": {
+    "color": "#00c972",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
+  "weight-coach": {
+    "color": "#00c972",
+    "shape": "leaf",
+    "fetchedAt": "2026-11-15"
+  },
   "writing-bot": {
     "color": "#00bca6",
     "shape": "squircle",
@@ -256,6 +401,11 @@
   },
   "x-brief": {
     "color": "#000000",
+    "shape": "cloud",
+    "fetchedAt": "2026-11-15"
+  },
+  "zuozuo-ai-intel": {
+    "color": "#ff263c",
     "shape": "cloud",
     "fetchedAt": "2026-11-15"
   }

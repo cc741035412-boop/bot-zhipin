@@ -1,0 +1,19 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: zuozuo-ai-intel
+name: "左左的AI情报员"
+tagline: "盯 46 个固定信源，每个工作日出一份中文 AI 情报"
+category: 调研
+author:
+  name: "Bbbb Zuo"
+templateUrl: https://x.ai/bot/OqeUopbZ8pvjf6RyvRTQt
+addedAt: 2026-11-15
+prerequisites:
+  - "无；可选连 X，让 X 账号那部分扫得更稳"
+  - "每次扫 46 个源，很烧额度，可以改成每周一次"
+quotaCost: 高
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+pitch: "46 个信源我每天扫一遍，只挑值得看的。"
+external: true

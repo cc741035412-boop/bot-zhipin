@@ -1,0 +1,17 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: frame
+name: "Frame"
+tagline: "像面试官一样陪你练案例题和估算，专挑拆解的漏洞"
+category: 求职
+author:
+  name: "Grady Allen"
+  url: https://x.com/gradycwallen
+templateUrl: https://x.ai/bot/ChQQ0_tBNki9hZWJo0GjQ
+addedAt: 2026-11-15
+prerequisites:
+  - "一道案例题或你的拆解思路；拿真实工作材料来练前先脱敏"
+  - "练的是咨询式 case 和估算，产品设计题它不管"
+quotaCost: 低
+permissions: []
+pitch: "来道案例题？你来拆，我专找漏洞。"
+external: true

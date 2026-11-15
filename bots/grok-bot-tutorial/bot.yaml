@@ -1,0 +1,23 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: grok-bot-tutorial
+name: "Grok Bot Tutorial"
+tagline: "20 节实操课，带新手一步步学会用 Grok Bot"
+category: 学习
+author:
+  name: "Sawyer Merritt"
+  url: https://x.com/SawyerMerritt
+templateUrl: https://x.ai/bot/VBmzZaD3abMPl53kwWuYp
+addedAt: 2026-11-15
+prerequisites:
+  - "第一次对话会自动建一个每天提醒上课的定时任务，不想要可以说暂停"
+  - "部分课要真连 Gmail、日历等应用或在云电脑登录网站，不想连可以跳过"
+  - "购物课用的是 Amazon 等美国网站，会做到结账前一步，买不买你定"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 浏览器 Cookie
+  - 外部账号
+  - 联网
+  - 定时自动运行
+pitch: "第一次用 Grok Bot？20 节课，我带你走一遍。"
+external: true
