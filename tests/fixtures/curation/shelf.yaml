@@ -1,0 +1,20 @@
+# 测试用的策展文件：3 个主推、2 个专题，都指向 tests/fixtures/bots/ 里的示例 Bot。
+featured:
+  - bot: demo-prd-reviewer
+    note: 示例主推：评审会前先让它挑一遍毛病。
+  - bot: demo-weekly-digest
+    note: 示例主推：一周的零散记录交给它整理。
+  - bot: demo-external
+    note: 示例主推：一个外部收录的条目。
+picks: [demo-weekly-digest, demo-prd-reviewer]
+collections:
+  - slug: demo-starter
+    title: 示例·上手
+    blurb: 两个不用连账号的示例
+    bots: [demo-weekly-digest, demo-external]
+  - slug: demo-all
+    title: 示例·全部
+    blurb: 把三个示例都放进来
+    bots: [demo-prd-reviewer, demo-weekly-digest, demo-external]
+editorNotes:
+  demo-prd-reviewer: 示例点评：问题按严重程度排好了，先看前三条就够。

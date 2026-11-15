@@ -30,7 +30,7 @@ const featuredEntering = ref(false)
 const slugs = (list) => list.map((bot) => bot.slug).join(',')
 const byNewest = (a, b) => b.addedAt.localeCompare(a.addedAt) || byName.compare(a.name, b.name)
 const byHeat = (a, b) => (heatState.values[b.slug] ?? 0) - (heatState.values[a.slug] ?? 0) || byNewest(a, b)
-// 货架上实际出现的分类，顺序跟 schema 枚举走。
+// 货架上实际出现的岗位，顺序跟 schema 枚举走。
 const categories = computed(() => enums.categories.filter((category) => bots.some((bot) => bot.category === category)))
 const visible = computed(() => filter.value === ALL ? ordered.value : ordered.value.filter((bot) => bot.category === filter.value))
 function reorder() {

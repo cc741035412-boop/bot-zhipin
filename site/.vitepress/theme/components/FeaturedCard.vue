@@ -8,7 +8,7 @@ import { botPalette } from '../color'
 import { reportClick } from '../heat'
 import { nextPoke } from '../pitch'
 
-// 精选大卡：只有活 Bot、名字、介绍、作者和导入，不带台词气泡，也不参与分类筛选。
+// 精选大卡：只有活 Bot、名字、介绍、作者和导入，不带台词气泡，也不参与岗位筛选。
 const props = defineProps<{ bot: {
   slug: string; name: string; tagline: string; avatar: string | null
   templateUrl: string; detailUrl: string; author: { name: string; link: string }

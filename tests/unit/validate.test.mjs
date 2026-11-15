@@ -79,7 +79,7 @@ it('非外部 author.github 必填', () => {
   expect(issues()).toContain('缺少必填字段 author.github')
 })
 it.each([
-  ['category', '不存在的分类', 'categories'],
+  ['category', '不存在的岗位', 'categories'],
   ['quotaCost', '中等', 'quotaCosts'],
   ['permissions', ['不存在的权限'], 'permissions'],
 ])('枚举 %s 列出全部可选值', (field, value, key) => {
@@ -362,7 +362,7 @@ it('CLI 默认目录通过、环境变量有效、--dir 优先于环境变量', 
   expect(cli().status).toBe(0)
   const environment = cli([], { BOTS_DIR: 'tests/fixtures/bots' })
   expect(environment.status).toBe(0)
-  expect(environment.stdout).toContain('3 个 Bot（其中 1 个外部收录）')
+  expect(environment.stdout).toContain('3 个 Bot（其中 1 个外部收录），1 支小队')
   remove('bot.yaml')
   expect(cli([], { BOTS_DIR: botsDir }).status).toBe(1)
   expect(cli(['--dir', fixtureDir], { BOTS_DIR: botsDir }).status).toBe(0)
@@ -372,7 +372,8 @@ it('CLI 错误退出 1，只有提醒退出 0 且先列提醒', () => {
   const warning = cli(['--dir', botsDir])
   expect(warning.status).toBe(0)
   expect(warning.stdout.startsWith('! bots/')).toBe(true)
-  expect(warning.stdout.trim().endsWith('✓ 校验通过：3 个 Bot（其中 1 个外部收录）')).toBe(true)
+  // CLI 做全量校验，成功时同时报 Bot 数和小队数；临时目录旁边没有 squads/，所以是 0 支。
+  expect(warning.stdout.trim().endsWith('✓ 校验通过：3 个 Bot（其中 1 个外部收录），0 支小队')).toBe(true)
   remove('bot.yaml')
   const failure = cli(['--dir', botsDir])
   expect(failure.status).toBe(1)

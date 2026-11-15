@@ -17,8 +17,8 @@
     "name": { "description": "Bot 的名字", "type": "string", "minLength": 1, "maxLength": 20, "pattern": "^[^<>\"]*$" },
     "tagline": { "description": "一句话介绍", "type": "string", "minLength": 4, "maxLength": 40, "pattern": "^[^<>\"]*$" },
     "category": {
-      "description": "分类",
-      "enum": ["调研", "定义", "评审", "AI 评测", "学习", "求职", "日常", "基础设施"]
+      "description": "岗位",
+      "enum": ["产品", "市场", "销售", "内容", "运营", "管家", "个人"]
     },
     "author": {
       "type": "object",
@@ -58,7 +58,77 @@
       "uniqueItems": true,
       "items": { "enum": ["云电脑文件", "浏览器 Cookie", "外部账号", "联网", "定时自动运行", "代我发消息"] }
     },
-    "pitch": { "description": "自荐台词（可选）", "type": "string", "minLength": 2, "maxLength": 30, "pattern": "^[^<>\"]*$" },
+    "pitch": {
+      "description": "自荐台词（可选）。写一句，或写 1 到 3 句互不相同的话；每句 2 到 30 个字",
+      "anyOf": [
+        { "type": "string", "minLength": 2, "maxLength": 30, "pattern": "^[^<>\"]*$" },
+        {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 2, "maxLength": 30, "pattern": "^[^<>\"]*$" }
+        }
+      ]
+    },
+    "about": {
+      "description": "它能干什么（可选）。里面的字段都可选，写了哪个，详情页就显示哪个",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "intro": { "description": "它是干什么的：你给它什么，它怎么干，交给你什么", "type": "string", "minLength": 10, "maxLength": 200, "pattern": "^[^<>\"]*$" },
+        "does": {
+          "description": "能帮你做的事，1 到 6 条",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 6,
+          "items": { "type": "string", "minLength": 2, "maxLength": 40, "pattern": "^[^<>\"]*$" }
+        },
+        "starters": {
+          "description": "导入后可以直接发的第一句话，1 到 3 条",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "items": { "type": "string", "minLength": 2, "maxLength": 60, "pattern": "^[^<>\"]*$" }
+        },
+        "skills": {
+          "description": "自带技能，1 到 16 个（外部收录用；非外部收录以 skills/ 目录为准）",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "does"],
+            "properties": {
+              "name": { "description": "技能名", "type": "string", "minLength": 1, "maxLength": 30, "pattern": "^[^<>\"]*$" },
+              "does": { "description": "这个技能做什么", "type": "string", "minLength": 2, "maxLength": 60, "pattern": "^[^<>\"]*$" }
+            }
+          }
+        },
+        "routines": {
+          "description": "定时任务，1 到 12 个",
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 12,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["what", "when", "default", "quiet"],
+            "properties": {
+              "what": { "description": "这个任务做什么", "type": "string", "minLength": 2, "maxLength": 60, "pattern": "^[^<>\"]*$" },
+              "when": { "description": "什么时候跑，比如「每周一早上 9 点」", "type": "string", "minLength": 2, "maxLength": 40, "pattern": "^[^<>\"]*$" },
+              "default": { "description": "导入后默认开还是关", "enum": ["开", "关", "未说明"] },
+              "quiet": { "description": "没有新内容时还发不发消息", "enum": ["不打扰", "照发", "未说明"] }
+            }
+          }
+        },
+        "fit": { "description": "适合谁", "type": "string", "minLength": 2, "maxLength": 60, "pattern": "^[^<>\"]*$" },
+        "notFit": { "description": "不适合谁", "type": "string", "minLength": 2, "maxLength": 60, "pattern": "^[^<>\"]*$" },
+        "cnFit": { "description": "国内可用性", "enum": ["好", "一般"] },
+        "cnNote": { "description": "国内用要知道什么", "type": "string", "minLength": 2, "maxLength": 80, "pattern": "^[^<>\"]*$" }
+      }
+    },
     "forkedFrom": {
       "description": "改编自哪个 Bot 的 slug（可选）",
       "type": "string",

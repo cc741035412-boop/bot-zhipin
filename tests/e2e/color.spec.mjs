@@ -54,7 +54,7 @@ for (const scheme of ['light', 'dark']) {
     expect(warnings).toEqual([])
   })
 
-  test(`${scheme}：八类标签实际 CSS 对比度 ≥4.5，首页/详情一致、外部标签中性`, async ({ page }) => {
+  test(`${scheme}：各岗位标签实际 CSS 对比度 ≥4.5，首页/详情一致、外部标签中性`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme })
     await page.goto('/')
     const homeColor = await page.locator(`[data-slug="${weekly}"] .category-tag`).evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])
@@ -84,7 +84,8 @@ for (const scheme of ['light', 'dark']) {
       })
       return { categories, external: [...document.querySelectorAll('.external-tag')].map(sample) }
     }, CATEGORY_COLORS)
-    expect(new Set(colors.categories.map((c) => c.bg.join(','))).size).toBe(8)
+    expect(new Set(colors.categories.map((c) => c.bg.join(','))).size).toBe(Object.keys(CATEGORY_COLORS).length)
+    expect(Object.keys(CATEGORY_COLORS)).toHaveLength(7)
     for (const color of [...colors.categories, ...colors.external]) {
       expect(color.ratio, `${color.name ?? '外部收录'} ${color.fg} / ${color.bg}`).toBeGreaterThanOrEqual(4.5)
     }

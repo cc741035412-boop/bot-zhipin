@@ -90,7 +90,7 @@ test('鼠标、Tab、Enter、空格、Esc、失焦、单开和跳动重播', asy
   await expect(a).not.toHaveAttribute('aria-describedby')
   await page.mouse.move(0, 0)
   await expect(opened(page)).toHaveCount(0)
-  // 真正从前一个按钮 Tab 到头像，不只调用 focus()。排序后面还有分类筛选和搜索入口，卡片前的最后一个控件是工具栏搜索框。
+  // 真正从前一个按钮 Tab 到头像，不只调用 focus()。排序后面还有岗位筛选和搜索入口，卡片前的最后一个控件是工具栏搜索框。
   await page.getByTestId('search-trigger-toolbar').focus()
   await page.keyboard.press('Tab')
   await expect(a).toBeFocused()

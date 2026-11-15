@@ -2,7 +2,7 @@
 slug: memory-keeper
 name: 记忆管家
 tagline: 定期把每个 Bot 的设定和记忆备份到你的私有 Git 仓库，丢了能找回
-category: 基础设施
+category: 管家
 author:
   name: 铁柱AGI
   github: RongleCat

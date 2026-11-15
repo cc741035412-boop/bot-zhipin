@@ -118,3 +118,126 @@ it('CI 只读 PR/手动派发，拉取两层历史并按首父严格检查范围
   expect(scope.run).toBe('node scripts/check-pr-scope.mjs --base HEAD^1 --head HEAD --association "${{ github.event_name == \'pull_request\' && github.event.pull_request.author_association || \'CONTRIBUTOR\' }}"')
   expect(steps.indexOf(scope)).toBeLessThan(steps.findIndex((step) => step.run === 'npm run validate'))
 })
+
+// ---- V5：小队投稿范围。贡献者只能新增或修改 squads/<slug>/squad.yaml 这一个文件；curation/ 只有维护者能动。 ----
+const squadYaml = (extra = '') => `slug: my-squad\naddedAt: 2026-11-10\nauthor:\n  name: Alice\n  github: Alice\n${extra}`
+
+it('新增小队、修改已有小队的正文都放行', () => {
+  put('squads/old-squad/squad.yaml', squadYaml().replace('my-squad', 'old-squad'))
+  commit()
+  put('squads/my-squad/squad.yaml', squadYaml())
+  put('squads/old-squad/squad.yaml', squadYaml('name: 改了名字\n').replace('my-squad', 'old-squad'))
+  commit()
+  const result = check()
+  expect(result.status).toBe(0)
+  expect(result.stdout).toContain('PR 范围检查通过')
+  expect(result.stdout).toContain('Bot 目录和小队文件内')
+})
+
+it('小队和 Bot 可以放在同一个 PR 里', () => {
+  put('squads/my-squad/squad.yaml', squadYaml())
+  put('bots/new-bot/bot.yaml', 'slug: new-bot\naddedAt: 2026-11-14\n')
+  commit()
+  expect(check().status).toBe(0)
+})
+
+it.each([
+  'squads/my-squad/README.md',
+  'squads/my-squad/assets/cover.png',
+  'squads/my-squad/squad.yml',
+  'squads/my-squad/nested/squad.yaml',
+  'squads/squad.yaml',
+  'squads/README.md',
+  'squads/_template/squad.yaml',
+  'squads/My_Squad/squad.yaml',
+  'squads/a/squad.yaml',
+  `squads/${'a'.repeat(41)}/squad.yaml`,
+])('小队文件夹里只认 squad.yaml：%s 被拦下', (file) => {
+  put('squads/my-squad/squad.yaml', squadYaml())
+  put(file, '多余的东西')
+  commit()
+  const result = check()
+  expect(result.status).toBe(1)
+  expect(result.stderr).toContain(JSON.stringify(file))
+  expect(result.stderr).toContain('投稿小队只能新增或修改 squads/<slug>/squad.yaml 这一个文件')
+  expect(result.stderr).not.toContain('"squads/my-squad/squad.yaml"')
+})
+
+it('策展文件只有维护者能动：贡献者新增、修改、删除都被拦下，维护者放行', () => {
+  put('curation/shelf.yaml', 'picks: []\n')
+  commit()
+  put('curation/shelf.yaml', 'picks: [old-bot]\n')
+  put('curation/extra.yaml', '新文件')
+  commit()
+  const changed = check()
+  expect(changed.status).toBe(1)
+  expect(changed.stderr).toContain('"curation/shelf.yaml"')
+  expect(changed.stderr).toContain('"curation/extra.yaml"')
+  expect(changed.stderr).toContain('不能修改 bots/_template/、bots/LICENSE、curation/ 或其他文件')
+  expect(check('OWNER').status).toBe(0)
+  rmSync(join(directory, 'curation/shelf.yaml'))
+  commit()
+  expect(check().stderr).toContain('"curation/shelf.yaml"')
+})
+
+it('已有小队的 addedAt 不能改；日期没变只改写法放行', () => {
+  put('squads/my-squad/squad.yaml', squadYaml())
+  commit()
+  put('squads/my-squad/squad.yaml', squadYaml().replace('addedAt: 2026-11-10', 'addedAt: "2026-11-10" # 原日期'))
+  commit()
+  expect(check().status).toBe(0)
+  put('squads/my-squad/squad.yaml', squadYaml().replace('2026-11-10', '2026-11-14'))
+  commit()
+  const result = check()
+  expect(result.status).toBe(1)
+  expect(result.stderr).toContain('squads/my-squad/squad.yaml：addedAt 是上架日期，不能修改；请保留 base 中的日期。')
+})
+
+it('已有小队的 author.github 不能改、不能删、不能后补；只改大小写放行', () => {
+  put('squads/my-squad/squad.yaml', squadYaml())
+  commit()
+  put('squads/my-squad/squad.yaml', squadYaml().replace('github: Alice', 'github: aLiCe'))
+  commit()
+  expect(check().status).toBe(0)
+  put('squads/my-squad/squad.yaml', squadYaml().replace('github: Alice', 'github: Bob'))
+  commit()
+  expect(check().stderr).toContain('squads/my-squad/squad.yaml：author.github 是投稿人的 GitHub 账号，不能修改；请保留 base 中的账号。')
+  put('squads/my-squad/squad.yaml', squadYaml().replace('  github: Alice\n', ''))
+  commit()
+  expect(check().stderr).toContain('squads/my-squad/squad.yaml：author.github 是投稿人的 GitHub 账号，不能修改')
+  put('squads/my-squad/squad.yaml', squadYaml())
+  commit()
+  expect(check().stderr).toContain('squads/my-squad/squad.yaml：author.github 是投稿人的 GitHub 账号，不能修改')
+})
+
+it.each(['slug: my-squad\n', 'addedAt: [坏 YAML'])('删掉 addedAt 或写坏 YAML 不能绕过小队的日期保护', (text) => {
+  put('squads/my-squad/squad.yaml', squadYaml())
+  commit()
+  put('squads/my-squad/squad.yaml', text)
+  commit()
+  const result = check()
+  expect(result.status).toBe(1)
+  expect(result.stderr).toContain('squads/my-squad/squad.yaml：无法比较 addedAt')
+})
+
+it('删除已有小队放行；把小队文件改名挪到别处，新旧路径都检查', () => {
+  put('squads/my-squad/squad.yaml', squadYaml())
+  commit()
+  renameSync(join(directory, 'squads/my-squad/squad.yaml'), join(directory, 'squads/my-squad/team.yaml'))
+  commit()
+  const moved = check()
+  expect(moved.status).toBe(1)
+  expect(moved.stderr).toContain('"squads/my-squad/team.yaml"')
+  rmSync(join(directory, 'squads'), { recursive: true })
+  commit()
+  expect(check('CONTRIBUTOR', 'HEAD~2').status).toBe(0)
+})
+
+it.each(['OWNER', 'MEMBER', 'COLLABORATOR'])('%s 改小队日期、作者、放别的文件都不受限', (association) => {
+  put('squads/my-squad/squad.yaml', squadYaml())
+  commit()
+  put('squads/my-squad/squad.yaml', squadYaml().replace('2026-11-10', '2026-11-14').replace('github: Alice', 'github: Bob'))
+  put('squads/my-squad/cover.png', '图')
+  commit()
+  expect(check(association).status).toBe(0)
+})

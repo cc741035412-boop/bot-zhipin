@@ -244,7 +244,7 @@ onBeforeUnmount(() => {
             ref="input" v-model="query" class="sp-input" data-testid="search-input" type="text"
             role="combobox" aria-label="搜索 Bot" aria-expanded="true" aria-haspopup="listbox" aria-autocomplete="list"
             :aria-controls="LIST_ID" :aria-activedescendant="activeId"
-            placeholder="搜 Bot：名字、分类、作者…"
+            placeholder="搜 Bot：名字、岗位、作者…"
             autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go"
           >
           <button type="button" class="sp-esc" aria-label="关闭搜索" @click="hide"><kbd class="sp-key">esc</kbd></button>

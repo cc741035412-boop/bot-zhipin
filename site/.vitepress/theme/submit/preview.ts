@@ -1,6 +1,6 @@
 import MarkdownIt from 'markdown-it'
 import { prepareDesignSource, installSafeDesignRules } from '../../../../scripts/lib/design-markdown.mjs'
-import { summarizeBot } from '../../../../scripts/lib/bot-summary.mjs'
+import { summarizeBot, decorateSummary } from '../../../../scripts/lib/bot-summary.mjs'
 import { validate } from '../../../../scripts/lib/validate/generated/bot-schema.mjs'
 import { submissionModel, type PreviewImage } from './model'
 export { summarizeBot }
@@ -60,7 +60,8 @@ export function previewModel(plaintext: string, {
     return [image.name, url && /^(?:blob:|data:image\/(?:jpeg|png|webp|gif);base64,)/i.test(url) ? url : null]
   }))
   const asset = (name: string) => urls.get(decodeURIComponent(name)) ?? null
-  const summary = summarizeBot(model, { asset, names })
+  // 预览没有策展和小队：装饰字段取默认值（editorNote、pick 为 null，squads 为空），形状和货架上的一致。
+  const summary = decorateSummary(summarizeBot(model, { asset, names }))
   validate(model.data)
   const invalid = [...(validate.errors || [])]
   const bad = (path: string) => !model.data || invalid.some((error) =>

@@ -24,7 +24,7 @@ export const HERO_MASCOTS = [
 
 // 首页货架的固定文案；搜索占位字和搜索面板里的输入框保持一致。
 export const SHELF_COPY = {
-  searchPlaceholder: '搜 Bot：名字、分类、作者…',
+  searchPlaceholder: '搜 Bot：名字、岗位、作者…',
   searchLabel: '搜索 Bot',
   contribute: '我要投稿',
   sectionTitle: '逛逛货架',
@@ -32,10 +32,21 @@ export const SHELF_COPY = {
   featuredTitle: '精选',
   featuredSub: '热度最高的三位',
   allCategories: '全部',
-  filterLabel: '按分类筛选',
-  emptyFilter: '这个分类下暂时没有 Bot',
+  filterLabel: '按岗位筛选',
+  emptyFilter: '这个岗位下暂时没有 Bot',
   showAll: '看看全部',
   footer: '货架到底啦。没找到合适的？把你做的 Bot 也挂上来。',
+}
+
+// 每个岗位一句说明。岗位的取值和顺序只认 schema（bot.schema.json 的 category）；单测保证这里一个不多、一个不少。
+export const CATEGORY_COPY = {
+  产品: '想清楚做什么，写出来，做出来，再挑毛病',
+  市场: '盯竞品，定定位，做投放，看数据',
+  销售: '找客户，备会，跟进，复盘',
+  内容: '找选题，写稿，剪视频',
+  运营: '办活动，管行政，招人',
+  管家: '管你的 Bot：省额度、备份、接飞书、派活',
+  个人: '求职、生活，还有好玩的',
 }
 
 export const POKE_PITCHES = ['哎，痒！', '再戳我就变形了', '好啦好啦，我在呢', '你找我呀？']
@@ -75,7 +86,6 @@ export const DEFAULT_PITCHES = [
   '挑我吧，上岗不用培训。',
   '重复的活交给我，你去想更重要的事。',
   '不画大饼，只交能用的结果。',
-  '先看看我的设计说明，再决定要不要我。',
   '导入一次，天天替你跑腿。',
   '简历就在详情页，欢迎来面试。',
   '额度花在刀刃上，这事我在行。',

@@ -1,0 +1,41 @@
+# 策展：首页主推、推荐排序、专题、编辑点评。只有维护者能改。
+# 这里写的 slug 都必须是货架上的 Bot，写错或者 Bot 已下架，npm run validate 会报错。
+# 字段规则见 schema/curation.schema.json。
+
+# 首页主推，最多 3 个；note 是「为什么推它」，4～80 字。
+featured:
+  - bot: idea-stress-test
+    note: 什么都不用准备，丢一个点子进去它就开拆。拆完你会知道最该先验证哪一条。
+  - bot: quota-saver
+    note: 定时任务先在你自己电脑上免费看一眼，有变化才叫醒 Bot。额度不够用的先装它。
+  - bot: copy-humanizer
+    note: 改稿不改意思，每处改动都告诉你为什么。写完的东西有 AI 味，交给它。
+
+# 「推荐」排序的置顶顺序，排在前面的先出现；没写进来的 Bot 排在它们后面。
+picks: [idea-stress-test, pm-bot, critiquito, startup-qa-bot, competitor-watch, product-marketer, ai-search-visibility, sales-call-coach, copy-humanizer, media-downloader, writing-bot, video-editor, clip-bot, video-edit-desk, x-brief, event-producer, meeting-recap-deck, quota-saver, memory-keeper, feishu-app-keeper, dr-eggbot, the-interviewer, pfp-bot]
+
+# 专题，按这里写的顺序显示；每个专题 2～12 个 Bot，Bot 也按写的顺序排。
+collections:
+  - slug: zero-setup
+    title: 零门槛上手
+    blurb: 不用连账号，贴进去就能用
+    bots: [idea-stress-test, writing-bot, critiquito, copy-humanizer, sales-call-coach, event-producer, the-interviewer, meeting-recap-deck]
+  - slug: pm-kit
+    title: 产品经理工具箱
+    blurb: 从调研到验收，按干活的顺序排好了
+    bots: [competitor-watch, last30days, idea-stress-test, pm-bot, proto-bot, figma-bro, critiquito, startup-qa-bot]
+  - slug: solo-video
+    title: 一个人做短视频
+    blurb: 找选题、扒素材、剪片子、出封面
+    bots: [last30days, x-brief, media-downloader, video-editor, clip-bot, video-edit-desk, stills-clips-desk, copy-humanizer]
+  - slug: daily-brief
+    title: 每天一份简报
+    blurb: 定好时间它们自己跑，早上看结果
+    bots: [x-brief, overheard, competitor-watch, market-researcher, ai-search-visibility, startup-qa-bot, ad-spend-watch]
+  - slug: community
+    title: 社区原创
+    blurb: 中文作者做的，解决的是我们自己的麻烦
+    bots: [quota-saver, memory-keeper, feishu-app-keeper, media-downloader, the-interviewer]
+
+# 详情页的「编辑点评」：Bot 的 slug 对应一句话，4～100 字。
+editorNotes: {}

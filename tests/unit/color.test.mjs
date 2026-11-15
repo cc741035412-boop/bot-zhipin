@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest'
-import { contrast, darkSwap, buttonColors, botPalette, CATEGORY_COLORS, categoryStyle } from '../../site/.vitepress/theme/color'
+import { contrast, darkSwap, buttonColors, botPalette, CATEGORY_COLORS, CATEGORY_MASCOTS, categoryStyle } from '../../site/.vitepress/theme/color'
 import { loadEnums } from '../../scripts/lib/load-bots.mjs'
-import { HERO_MASCOTS } from '../../site/.vitepress/meta.mjs'
+import { HERO_MASCOTS, CATEGORY_COPY } from '../../site/.vitepress/meta.mjs'
 import { shapeRadii } from '../../site/.vitepress/theme/face'
 
-describe('LB6 品牌与分类配置', () => {
+describe('LB6 品牌与岗位配置', () => {
   test('固定九只（上排五只、下排四只）、橙色在上排正中、形状有效且至少五种、颜色互异', () => {
     expect(HERO_MASCOTS).toHaveLength(9)
     expect(new Set(HERO_MASCOTS.map((m) => m.key)).size).toBe(9)
@@ -32,7 +32,29 @@ describe('LB6 品牌与分类配置', () => {
     // 下排错开半格：第 i 只夹在上排第 i、i+1 只中间。
     bottom.forEach((value, i) => { expect(value).not.toBe(top[i]); expect(value).not.toBe(top[i + 1]) })
   })
-  test('分类映射完整覆盖 schema，无重复颜色，未知分类安全回退', () => {
+  test('岗位枚举是固定顺序的 7 个', () => {
+    expect(loadEnums().categories).toEqual(['产品', '市场', '销售', '内容', '运营', '管家', '个人'])
+  })
+  test('每个岗位一只吉祥物：完整覆盖 schema，和招牌里对应那只同色同形，颜色形状都不重复', () => {
+    const categories = loadEnums().categories
+    expect(Object.keys(CATEGORY_MASCOTS).sort()).toEqual([...categories].sort())
+    for (const category of categories) {
+      const mascot = CATEGORY_MASCOTS[category]
+      expect(Object.keys(mascot).sort()).toEqual(['color', 'shape'])
+      expect(HERO_MASCOTS.filter((hero) => hero.shape === mascot.shape && hero.color === mascot.color), category).toHaveLength(1)
+      expect(CATEGORY_COLORS[category]).toBe(mascot.color)
+    }
+    expect(new Set(Object.values(CATEGORY_MASCOTS).map((m) => m.color)).size).toBe(categories.length)
+    expect(new Set(Object.values(CATEGORY_MASCOTS).map((m) => m.shape)).size).toBe(categories.length)
+    expect(CATEGORY_MASCOTS['产品']).toEqual({ shape: 'blob', color: '#ff6a13' })
+    expect(CATEGORY_MASCOTS['个人']).toEqual({ shape: 'teardrop', color: '#34d399' })
+  })
+  test('每个岗位一句说明：完整覆盖 schema，都是非空文字', () => {
+    expect(Object.keys(CATEGORY_COPY).sort()).toEqual([...loadEnums().categories].sort())
+    for (const copy of Object.values(CATEGORY_COPY)) expect(copy).toMatch(/\S{4,}/)
+    expect(CATEGORY_COPY['管家']).toBe('管你的 Bot：省额度、备份、接飞书、派活')
+  })
+  test('岗位色完整覆盖 schema，无重复颜色，未知岗位安全回退', () => {
     expect(Object.keys(CATEGORY_COLORS).sort()).toEqual([...loadEnums().categories].sort())
     expect(new Set(Object.values(CATEGORY_COLORS)).size).toBe(loadEnums().categories.length)
     for (const [name, color] of Object.entries(CATEGORY_COLORS)) {

@@ -15,6 +15,17 @@ it('导出的 schema 和 SHA256 对应唯一真源文件', () => {
   expect(schema).toEqual(JSON.parse(text))
   expect(SCHEMA_SHA256).toBe(createHash('sha256').update(text).digest('hex'))
 })
+it.each(['bot', 'squad', 'curation'])('%s：生成文件导出的 schema 和 SHA256 对应各自的真源文件，standalone 与运行时结论一致', async (name) => {
+  const text = readFileSync(join(ROOT, `schema/${name}.schema.json`), 'utf8')
+  const generated = await import(`../../scripts/lib/validate/generated/${name}-schema.mjs`)
+  expect(generated.schema).toEqual(JSON.parse(text))
+  expect(generated.SCHEMA_SHA256).toBe(createHash('sha256').update(text).digest('hex'))
+  const live = new Ajv2020({ allErrors: true, verbose: true, strict: false }).compile(generated.schema)
+  for (const data of [{}, null, [], { slug: 'UPPER', members: [{}], featured: [{}, {}, {}, {}], collections: [{ bots: ['a'] }], editorNotes: { x: '短' }, extra: 1 }]) {
+    expect(generated.validate(data)).toBe(live(data))
+    expect(generated.validate.errors).toEqual(live.errors)
+  }
+})
 const runtime = new Ajv2020({ allErrors: true, verbose: true, strict: false }).compile(schema)
 const base = {
   slug: 'test-bot', name: '测试', tagline: '这是测试样例', category: schema.properties.category.enum[0],

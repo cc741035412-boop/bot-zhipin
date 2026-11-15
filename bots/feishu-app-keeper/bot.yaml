@@ -2,7 +2,7 @@
 slug: feishu-app-keeper
 name: 飞书应用管家
 tagline: 给每个 Bot 配一个专属飞书机器人，在飞书里就能直接找它干活
-category: 基础设施
+category: 管家
 author:
   name: 铁柱AGI
   github: RongleCat

@@ -1,7 +1,7 @@
 slug: demo-external
 name: 示例·外部收录
 tagline: 一个外部收录的示例，只有导入链接
-category: 基础设施
+category: 管家
 author:
   name: 外部作者
   url: https://x.ai/bot/demo-external-000
@@ -11,3 +11,24 @@ prerequisites: 无
 quotaCost: 低
 permissions: []
 external: true
+pitch:
+  - 我是外面请来的，链接点开就能用。
+  - 不占你的地方，用完就走。
+about:
+  intro: 一个外部收录的示例条目，用来测试自带技能和定时任务怎么显示。
+  skills:
+    - name: fetch-notes
+      does: 把你指定的资料抓回来整理成要点
+    - name: daily-check
+      does: 每天看一眼有没有更新
+  routines:
+    - what: 检查资料有没有更新
+      when: 每天早上 9 点
+      default: 关
+      quiet: 不打扰
+    - what: 发一份本周汇总
+      when: 每周五下午
+      default: 未说明
+      quiet: 照发
+  cnFit: 一般
+  cnNote: 示例说明：资料来源在国内可能打不开。
