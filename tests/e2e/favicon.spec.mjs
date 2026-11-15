@@ -221,7 +221,8 @@ test('眼睛跟着鼠标看：左右上下都跟，同一片区域里挪动不�
   const right = await offsetAfterMove(1190, 400, (o) => o.x > 15)
   const left = await offsetAfterMove(10, 400, (o) => o.x < -15)
   expect(right.x - left.x).toBeGreaterThan(40)
-  const bottom = await offsetAfterMove(600, 790, (o) => o.y > 5)
+  // 往下看的幅度各形状不一样（gem 只有 3 左右），这里只要求确实往下；上下差距由后面两条把关。
+  const bottom = await offsetAfterMove(600, 790, (o) => o.y > 2)
   const top = await offsetAfterMove(600, 10, (o) => o.y < bottom.y - 15)
   expect(bottom.y - top.y).toBeGreaterThan(15)
   // 同一格里小幅挪动：不换图。
