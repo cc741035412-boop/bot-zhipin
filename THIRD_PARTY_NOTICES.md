@@ -5,6 +5,7 @@
 - 用途：按 slug 生成默认头像（`site/.vitepress/theme/vendor/bloub/`）
 - 来源：https://github.com/jeremy-prt/bloub （提交 `b4bb3c1b5f93c7b87a2e8d620f667c4093d97749`，目录 `src/bot/`）
 - 许可证：MIT，Copyright (c) 2026 Jérémy Perret，全文见 `site/.vitepress/theme/vendor/bloub/LICENSE`
+- 本站 `LiveBot.vue` 的渲染方式、`live/gaze.ts` 的视线参数参考了 jeremy-prt/bloub 的 `src/components/BloubBot.vue` 和 `src/ui/gaze.ts`（MIT，提交 `b4bb3c1`）。
 
 ## VitePress
 
