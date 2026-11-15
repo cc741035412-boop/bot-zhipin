@@ -232,6 +232,13 @@ describe('Issue 表单与身份', () => {
 })
 
 describe('截图来源、大小、类型', () => {
+  it('GitHub 官方附件存储桶只允许作为重定向目标，其他 S3 主机一律拒绝', () => {
+    const bucket = 'https://github-production-user-asset-6210df.s3.amazonaws.com/1/2-abc.png?X-Amz-Signature=x'
+    expect(assertImageUrl(bucket)).toBe(new URL(bucket).href)
+    expect(() => assertImageUrl(bucket, true)).toThrow()
+    expect(() => assertImageUrl('https://evil-bucket.s3.amazonaws.com/x.png')).toThrow()
+    expect(() => assertImageUrl('https://github-production-user-asset-6210df.s3.amazonaws.com.evil.example/x.png')).toThrow()
+  })
   it('Markdown 和 HTML img 按出现顺序提取', () => {
     const urls = extractImageUrls(`![图](${attachment})\n<img width="20" src="${attachment}-2">\n<img src='${attachment}-3'>`)
     expect(urls).toEqual([attachment, `${attachment}-2`, `${attachment}-3`])
@@ -348,11 +355,19 @@ describe('处理流程与可替换适配器（网络/git/gh 全假）', () => {
     const { adapters, run, fetchImpl } = setup()
     const result = await submitIssue(input(form(), { login: 'another-user' }), adapters)
     expect(result.ok).toBe(false)
+    expect(result.internal).toBe(false) // 投稿本身的问题：工作流按成功结束，不给投稿人发失败邮件
     expect(fetchImpl).not.toHaveBeenCalled()
     expect(existsSync(join(root, 'bots', slug))).toBe(false)
     expect(didPublish(run)).toBe(false)
     const [{ body }] = commentsWritten(run)
     for (const text of [COMMENT_MARKER, '还没通过检查', '文件：', '位置：', '问题：', '改法：', 'author.github', '```text', '把这条评论整段发给你的 AI', '右上角 ··· → Edit']) expect(body).toContain(text)
+  })
+  it('内部错误（比如推送失败）标记为 internal，工作流才算失败', async () => {
+    const { adapters } = setup()
+    const boom = { ...adapters, publish: async () => { throw new Error('push rejected') } }
+    const result = await submitIssue(input(), boom)
+    expect(result.ok).toBe(false)
+    expect(result.internal).toBe(true)
   })
   it('他人占用 slug 保持原目录不动', async () => {
     cpSync(fixture, join(root, 'bots', slug), { recursive: true })

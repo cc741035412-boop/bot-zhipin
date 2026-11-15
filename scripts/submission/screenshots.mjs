@@ -4,11 +4,14 @@ import { fail } from './errors.mjs'
 
 const bad = (problem, fix = '请拖入真实的 PNG/JPG/WEBP/GIF 截图，每张不超过 2MB；不要粘贴外站图片地址。') => fail('Issue', 'screenshots', problem, fix)
 const attachmentPrefix = 'https://github.com/user-attachments/assets/'
+// GitHub 附件实际 302 到官方存储桶的预签名地址（2026-11-15 真实联调确认）；只放行这一个确切主机，且只能作为重定向目标。
+const GITHUB_ASSET_BUCKET = 'github-production-user-asset-6210df.s3.amazonaws.com'
 
 export function assertImageUrl(value, initial = false) {
   let url
   try { url = new URL(value) } catch { bad('截图地址不是合法 URL。') }
-  const hostAllowed = url.hostname === 'github.com' || (url.hostname.endsWith('.githubusercontent.com') && url.hostname !== '.githubusercontent.com')
+  const hostAllowed = url.hostname === 'github.com' || (url.hostname.endsWith('.githubusercontent.com') && url.hostname !== '.githubusercontent.com') ||
+    (!initial && url.hostname === GITHUB_ASSET_BUCKET)
   if (url.protocol !== 'https:' || url.username || url.password || url.port || !hostAllowed ||
       (initial && (!value.startsWith(attachmentPrefix) || url.hostname !== 'github.com' || !url.pathname.startsWith('/user-attachments/assets/') || url.pathname === '/user-attachments/assets/'))) {
     bad('截图地址不在白名单：只接受 https://github.com/user-attachments/assets/ 下的附件，重定向只能到 GitHub 图片主机。')
