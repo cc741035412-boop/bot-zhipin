@@ -69,6 +69,15 @@ export function botSummaries(bots, sources) {
   return shelfData(bots, sources).bots
 }
 
+/**
+ * 首页和搜索面板用的列表数据：完整摘要去掉 about。
+ * about 是详情页才用的长文字（82 个 Bot 加起来两百多 KB），不放进每个页面都要加载的包；
+ * 详情页的完整摘要走路由参数（site/bots/[slug].paths.mjs），每个 Bot 各自一份。
+ */
+export function listSummaries(bots, sources) {
+  return botSummaries(bots, sources).map(({ about, ...bot }) => bot)
+}
+
 // 数据加载器的监听范围。VitePress 1.6 的 glob 会从工作区外路径的共同祖先（可能是 /）遍历，
 // 所以仓库外的目录不放进来，改由 config 里的定点 watcher（bot-watch.mjs）负责。
 export function shelfWatch() {

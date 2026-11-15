@@ -23,9 +23,6 @@ export const HERO_MASCOTS = [
   { key: 'brown', shape: 'pebble', color: '#9a6a3a' },
 ]
 
-// 首页主推：编辑挑的三个，按这个顺序排。这几个不在货架上时（比如测试数据），退回按热度取前三。
-export const FEATURED = ['idea-stress-test', 'quota-saver', 'copy-humanizer']
-
 // 首页货架的固定文案。界面上不放解释性的句子（决策 37）：这里只有标题、按钮、标签和状态反馈。
 // 搜索占位字首屏搜索框和搜索面板共用。
 export const SHELF_COPY = {

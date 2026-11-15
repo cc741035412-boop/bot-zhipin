@@ -1,8 +1,8 @@
-# 小队：成员都是货架上的普通 Bot，这里只是一张编制表。字段规则见 schema/squad.schema.json。
-# flow、setup 目前只有示例条目，kickoff、tryout、notes 还没写：等核对过原套装的配置后再补全。
+# 小队编制表：成员都是货架上的普通 Bot，这里只是一张把它们连起来的表。字段规则见 V5-DATA §5（schema/squad.schema.json）。
+# flow 里每一条都对得上成员配置里的一句原文。整套配合还没在 Grok Bot 里实测，拿不准的地方写了「没实测」。
 slug: one-person-marketing
 name: 一个人的市场部
-tagline: 一个项目经理带四个专员：盯竞品、定定位、改官网、看数据
+tagline: 一个项目经理带四个专员，盯竞品、写定位、改官网、看投放数据
 formation: 带队
 origin: 原作者成套
 author:
@@ -12,27 +12,86 @@ addedAt: 2026-11-15
 members:
   - bot: project-manager
     title: 队长
-    does: 把上线日期倒排成计划，把活派给专员，盯进度
+    does: 从上线日期往回排计划，给专员派活，盯进度，要你拍板的事带给你
     lead: true
+    optional: false
   - bot: market-researcher
     title: 竞品调研
-    does: 每周盯竞品的广告、落地页和定价
+    does: 盯竞品的广告、落地页和定价，把变化和应对建议写成简报
+    optional: true
   - bot: product-marketer
-    title: 定位文案
-    does: 先定产品定位，再照着写落地页和广告文案
+    title: 定位和文案
+    does: 写定位原则，照着起草文案，再出落地页简报和广告简报
+    optional: false
   - bot: website-ops
-    title: 官网运维
-    does: 给网站做体检，要改的地方开成 PR
+    title: 官网
+    does: 把落地页简报做成 PR，给官网做体检，合并留给你
+    optional: true
   - bot: marketing-analyst
-    title: 数据分析
-    does: 把投放数据做成周报月报，数字都标来源
+    title: 投放数据
+    does: 把广告后台或导出表里的数据做成周报月报，回答你问的数字
+    optional: true
 flow:
+  - from: you
+    to: project-manager
+    what: 目标和上线日期
+  - from: project-manager
+    to: market-researcher
+    what: 调研线的任务简报
+  - from: project-manager
+    to: product-marketer
+    what: 定位线的任务简报
+  - from: project-manager
+    to: website-ops
+    what: 落地页线的任务简报
+  - from: project-manager
+    to: marketing-analyst
+    what: 数据线的任务简报
   - from: market-researcher
     to: product-marketer
-    what: 竞品简报
+    what: 竞品发现
+  - from: product-marketer
+    to: website-ops
+    what: 落地页简报
+  - from: product-marketer
+    to: you
+    what: 广告简报（队里没人接）
+  - from: website-ops
+    to: you
+    what: 落地页 PR，等你合并
+  - from: project-manager
+    to: you
+    what: 合并、发布、花钱等你点头
 setup:
+  - title: 五个要分五次导入
+    detail: 一个模板链接只装一个 Bot，没有批量导入，要几个就点几次。建议先导专员、最后导队长，这样队长第一次排计划时队友已经在。导入顺序有没有影响没实测。
+  - title: 先让每个成员走完首次设置
+    detail: 每个成员第一次对话都会先走自己的设置。队长问目标和日期，文案岗要官网链接和几段你认可的文案，官网岗要仓库和网址。没设置过的成员收到队长的简报会怎样，没实测。
   - title: 放进同一个分区
-    detail: 在 Grok Bot 侧栏右键这几个 Bot，选 Move to new section。
+    detail: 在 Grok Bot 侧栏右键这几个 Bot，选 Move to new section，归到一起好找。分区对它们互相找人有没有影响没实测。
+  - title: 群可以先不建
+    detail: 配置里写的配合方式是成员直接给队友发消息，没看到提群，同账号的 Bot 本来就能互发。想看它们怎么对话，可以建一个群把五个都拉进去（一个群最多 6 个 Bot）。群里怎么配合没实测。
+  - title: 连接要用自己的账号连
+    detail: 模板不带密钥。只有官网岗的 GitHub 是必需的，不连它只能做只读体检。其余连接（Slack、Notion、Linear、Google Drive、Sheets、Gmail、X 等）都标着可选或推荐，不连就在聊天里交付。每个成员要不要分别连没实测。
+  - title: 定时任务默认全关
+    detail: 五个成员一共 9 个定时任务，导入后都是关的：队长 2 个、调研岗 2 个、文案岗 1 个、官网岗 1 个、数据岗 3 个。先手动跑顺再挑着开，开的时候它会问你时区。
+kickoff: |-
+  我把营销这套的几个同事都导进来了，跟你在同一个账号下。目标和上线日期我下一条发，你先按自己的办法把队友资料扫一遍，认一下人。
+  Market Researcher 管调研这条线：盯竞品的广告、落地页和定价。
+  Product Marketer 管定位这条线：写定位原则和文案，落地页简报和广告简报也是它出。
+  Website Ops 管落地页这条线：把落地页简报做成 PR，给官网做体检。
+  Marketing Analyst 管数据这条线：投放数据的周报、月报和问数。
+  队里没有管投放的同事，广告这条线的负责人先记成我。
+  认完回我一句：五条线各归谁，哪个你没找到。没找到的那条线，简报直接给我，我自己转。
+  再确认一下规矩：合并、发布、花钱只认我在这个对话里说的话，队友说可以不算数。
+tryout: 新版落地页下个月 20 号上线。你从这天往回排，五条线各定交付物、负责人和截止日，能派给队友的现在就派，派完告诉我谁接了什么、哪些要我自己来。
+notes:
+  - 队内互发消息也算额度。每条 Bot 回复都算，Bot 之间互发的也算，队长派一次活、专员回一次都在扣。调研岗、官网岗、数据岗单次干活本来就很耗额度。
+  - 广告这条线没人接。Performance Marketer 本站没收，按配置，文案岗写好的广告简报会交回给你，搭广告、开投放、花钱都要你自己做。它会不会把简报错发给数据岗没实测。
+  - 队友同意不算你同意，五个成员的配置都写了这一条。合并、发布、花钱只认你本人在对话里说的话。文案岗把简报发给队友之前也会先问你。
+  - 五个成员共用一台云电脑和 /workspace。你在某个成员的浏览器里登录的广告后台、谷歌账号，其他成员也能用；官网岗克隆下来的私有仓库，其他成员也看得到。能贴导出表就别登录。
+  - 调研岗的数据来自谷歌、Meta、LinkedIn 的公开广告库和 X，国内平台的投放看不到。文案岗的规则按英文写，中文禁用词和平台字数要自己补。数据岗的每小时邮件巡检很烧额度，没人发邮件问数就别开。
+  - 整套配合本站还没实测。成员靠扫描队友资料找人，不按名字认，认得准不准要你第一次跑的时候看一眼。认不到也不会卡住，它们会把东西直接交给你。
 missing:
   - name: Performance Marketer
-    does: 写广告简报并跟投放
+    does: 接文案岗的广告简报，先出审核表，再搭成暂停状态的测试广告，开投前问你

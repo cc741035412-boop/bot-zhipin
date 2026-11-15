@@ -9,7 +9,7 @@ import { loadAllSquads } from '../../scripts/lib/load-squads.mjs'
 import { loadCuration } from '../../scripts/lib/load-curation.mjs'
 import { buildSquadModel } from '../../scripts/lib/squad-model.mjs'
 import { summarizeSquad } from '../../scripts/lib/squad-summary.mjs'
-import { shelfData, shelfWatch, readBots, readSquads, readCuration } from '../../site/.vitepress/data/bots.mjs'
+import { shelfData, shelfWatch, listSummaries, readBots, readSquads, readCuration } from '../../site/.vitepress/data/bots.mjs'
 import { syncAssets } from '../../scripts/sync-assets.mjs'
 
 const enums = loadEnums()
@@ -265,7 +265,12 @@ describe('网站数据：bots、squads、curation 三份对得上', () => {
       import('../../site/.vitepress/data/curation.data.mjs'), import('../../site/squads/[slug].paths.mjs'),
     ])
     const data = shelfData()
-    expect(bots.default.load()).toEqual(data.bots)
+    // 列表数据不带 about 全文（首页和搜索面板每页都加载）；详情页的完整摘要走路由参数。
+    const list = bots.default.load()
+    expect(list).toEqual(data.bots.map(({ about, ...bot }) => bot))
+    expect(list).toEqual(listSummaries())
+    for (const bot of list) expect(bot).not.toHaveProperty('about')
+    expect(data.bots.filter((bot) => bot.about !== null)).toHaveLength(82)
     expect(squads.default.load()).toEqual(data.squads)
     expect(curation.default.load()).toEqual(data.curation)
     const routes = paths.default.paths()

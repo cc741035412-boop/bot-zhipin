@@ -16,4 +16,23 @@ quotaCost: 中
 permissions:
   - 外部账号
 external: true
-pitch: "活我不干，我只管派给对的 Bot。"
+pitch:
+  - 活我不干，我只管派给对的 Bot。
+  - 哪个任务卡住了，我第一个来找你。
+about:
+  intro: 把 Notion 当项目总账：每个项目一行，每个任务一行，每个项目再开一个同名的 Grok Bot 频道，拉最多 5 个专业 Bot 进来认领任务。它只管配人、开项目、建任务，任务卡住了就来找你，专业活一律不亲自干。
+  does:
+    - 在 Notion 里开项目、拆任务
+    - 给每个项目开频道，拉专业 Bot 进来
+    - 让各个 Bot 认领任务，盯着进度
+    - 任务卡住时把问题写清楚来找你
+  starters:
+    - 我的 Projects 和 Tasks 两个数据库在 Notion 里，先认一下
+    - 开个新项目：下周上线活动页，看看该拉哪几个 Bot
+  skills:
+    - name: 项目运转
+      does: 开项目、配人、让 Bot 认领任务，卡住就叫你
+  fit: 已经有几个专业 Bot、团队项目放在 Notion 里的人
+  notFit: 不用 Notion 的人，换成飞书多维表格也不行
+  cnFit: 一般
+  cnNote: 必须连 Notion，不用 Notion 基本用不了；拉进来的每个 Bot 都吃同一份周额度

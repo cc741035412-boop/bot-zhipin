@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import YAML from 'yaml'
-import { ROOT } from '../../scripts/lib/load-bots.mjs'
+import { ROOT, loadAllBots } from '../../scripts/lib/load-bots.mjs'
 import { loadCuration } from '../../scripts/lib/load-curation.mjs'
 import { buildCurationModel, CURATION_YAML_BYTES } from '../../scripts/lib/squad-model.mjs'
 import { validateCuration } from '../../scripts/lib/validate/squads.mjs'
@@ -49,7 +49,10 @@ describe('合法的策展', () => {
     expect(real.data.picks).toHaveLength(23)
     expect(real.data.collections.map((item) => item.slug)).toEqual(['zero-setup', 'pm-kit', 'solo-video', 'daily-brief', 'community'])
     expect(real.data.collections.map((item) => item.bots.length)).toEqual([8, 8, 8, 7, 5])
-    expect(real.data.editorNotes).toEqual({})
+    // 每个 Bot 一条编辑点评，写给的都是货架上的 Bot。
+    const shelfSlugs = loadAllBots(join(ROOT, 'bots')).map((bot) => bot.slug).sort()
+    expect(Object.keys(real.data.editorNotes).sort()).toEqual(shelfSlugs)
+    expect(shelfSlugs).toHaveLength(82)
     const fixture = loadCuration(join(ROOT, 'tests/fixtures/curation/shelf.yaml'))
     expect(fixture.data.featured).toHaveLength(3)
     expect(fixture.data.collections).toHaveLength(2)

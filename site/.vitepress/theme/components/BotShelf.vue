@@ -1,8 +1,9 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { data as bots } from '../../data/bots.data.mjs'
+import { data as curation } from '../../data/curation.data.mjs'
 import { data as enums } from '../enums.data.mjs'
-import { SITE, CONTRIBUTE_URL, FEATURED, HERO_MASCOTS, SHELF_COPY } from '../../meta.mjs'
+import { SITE, CONTRIBUTE_URL, HERO_MASCOTS, SHELF_COPY } from '../../meta.mjs'
 import { heatState, loadHeat } from '../heat'
 import { categoryStyle } from '../color'
 import BotCard from './BotCard.vue'
@@ -38,9 +39,9 @@ function reorder() {
 }
 function pickFeatured() {
   // 精选和列表一样只拍快照：热度没到时就是最新三位，之后的点击不会让卡片跳位。
-  // 主推由编辑定（meta.mjs 的 FEATURED）；名单里的 Bot 不在货架上时，退回热度前三。
-  const picks = FEATURED.map((slug) => bots.find((bot) => bot.slug === slug)).filter(Boolean)
-  featured.value = picks.length === FEATURED.length ? picks : bots.length >= 3 ? [...bots].sort(byHeat).slice(0, 3) : []
+  // 主推由编辑定（curation/shelf.yaml 的 featured，最多三个，按写的顺序）；没写主推时退回热度前三。
+  const picks = curation.featured.map((item) => bots.find((bot) => bot.slug === item.bot)).filter(Boolean)
+  featured.value = picks.length ? picks : bots.length >= 3 ? [...bots].sort(byHeat).slice(0, 3) : []
 }
 function select(value) {
   manual = true
