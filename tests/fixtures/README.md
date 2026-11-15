@@ -2,9 +2,9 @@
 
 `tests/fixtures/bots/` 是三条测试共用的示例 Bot，内容都是虚构的，截图是纯色占位图：
 
-- `demo-prd-reviewer`（岗位：产品）：完整的普通 Bot，有头像、一句 pitch、`about`（介绍、能做的事、第一句话、适合谁）、两个技能、定时任务
-- `demo-weekly-digest`（岗位：内容）：没有头像、pitch 和 `about`，有两张截图，`forkedFrom: demo-prd-reviewer`
-- `demo-external`（岗位：管家）：外部收录（`external: true`），只有 bot.yaml；有两句 pitch，`about` 里带自带技能和定时任务
+- `demo-prd-reviewer`（分组：产品）：完整的普通 Bot，有头像、一句 pitch、`about`（介绍、能做的事、第一句话、适合谁）、两个技能、定时任务
+- `demo-weekly-digest`（分组：内容）：没有头像、pitch 和 `about`，有两张截图，`forkedFrom: demo-prd-reviewer`
+- `demo-external`（分组：管家）：外部收录（`external: true`），只有 bot.yaml；有两句 pitch，`about` 里带自带技能和定时任务
 
 旁边两个目录是配套的小队和策展：
 

@@ -234,7 +234,7 @@ describe('网站数据：bots、squads、curation 三份对得上', () => {
     expect(data.curation.collections).toEqual(raw.collections)
     expect(data.bots.find((item) => item.slug === 'idea-stress-test').pick).toBe(0)
     expect(data.bots.find((item) => item.slug === 'project-manager').squads).toEqual([{ slug: 'one-person-marketing', name: '一个人的市场部', title: '队长', lead: true, detailUrl: '/squads/one-person-marketing' }])
-    // 每个 Bot 都落在 schema 的某个岗位里。各岗位的人数不写死：有人投稿，货架就变。
+    // 每个 Bot 都落在 schema 的某个分组里。各分组的人数不写死：有人投稿，货架就变。
     const count = Object.fromEntries(enums.categories.map((category) => [category, data.bots.filter((item) => item.category === category).length]))
     expect(Object.values(count).reduce((sum, n) => sum + n, 0)).toBe(data.bots.length)
   })

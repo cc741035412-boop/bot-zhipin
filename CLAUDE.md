@@ -29,7 +29,7 @@
 - 不复制 fork 来源（原 Grok Bot 教程站）的任何文字、图片、组件代码。
 - `site/.vitepress/theme/vendor/bloub/` 是第三方 MIT 代码，不改。
 - 不提交任何密钥。线上变量在 Cloudflare 后台，本地在 `.dev.vars`（gitignore）。
-- 岗位（字段名 `category`，9 个：产品、市场、销售、内容、运营、学习、求职、管家、生活）、权限、额度的取值只在 `schema/bot.schema.json` 里定义，代码里通过 `loadEnums()` 读取，不写死。每个岗位的颜色和吉祥物在 `theme/color.ts`，一句说明在 `meta.mjs` 的 `CATEGORY_COPY`，改枚举时一起改，单测会核对。
+- 分组（字段名 `category`，9 个：产品、市场、销售、内容、运营、学习、求职、管家、生活）、权限、额度的取值只在 `schema/bot.schema.json` 里定义，代码里通过 `loadEnums()` 读取，不写死。每个分组的颜色和吉祥物在 `theme/color.ts`，一句说明在 `meta.mjs` 的 `CATEGORY_COPY`，改枚举时一起改，单测会核对。
 - 本仓库本地还有 `upstream` 远端（原仓库）。`gh pr create` 一律带 `--repo jakob52123/bot-zhipin`，绝不推送或提 PR 到 upstream。
 - 构建产物里不能有 `_worker.js`（会让 Pages 忽略 `functions/`）。
 - 改了 `schema/` 下任何一份 schema（`bot`、`squad`、`curation`）都要运行 `npm run gen:schema`；`scripts/lib/validate/generated/` 是派生物，不算第二份枚举。

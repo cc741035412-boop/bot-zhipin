@@ -5,7 +5,7 @@
 slug: my-bot                      # 必须和文件夹名一模一样
 name: 我的 Bot                    # Bot 的名字，20 个字以内
 tagline: 一句话说清它帮谁做什么    # 一句话介绍，40 个字以内
-category: 产品                    # 岗位，九选一：产品、市场、销售、内容、运营、学习、求职、管家、生活
+category: 产品                    # 分组，九选一：产品、市场、销售、内容、运营、学习、求职、管家、生活
 author:
   name: 你的名字
   github: your-github-username    # 你的 GitHub 用户名，不带 @

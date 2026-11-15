@@ -423,7 +423,7 @@ it('复制给 AI 与 CLI 四项格式一致，支持空错误和动态错误摘�
   expect(copyForAi([])).toContain('投稿页检查没通过')
 })
 
-// ---- V5：投稿预览遇到 about、多句台词、新岗位都不报错，摘要形状和货架上的一致 ----
+// ---- V5：投稿预览遇到 about、多句台词、新分组都不报错，摘要形状和货架上的一致 ----
 it('预览：fixture 自带的 about 和一句台词照常进摘要，装饰字段是默认值', () => {
   const { summary } = previewModel(plaintext, { now, login: 'example-user' })
   expect(summary).toMatchObject({ category: '产品', pitch: '评审会上被问住之前，先让我问你一遍。', pitches: ['评审会上被问住之前，先让我问你一遍。'], editorNote: null, pick: null, squads: [], needsAccount: true, selfRunning: false })
@@ -442,7 +442,7 @@ it.each([
   ['台词写成数字', { pitch: 123 }, 'pitch'],
   ['台词列表里混了别的类型', { pitch: ['正常的一句', null, { a: 1 }] }, 'pitch.1'],
   ['台词写了四句', { pitch: ['第一句话', '第二句话', '第三句话', '第四句话'] }, 'pitch'],
-  ['岗位写的是旧分类', { category: '评审' }, 'category'],
+  ['分组写的是旧分类', { category: '评审' }, 'category'],
 ])('预览：%s 时不抛错，照样出预览，错误由校验用中文指出位置', (_label, change, where) => {
   const input = bundle(change)
   let result

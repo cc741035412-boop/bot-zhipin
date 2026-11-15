@@ -32,12 +32,12 @@ export const SHELF_COPY = {
   featuredTitle: '本周主推',
   allTitle: '全部 Bot',
   allCategories: '全部',
-  filterLabel: '按岗位筛选',
-  emptyFilter: '这个岗位下暂时没有 Bot',
+  filterLabel: '按分组筛选',
+  emptyFilter: '这个分组下暂时没有 Bot',
   showAll: '看看全部',
 }
 
-// 每个岗位一句说明。岗位的取值和顺序只认 schema（bot.schema.json 的 category）；单测保证这里一个不多、一个不少。
+// 每个分组一句说明。分组的取值和顺序只认 schema（bot.schema.json 的 category）；单测保证这里一个不多、一个不少。
 export const CATEGORY_COPY = {
   产品: '想清楚做什么，写出来，做出来，再挑毛病',
   市场: '盯竞品，定定位，做投放，看数据',

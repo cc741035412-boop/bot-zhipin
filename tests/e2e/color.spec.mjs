@@ -54,7 +54,7 @@ for (const scheme of ['light', 'dark']) {
     expect(warnings).toEqual([])
   })
 
-  test(`${scheme}：九个岗位的标签和来源标签实际 CSS 对比度 ≥4.5，首页/详情一致`, async ({ page }) => {
+  test(`${scheme}：九个分组的标签和来源标签实际 CSS 对比度 ≥4.5，首页/详情一致`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme })
     await page.goto('/')
     const homeColor = await page.locator(`[data-testid="bot-card"][data-slug="${weekly}"] .category-tag`).evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])

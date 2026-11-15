@@ -79,7 +79,7 @@ it('非外部 author.github 必填', () => {
   expect(issues()).toContain('缺少必填字段 author.github')
 })
 it.each([
-  ['category', '不存在的岗位', 'categories'],
+  ['category', '不存在的分组', 'categories'],
   ['quotaCost', '中等', 'quotaCosts'],
   ['permissions', ['不存在的权限'], 'permissions'],
 ])('枚举 %s 列出全部可选值', (field, value, key) => {

@@ -12,7 +12,7 @@
 | `bots/_template/` | 投稿模板 | 维护者 |
 | `squads/<slug>/squad.yaml` | 小队：成员（货架上的 Bot）、队长、分工、交接、接线步骤。一支队只有这一个文件 | 投稿者 |
 | `curation/shelf.yaml` | 策展：首页主推、推荐排序、专题、编辑点评 | **只有维护者** |
-| `schema/bot.schema.json` | bot.yaml 的 JSON Schema，**岗位（`category`）、权限、额度的枚举唯一真源** | 维护者 |
+| `schema/bot.schema.json` | bot.yaml 的 JSON Schema，**分组（`category`）、权限、额度的枚举唯一真源** | 维护者 |
 | `schema/squad.schema.json`、`schema/curation.schema.json` | squad.yaml 和 shelf.yaml 的 JSON Schema | 维护者 |
 | `scripts/lib/load-bots.mjs` | 读取 bots/ 的共享代码（只读不校验） | 维护者，改了影响校验器和网站 |
 | `scripts/lib/load-squads.mjs`、`load-curation.mjs` | 读取小队和策展（只读不校验，不跟随符号链接）；目录怎么定见下面「约定」 | 维护者 |
@@ -20,7 +20,7 @@
 | `scripts/validate.mjs` + `scripts/lib/validate/` | `npm run validate`：Bot + 小队 + 策展的全量校验；`validate/squads.mjs` 是小队和策展的校验内核 | 维护者 |
 | `scripts/gen-schema-validator.mjs` | `npm run gen:schema`：把三份 schema 各预编译成 `scripts/lib/validate/generated/<名字>-schema.mjs` | 维护者 |
 | `scripts/sync-assets.mjs` | 构建前把截图、头像复制到 `site/public/bot-assets/`，并生成 `site/public/api-data/slugs.json`、`squad-slugs.json` | 维护者 |
-| `site/` | VitePress 站点根目录；`site/.vitepress/meta.mjs` 放站名、仓库地址、安装提示词、默认台词、每个岗位的一句说明（`CATEGORY_COPY`） | 维护者 |
+| `site/` | VitePress 站点根目录；`site/.vitepress/meta.mjs` 放站名、仓库地址、安装提示词、默认台词、每个分组的一句说明（`CATEGORY_COPY`） | 维护者 |
 | `site/.vitepress/data/` | 数据加载器：`bots.data`（列表数据：Bot 摘要 + 装饰，不带 `about` 全文）、`squads.data`（小队摘要）、`curation.data`（策展）；三份都由 `bots.mjs` 的 `shelfData()` 一次算出，保证对得上 | 维护者 |
 | `site/squads/[slug].md` + `[slug].paths.mjs` | 小队页的动态路由 `/squads/<slug>` | 维护者 |
 | `site/.vitepress/theme/components/SquadDetail.vue` | 小队页组件（目前是只渲染数据的占位版） | 维护者 |
@@ -31,11 +31,11 @@
 | `site/.vitepress/theme/components/LiveBot.vue` | SSR sample(0) + 客户端活体 SVG；bz-play 事件入口 | 维护者 |
 | `site/.vitepress/theme/face.ts` | 官方形状映射、botFace / resolveFace、faceColors 和 seed 回退 | 维护者 |
 | `site/.vitepress/theme/shapes-extra.ts` | 15 种原创径向轮廓，不复制 x.ai 路径 | 维护者 |
-| `site/.vitepress/theme/color.ts` | contrast、darkSwap、buttonColors、botPalette 纯函数配色；岗位的颜色和吉祥物（`CATEGORY_COLORS`、`CATEGORY_MASCOTS`） | 维护者 |
+| `site/.vitepress/theme/color.ts` | contrast、darkSwap、buttonColors、botPalette 纯函数配色；分组的颜色和吉祥物（`CATEGORY_COLORS`、`CATEGORY_MASCOTS`） | 维护者 |
 | `site/.vitepress/theme/styles/` | 全站视觉，按区域分七个文件：`tokens.css`（token）、`base.css`（基础部件：按钮、标签、头像砖、区块标题、分段控件、气泡、焦点）、`nav.css`（导航条）、`hero.css`（首屏）、`home.css`（首页区块和卡片）、`detail.css`（详情页）、`misc.css`（404、空状态、弹窗）；`theme/index.ts` 按这个顺序引入。规格见 `INTERACTION.md` §1、§1b | 维护者 |
 | `site/.vitepress/theme/icons.ts` + `components/BzIcon.vue` | 全站唯一一套线性图标：路径数据 + 渲染组件 | 维护者 |
-| `site/.vitepress/theme/enums.data.mjs` | 构建时用 `loadEnums()` 读 schema，把岗位枚举（含顺序）给到浏览器；首页岗位筛选用 | 维护者 |
-| `site/.vitepress/theme/components/BotShelf.vue` | 首页：极光、砖墙、标题、搜索入口、精选、排序 + 岗位筛选、列表、空状态 | 维护者 |
+| `site/.vitepress/theme/enums.data.mjs` | 构建时用 `loadEnums()` 读 schema，把分组枚举（含顺序）给到浏览器；首页分组筛选用 | 维护者 |
+| `site/.vitepress/theme/components/BotShelf.vue` | 首页：极光、砖墙、标题、搜索入口、精选、排序 + 分组筛选、列表、空状态 | 维护者 |
 | `site/.vitepress/theme/components/HeroPortrait.vue` | 砖墙里的一块玻璃砖 + 一只吉祥物（数据在 `meta.mjs` 的 `HERO_MASCOTS`） | 维护者 |
 | `site/.vitepress/theme/components/FeaturedCard.vue` | 精选大卡：活 Bot、名字、介绍、作者、热度、导入；不带气泡 | 维护者 |
 | `site/.vitepress/theme/components/SearchTrigger.vue` | 长得像输入框的按钮（首屏和工具栏各一个），只负责派发 `bz-search-open` | 维护者 |
@@ -76,7 +76,7 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 
 | 字段 | 含义 |
 |---|---|
-| `category` | 岗位，9 选 1（产品、市场、销售、内容、运营、学习、求职、管家、生活） |
+| `category` | 分组，9 选 1（产品、市场、销售、内容、运营、学习、求职、管家、生活） |
 | `pitches` | 台词数组（没写是 `[]`）；`pitch` 保留，取第一句或 `null` |
 | `about` | **只在完整摘要里**，列表数据没有这个键。没写是 `null`；写了就是 `{ intro, does[], starters[], skills[{name, does}], routines[{what, when, default, quiet}], fit, notFit, cnFit, cnNote }`，缺的数组是 `[]`、缺的字符串是 `null` |
 | `needsAccount` | 权限里有「外部账号」或「浏览器 Cookie」 |
@@ -124,7 +124,7 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 - 页面路径：首页 `/`，详情页 `/bots/<slug>`，小队页 `/squads/<slug>`（小队可以和 Bot 同名，路由不同）。
 - **小队和策展放在哪**：默认是仓库里的 `squads/` 和 `curation/shelf.yaml`。规则是「跟着 Bot 目录取兄弟目录」：`<Bot 目录的上级>/squads`、`<上级>/curation/shelf.yaml`，所以只设 `BOTS_DIR=tests/fixtures/bots` 就会一起用 fixtures 的小队和策展；要单独指定用环境变量 `SQUADS_DIR`、`CURATION_FILE`。目录或文件不存在就当空，不报错。
 - **引用必须落在货架上**：小队成员、策展里的 slug 都要是货架上的 Bot，`npm run validate` 会拦；下架一个被引用的 Bot 要同时改小队和策展。网站构建时再兜一层底：对不上的那一项丢掉并打印警告，成员不到 2 个的小队不出页面。
-- **岗位**：字段名是 `category`，界面和文档里叫「岗位」，意思是「这个 Bot 干的是哪一行」。一共 9 个：产品、市场、销售、内容、运营、学习、求职、管家、生活（决策 38）。取值和顺序只在 `schema/bot.schema.json`；颜色和吉祥物在 `theme/color.ts`，一句说明在 `meta.mjs` 的 `CATEGORY_COPY`，单测保证它们和枚举一个不多、一个不少。
+- **分组**：字段名是 `category`，界面和文档里叫「分组」，意思是「这个 Bot 干的是哪一行」。一共 9 个：产品、市场、销售、内容、运营、学习、求职、管家、生活（决策 38）。取值和顺序只在 `schema/bot.schema.json`；颜色和吉祥物在 `theme/color.ts`，一句说明在 `meta.mjs` 的 `CATEGORY_COPY`，单测保证它们和枚举一个不多、一个不少。
 - **开发热更新**：`bot-watch.mjs` 同时监听 Bot 目录、小队目录和策展文件，哪一处变了都重启 dev server 刷新数据和动态路由。
 - 图片引用：`/bot-assets/<slug>/<文件名>`。
 - 不复制原站（fork 来源）的任何文字、图片和组件代码。

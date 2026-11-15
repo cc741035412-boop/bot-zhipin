@@ -1,4 +1,4 @@
-// V5 的 bot.yaml 新规则：岗位枚举、多句台词、about。
+// V5 的 bot.yaml 新规则：分组枚举、多句台词、about。
 import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
@@ -23,16 +23,16 @@ const check = (update, options = {}) => validateModels([fresh(update)], { templa
 const at = (update, prefix) => check(update).errors.filter((error) => error.where === prefix || error.where.startsWith(`${prefix}.`))
 const long = (n) => '字'.repeat(n)
 
-describe('岗位', () => {
-  it('9 个岗位，顺序固定；字段名还是 category，说明改成「岗位」', () => {
+describe('分组', () => {
+  it('9 个分组，顺序固定；字段名还是 category，说明改成「分组」', () => {
     expect(loadEnums().categories).toEqual(['产品', '市场', '销售', '内容', '运营', '学习', '求职', '管家', '生活'])
-    expect(schema.properties.category.description).toBe('岗位')
+    expect(schema.properties.category.description).toBe('分组')
   })
   it.each(loadEnums().categories)('%s 通过', (category) => {
     expect(check((data) => { data.category = category }).errors).toEqual([])
   })
-  // 旧 8 类里的「学习」「求职」在新枚举里还在；「个人」是 7 个岗位那一版的叫法，已改成「生活」。
-  it.each(['调研', '定义', '评审', 'AI 评测', '日常', '基础设施', '个人'])('旧分类 %s 不再接受，报错列出全部岗位', (category) => {
+  // 旧 8 类里的「学习」「求职」在新枚举里还在；「个人」是 7 个分组那一版的叫法，已改成「生活」。
+  it.each(['调研', '定义', '评审', 'AI 评测', '日常', '基础设施', '个人'])('旧分类 %s 不再接受，报错列出全部分组', (category) => {
     const errors = at((data) => { data.category = category }, 'category')
     expect(errors).toHaveLength(1)
     expect(errors[0].file).toBe('bots/demo-weekly-digest/bot.yaml')
@@ -164,7 +164,7 @@ describe('about', () => {
 
 describe('投稿模板里的例子', () => {
   const text = readFileSync(join(ROOT, 'bots/_template/bot.yaml'), 'utf8')
-  it('岗位注释列的是 schema 里的 9 个岗位，示例值也在里面', () => {
+  it('分组注释列的是 schema 里的 9 个分组，示例值也在里面', () => {
     const categories = loadEnums().categories
     expect(text).toContain(`九选一：${categories.join('、')}`)
     expect(categories).toContain(template.data.category)

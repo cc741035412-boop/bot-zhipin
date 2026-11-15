@@ -39,7 +39,7 @@ const who = (slug) => slug === 'you' ? '你' : names.value.get(slug) || slug
           <p data-testid="member-does">{{ member.does }}</p>
           <p>{{ member.tagline }}</p>
           <p>
-            <span>岗位：{{ member.category }}</span>
+            <span>分组：{{ member.category }}</span>
             <span>额度 {{ member.quotaCost }}</span>
             <span v-if="member.needsAccount">要连账号</span>
             <span v-if="member.selfRunning">会自己定时跑</span>
