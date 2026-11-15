@@ -47,8 +47,8 @@ const ink = computed(() => !!colors.value && colors.value.light !== colors.value
 </script>
 
 <template>
-  <img v-if="bot?.avatar && !failed && !ghost" class="bz-still" :src="bot.avatar" alt="" width="28" height="28" @error="failed = true">
-  <svg v-else class="bz-still bz-live" :class="{ 'bz-live-ink': ink, 'is-ghost': ghost }" :style="style" viewBox="-112 -112 224 224" width="28" height="28" aria-hidden="true">
+  <img v-if="bot?.avatar && !failed && !ghost" class="squad-still" :src="bot.avatar" alt="" width="28" height="28" @error="failed = true">
+  <svg v-else class="squad-still bz-live" :class="{ 'bz-live-ink': ink, 'is-ghost': ghost }" :style="style" viewBox="-112 -112 224 224" width="28" height="28" aria-hidden="true">
     <path class="still-body" :d="frame.body" />
     <path v-if="!ghost && colors?.outline" data-part="outline" :d="frame.body" fill="none" style="stroke: var(--bz-bot-outline)" stroke-width="1.5" vector-effect="non-scaling-stroke" />
     <path v-for="(eye, index) in frame.eyes" :key="index" class="still-eye" :d="eye.d" :transform="eye.matrix" />

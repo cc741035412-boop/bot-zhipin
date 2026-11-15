@@ -96,7 +96,7 @@ test.describe('首页的小队区块', () => {
     await page.goto('/')
     const recruit = page.getByTestId('squad-recruit')
     await expect(recruit).toHaveCSS('border-top-style', 'dashed')
-    await expect(recruit.locator('.bz-still.is-ghost')).toHaveCount(3)
+    await expect(recruit.locator('.squad-still.is-ghost')).toHaveCount(3)
     await expect(recruit.locator('a, button')).toHaveCount(1)
     const link = recruit.locator('a')
     await expect(link).toHaveAttribute('href', SQUAD_CONTRIBUTE_URL)
@@ -436,7 +436,7 @@ test.describe('搜索面板里的小队', () => {
     await expect(item.locator('[data-part="name"]')).toHaveText('示例·周会小队')
     await expect(item.locator('[data-part="tagline"]')).toHaveText('一个评审员带两个帮手，把周会前后的事包了')
     await expect(item.locator('.sp-tag')).toHaveText(SQUAD_COPY.tag)
-    await expect(item.locator('.bz-still')).toHaveCount(3)
+    await expect(item.locator('.squad-still')).toHaveCount(3)
     await expect(page.getByTestId('search-panel').locator('.sp-group .sp-heading')).toHaveText(SQUAD_COPY.title)
     // 排在所有 Bot 后面。
     const tops = await page.locator('[data-testid="search-item"], [data-testid="search-squad"]').evaluateAll((nodes) => nodes.map((node) => node.dataset.testid))

@@ -489,11 +489,11 @@ onBeforeUnmount(() => {
 .sp-group > .sp-heading { padding: 10px 10px 6px; }
 .sp-list > .sp-group:first-child > .sp-heading { padding-top: 14px; }
 /* 小合影：32px 的头像位里放三只小 Bot，队长在前面正中，两个队员在后面左右 */
-.sp-team :deep(.bz-still) { position: absolute; width: 18px; height: 18px; pointer-events: none; }
-.sp-team :deep(.bz-still:nth-child(1)) { z-index: 1; left: 5px; top: 12px; width: 22px; height: 22px; }
-.sp-team :deep(.bz-still:nth-child(2)) { left: -2px; top: 0; }
-.sp-team :deep(.bz-still:nth-child(3)) { left: 16px; top: 0; }
-.sp-team :deep(.bz-still:nth-child(1):last-child) { left: 2px; top: 2px; width: 28px; height: 28px; }
+.sp-team :deep(.squad-still) { position: absolute; width: 18px; height: 18px; pointer-events: none; }
+.sp-team :deep(.squad-still:nth-child(1)) { z-index: 1; left: 5px; top: 12px; width: 22px; height: 22px; }
+.sp-team :deep(.squad-still:nth-child(2)) { left: -2px; top: 0; }
+.sp-team :deep(.squad-still:nth-child(3)) { left: 16px; top: 0; }
+.sp-team :deep(.squad-still:nth-child(1):last-child) { left: 2px; top: 2px; width: 28px; height: 28px; }
 .sp-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 16px 36px; color: var(--bz-text-2); }
 /*
   睡着的 Bot 是一颗上下弹的小球，一有输入会惊醒成「!」再睡回去。

@@ -19,14 +19,14 @@
 }
 
 /* ---------- 0. 静态小 Bot（BotStill） ---------- */
-.bz-still { display: block; flex: none; width: 24px; height: 24px; overflow: visible; }
+.squad-still { display: block; flex: none; width: 24px; height: 24px; overflow: visible; }
 /* 图片要自己裁成圆：overflow 留着 visible 的话，圆角裁不到图片内容 */
-img.bz-still { overflow: clip; border: 1px solid var(--bz-hairline); border-radius: 50%; object-fit: cover; }
-.bz-still .still-body { fill: var(--bz-bot-body, #8a8a93); }
-.bz-still .still-eye { fill: var(--bz-eye); }
+img.squad-still { overflow: clip; border: 1px solid var(--bz-hairline); border-radius: 50%; object-fit: cover; }
+.squad-still .still-body { fill: var(--bz-bot-body, #8a8a93); }
+.squad-still .still-eye { fill: var(--bz-eye); }
 /* 空位：只有一圈虚线轮廓和两只淡淡的眼睛 */
-.bz-still.is-ghost .still-body { fill: none; stroke: var(--bz-border-hover); stroke-width: 1.5; stroke-dasharray: 4 4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.bz-still.is-ghost .still-eye { fill: var(--bz-border-strong); }
+.squad-still.is-ghost .still-body { fill: none; stroke: var(--bz-border-hover); stroke-width: 1.5; stroke-dasharray: 4 4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.squad-still.is-ghost .still-eye { fill: var(--bz-border-strong); }
 
 /* ---------- 1. 合影（SquadLineup） ----------
    面板是尺寸容器：里面的人按「设计稿宽高」（--lu-w、--lu-h）等比缩到面板里，最大 1:1。
@@ -112,12 +112,12 @@ img.bz-still { overflow: clip; border: 1px solid var(--bz-hairline); border-radi
 /* 招募卡：虚线边，三只空位，一个按钮；按钮的可点范围铺满整卡 */
 .squad-recruit { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--bz-sp-5); border-style: dashed; border-color: var(--bz-border-strong); background: transparent; box-shadow: none; }
 .recruit-seats { display: flex; align-items: flex-end; justify-content: center; }
-.recruit-seats .bz-still { width: 60px; height: 60px; transition: opacity var(--bz-dur) var(--bz-ease); opacity: .8; }
-.recruit-seats .bz-still.lead { position: relative; z-index: 1; width: 80px; height: 80px; margin: 0 -10px; }
+.recruit-seats .squad-still { width: 60px; height: 60px; transition: opacity var(--bz-dur) var(--bz-ease); opacity: .8; }
+.recruit-seats .squad-still.lead { position: relative; z-index: 1; width: 80px; height: 80px; margin: 0 -10px; }
 .squad-recruit .bz-btn::after { content: ''; position: absolute; inset: 0; border-radius: calc(var(--bz-r-panel) - 1px); }
 @media (hover: hover) {
   .squad-recruit:hover { border-color: var(--bz-border-hover); }
-  .squad-recruit:hover .recruit-seats .bz-still { opacity: 1; }
+  .squad-recruit:hover .recruit-seats .squad-still { opacity: 1; }
 }
 
 /* ---------- 3. 小队详情页：头部 ---------- */
@@ -169,7 +169,7 @@ img.bz-still { overflow: clip; border: 1px solid var(--bz-hairline); border-radi
 .roster-row.is-missing .roster-name, .roster-row.is-missing .roster-does { color: var(--bz-text-3); }
 .roster-row.is-missing .roster-tile { border-style: dashed; border-color: var(--bz-border-strong); background: transparent; box-shadow: none; cursor: default; }
 .roster-row.is-missing .roster-tile::before { display: none; }
-.roster-row.is-missing .bz-still { width: 68%; height: 68%; }
+.roster-row.is-missing .squad-still { width: 68%; height: 68%; }
 @media (hover: hover) {
   .roster-row:not(.is-missing):hover::before { opacity: 1; }
   .roster-row:hover .bz-tile::before { opacity: 1; }
@@ -230,7 +230,7 @@ img.bz-still { overflow: clip; border: 1px solid var(--bz-hairline); border-radi
 .flow-route { display: flex; flex-wrap: wrap; align-items: center; gap: var(--bz-sp-1) var(--bz-sp-2); font-size: var(--bz-fs-sm); line-height: 24px; color: var(--bz-text-2); }
 .flow-route > .bz-icon { color: var(--bz-text-3); }
 .flow-who { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
-.flow-who .bz-still { width: 20px; height: 20px; }
+.flow-who .squad-still { width: 20px; height: 20px; }
 .flow-you-dot { flex: none; width: 16px; height: 16px; margin: 0 2px; border: 1.5px solid var(--bz-text-3); border-radius: 50%; }
 @media (min-width: 680px) {
   .flow-list { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
@@ -310,7 +310,7 @@ img.bz-still { overflow: clip; border: 1px solid var(--bz-hairline); border-radi
 /* 权限：后面跟着用到它的成员 */
 .cost-bots { display: inline-flex; flex: none; gap: 2px; }
 .cost-bots > span { display: block; }
-.cost-bots .bz-still { width: 22px; height: 22px; }
+.cost-bots .squad-still { width: 22px; height: 22px; }
 .prereq-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--bz-sp-5) var(--bz-sp-6); }
 .prereq-who { display: flex; align-items: center; gap: var(--bz-sp-2); font-size: var(--bz-fs-sm); line-height: 24px; font-weight: 600; color: var(--bz-ink); }
 .prereq-list ul { margin-top: var(--bz-sp-1); }
