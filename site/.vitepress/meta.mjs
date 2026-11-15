@@ -23,17 +23,37 @@ export const HERO_MASCOTS = [
   { key: 'brown', shape: 'pebble', color: '#9a6a3a' },
 ]
 
-// 首页货架的固定文案。界面上不放解释性的句子（决策 37）：这里只有标题、按钮、标签和状态反馈。
+// 首页货架的固定文案。界面上不放解释性的句子（决策 37）：这里只有标题、按钮、标签、计数和状态反馈。
+// 能出现在界面上的固定文字以 B2-UI 任务书第 2 节的清单为准，要加新的先问用户。
 // 搜索占位字首屏搜索框和搜索面板共用。
 export const SHELF_COPY = {
   searchPlaceholder: '搜索',
   searchLabel: '搜索 Bot',
   contribute: '我要投稿',
+  // 区块标题
   featuredTitle: '本周主推',
+  collectionsTitle: '专题',
   allTitle: '全部 Bot',
-  allCategories: '全部',
-  filterLabel: '按岗位筛选',
-  emptyFilter: '这个岗位下暂时没有 Bot',
+  // 工具栏：分组切换（「全部」+ 各分组名 + 数量）和排序。roleLabel、sortLabel 只给读屏。
+  allRoles: '全部',
+  roleLabel: '按分组筛选',
+  sortLabel: '排序',
+  sortRec: '推荐',
+  sortNew: '最新',
+  sortHot: '最热',
+  // 计数
+  total: (count) => `共 ${count} 个`,
+  groupCount: (count) => `${count} 个`,
+  collectionCount: (count) => `${count} 个 Bot`,
+  // 每组先露几张，其余展开
+  expand: (count) => `展开 ${count} 个`,
+  collapse: '收起',
+  // 专题筛选条：「专题：<标题> · N 个」+「清除」
+  collectionKind: '专题：',
+  filterCount: (count) => ` · ${count} 个`,
+  clear: '清除',
+  // 筛选为空
+  emptyFilter: '这个分组还没有 Bot',
   showAll: '看看全部',
 }
 

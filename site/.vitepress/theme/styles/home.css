@@ -1,4 +1,4 @@
-/* 首页：区块、主推卡、工具栏、列表卡、页尾、筛选为空。
+/* 首页：区块、主推卡、专题、工具栏、分组、列表卡、筛选条、页尾、筛选为空。
    卡片里的头像砖、名字、作者行、介绍、标签着色、操作按钮，详情页和投稿预览也在用，统一写在这里。
    只用 V5-DESIGN §1、§2 里写了名字的 token 和基础类。 */
 
@@ -48,12 +48,21 @@
 /* 来源标签只剩「作者投稿」一种；官方市场、社区收录都写在作者行里 */
 .bz-tag.source-tag { --bz-tag-color: #ff6a13; }
 
+/* 分组标签前面那只 12px 的吉祥物（静止）：往左收 2px，和圆角的视觉重心对齐 */
+.bz-tag > .role-mascot { margin-left: -2px; }
+
+/* 静止的小 Bot（StaticBot）：首帧的轮廓和眼睛，不动。叠在一起时身体外面垫一圈底色（ring），互相分得开。 */
+.bz-still { display: block; flex: none; }
+.bz-still [data-part="eye"] { fill: var(--bz-eye, #16161b); }
+.bz-still [data-part="ring"] { stroke: var(--bz-still-ring, var(--bz-page)); stroke-width: 4px; vector-effect: non-scaling-stroke; }
+img.bot-still { display: block; flex: none; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px var(--bz-still-ring, var(--bz-page)); }
+
 /* 操作按钮（BotActions）：卡片和详情页共用 */
 .bot-actions { display: flex; flex-wrap: wrap; gap: var(--bz-sp-3); }
 .bz-btn.copied, .bz-btn.copied:hover { border-color: color-mix(in srgb, var(--bz-success) 55%, transparent); color: var(--bz-success); }
 .bot-actions-note { font-size: var(--bz-fs-sm); line-height: 1.5; color: var(--bz-text-3); }
 
-/* ---------- 3. 精选卡 ---------- */
+/* ---------- 3. 主推卡 ---------- */
 .featured-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--bz-sp-4); }
 .featured-card {
   position: relative; isolation: isolate; display: flex; flex-direction: column; min-width: 0; padding: var(--bz-sp-5);
@@ -71,6 +80,13 @@
 .featured-tile { width: 72px; height: 72px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .featured-tile svg, .featured-tile img { display: block; width: 68%; height: 68%; }
 .featured-card .bot-tagline { margin-top: var(--bz-sp-4); }
+/* 编辑点评：只有点评本身，前面一个 Bot 色的引号。垫一块淡淡染了 Bot 色的底，读得出是另一个人在说话 */
+.featured-note {
+  display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: var(--bz-sp-2); margin: var(--bz-sp-4) 0 0; padding: var(--bz-sp-3);
+  border: 0; border-radius: var(--bz-r-control); background-color: color-mix(in srgb, var(--bz-bot-color) 7%, var(--bz-surface-2));
+}
+.featured-note > svg { color: color-mix(in srgb, var(--bz-bot-color) 70%, var(--bz-ink)); }
+.shelf-page .featured-note p { font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: color-mix(in srgb, var(--bz-ink) 85%, var(--bz-page)); text-wrap: pretty; }
 .featured-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--bz-sp-3); margin-top: auto; padding-top: var(--bz-sp-5); }
 @media (hover: hover) {
   .featured-card:hover { border-color: color-mix(in srgb, var(--bz-bot-color) 42%, var(--bz-hairline)); }
@@ -78,29 +94,100 @@
   .featured-card:hover .bz-tile::before { opacity: 1; }
 }
 
-/* ---------- 4. 工具栏：左排序，右分类 ---------- */
-.shelf-toolbar { display: flex; align-items: center; gap: var(--bz-sp-4); margin-bottom: var(--bz-sp-5); }
-.filter-chips {
-  display: flex; gap: var(--bz-sp-2); min-width: 0; margin: -4px -4px -4px auto; padding: 4px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+/* ---------- 4. 专题：一排卡，每张是一个按钮 ---------- */
+.collection-strip { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--bz-sp-4); }
+.collection-card {
+  --bz-still-ring: var(--bz-collection-bg);
+  position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: flex-start; min-width: 0; padding: var(--bz-sp-4);
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-1); box-shadow: var(--bz-highlight);
+  color: var(--bz-ink); font-family: var(--bz-font-text); text-align: left; cursor: pointer; scroll-snap-align: start; -webkit-tap-highlight-color: transparent;
+  transition: border-color var(--bz-dur) var(--bz-ease);
 }
-.filter-chips::-webkit-scrollbar { display: none; }
-.filter-chip {
-  display: inline-flex; align-items: center; gap: 6px; flex: none; height: 32px; padding: 0 12px 0 10px;
-  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-control); background: transparent; color: var(--bz-text-2);
-  font-family: var(--bz-font-text); font-size: var(--bz-fs-sm); font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer;
-  transition: color var(--bz-dur) var(--bz-ease), border-color var(--bz-dur) var(--bz-ease), background-color var(--bz-dur) var(--bz-ease);
+:root { --bz-collection-bg: #ffffff; --bz-collection-glow: .1; }
+.dark { --bz-collection-bg: var(--bz-page); --bz-collection-glow: .16; }
+/* 卡片顶上一片柔光，颜色就是这个专题里前几只 Bot 的颜色，从头像那一角漫开 */
+.collection-card::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: calc(var(--bz-r-card) - 1px); pointer-events: none; opacity: var(--bz-collection-glow);
+  background: linear-gradient(100deg, var(--bz-face-1, transparent), var(--bz-face-2, transparent) 34%, var(--bz-face-3, transparent) 67%, var(--bz-face-4, transparent));
+  -webkit-mask-image: radial-gradient(130% 110% at 14% 0%, #000 0%, transparent 72%); mask-image: radial-gradient(130% 110% at 14% 0%, #000 0%, transparent 72%);
+  transition: opacity var(--bz-dur) var(--bz-ease);
 }
-.chip-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--bz-category-color); }
-.chip-dot.all { background: conic-gradient(#ff6a13, #f5a623, #34d399, #14b8a6, #3b82f6, #8b5cf6, #ff2e93, #ff6a13); }
-.filter-chip:hover { background: var(--bz-surface-3); color: var(--bz-ink); }
-.filter-chip[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--bz-category-color) 55%, transparent);
-  background: color-mix(in srgb, var(--bz-category-color) 14%, transparent); color: var(--bz-ink);
+.collection-faces { display: flex; align-items: center; height: 40px; }
+.collection-faces > .bot-still { width: 40px; height: 40px; }
+.collection-faces > .bot-still + .bot-still { margin-left: calc(-1 * var(--bz-sp-3)); }
+.collection-more { margin-left: var(--bz-sp-2); font-size: var(--bz-fs-xs); line-height: var(--bz-lh-xs); font-weight: 600; color: var(--bz-text-3); font-variant-numeric: tabular-nums; }
+.collection-title { max-width: 100%; margin-top: var(--bz-sp-4); font-family: var(--bz-font-display); font-size: var(--bz-fs-title); line-height: var(--bz-lh-title); font-weight: 600; letter-spacing: -.01em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.collection-count { margin-top: var(--bz-sp-1); font-size: var(--bz-fs-xs); line-height: var(--bz-lh-xs); font-weight: 600; color: var(--bz-text-3); font-variant-numeric: tabular-nums; }
+@media (hover: hover) {
+  .collection-card:hover { border-color: var(--bz-border-strong); }
+  .collection-card:hover::before { opacity: calc(var(--bz-collection-glow) * 1.8); }
 }
-/* 「全部」没有分类色：选中时只比轨道亮一档 */
-.filter-chip.all[aria-pressed="true"] { border-color: var(--bz-border-strong); background: var(--bz-surface-3); }
+/* 正在按它筛选 */
+.collection-card[aria-pressed="true"] { border-color: var(--bz-border-hover); }
+.collection-card[aria-pressed="true"]::before { opacity: calc(var(--bz-collection-glow) * 1.8); }
 
-/* ---------- 5. 列表和列表卡 ---------- */
+/* ---------- 5. 工具栏：左分组，右排序；吸在导航条下面 ---------- */
+.shelf-all { --bz-toolbar-h: 58px; overflow-anchor: none; }
+/* 平时没有底，左右各往外放 8px，分组的左边缘正好和内容对齐；吸住以后才显出玻璃底和细边，位置不动 */
+.shelf-toolbar {
+  position: sticky; top: var(--vp-nav-height); z-index: 5; display: flex; align-items: center; gap: var(--bz-sp-4);
+  margin: calc(-1 * var(--bz-sp-2) - 1px) calc(-1 * var(--bz-sp-2) - 1px) var(--bz-sp-4); padding: var(--bz-sp-2);
+  border: 1px solid transparent; border-radius: var(--bz-r-card);
+  transition: border-color var(--bz-dur) var(--bz-ease), background-color var(--bz-dur) var(--bz-ease), box-shadow var(--bz-dur) var(--bz-ease);
+}
+.shelf-toolbar[data-stuck="true"] {
+  border-color: var(--bz-hairline); background-color: var(--bz-nav-bg); box-shadow: var(--bz-nav-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
+}
+.role-tabs.bz-seg { flex: 0 1 auto; }
+.sort-seg { margin-left: auto; }
+/* 这一条自己会横向滚动，往外画的焦点框会被裁掉：改成画在按钮里面 */
+.shelf-page .role-tabs > button:focus-visible { outline-offset: -2px; }
+.role-tabs > button > :is(svg, .role-mascot) { flex: none; }
+.role-tabs > button > .bz-icon { color: var(--bz-text-3); }
+.role-tabs > button[aria-pressed="true"] > .bz-icon { color: inherit; }
+/* 数量：小一档、三级灰，和分组名之间只留 4 */
+.tab-count { margin-left: -2px; font-size: var(--bz-fs-xs); color: var(--bz-text-3); font-variant-numeric: tabular-nums; }
+/* 选中项的底更亮，三级灰压在上面对比度不够，数量提一档 */
+.role-tabs > button[aria-pressed="true"] > .tab-count { color: var(--bz-text-2); }
+/* 分组放不下时自己横向滑动：哪一头还有内容，哪一头渐隐 */
+.role-tabs[data-fade="right"] { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent); }
+.role-tabs[data-fade="left"] { -webkit-mask-image: linear-gradient(270deg, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(270deg, #000 calc(100% - 32px), transparent); }
+.role-tabs[data-fade="both"] { -webkit-mask-image: linear-gradient(90deg, transparent, #000 32px, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(90deg, transparent, #000 32px, #000 calc(100% - 32px), transparent); }
+
+/* ---------- 6. 分组：组头（吉祥物 + 分组名 + 数量）→ 两列卡片 → 展开 / 收起 ---------- */
+.shelf-list, .role-group { scroll-margin-top: calc(var(--vp-nav-height) + var(--bz-toolbar-h) + var(--bz-sp-4)); }
+.role-group + .role-group { margin-top: var(--bz-sp-8); }
+.role-head { display: flex; align-items: center; gap: var(--bz-sp-3); margin-bottom: var(--bz-sp-4); }
+.role-head h3 { min-width: 0; font-family: var(--bz-font-display); font-size: var(--bz-fs-h3); line-height: var(--bz-lh-h3); font-weight: 600; letter-spacing: -.01em; }
+.role-head .bz-count { margin-left: auto; }
+.role-tile { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.role-hop { display: block; transform-origin: center bottom; }
+.role-hop svg { display: block; width: 100%; height: 100%; }
+.role-hop.is-speaking { animation: bz-bounce 560ms var(--bz-ease-pop); }
+@media (hover: hover) {
+  .role-tile:hover::before { opacity: 1; }
+}
+/* 展开 / 收起：一条细线中间夹一个幽灵按钮，像把这一组折起来的折痕 */
+.group-more { display: flex; align-items: center; gap: var(--bz-sp-3); margin-top: var(--bz-sp-4); }
+.group-more::before, .group-more::after { content: ''; flex: 1; height: 1px; background: var(--bz-hairline); }
+.group-more .bz-icon { transition: transform var(--bz-dur) var(--bz-ease); }
+.group-more [aria-expanded="true"] .bz-icon { transform: rotate(180deg); }
+/* 刚展开出来的卡片淡入 */
+.bot-card.is-revealed { animation: bz-card-reveal 240ms ease both; }
+@keyframes bz-card-reveal { from { opacity: 0; } to { opacity: 1; } }
+
+/* 专题筛选条：「专题：<标题> · N 个」+「清除」 */
+.filter-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--bz-sp-3); margin-bottom: var(--bz-sp-4);
+  padding: var(--bz-sp-2) var(--bz-sp-2) var(--bz-sp-2) var(--bz-sp-4);
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background-color: var(--bz-surface-2); box-shadow: var(--bz-highlight);
+}
+.shelf-page .filter-bar p { min-width: 0; font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); color: var(--bz-text-2); }
+.filter-bar strong { font-weight: 600; color: var(--bz-ink); }
+.filter-total { font-variant-numeric: tabular-nums; }
+
+/* ---------- 7. 列表和列表卡 ---------- */
 .bot-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--bz-sp-4); }
 .grid-enter { animation: bz-grid-enter 200ms ease; }
 @keyframes bz-grid-enter { from { opacity: .35; } to { opacity: 1; } }
@@ -157,33 +244,61 @@
   .bot-card .bot-actions > .bz-btn { flex-basis: 100%; }
 }
 
-/* ---------- 6. 筛选为空、页尾 ---------- */
+/* ---------- 8. 筛选为空、页尾 ---------- */
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: var(--bz-sp-4); padding: var(--bz-sp-8) var(--bz-sp-4); border: 1px dashed var(--bz-border-strong); border-radius: var(--bz-r-card); background: var(--bz-surface-2); text-align: center; }
 .shelf-page .empty-state p { font-size: var(--bz-fs-body); line-height: 1.6; color: var(--bz-text-2); }
 /* 页尾只有一枚「我要投稿」，居中放在细线下面 */
 .shelf-footer { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: var(--bz-sp-9); padding-top: var(--bz-sp-7); border-top: 1px solid var(--bz-hairline); }
 
-/* ---------- 7. 投稿预览复用列表卡：把 submit.css 里旧版式留下的偏移归零 ---------- */
+/* ---------- 9. 投稿预览复用列表卡：把 submit.css 里旧版式留下的偏移归零 ---------- */
 .submit-preview .bot-card.bot-card { padding: 0; }
 .submit-preview .bot-card .bot-card-body .avatar-stage { margin: 0; }
 .submit-preview .bot-card .bot-name a { padding-block: 0; }
 
-/* ---------- 8. 响应式 ---------- */
+/* ---------- 10. 响应式 ---------- */
 @media (max-width: 1099px) {
-  /* 分类换到第二行，自己横向滑动，右端渐隐 */
-  .shelf-toolbar { flex-wrap: wrap; row-gap: var(--bz-sp-3); }
-  .filter-chips {
-    flex: 1 0 100%; margin-left: -4px;
-    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  /* 专题放不下五列：改成一条横向滑动的带子，出血到页面两边；还有卡片的那一头渐隐。页面本身不横向滚动 */
+  .collection-strip {
+    --bz-strip-fade: 48px;
+    grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 208px; justify-content: start;
+    margin-inline: calc(-1 * var(--bz-gutter)); padding-inline: var(--bz-gutter); scroll-padding-inline: var(--bz-gutter);
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none;
   }
-  .filter-chips::after { content: ''; flex: none; width: 20px; }
+  .collection-strip[data-fade="right"] { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - var(--bz-strip-fade)), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - var(--bz-strip-fade)), transparent); }
+  .collection-strip[data-fade="left"] { -webkit-mask-image: linear-gradient(270deg, #000 calc(100% - var(--bz-strip-fade)), transparent); mask-image: linear-gradient(270deg, #000 calc(100% - var(--bz-strip-fade)), transparent); }
+  .collection-strip[data-fade="both"] { -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--bz-strip-fade), #000 calc(100% - var(--bz-strip-fade)), transparent); mask-image: linear-gradient(90deg, transparent, #000 var(--bz-strip-fade), #000 calc(100% - var(--bz-strip-fade)), transparent); }
+  .collection-strip::-webkit-scrollbar { display: none; }
+  /* 焦点框不被滚动容器裁掉 */
+  .collection-strip { padding-block: var(--bz-sp-1); margin-block: calc(-1 * var(--bz-sp-1)); }
 }
 @media (max-width: 899px) {
   .featured-grid, .bot-grid { grid-template-columns: minmax(0, 1fr); }
+  /* 单列时每组只先露 2 张（两行）。服务端渲染的是 4 张，脚本接管之前先把后两张藏住，页面不跳 */
+  .role-group[data-folded="true"] .bot-card:nth-child(n + 3) { display: none; }
 }
 @media (max-width: 679px) {
   .shelf-section, .shelf-footer { margin-top: var(--bz-sp-8); }
+  .role-group + .role-group { margin-top: var(--bz-sp-7); }
+  /* 手机：只有分组那一条吸顶（它自己变成玻璃条），排序换到下面一行，跟着页面滚走 */
+  .shelf-all { --bz-toolbar-h: 40px; }
+  .shelf-toolbar { display: contents; }
+  .role-tabs.bz-seg {
+    position: sticky; top: var(--vp-nav-height); z-index: 5; margin-bottom: var(--bz-sp-3);
+    transition: background-color var(--bz-dur) var(--bz-ease), box-shadow var(--bz-dur) var(--bz-ease);
+  }
+  .shelf-toolbar[data-stuck="true"] .role-tabs {
+    background-color: var(--bz-nav-bg); box-shadow: var(--bz-nav-shadow);
+    -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
+  }
+  .sort-seg { width: fit-content; margin: 0 0 var(--bz-sp-5); }
 }
 @media (pointer: coarse) {
-  .filter-chip { height: 44px; }
+  .shelf-all { --bz-toolbar-h: 62px; }
+}
+@media (pointer: coarse) and (max-width: 679px) {
+  .shelf-all { --bz-toolbar-h: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shelf-page .role-hop, .shelf-page .grid-enter, .shelf-page .bot-card.is-revealed { animation: none !important; transform: none !important; }
+  .group-more .bz-icon { transition: none !important; }
 }
