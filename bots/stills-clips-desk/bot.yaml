@@ -16,3 +16,4 @@ permissions:
   - 云电脑文件
   - 定时自动运行
 external: true
+pitch: "几分几秒那一帧当封面？告诉我就行。"

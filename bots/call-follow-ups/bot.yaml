@@ -18,3 +18,4 @@ permissions:
   - 外部账号
   - 代我发消息
 external: true
+pitch: "电话刚挂，跟进邮件我已经起好草了。"

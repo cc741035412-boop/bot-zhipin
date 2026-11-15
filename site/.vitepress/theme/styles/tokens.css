@@ -1,0 +1,204 @@
+/* Bot 直聘主题：Raycast Store 的结构和质感 + Grok Bot 的灵动和颜色。规格见 docs/dev/INTERACTION.md（v5）。 */
+/* tokens.css：设计 token。浅色写在 :root，深色写在 .dark。界面是中性的，颜色只来自 Bot。 */
+
+:root {
+  /* ---- 字体：圆体只给站名、标题、卡片上的 Bot 名和气泡；其余全用系统字体 ---- */
+  --bz-font-display: ui-rounded, "SF Pro Rounded", "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif;
+  --bz-font-text: system-ui, -apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
+
+  /* ---- 字号阶梯：只许用这 8 档（按钮和气泡的 14px 是唯一例外） ---- */
+  --bz-fs-display: clamp(44px, 5.6vw, 72px);
+  --bz-fs-h1: 32px;
+  --bz-fs-h2: 24px;
+  --bz-fs-h3: 20px;
+  --bz-fs-title: 16px;
+  --bz-fs-body: 15px;
+  --bz-fs-sm: 13px;
+  --bz-fs-xs: 12px;
+  --bz-fs-btn: 14px;
+  --bz-lh-display: 1.05;
+  --bz-lh-h1: 1.15;
+  --bz-lh-h2: 1.25;
+  --bz-lh-h3: 1.3;
+  --bz-lh-title: 1.35;
+  --bz-lh-body: 1.6;
+  --bz-lh-sm: 1.5;
+  --bz-lh-xs: 1.3;
+
+  /* ---- 间距阶梯 ---- */
+  --bz-sp-1: 4px;
+  --bz-sp-2: 8px;
+  --bz-sp-3: 12px;
+  --bz-sp-4: 16px;
+  --bz-sp-5: 24px;
+  --bz-sp-6: 32px;
+  --bz-sp-7: 48px;
+  --bz-sp-8: 64px;
+  --bz-sp-9: 96px;
+  /* 首页区块之间 */
+  --bz-sp-section: var(--bz-sp-9);
+
+  /* ---- 圆角三档；头像砖用比例圆角，分段控件是唯一的胶囊 ---- */
+  --bz-r-control: 8px;
+  --bz-r-card: 12px;
+  --bz-r-panel: 16px;
+  --bz-r-tile: 24%;
+  --bz-r-pill: 999px;
+  --bz-radius-card: var(--bz-r-card);
+
+  /* ---- 动效 ---- */
+  --bz-dur-fast: 120ms;
+  --bz-dur: 180ms;
+  --bz-dur-slow: 280ms;
+  --bz-ease: cubic-bezier(.2, .8, .2, 1);
+  --bz-ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --bz-ease-pop: cubic-bezier(.3, 1.5, .5, 1);
+
+  /* ---- 颜色角色（浅色） ---- */
+  --bz-page: #f6f5f1;
+  --bz-card: #ffffff;
+  --bz-paper: var(--bz-card);
+  --bz-surface-1: #ffffff;
+  --bz-surface-2: rgba(20, 20, 24, .03);
+  --bz-surface-3: rgba(20, 20, 24, .06);
+  --bz-surface-soft: #efede7;
+  --bz-glass: rgba(255, 255, 255, .7);
+  --bz-hairline: rgba(20, 20, 24, .08);
+  --bz-border: #e6e2d9;
+  --bz-border-strong: rgba(20, 20, 24, .16);
+  --bz-border-hover: rgba(20, 20, 24, .3);
+  --bz-highlight: inset 0 1px 0 rgba(255, 255, 255, .7);
+  --bz-ink: #141418;
+  --bz-ink-hover: #2c2c33;
+  --bz-text-2: #4a4a52;
+  --bz-text-3: #62626b;
+  --bz-eye: #16161b;
+  --bz-success: #16a34a;
+  --bz-quota-low: #15803d;
+  --bz-quota-mid: #b45309;
+  --bz-quota-high: #b91c1c;
+  --bz-flame: #f97316;
+  /* 实心按钮：一屏最多一个 */
+  --bz-primary-bg: var(--bz-ink);
+  --bz-primary-bg-hover: var(--bz-ink-hover);
+  --bz-primary-fg: #ffffff;
+  /* 来源标签 */
+  --bz-source-community: #34d399;
+  --bz-source-author: #ff6a13;
+  /* 浮层才有投影；卡片靠细边和内高光分层 */
+  --bz-shadow-card: 0 1px 2px rgba(20, 20, 24, .04), 0 12px 28px -20px rgba(20, 20, 24, .2);
+  --bz-shadow-float: 0 2px 6px rgba(20, 20, 24, .06), 0 24px 48px -24px rgba(20, 20, 24, .32);
+
+  /* ---- 只在 styles/ 里用的派生量，不算对外 token ---- */
+  --bz-card-bg: var(--bz-surface-1);
+  --bz-card-shadow: 0 0 0 0 transparent;
+  --bz-hover-from: rgba(255, 255, 255, 0);
+  --bz-hover-to: rgba(20, 20, 24, .035);
+  --bz-tile-bg: var(--bz-surface-2);
+  --bz-tile-glow: 30%;
+  --bz-hero-tile-bg: rgba(255, 255, 255, .78);
+  --bz-hero-tile-highlight: inset 0 1px 0 rgba(255, 255, 255, .9);
+  --bz-nav-bg: rgba(255, 255, 255, .74);
+  --bz-nav-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 16px 36px -24px rgba(20, 20, 24, .32);
+  --bz-seg-active: #ffffff;
+  --bz-seg-shadow: 0 1px 2px rgba(20, 20, 24, .14), 0 0 0 1px rgba(20, 20, 24, .04);
+  --bz-aurora-opacity: .3;
+  --bz-featured-glow: 16%;
+
+  /* 悬浮导航条：条高 + 距顶 16px + 8px 呼吸，正文和粘性元素都按这个让位 */
+  --bz-nav-top: 16px;
+  --bz-nav-bar: 64px;
+  --vp-nav-height: calc(var(--bz-nav-top) + var(--bz-nav-bar) + 8px);
+  --vp-c-bg: var(--bz-page);
+  --vp-c-bg-elv: var(--bz-card);
+  --vp-c-bg-soft: var(--bz-surface-soft);
+  --vp-c-divider: var(--bz-border);
+  --vp-c-gutter: var(--bz-border);
+  --vp-nav-bg-color: var(--bz-nav-bg);
+  --vp-nav-screen-bg-color: var(--bz-card);
+  --vp-c-text-1: var(--bz-ink);
+  --vp-c-text-2: var(--bz-text-2);
+  --vp-c-brand-1: var(--bz-ink);
+  --vp-c-brand-2: var(--bz-ink-hover);
+}
+.dark {
+  --bz-page: #07080a;
+  --bz-card: #0c0d0f;
+  --bz-paper: var(--bz-card);
+  --bz-surface-1: transparent;
+  --bz-surface-2: rgba(255, 255, 255, .04);
+  --bz-surface-3: rgba(255, 255, 255, .07);
+  --bz-surface-soft: #17181b;
+  --bz-glass: rgba(255, 255, 255, .04);
+  --bz-hairline: rgba(255, 255, 255, .06);
+  --bz-border: rgba(255, 255, 255, .08);
+  --bz-border-strong: rgba(255, 255, 255, .14);
+  --bz-border-hover: rgba(255, 255, 255, .26);
+  --bz-highlight: inset 0 1px 0 rgba(255, 255, 255, .05);
+  --bz-ink: #ffffff;
+  --bz-ink-hover: #e4e4e7;
+  --bz-text-2: #9c9c9d;
+  --bz-text-3: #8b8c8f;
+  --bz-flame: #fb923c;
+  --bz-success: #4ade80;
+  --bz-quota-low: #4ade80;
+  --bz-quota-mid: #fbbf24;
+  --bz-quota-high: #f87171;
+  --bz-primary-bg: #ffffff;
+  --bz-primary-bg-hover: #ebebeb;
+  --bz-primary-fg: #0b0b0d;
+  --bz-shadow-card: 0 2px 6px rgba(0, 0, 0, .3), 0 16px 36px -20px rgba(0, 0, 0, .7);
+  --bz-shadow-float: 0 2px 6px rgba(0, 0, 0, .3), 0 24px 56px -24px rgba(0, 0, 0, .9);
+  --bz-hover-from: rgba(255, 255, 255, .02);
+  --bz-hover-to: rgba(255, 255, 255, .075);
+  --bz-tile-glow: 42%;
+  --bz-hero-tile-bg: rgba(18, 19, 22, .72);
+  --bz-hero-tile-highlight: inset 0 1px 0 rgba(255, 255, 255, .1);
+  --bz-nav-bg: rgba(14, 15, 17, .72);
+  --bz-nav-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 18px 40px -24px rgba(0, 0, 0, .9);
+  --bz-seg-active: rgba(255, 255, 255, .1);
+  --bz-seg-shadow: inset 0 1px 0 rgba(255, 255, 255, .1), inset 0 0 0 1px rgba(255, 255, 255, .06);
+  --bz-aurora-opacity: .5;
+  --bz-featured-glow: 22%;
+}
+@media (max-width: 679px) {
+  :root { --bz-fs-h1: 28px; --bz-fs-h2: 22px; --bz-fs-h3: 18px; --bz-sp-section: var(--bz-sp-8); }
+}
+@media (max-width: 767px) {
+  :root { --bz-nav-bar: 56px; }
+}
+
+/* 次级按钮的底和边：不在 Bot 范围里是中性玻璃，进了 .bz-bot-scope 就染上这只 Bot 的颜色。
+   在使用处解析 Bot 色，不让根节点提前把变量算成空值。 */
+:root {
+  --bz-btn-fill: var(--bz-surface-2);
+  --bz-btn-fill-hover: var(--bz-surface-3);
+  --bz-btn-edge: var(--bz-border-strong);
+  --bz-btn-edge-hover: var(--bz-border-hover);
+}
+:root, .bz-bot-scope {
+  --bz-shadow-hover: 0 4px 10px rgba(20, 20, 24, .06), 0 18px 40px -24px color-mix(in srgb, var(--bz-bot-color, #8a8a93) 55%, transparent);
+}
+.bz-bot-scope {
+  --bz-bot-color: var(--bz-bot-light);
+  /* 旧的 Bot 色实底按钮变量：v5 不再使用，保留给还没迁移的地方读取 */
+  --bz-btn-bg: var(--bz-btn-bg-light);
+  --bz-btn-fg: var(--bz-btn-fg-light);
+  --bz-btn-fill: color-mix(in srgb, var(--bz-bot-color) 10%, var(--bz-surface-2));
+  --bz-btn-fill-hover: color-mix(in srgb, var(--bz-bot-color) 18%, var(--bz-surface-2));
+  --bz-btn-edge: color-mix(in srgb, var(--bz-bot-color) 34%, var(--bz-border-strong));
+  --bz-btn-edge-hover: color-mix(in srgb, var(--bz-bot-color) 60%, var(--bz-border-strong));
+}
+.dark .bz-bot-scope {
+  --bz-bot-color: var(--bz-bot-dark);
+  --bz-btn-bg: var(--bz-btn-bg-dark);
+  --bz-btn-fg: var(--bz-btn-fg-dark);
+}
+
+/* 活体头像的身体色和眼睛 */
+.bz-live { --bz-bot-body: var(--bz-bot-light); overflow: visible; }
+.dark .bz-live { --bz-bot-body: var(--bz-bot-dark); }
+.dark .bz-live [data-part="outline"] { display: none; }
+/* 近乎纯黑的 Bot：浅色主题下身体是黑的，眼睛换成奶白；深色主题身体已换成奶白，眼睛照旧是深色。 */
+.bz-live.bz-live-ink { --bz-eye: #f1efe9; }
+.dark .bz-live.bz-live-ink { --bz-eye: #16161b; }

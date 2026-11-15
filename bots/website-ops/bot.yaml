@@ -19,3 +19,4 @@ permissions:
   - 定时自动运行
   - 外部账号
 external: true
+pitch: "官网哪里断链、哪里慢，我体检完直接开 PR。"

@@ -14,9 +14,11 @@ const style = computed(() => ({
   '--bz-bot-dark': colors.value.dark,
   ...(colors.value.outline ? { '--bz-bot-outline': colors.value.outline } : {}),
 }))
+// 官方色近乎纯黑（深色主题会换成奶白的那些）：浅色主题下黑眼睛压在黑身体上看不见，交给 CSS 把眼睛换成奶白。
+const inkBody = computed(() => colors.value.light !== colors.value.dark)
 defineExpose({ play: (detail: Play) => live.value?.play(detail) })
 </script>
 
 <template>
-  <LiveBot ref="live" :radii="face.radii" color="var(--bz-bot-body)" :shape-id="face.shape" :style="style" :outline="colors.outline ? 'var(--bz-bot-outline)' : null" :rest="rest" :size="size" />
+  <LiveBot ref="live" :radii="face.radii" color="var(--bz-bot-body)" :shape-id="face.shape" :class="{ 'bz-live-ink': inkBody }" :style="style" :outline="colors.outline ? 'var(--bz-bot-outline)' : null" :rest="rest" :size="size" />
 </template>

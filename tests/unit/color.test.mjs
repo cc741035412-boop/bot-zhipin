@@ -5,17 +5,32 @@ import { HERO_MASCOTS } from '../../site/.vitepress/meta.mjs'
 import { shapeRadii } from '../../site/.vitepress/theme/face'
 
 describe('LB6 品牌与分类配置', () => {
-  test('固定七只、橙色居中、形状有效且至少五种、颜色互异', () => {
-    expect(HERO_MASCOTS).toHaveLength(7)
-    expect(new Set(HERO_MASCOTS.map((m) => m.key)).size).toBe(7)
-    expect(new Set(HERO_MASCOTS.map((m) => m.color)).size).toBe(7)
+  test('固定九只（上排五只、下排四只）、橙色在上排正中、形状有效且至少五种、颜色互异', () => {
+    expect(HERO_MASCOTS).toHaveLength(9)
+    expect(new Set(HERO_MASCOTS.map((m) => m.key)).size).toBe(9)
+    expect(new Set(HERO_MASCOTS.map((m) => m.color)).size).toBe(9)
     expect(new Set(HERO_MASCOTS.map((m) => m.shape)).size).toBeGreaterThanOrEqual(5)
-    expect(HERO_MASCOTS[3].color).toBe('#ff6a13')
+    expect(HERO_MASCOTS[2].color).toBe('#ff6a13')
+    expect(HERO_MASCOTS.map((m) => m.color)).toEqual(expect.arrayContaining(['#3b82f6', '#f43f5e']))
     for (const mascot of HERO_MASCOTS) {
       expect(Object.keys(mascot).sort()).toEqual(['color', 'key', 'shape'])
       expect(shapeRadii(mascot.shape)).not.toBeNull()
       expect(mascot.color).toMatch(/^#[0-9a-f]{6}$/)
     }
+  })
+  test('砖墙上相邻的砖（左右和斜向）不同色系', () => {
+    // 色相分四个家族：暖橙（含琥珀、棕）、粉红、蓝紫、绿。
+    const family = (hex) => {
+      const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+      const max = Math.max(r, g, b), min = Math.min(r, g, b)
+      const h = ((max === r ? ((g - b) / (max - min)) % 6 : max === g ? (b - r) / (max - min) + 2 : (r - g) / (max - min) + 4) * 60 + 360) % 360
+      return h < 60 ? '暖橙' : h < 200 ? '绿' : h < 290 ? '蓝紫' : '粉红'
+    }
+    const top = HERO_MASCOTS.slice(0, 5).map((m) => family(m.color)), bottom = HERO_MASCOTS.slice(5).map((m) => family(m.color))
+    for (let i = 1; i < top.length; i++) expect(top[i], `上排第 ${i + 1} 只`).not.toBe(top[i - 1])
+    for (let i = 1; i < bottom.length; i++) expect(bottom[i], `下排第 ${i + 1} 只`).not.toBe(bottom[i - 1])
+    // 下排错开半格：第 i 只夹在上排第 i、i+1 只中间。
+    bottom.forEach((value, i) => { expect(value).not.toBe(top[i]); expect(value).not.toBe(top[i + 1]) })
   })
   test('分类映射完整覆盖 schema，无重复颜色，未知分类安全回退', () => {
     expect(Object.keys(CATEGORY_COLORS).sort()).toEqual([...loadEnums().categories].sort())

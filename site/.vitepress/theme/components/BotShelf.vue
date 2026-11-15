@@ -1,76 +1,127 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { data as bots } from '../../data/bots.data.mjs'
-import { SITE, CONTRIBUTE_URL, HERO_MASCOTS } from '../../meta.mjs'
+import { data as enums } from '../enums.data.mjs'
+import { SITE, CONTRIBUTE_URL, FEATURED, HERO_MASCOTS, SHELF_COPY } from '../../meta.mjs'
 import { heatState, loadHeat } from '../heat'
+import { categoryStyle } from '../color'
 import BotCard from './BotCard.vue'
+import FeaturedCard from './FeaturedCard.vue'
 import HeroPortrait from './HeroPortrait.vue'
+import SearchTrigger from './SearchTrigger.vue'
+import BzIcon from './BzIcon.vue'
 import { enterHero } from '../live/reactions'
 import DefaultAvatar from './DefaultAvatar.vue'
 import LiveAnnouncer from './LiveAnnouncer.vue'
 
+const ALL = 'all'
 const hero = ref()
 let releaseEntry
 const sort = ref('hot')
+const filter = ref(ALL)
 let manual = false
 let alive = true
 const ordered = shallowRef([])
+const featured = shallowRef([])
 const byName = new Intl.Collator('zh-CN')
 const entering = ref(false)
-function heroStyle(index) {
-  const distance = Math.abs(index - (HERO_MASCOTS.length - 1) / 2)
-  return { '--bz-hero-size': `${[96, 80, 68, 60][distance]}px` }
-}
+const featuredEntering = ref(false)
+const slugs = (list) => list.map((bot) => bot.slug).join(',')
+const byNewest = (a, b) => b.addedAt.localeCompare(a.addedAt) || byName.compare(a.name, b.name)
+const byHeat = (a, b) => (heatState.values[b.slug] ?? 0) - (heatState.values[a.slug] ?? 0) || byNewest(a, b)
+// 货架上实际出现的分类，顺序跟 schema 枚举走。
+const categories = computed(() => enums.categories.filter((category) => bots.some((bot) => bot.category === category)))
+const visible = computed(() => filter.value === ALL ? ordered.value : ordered.value.filter((bot) => bot.category === filter.value))
 function reorder() {
   // 只在进入页面、首次 stats 返回、主动切换排序或开发数据更新时拍快照。
-  ordered.value = [...bots].sort((a, b) =>
-    (sort.value === 'hot' ? (heatState.values[b.slug] ?? 0) - (heatState.values[a.slug] ?? 0) : 0)
-    || b.addedAt.localeCompare(a.addedAt)
-    || byName.compare(a.name, b.name))
+  ordered.value = [...bots].sort(sort.value === 'hot' ? byHeat : byNewest)
+}
+function pickFeatured() {
+  // 精选和列表一样只拍快照：热度没到时就是最新三位，之后的点击不会让卡片跳位。
+  // 主推由编辑定（meta.mjs 的 FEATURED）；名单里的 Bot 不在货架上时，退回热度前三。
+  const picks = FEATURED.map((slug) => bots.find((bot) => bot.slug === slug)).filter(Boolean)
+  featured.value = picks.length === FEATURED.length ? picks : bots.length >= 3 ? [...bots].sort(byHeat).slice(0, 3) : []
 }
 function select(value) {
   manual = true
   sort.value = value
   reorder()
 }
-watch(() => bots, reorder, { immediate: true })
+function choose(value) {
+  if (filter.value === value) return
+  filter.value = value
+  entering.value = true
+}
+watch(() => bots, () => {
+  reorder()
+  pickFeatured()
+  if (filter.value !== ALL && !categories.value.includes(filter.value)) filter.value = ALL
+}, { immediate: true })
 onMounted(async () => {
   releaseEntry = enterHero([...hero.value.querySelectorAll('[data-testid="live-bot"]')])
   const success = await loadHeat()
   if (!alive) return
   if (!success && !manual) sort.value = 'new'
-  const previous = ordered.value.map((bot) => bot.slug).join(',')
+  const previous = slugs(ordered.value), previousFeatured = slugs(featured.value)
   reorder()
-  entering.value = success && previous !== ordered.value.map((bot) => bot.slug).join(',')
+  if (success) pickFeatured()
+  entering.value = success && previous !== slugs(ordered.value)
+  featuredEntering.value = success && previousFeatured !== slugs(featured.value)
 })
 onBeforeUnmount(() => { alive = false; releaseEntry?.() })
 </script>
 
 <template>
-  <main class="shelf-page">
+  <main class="shelf-page shelf-home">
     <LiveAnnouncer />
+    <!-- 极光是独立的装饰层：文字的祖先元素上不放任何背景图。 -->
+    <div class="hero-aurora" aria-hidden="true"><i /><i /><i /><i /></div>
     <header class="shelf-intro">
       <div ref="hero" class="hero-portraits" aria-hidden="true">
-        <HeroPortrait v-for="(mascot, index) in HERO_MASCOTS" :key="mascot.key" :mascot="mascot" :class="{ central: index === 3, 'hero-edge': index === 0 || index === 6 }" :style="heroStyle(index)" />
+        <HeroPortrait v-for="mascot in HERO_MASCOTS" :key="mascot.key" :mascot="mascot" />
       </div>
       <h1>{{ SITE.name }}</h1>
-      <p>{{ SITE.tagline }}</p>
-      <a data-testid="contribute-link" class="shelf-button primary contribute" :href="CONTRIBUTE_URL"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v12M2 8h12" /></svg>我要投稿</a>
+      <SearchTrigger class="hero-search" data-testid="search-trigger" />
     </header>
-    <div class="shelf-toolbar">
-    <div class="sort-controls" :data-sort="sort" role="group" aria-label="排序">
-      <button type="button" data-testid="sort-hot" class="shelf-button" :aria-pressed="sort === 'hot'" @click="select('hot')">热门</button>
-      <button type="button" data-testid="sort-new" class="shelf-button" :aria-pressed="sort === 'new'" @click="select('new')">最新</button>
-    </div>
-    <span class="bot-count">共 {{ bots.length }} 个 Bot</span>
-    </div>
-    <div v-if="ordered.length" class="bot-grid" :class="{ 'grid-enter': entering }" @animationend="entering = false">
-      <BotCard v-for="bot in ordered" :key="bot.slug" :bot="bot" />
-    </div>
-    <div v-else data-testid="empty-state" class="empty-state">
-      <DefaultAvatar slug="empty-shelf" rest="sleep" :size="160" />
-      <p>货架上还没有 Bot</p>
-      <a class="shelf-button" :href="CONTRIBUTE_URL">做第一个投稿的人</a>
-    </div>
+    <section v-if="featured.length" class="shelf-section" aria-labelledby="featured-title">
+      <header class="bz-section-head">
+        <div><h2 id="featured-title">{{ SHELF_COPY.featuredTitle }}</h2></div>
+      </header>
+      <div class="featured-grid" :class="{ 'grid-enter': featuredEntering }" @animationend="featuredEntering = false">
+        <FeaturedCard v-for="bot in featured" :key="bot.slug" :bot="bot" />
+      </div>
+    </section>
+    <section id="all" class="shelf-section" aria-labelledby="all-title">
+      <header class="bz-section-head">
+        <div><h2 id="all-title">{{ SHELF_COPY.allTitle }}</h2></div>
+        <span v-if="bots.length" class="bot-count">共 {{ visible.length }} 个</span>
+      </header>
+      <div v-if="bots.length" class="shelf-toolbar">
+        <div class="bz-seg" :data-sort="sort" role="group" aria-label="排序">
+          <button type="button" data-testid="sort-hot" :aria-pressed="sort === 'hot'" @click="select('hot')">热门</button>
+          <button type="button" data-testid="sort-new" :aria-pressed="sort === 'new'" @click="select('new')">最新</button>
+        </div>
+        <div class="filter-chips" role="group" :aria-label="SHELF_COPY.filterLabel">
+          <button type="button" data-testid="filter-category" class="filter-chip all" :aria-pressed="filter === ALL" @click="choose(ALL)"><i class="chip-dot all" aria-hidden="true" />{{ SHELF_COPY.allCategories }}</button>
+          <button v-for="category in categories" :key="category" type="button" data-testid="filter-category" class="filter-chip" :style="categoryStyle(category)" :aria-pressed="filter === category" @click="choose(category)"><i class="chip-dot" aria-hidden="true" />{{ category }}</button>
+        </div>
+      </div>
+      <div v-if="visible.length" class="bot-grid" :class="{ 'grid-enter': entering }" @animationend="entering = false">
+        <BotCard v-for="bot in visible" :key="bot.slug" :bot="bot" />
+      </div>
+      <div v-else-if="bots.length" data-testid="empty-filter" class="empty-state">
+        <DefaultAvatar slug="empty-shelf" rest="sleep" :size="96" />
+        <p>{{ SHELF_COPY.emptyFilter }}</p>
+        <button type="button" class="bz-btn" @click="choose(ALL)">{{ SHELF_COPY.showAll }}</button>
+      </div>
+      <div v-else data-testid="empty-state" class="empty-state">
+        <DefaultAvatar slug="empty-shelf" rest="sleep" :size="120" />
+        <p>货架上还没有 Bot</p>
+        <a class="bz-btn" :href="CONTRIBUTE_URL"><BzIcon name="plus" />做第一个投稿的人</a>
+      </div>
+    </section>
+    <footer v-if="bots.length" class="shelf-footer">
+      <a data-testid="contribute-link" class="bz-btn" :href="CONTRIBUTE_URL"><BzIcon name="plus" />{{ SHELF_COPY.contribute }}</a>
+    </footer>
   </main>
 </template>

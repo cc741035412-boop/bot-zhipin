@@ -25,7 +25,8 @@ test('接口失败：最新排序、热度占位、链接与外部收录按钮',
   await page.goto('/')
   await expect(page.getByTestId('sort-new')).toHaveAttribute('aria-pressed', 'true')
   expect(await order(page)).toEqual([weekly, reviewer, external])
-  await expect(card(page, weekly).getByTestId('heat')).toHaveText('热度 —')
+  // 列表卡只在热度大于 0 时显示热度；拿不到热度就不占位。
+  await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
   await expect(page.getByTestId('contribute-link')).toHaveAttribute('href', CONTRIBUTE_URL)
   await expect(card(page, reviewer).getByTestId('author-link')).toHaveAttribute('href', 'https://github.com/example-user')
   await expect(card(page, external).getByTestId('author-link')).toHaveAttribute('href', 'https://x.ai/bot/demo-external-000')
@@ -46,7 +47,7 @@ test('延迟失败不覆盖用户手动排序；HTTP / JSON 失败均可降级',
   release()
   await response
   await expect(page.getByTestId('sort-hot')).toHaveAttribute('aria-pressed', 'true')
-  await expect(card(page, weekly).getByTestId('heat')).toHaveText('热度 —')
+  await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
   await page.unroute('**/api/stats')
   await page.route('**/api/stats', (route) => route.fulfill({ contentType: 'text/html', body: '<h1>没有后端</h1>' }))
   await page.reload()
@@ -64,9 +65,11 @@ test('热度更新不跳位、切换后重排、复制反馈与导入上报', as
   await page.goto('/')
   await expect(card(page, external).getByTestId('heat')).toHaveText('热度 5')
   expect(await order(page)).toEqual([external, reviewer, weekly])
-  await expect(card(page, weekly).getByTestId('heat')).toHaveText('热度 0')
+  await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
   await card(page, weekly).getByTestId('btn-prompt').click()
-  await expect(card(page, weekly).getByTestId('btn-prompt')).toHaveText('已复制 ✓')
+  // 复制成功：文字换成「已复制」，前面的图标从 copy 换成对勾。
+  await expect(card(page, weekly).getByTestId('btn-prompt')).toHaveText('已复制')
+  await expect(card(page, weekly).getByTestId('btn-prompt').locator('svg')).toHaveAttribute('data-icon', 'check')
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(installPrompt(weekly))
   await expect(card(page, weekly).getByTestId('heat')).toHaveText('热度 99')
   expect(await order(page)).toEqual([external, reviewer, weekly])
@@ -84,6 +87,7 @@ test('热度更新不跳位、切换后重排、复制反馈与导入上报', as
   await popup.close()
   await expect.poll(() => clicks).toContainEqual({ slug: reviewer, kind: 'import' })
   await expect(card(page, weekly).getByTestId('btn-prompt')).toHaveText('复制安装提示词')
+  await expect(card(page, weekly).getByTestId('btn-prompt').locator('svg')).toHaveAttribute('data-icon', 'copy')
 })
 
 test('剪贴板和上报失败时仍可手动复制，不报页面错误', async ({ page }) => {
@@ -163,20 +167,135 @@ test('详情、SSR 头像一致性、技能和任务源码链接、外部隐藏�
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', '把一周零散的聊天和笔记整理成一份周报')
   await expect(page.getByTestId('forked-from')).toContainText('示例·PRD 评审员')
   await expect(page.getByTestId('section-prereq')).toContainText('无')
-  await expect(page.getByTestId('section-quota')).toContainText('偶尔用一下，几乎不占额度')
-  await expect(page.getByTestId('section-permissions')).toContainText('会按计划自己运行，不用你每次叫它')
+  // 额度：三格强度条 + 一个字；档位的含义不直接显示，在 title 和读屏文本里。
+  const meter = page.getByTestId('quota-meter')
+  await expect(meter).toHaveAttribute('data-quota', '低')
+  await expect(meter).toHaveAttribute('title', '偶尔用一下，几乎不占额度')
+  await expect(meter.locator('.quota-level')).toHaveText('低')
+  await expect(meter.locator('.quota-bars > i')).toHaveCount(3)
+  await expect(meter.locator('.bz-sr-only')).toHaveText('：偶尔用一下，几乎不占额度')
+  // 说明句只给读屏：视觉上是 1px 的隐藏块，不占版面。
+  expect((await meter.locator('.bz-sr-only').boundingBox()).width).toBeLessThanOrEqual(1)
+  expect(await meter.locator('.quota-bars > i').evaluateAll((cells) => cells.map((cell) => getComputedStyle(cell).backgroundColor)).then((colors) => colors.filter((color) => color === colors[0]).length), '「低」只亮一格').toBe(1)
+  // 权限：一排标签，每项的含义同样在 title 和读屏文本里。
+  const auto = page.getByTestId('section-permissions').locator('.permission-list > li', { hasText: '定时自动运行' })
+  await expect(auto).toHaveClass(/bz-tag/)
+  await expect(auto).toHaveAttribute('title', '会按计划自己运行，不用你每次叫它')
+  await expect(auto.locator('.bz-sr-only')).toHaveText('：会按计划自己运行，不用你每次叫它')
+  expect((await auto.locator('.bz-sr-only').boundingBox()).width).toBeLessThanOrEqual(1)
+  expect((await auto.boundingBox()).height, '权限是 22 高的标签').toBe(22)
   await expect(page.getByTestId('section-screenshots').locator('img')).toHaveCount(2)
   await expect(page.getByTestId('section-skills').locator('a')).toHaveAttribute('href', /\/bots\/demo-weekly-digest\/skills\/weekly-summary\/SKILL\.md$/)
   await expect(page.getByTestId('section-design')).toContainText('解决谁的什么问题')
   await page.getByTestId('forked-from').locator('a').click()
   await expect(page.getByTestId('section-prereq').locator('li')).toHaveCount(2)
   await expect(page.getByTestId('section-routines').locator('a')).toHaveAttribute('href', /\/bots\/demo-prd-reviewer\/routines\.md$/)
+  // 定时任务这一块只有标题和链接，没有说明句。
+  await expect(page.getByTestId('section-routines').locator('p')).toHaveCount(0)
   await expect(page.getByTestId('forked-from')).toHaveCount(0)
   await page.goto(`/bots/${external}`)
-  await expect(page.getByTestId('bot-detail')).toContainText('这个 Bot 由原作者在 x.ai 发布，本站只收录链接。')
+  // 来源只写在头部的作者行里，页面底部不再有一行来源说明。
+  await expect(page.getByTestId('bot-detail').locator('.detail-header .bot-origin')).toHaveText('· 社区收录')
+  await expect(page.getByTestId('bot-detail')).not.toContainText('本站只收录链接')
+  await expect(page.locator('.external-notice')).toHaveCount(0)
   for (const id of ['btn-prompt', 'section-skills', 'section-screenshots', 'section-design']) {
     await expect(page.getByTestId(id)).toHaveCount(0)
   }
+})
+
+test('界面上没有解释性的句子：首屏、区块、页尾、404、搜索占位字', async ({ page }) => {
+  await mockStats(page)
+  await page.goto('/')
+  // 首屏只有砖墙、站名、搜索框；tagline 只留在 meta description 里。
+  await expect(page.locator('.shelf-intro > *')).toHaveCount(3)
+  await expect(page.locator('.shelf-intro p')).toHaveCount(0)
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Grok Bot 模板货架/)
+  await expect(page.getByTestId('search-trigger').locator('.search-trigger-text')).toHaveText('搜索')
+  // 区块只有标题；列表区右侧保留计数。
+  await expect(page.locator('.bz-section-head p')).toHaveCount(0)
+  await expect(page.locator('.bz-section-head h2')).toHaveText(['本周主推', '全部 Bot'])
+  await expect(page.locator('.bot-count')).toHaveText('共 3 个')
+  // 页尾只有「我要投稿」：图标 + 动词。
+  await expect(page.locator('.shelf-footer > *')).toHaveCount(1)
+  await expect(page.getByTestId('contribute-link')).toHaveText('我要投稿')
+  await expect(page.getByTestId('contribute-link').locator('svg')).toHaveAttribute('data-icon', 'plus')
+  // 搜索面板的占位字和首屏一致。
+  await page.getByTestId('search-trigger').click()
+  await expect(page.getByTestId('search-input')).toHaveAttribute('placeholder', '搜索')
+  await page.keyboard.press('Escape')
+  // 404：只有标题和返回按钮。
+  await page.goto('/bots/not-exist-xyz')
+  await expect(page.locator('.not-found h1')).toHaveText('这一页走丢了')
+  await expect(page.locator('.not-found p:not([aria-hidden="true"])')).toHaveCount(0)
+  await expect(page.locator('.not-found .bz-btn')).toHaveText('回货架看看')
+  await expect(page.locator('.not-found .bz-btn svg')).toHaveAttribute('data-icon', 'arrow-left')
+})
+
+test('整张卡可点进详情；头像、作者、导入、复制在它上面各管各的', async ({ page, context, baseURL }) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: baseURL })
+  await mockStats(page)
+  await page.goto('/')
+  const bot = card(page, weekly)
+  await bot.scrollIntoViewIfNeeded()
+  // 卡里仍然只有一个指向详情的链接；卡上随便一处（介绍、元信息、空白）都是手型。
+  await expect(bot.locator(`a[href="/bots/${weekly}"]`)).toHaveCount(1)
+  const cursorAt = (locator, selector) => locator.evaluate((el, selector) => {
+    const box = (selector ? el.querySelector(selector) : el).getBoundingClientRect()
+    const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
+    return { cursor: getComputedStyle(hit).cursor, link: hit.closest('a')?.getAttribute('href') ?? null }
+  }, selector)
+  for (const selector of ['.bot-tagline', '.bot-stats .stat-quota', '.category-tag']) {
+    expect(await cursorAt(bot, selector), selector).toEqual({ cursor: 'pointer', link: `/bots/${weekly}` })
+  }
+  // 鼠标真的悬停上去之后（气泡打开、介绍淡出）也一样：介绍那一块点下去要进详情，不能被淡出的介绍吃掉。
+  const hoverAt = await bot.locator('.bot-tagline').boundingBox()
+  await page.mouse.move(hoverAt.x + hoverAt.width / 2, hoverAt.y + hoverAt.height / 2, { steps: 3 })
+  await expect(bot.getByTestId('pitch-bubble')).toHaveAttribute('data-open', 'true')
+  await page.waitForTimeout(250)
+  expect(await page.evaluate(([x, y]) => document.elementFromPoint(x, y).closest('a')?.getAttribute('href') ?? null, [hoverAt.x + hoverAt.width / 2, hoverAt.y + hoverAt.height / 2]), '悬停时介绍位置仍是整卡链接').toBe(`/bots/${weekly}`)
+  await page.mouse.move(5, 5)
+  // 头像、作者、导入、复制不被整卡链接盖住。
+  for (const id of ['avatar', 'author-link', 'btn-import', 'btn-prompt']) {
+    const hit = await bot.getByTestId(id).evaluate((el) => {
+      const box = el.getBoundingClientRect()
+      return el.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2))
+    })
+    expect(hit, `${id} 在整卡链接上面`).toBe(true)
+  }
+  // 点头像是戳，点复制是复制：都不跳走。
+  await bot.getByTestId('avatar').click()
+  await expect(bot.getByTestId('pitch-bubble')).toHaveAttribute('data-open', 'true')
+  await bot.getByTestId('btn-prompt').click()
+  await expect(bot.getByTestId('btn-prompt')).toHaveText('已复制')
+  await expect(page).toHaveURL(/\/$/)
+  // 点导入开新标签页，本页不动。
+  const popup = context.waitForEvent('page')
+  await bot.getByTestId('btn-import').click()
+  await (await popup).close()
+  await expect(page).toHaveURL(/\/$/)
+  // 点介绍那一块（不是名字）进详情。
+  const tagline = await bot.locator('.bot-tagline').boundingBox()
+  await page.mouse.click(tagline.x + tagline.width / 2, tagline.y + tagline.height / 2)
+  await expect(page).toHaveURL(new RegExp(`/bots/${weekly}$`))
+  await expect(page.getByTestId('bot-detail')).toBeVisible()
+  // 主推卡同样整卡可点：点介绍进详情，点砖是戳、点导入开新标签页。
+  await page.goto('/')
+  const featured = page.locator(`[data-testid="featured-card"][data-slug="${reviewer}"]`)
+  await featured.scrollIntoViewIfNeeded()
+  await expect(featured.locator(`a[href="/bots/${reviewer}"]`)).toHaveCount(1)
+  expect(await cursorAt(featured, '.bot-tagline')).toEqual({ cursor: 'pointer', link: `/bots/${reviewer}` })
+  for (const selector of ['.featured-tile', '.bot-author', '[data-testid="featured-import"]']) {
+    const hit = await featured.locator(selector).evaluate((el) => {
+      const box = el.getBoundingClientRect()
+      return el.contains(document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2))
+    })
+    expect(hit, `${selector} 在整卡链接上面`).toBe(true)
+  }
+  await featured.locator('.featured-tile').click()
+  await expect(page).toHaveURL(/\/$/)
+  const line = await featured.locator('.bot-tagline').boundingBox()
+  await page.mouse.click(line.x + line.width / 2, line.y + line.height / 2)
+  await expect(page).toHaveURL(new RegExp(`/bots/${reviewer}$`))
 })
 
 test('设计说明：模板和 HTML 不执行，图片相对路径与引用式图片改写', async ({ page }) => {

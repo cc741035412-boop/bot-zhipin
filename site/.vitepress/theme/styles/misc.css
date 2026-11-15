@@ -1,0 +1,48 @@
+/* misc.css：手动复制弹窗、空状态、404，以及投稿预览对卡片和详情的修正。 */
+
+/* ---------- 手动复制弹窗（浮层：面板圆角 16，有投影） ---------- */
+.prompt-fallback {
+  width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 48px); margin: auto; padding: var(--bz-sp-5); overflow: auto;
+  border: 1px solid var(--bz-border); border-radius: var(--bz-r-panel); background: var(--bz-paper); color: var(--bz-ink);
+  box-shadow: var(--bz-highlight), var(--bz-shadow-float);
+}
+.prompt-fallback::backdrop { background: rgba(0, 0, 0, .6); }
+.shelf-page .prompt-fallback h2 { margin: 0 0 var(--bz-sp-2); font-family: var(--bz-font-display); font-size: var(--bz-fs-h3); line-height: var(--bz-lh-h3); font-weight: 600; letter-spacing: -.01em; }
+.prompt-fallback p { font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-2); }
+.prompt-fallback textarea {
+  display: block; width: 100%; margin: var(--bz-sp-4) 0; padding: var(--bz-sp-3); resize: vertical;
+  border: 1px solid var(--bz-border-strong); border-radius: var(--bz-r-control); background: var(--bz-surface-2); color: var(--bz-ink);
+  font: inherit; font-size: var(--bz-fs-sm); line-height: var(--bz-lh-body);
+}
+
+/* ---------- 空状态：虚线框里一只睡着的 Bot、一句话、一个按钮 ---------- */
+.empty-state {
+  display: flex; flex-direction: column; align-items: center; padding: var(--bz-sp-7) var(--bz-sp-4);
+  border: 1px dashed var(--bz-border-strong); border-radius: var(--bz-r-card); text-align: center;
+}
+.empty-state > svg { width: 96px; height: 96px; }
+.shelf-page .empty-state p { margin: var(--bz-sp-4) 0 var(--bz-sp-5); font-size: var(--bz-fs-title); line-height: var(--bz-lh-title); font-weight: 600; color: var(--bz-ink); }
+
+/* ---------- 404 ---------- */
+.shelf-page.not-found { display: flex; flex-direction: column; align-items: center; padding-block: var(--bz-sp-9); text-align: center; }
+/* 砖背后一小团这只 Bot 颜色的光：伪元素，只罩住砖，不垫在文字后面 */
+.not-found-stage { --bz-tile-size: 120px; margin-bottom: var(--bz-sp-6); }
+.not-found-stage::after {
+  content: ''; position: absolute; z-index: -2; left: 50%; top: 50%; width: 240px; height: 180px; margin: -100px 0 0 -120px;
+  border-radius: 50%; background: var(--bz-bot-color); opacity: .22; filter: blur(48px); pointer-events: none;
+}
+.shelf-page.not-found .not-found-code { font-size: var(--bz-fs-xs); line-height: var(--bz-lh-xs); font-weight: 600; letter-spacing: .12em; color: var(--bz-text-3); font-variant-numeric: tabular-nums; }
+.not-found h1 { margin-top: var(--bz-sp-2); font-size: var(--bz-fs-h1); font-weight: 700; line-height: var(--bz-lh-h1); letter-spacing: -.01em; }
+.not-found .bz-btn { margin-top: var(--bz-sp-6); }
+
+/* ---------- 投稿预览复用卡片和详情：把旧版式留下的偏移归零 ---------- */
+.submit-preview .bot-card.bot-card { padding: 0; }
+.submit-preview .bot-card .bot-card-body .avatar-stage { margin: 0; }
+.submit-preview .bot-detail .detail-header { margin-top: 64px; }
+.submit-preview .detail-header .avatar-root { align-self: center; }
+.submit-preview .detail-header::before { left: calc(50% - 220px); }
+.submit-preview .bot-detail > section { padding: 18px 20px; }
+
+@media (max-width: 359px) {
+  .prompt-fallback { padding: var(--bz-sp-4); }
+}

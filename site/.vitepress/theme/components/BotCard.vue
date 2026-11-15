@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { previewMode, previewDetail, previewCardActive } from '../submit/preview-mode'
 const preview = inject(previewMode, false)
 const active = inject(previewCardActive, ref(true))
@@ -11,22 +11,45 @@ import { botPalette, categoryStyle } from '../color'
 import BotAvatar from './BotAvatar.vue'
 import BotActions from './BotActions.vue'
 import BotHeat from './BotHeat.vue'
+import BzIcon from './BzIcon.vue'
 import ExternalHint from './ExternalHint.vue'
-defineProps({ bot: { type: Object, required: true } })
+const props = defineProps({ bot: { type: Object, required: true } })
+// 投稿预览里的数据可能还没通过校验，元信息只在取值像样时才显示。
+const quota = computed(() => typeof props.bot.quotaCost === 'string' ? props.bot.quotaCost : '')
+const permissions = computed(() => Array.isArray(props.bot.permissions) ? props.bot.permissions : null)
+// 门槛从权限现算：要连外部账号或借浏览器登录态的，算「要连账号」；带定时运行的，算「会自己跑」。
+const needsAccount = computed(() => !!permissions.value?.some((item) => item === '外部账号' || item === '浏览器 Cookie'))
+const selfRunning = computed(() => !!permissions.value?.includes('定时自动运行'))
+// 来源：外部收录的写进作者行（官方市场 / 社区收录）；作者自己投稿的在名字右边挂「作者投稿」标签。
+const origin = computed(() => props.bot.external ? (props.bot.official ? '官方市场' : '社区收录') : '')
 </script>
 
 <template>
   <article class="bot-card bz-bot-scope" :style="botPalette(bot.avatar ? '#8a8a93' : avatarColor(bot.slug))" data-testid="bot-card" :data-slug="bot.slug" @pointerenter="avatar?.enter($event)" @pointerleave="avatar?.leave($event)">
-    <BotAvatar v-if="active" ref="avatar" :bot="bot" whole-card />
-    <h2><a data-testid="detail-link" :href="preview ? '#submit-preview-detail' : bot.detailUrl" :target="preview ? '_self' : undefined" @click="preview && ($event.preventDefault(), showDetail())">{{ bot.name }}</a></h2>
-    <div class="bot-meta">
-      <span class="bot-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
-      <span v-if="bot.external" class="bot-tag external-tag">{{ bot.official ? '官方市场' : '外部收录' }}</span>
-      <span v-if="preview">by {{ bot.author.name }}</span>
-      <a v-else data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
+    <!-- article 是容器查询的容器；版式网格放在里面这层，才能按卡片自己的宽度切换。
+         整张卡可点进详情：名字那个链接用伪元素铺满这一层（样式在 home.css），头像、作者、按钮在它上面。 -->
+    <div class="bot-card-body">
+      <BotAvatar v-if="active" ref="avatar" :bot="bot" whole-card />
+      <div class="bot-head">
+        <div class="bot-title">
+          <h3 class="bot-name"><a data-testid="detail-link" :href="preview ? '#submit-preview-detail' : bot.detailUrl" :target="preview ? '_self' : undefined" @click="preview && ($event.preventDefault(), showDetail())">{{ bot.name }}</a></h3>
+          <span v-if="!bot.external" class="bz-tag source-tag">作者投稿</span>
+        </div>
+        <p class="bot-byline">
+          <span v-if="preview" class="bot-author">by {{ bot.author.name }}</span>
+          <a v-else data-testid="author-link" class="bot-author" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
+          <span v-if="origin" class="bot-origin">· {{ origin }}</span>
+        </p>
+      </div>
+      <p class="bot-tagline">{{ bot.tagline }}</p>
+      <div class="bot-stats">
+        <span class="bz-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
+        <span v-if="quota" class="bot-stat stat-quota" :data-quota="quota"><BzIcon name="bolt" />额度 {{ quota }}</span>
+        <span v-if="permissions" class="bot-stat stat-account"><BzIcon :name="needsAccount ? 'plug' : 'plug-off'" />{{ needsAccount ? '要连账号' : '不用连账号' }}</span>
+        <span v-if="selfRunning" class="bot-stat stat-auto"><BzIcon name="clock" />会自己跑</span>
+        <BotHeat :slug="bot.slug" compact />
+      </div>
+      <BotActions :bot="bot" compact />
     </div>
-    <p class="bot-tagline">{{ bot.tagline }}</p>
-    <BotHeat :slug="bot.slug" />
-    <BotActions :bot="bot" />
   </article>
 </template>

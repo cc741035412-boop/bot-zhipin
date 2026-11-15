@@ -17,3 +17,4 @@ permissions:
   - 定时自动运行
   - 外部账号
 external: true
+pitch: "画板丢给我，间距字号我一个个给你量出来。"

@@ -18,3 +18,4 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
+pitch: "该浇水了。对，就是窗台那盆。"

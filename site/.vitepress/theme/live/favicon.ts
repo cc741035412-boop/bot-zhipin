@@ -256,9 +256,16 @@ export function startFavicon(options: { random?: () => number } = {}): () => voi
     const tick = (ms: number) => {
       began ??= ms
       const k = (ms - began) / 1000 / FAVICON_MORPH
-      if (k >= 1) return land?.()
-      if (ms - last >= FRAME_MS) {
-        last = ms
+      // 按实际时间节流：页面别处在重绘时，rAF 的时间戳并不规整（实测 16–21ms 乱跳）
+      const wall = performance.now()
+      // 落地那一帧也守帧间隔：离上一帧不到 FRAME_MS 就再等一帧
+      if (k >= 1) {
+        if (wall - last >= FRAME_MS) return land?.()
+        raf = window.requestAnimationFrame(tick)
+        return
+      }
+      if (wall - last >= FRAME_MS) {
+        last = wall
         const { at, progress, lid } = morphAt(start, k)
         show(engine.sample(at), mixColor(from, bot.color, progress), lid)
       }

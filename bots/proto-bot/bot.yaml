@@ -21,3 +21,4 @@ permissions:
   - 外部账号
   - 浏览器 Cookie
 external: true
+pitch: "光说没感觉，我直接做个能点的给你看。"

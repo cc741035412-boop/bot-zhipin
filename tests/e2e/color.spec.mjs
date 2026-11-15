@@ -27,7 +27,7 @@ for (const scheme of ['light', 'dark']) {
     expect(frames.client).toEqual(frames.ssr)
     for (const frame of frames.client) expect(frame.viewBox).toBe('-112 -112 224 224')
     const heroes = page.locator('.hero-portrait')
-    await expect(heroes).toHaveCount(7)
+    await expect(heroes).toHaveCount(9)
     await expect(page.locator('.hero-portraits')).toHaveAttribute('aria-hidden', 'true')
     for (const [i, mascot] of HERO_MASCOTS.entries()) {
       const svg = heroes.nth(i).getByTestId('live-bot')
@@ -54,10 +54,10 @@ for (const scheme of ['light', 'dark']) {
     expect(warnings).toEqual([])
   })
 
-  test(`${scheme}：八类标签实际 CSS 对比度 ≥4.5，首页/详情一致、外部标签中性`, async ({ page }) => {
+  test(`${scheme}：八类标签和来源标签实际 CSS 对比度 ≥4.5，首页/详情一致`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme })
     await page.goto('/')
-    const homeColor = await page.locator(`[data-slug="${weekly}"] .category-tag`).evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])
+    const homeColor = await page.locator(`[data-testid="bot-card"][data-slug="${weekly}"] .category-tag`).evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])
     await page.goto(`/bots/${weekly}`)
     expect(await page.locator('.category-tag').evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])).toEqual(homeColor)
     await page.goto('/')
@@ -68,8 +68,15 @@ for (const scheme of ['light', 'dark']) {
         return [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3)
       }
       const luminance = (rgb) => rgb.map((v) => v / 255).map((v) => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4).reduce((sum, v, i) => sum + v * [.2126, .7152, .0722][i], 0)
+      // 半透明底（中性标签用的 --bz-surface-2）要叠到祖先的底色上再算。
+      const parse = (css) => { const m = css.match(/[\d.]+(?:e-?\d+)?/g).map(Number); return { c: m.slice(0, 3).map((v) => css.startsWith('color(') ? v * 255 : v), a: m.length > 3 ? m[3] : 1 } }
+      const backdrop = (node) => {
+        const layers = []
+        for (let at = node; at; at = at.parentElement) { const layer = parse(getComputedStyle(at).backgroundColor); if (layer.a > 0) layers.push(layer); if (layer.a === 1) break }
+        return layers.reverse().reduce((under, layer) => under.map((v, i) => Math.round(layer.c[i] * layer.a + v * (1 - layer.a))), [255, 255, 255])
+      }
       const sample = (node) => {
-        const style = getComputedStyle(node), fg = rgb(style.color), bg = rgb(style.backgroundColor)
+        const style = getComputedStyle(node), fg = rgb(style.color), bg = backdrop(node)
         const a = luminance(fg), b = luminance(bg)
         return { fg, bg, ratio: (Math.max(a, b) + .05) / (Math.min(a, b) + .05) }
       }
@@ -82,26 +89,37 @@ for (const scheme of ['light', 'dark']) {
         clone.remove()
         return result
       })
-      return { categories, external: [...document.querySelectorAll('.external-tag')].map(sample) }
+      return { categories, source: [...document.querySelectorAll('.source-tag')].map(sample) }
     }, CATEGORY_COLORS)
     expect(new Set(colors.categories.map((c) => c.bg.join(','))).size).toBe(8)
-    for (const color of [...colors.categories, ...colors.external]) {
-      expect(color.ratio, `${color.name ?? '外部收录'} ${color.fg} / ${color.bg}`).toBeGreaterThanOrEqual(4.5)
+    for (const color of [...colors.categories, ...colors.source]) {
+      expect(color.ratio, `${color.name ?? '来源标签'} ${color.fg} / ${color.bg}`).toBeGreaterThanOrEqual(4.5)
     }
-    expect(colors.external.length).toBeGreaterThan(0)
-    for (const color of colors.external) expect(Math.max(...color.bg) - Math.min(...color.bg)).toBeLessThan(10)
+    // 来源标签只有「作者投稿」，和分类标签同一种混法；官方市场、社区收录不做标签，写在作者行里。
+    expect(colors.source.length).toBeGreaterThan(0)
+    await expect(page.locator('.bz-tag', { hasText: /官方市场|社区收录/ })).toHaveCount(0)
+    await expect(page.locator('[data-testid="bot-card"][data-slug="demo-external"] .bot-byline')).toContainText('· 社区收录')
+    await expect(page.locator('[data-testid="bot-card"][data-slug="demo-external"] .source-tag')).toHaveCount(0)
+    await expect(page.locator(`[data-testid="bot-card"][data-slug="${weekly}"] .source-tag`)).toHaveText('作者投稿')
   })
 }
 
-test('招牌七/五只响应式大小，排序不换脸、各断点无横滚', async ({ page }) => {
+test('招牌九块砖（上五下四）按断点缩放，排序不换脸、各断点无横滚', async ({ page }) => {
   await page.goto('/')
   for (const width of [1280, 1100, 1024, 900, 680, 679, 400, 390, 320]) {
     await page.setViewportSize({ width, height: 900 })
-    const widths = await page.locator('.hero-portrait').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().width).filter(Boolean))
-    const factor = width >= 680 ? 1 : width >= 400 ? .75 : .62
-    const sizes = width >= 680 ? [60, 68, 80, 96, 80, 68, 60] : [68, 80, 96, 80, 68]
-    expect(widths).toHaveLength(sizes.length)
-    widths.forEach((w, i) => expect(w).toBeCloseTo(sizes[i] * factor, 1))
+    const tiles = await page.locator('.hero-portrait').evaluateAll((els) => els.map((el) => { const r = el.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height } }))
+    // 所有宽度都显示 9 块；≥1100 是 124，680–1099 是 96，再窄按视口缩到 ≤60。
+    const size = width >= 1100 ? 124 : width >= 680 ? 96 : Math.min(60, (width - 72) / 5)
+    expect(tiles).toHaveLength(9)
+    for (const tile of tiles) { expect(tile.w).toBeCloseTo(size, 0); expect(tile.h).toBeCloseTo(size, 0) }
+    const top = tiles.slice(0, 5), bottom = tiles.slice(5)
+    for (const tile of top) expect(tile.y).toBeCloseTo(top[0].y, 0)
+    for (const tile of bottom) expect(tile.y).toBeCloseTo(bottom[0].y, 0)
+    expect(bottom[0].y).toBeGreaterThan(top[0].y + size)
+    // 下排相对上排错开半格：下排第一块的中心落在上排第一、二块中心的正中间。
+    expect(bottom[0].x + bottom[0].w / 2).toBeCloseTo((top[0].x + top[1].x + top[0].w) / 2, 0)
+    for (const tile of tiles) { expect(tile.x).toBeGreaterThanOrEqual(0); expect(tile.x + tile.w).toBeLessThanOrEqual(width) }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
   }
   await page.getByTestId('sort-new').click()

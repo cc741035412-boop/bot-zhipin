@@ -18,3 +18,4 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
+pitch: "哪天 Bot 失忆了，来我这儿找备份。"

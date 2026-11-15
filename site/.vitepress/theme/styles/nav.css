@@ -1,0 +1,86 @@
+/* nav.css：悬浮玻璃导航条（VitePress 默认顶栏换肤，不另写导航组件）。
+   右侧顺序：我要投稿（次级小按钮，中性玻璃，前面一个 plus 图标）、主题开关、GitHub；后两个是 32px 的幽灵图标按钮。 */
+
+/* 这个站没有文档页：滚动后才冒出来的「回到顶部」条会从悬浮岛后面露出来，全站关掉。 */
+.Layout .VPLocalNav { display: none; }
+.Layout > .VPNav.VPNav { position: fixed; top: 0; left: 0; width: 100%; padding: var(--bz-nav-top) var(--bz-sp-4) 0; }
+.Layout > .VPContent.VPContent { padding-top: var(--vp-nav-height); }
+.Layout .VPNav .VPNavBar, .Layout .VPNav .VPNavBar.screen-open {
+  /* 条里的子元素按条高排版；外面的正文让位仍用 :root 上的总高度 */
+  --vp-nav-height: calc(var(--bz-nav-bar) - 2px);
+  max-width: 1204px; height: var(--bz-nav-bar); margin: 0 auto;
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-panel);
+  background-color: var(--bz-nav-bg);
+  -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
+  box-shadow: var(--bz-nav-shadow); pointer-events: auto; transition: none;
+}
+.Layout .VPNavBar .divider { display: none; }
+.Layout .VPNavBar .wrapper { padding: 0 var(--bz-sp-4) 0 var(--bz-sp-5); }
+.Layout .VPNavBar .content-body { gap: var(--bz-sp-1); background-color: transparent; }
+
+/* 站名：自己画的小吉祥物（橙色圆团 + 两只竖眼）+ 圆体字 */
+.Layout .VPNavBarTitle .title { font-size: var(--bz-fs-title); font-weight: 600; letter-spacing: 0; border-bottom: 0; }
+.Layout .VPNavBarTitle .title::before {
+  content: ''; flex: none; width: 28px; height: 28px; margin-right: var(--bz-sp-2);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23ff6a13' d='M16 2.5c8.2 0 13.5 4.7 13.5 12.3 0 8.4-5.6 14.7-13.5 14.7S2.5 23.2 2.5 14.8C2.5 7.2 7.8 2.5 16 2.5Z'/%3E%3Cpath fill='%2316161b' d='M12.6 10.2c.9 0 1.6.7 1.6 1.6v5.4a1.6 1.6 0 0 1-3.2 0v-5.4c0-.9.7-1.6 1.6-1.6Zm6.8 0c.9 0 1.6.7 1.6 1.6v5.4a1.6 1.6 0 0 1-3.2 0v-5.4c0-.9.7-1.6 1.6-1.6Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  transition: transform 320ms var(--bz-ease-spring);
+}
+@media (hover: hover) { .Layout .VPNavBarTitle .title:hover::before { transform: rotate(-10deg) scale(1.12); } }
+
+/* 「我要投稿」：和 .bz-btn.sm 同一套数（高 32、左右 12、13px / 600、圆角 8、中性玻璃） */
+.Layout .VPNavBar .VPNavBarMenu { align-items: center; margin-right: var(--bz-sp-1); }
+.Layout .VPNavBar .VPNavBarMenuLink, .Layout .VPNavBar .VPNavBarMenuLink.active {
+  height: 32px; padding: 0 var(--bz-sp-3); border: 1px solid var(--bz-border-strong); border-radius: var(--bz-r-control);
+  background-color: var(--bz-surface-2); box-shadow: var(--bz-highlight); color: var(--bz-ink);
+  font-family: var(--bz-font-text); font-size: var(--bz-fs-sm); font-weight: 600; line-height: 30px;
+  transition: border-color var(--bz-dur) var(--bz-ease), background-color var(--bz-dur) var(--bz-ease);
+}
+.Layout .VPNavBar .VPNavBarMenuLink:hover, .Layout .VPNavBar .VPNavBarMenuLink.active:hover {
+  border-color: var(--bz-border-hover); background-color: var(--bz-surface-3); color: var(--bz-ink);
+}
+/* plus 图标：和 theme/icons.ts 的 plus 同一条路径（24 网格、线宽 1.5、圆头），用遮罩画，颜色跟着文字走；手机菜单里那一项也带 */
+.Layout .VPNavBar .VPNavBarMenuLink::before, .Layout .VPNav .VPNavScreenMenuLink::before {
+  content: ''; flex: none; width: 16px; height: 16px; margin-right: 6px; background-color: currentColor;
+  -webkit-mask: var(--bz-icon-plus) center / contain no-repeat; mask: var(--bz-icon-plus) center / contain no-repeat;
+}
+.Layout .VPNav { --bz-icon-plus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E"); }
+
+/* 主题开关和 GitHub：去掉默认的分隔线和胶囊开关，统一成 32px 幽灵图标按钮 */
+.Layout .VPNav .VPNavBar .content-body > .appearance::before,
+.Layout .VPNav .VPNavBar .content-body > .social-links::before { display: none; }
+.Layout .VPNav .VPNavBar .content-body > .social-links { margin-right: 0; }
+.Layout .VPNav .VPSwitch.VPSwitchAppearance {
+  width: 32px; height: 32px; border: 0; border-radius: var(--bz-r-control); background-color: transparent;
+  transition: background-color var(--bz-dur) var(--bz-ease) !important;
+}
+.Layout .VPNav .VPSwitch.VPSwitchAppearance .check {
+  position: static; display: grid; place-items: center; width: 100%; height: 100%;
+  border-radius: 0; background-color: transparent; box-shadow: none; transform: none;
+}
+.Layout .VPNav .VPSwitch.VPSwitchAppearance .icon { width: 18px; height: 18px; border-radius: 0; overflow: visible; }
+.Layout .VPNav .VPSwitch.VPSwitchAppearance .icon [class^='vpi-'] { top: 0; left: 0; width: 18px; height: 18px; color: var(--bz-text-2); }
+.Layout .VPNav .VPSocialLink { width: 32px; height: 32px; border-radius: var(--bz-r-control); color: var(--bz-text-2); transition: color var(--bz-dur) var(--bz-ease), background-color var(--bz-dur) var(--bz-ease); }
+.Layout .VPNav .VPSocialLink > [class^='vpi-social-'] { width: 18px; height: 18px; }
+@media (hover: hover) {
+  .Layout .VPNav .VPSwitch.VPSwitchAppearance:hover, .Layout .VPNav .VPSocialLink:hover { background-color: var(--bz-surface-3); }
+  .Layout .VPNav .VPSwitch.VPSwitchAppearance:hover .icon [class^='vpi-'], .Layout .VPNav .VPSocialLink:hover { color: var(--bz-ink); }
+}
+
+/* 手机菜单：从导航条下面掉出来的一块面板（浮层，有投影），不铺满全屏 */
+.Layout .VPNav .VPNavScreen {
+  top: calc(var(--bz-nav-top) + var(--bz-nav-bar) + 8px); right: var(--bz-sp-4); bottom: auto; left: var(--bz-sp-4); width: auto;
+  max-height: calc(100dvh - var(--bz-nav-top) - var(--bz-nav-bar) - 24px); padding: var(--bz-sp-1) var(--bz-sp-5) var(--bz-sp-4);
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-panel); background-color: var(--bz-card);
+  box-shadow: var(--bz-highlight), var(--bz-shadow-float);
+}
+.Layout .VPNav .VPNavScreen .container { max-width: none; padding: var(--bz-sp-2) 0 0; }
+.Layout .VPNav .VPNavScreenMenuLink { display: flex; align-items: center; font-size: var(--bz-fs-body); font-weight: 600; }
+.Layout .VPNav .VPNavScreenAppearance { border-radius: var(--bz-r-control); background-color: var(--bz-surface-2); }
+.Layout .VPNav .VPNavScreenAppearance .text { font-size: var(--bz-fs-sm); }
+@media (max-width: 767px) {
+  .Layout .VPNavBar .wrapper { padding: 0 var(--bz-sp-1) 0 var(--bz-sp-4); }
+}
+@media (pointer: coarse) {
+  .Layout .VPNavBar .VPNavBarMenuLink, .Layout .VPNavBar .VPNavBarMenuLink.active { height: 44px; line-height: 42px; }
+  .Layout .VPNav .VPSwitch.VPSwitchAppearance, .Layout .VPNav .VPSocialLink { width: 44px; height: 44px; }
+}
