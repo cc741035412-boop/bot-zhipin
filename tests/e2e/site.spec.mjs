@@ -248,11 +248,11 @@ test('整张卡可点进详情；头像、作者、导入、复制在它上面�
     expect(await cursorAt(bot, selector), selector).toEqual({ cursor: 'pointer', link: `/bots/${weekly}` })
   }
   // 鼠标真的悬停上去之后（气泡打开、介绍淡出）也一样：介绍那一块点下去要进详情，不能被淡出的介绍吃掉。
-  const tagline = await bot.locator('.bot-tagline').boundingBox()
-  await page.mouse.move(tagline.x + tagline.width / 2, tagline.y + tagline.height / 2, { steps: 3 })
+  const hoverAt = await bot.locator('.bot-tagline').boundingBox()
+  await page.mouse.move(hoverAt.x + hoverAt.width / 2, hoverAt.y + hoverAt.height / 2, { steps: 3 })
   await expect(bot.getByTestId('pitch-bubble')).toHaveAttribute('data-open', 'true')
   await page.waitForTimeout(250)
-  expect(await page.evaluate(([x, y]) => document.elementFromPoint(x, y).closest('a')?.getAttribute('href') ?? null, [tagline.x + tagline.width / 2, tagline.y + tagline.height / 2]), '悬停时介绍位置仍是整卡链接').toBe(`/bots/${weekly}`)
+  expect(await page.evaluate(([x, y]) => document.elementFromPoint(x, y).closest('a')?.getAttribute('href') ?? null, [hoverAt.x + hoverAt.width / 2, hoverAt.y + hoverAt.height / 2]), '悬停时介绍位置仍是整卡链接').toBe(`/bots/${weekly}`)
   await page.mouse.move(5, 5)
   // 头像、作者、导入、复制不被整卡链接盖住。
   for (const id of ['avatar', 'author-link', 'btn-import', 'btn-prompt']) {
