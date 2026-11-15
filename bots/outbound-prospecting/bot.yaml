@@ -1,8 +1,9 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: outbound-prospecting
 name: "Outbound Prospecting"
+nameZh: "客户开发员"
 tagline: "按你的目标客户找人、查背景，起草第一封开发信"
-category: 调研
+category: 销售
 author:
   name: "Krista Letz"
   url: https://x.ai/bot/marketplace/bots/pg
@@ -18,4 +19,51 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
-pitch: "你说卖给谁，我去把人找出来。"
+pitch:
+  - 你说卖给谁，我去把人找出来。
+  - 第一封信写什么？我先查查他最近在忙啥。
+about:
+  intro: 说清你卖什么、卖给谁，它就在公开网页上找匹配的公司和对应职位的人，逐个查背景，挑一个带日期和链接的切入点，按邮件、LinkedIn 或 X 私信写第一封开发信。查不到出处的字段就空着，从不替你发出去。
+  does:
+    - 按目标客户在公开网页上建一份名单
+    - 逐个查背景，找带日期和链接的切入点
+    - 按邮件、LinkedIn 或 X 私信写开场信
+    - 写最多四轮跟进，帮你判断回信怎么回
+    - 发够 20 封后，看哪种打法有回音
+  starters:
+    - 我卖客服软件，主要卖给电商公司的运营负责人，先找 10 个
+    - 帮我查一下这家公司，写一封第一次联系的邮件
+  skills:
+    - name: 上手引导
+      does: 问清你卖给谁，马上给出第一份名单和草稿
+    - name: 建名单
+      does: 按你描述的客户建名单，能增删也能放宽
+    - name: 查背景
+      does: 写信前把这家公司和这个人查清楚
+    - name: 写开场信
+      does: 给一个或一批潜客写第一封，按渠道出格式
+    - name: 写跟进
+      does: 首封没回音时写下一轮
+    - name: 处理回信
+      does: 对方回了，帮你判断意思、起草怎么回
+    - name: 每周复盘
+      does: 这周发了多少、回了多少、谁在等你
+    - name: 找有效打法
+      does: 发得够多后看规律，回复变少时找原因
+  routines:
+    - what: 查名单上接下来几个人，各写一封开场信
+      when: 工作日早上，默认每批 5 人，时间你定
+      default: 关
+      quiet: 不打扰
+    - what: 拓客周复盘
+      when: 每周五，时间你定
+      default: 关
+      quiet: 照发
+    - what: 按目标客户给名单补新公司和新人
+      when: 每周一，时间你定
+      default: 关
+      quiet: 未说明
+  fit: 做海外 ToB、要自己从零找客户写开发信的销售
+  notFit: 处理主动上门的线索或管老客户的人，这些它不接
+  cnFit: 一般
+  cnNote: 不连应用也能用，草稿留在聊天；但打法是英文冷邮件和 LinkedIn，资料以英文网为主

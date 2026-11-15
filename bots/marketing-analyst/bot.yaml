@@ -1,8 +1,9 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: marketing-analyst
 name: "Marketing Analyst"
+nameZh: "投放数据分析师"
 tagline: "把广告投放数据做成周报月报，每个数字都标来源"
-category: 日常
+category: 市场
 author:
   name: "Josh Kim"
   url: https://x.ai/bot/marketplace/bots/marketing-analyst
@@ -19,4 +20,53 @@ permissions:
   - 定时自动运行
   - 浏览器 Cookie
 external: true
-pitch: "上周广告花了多少？问我，数字都带出处。"
+pitch:
+  - 上周广告花了多少？问我，数字都带出处。
+  - 周报月报我来出，你只管看结论。
+about:
+  intro: 在 Bot 的浏览器里登录 Google Ads、Meta 这些广告后台，或者直接贴导出的 CSV，就能按固定公式算花费、转化、CPA，出带图表的周报和月报。每个数字都标来源和日期，缺哪段数据直说。同事问「上周花了多少」也能答，邮件回复只存草稿。
+  does:
+    - 出带图表的投放周报和月报，每个数都标来源
+    - 回答花了多少、CPA 多少这类问数
+    - 按你设的阈值手动跑一次花费检查
+    - 起草问数邮件的回复，只存草稿不发
+    - 月报里算三个月趋势和预算进度
+  starters:
+    - 我贴一份上周 Google Ads 的导出，帮我出周报
+    - 上个月 Meta 的 CPA 是多少？
+  skills:
+    - name: 首次上手
+      does: 问清平台和账号，引导登录一次，试跑一份真实报告
+    - name: 连接账号
+      does: 引导你在 Bot 浏览器登录广告后台，它不碰密码
+    - name: 读取数据
+      does: 先读后台再读导出，核对列名、去重、统一日期币种
+    - name: 投放周报
+      does: 按广告系列对比上周花费、转化、CPA，附解读
+    - name: 投放月报
+      does: 周报内容再加三个月趋势、预算进度和整月总结
+    - name: 回答问数
+      does: 给出数字、日期范围和出处，邮件只起草不发
+    - name: 花费检查
+      does: 按你设的阈值算预算进度，超线只提醒不改账户
+    - name: 网页报告
+      does: 把周报月报做成能单独打开的带图网页文件
+    - name: 图表截图
+      does: 规定图表和后台截图怎么出、怎么标、怎么附上
+  routines:
+    - what: 读指定邮箱里的问数邮件，起草带数字的回复
+      when: 工作日 9 点到 17 点，每小时一次
+      default: 关
+      quiet: 不打扰
+    - what: 用手头数据出上周的投放周报
+      when: 每周一早上 9 点，按你的时区
+      default: 关
+      quiet: 未说明
+    - what: 出上个月的投放月报，含预算进度
+      when: 每月 1 号早上 9 点，按你的时区
+      default: 关
+      quiet: 未说明
+  fit: 管海外广告投放、每周要交数据报告的人
+  notFit: 投巨量引擎、腾讯广告的，后台读不了，只能贴导出表
+  cnFit: 一般
+  cnNote: 读后台只认海外广告平台；国内平台贴导出 CSV 也能出报告，问数邮件要 Gmail

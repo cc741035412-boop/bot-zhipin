@@ -9,6 +9,7 @@ import './styles/nav.css'
 import './styles/hero.css'
 import './styles/home.css'
 import './styles/detail.css'
+import './styles/squad.css'
 import './styles/misc.css'
 
 export default {

@@ -20,11 +20,13 @@ test.beforeEach(async ({ context, page }) => {
   await page.route('**/api/click', (route) => route.fulfill({ json: { ok: true, counted: true, heat: 99 } }))
 })
 
-test('接口失败：最新排序、热度占位、链接与外部收录按钮', async ({ page }) => {
+test('接口失败：排序留在推荐、热度不占位、链接与外部收录按钮', async ({ page }) => {
   await page.route('**/api/stats', (route) => route.abort())
   await page.goto('/')
-  await expect(page.getByTestId('sort-new')).toHaveAttribute('aria-pressed', 'true')
-  expect(await order(page)).toEqual([weekly, reviewer, external])
+  // 默认是「推荐」，它不靠热度（先排编辑置顶的），拿不到热度也不用换排序。
+  await expect(page.getByTestId('sort-rec')).toHaveAttribute('aria-pressed', 'true')
+  // 默认按分组分段：分组顺序跟 schema 走（产品、内容、管家）。
+  expect(await order(page)).toEqual([reviewer, weekly, external])
   // 列表卡只在热度大于 0 时显示热度；拿不到热度就不占位。
   await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
   await expect(page.getByTestId('contribute-link')).toHaveAttribute('href', CONTRIBUTE_URL)
@@ -51,7 +53,7 @@ test('延迟失败不覆盖用户手动排序；HTTP / JSON 失败均可降级',
   await page.unroute('**/api/stats')
   await page.route('**/api/stats', (route) => route.fulfill({ contentType: 'text/html', body: '<h1>没有后端</h1>' }))
   await page.reload()
-  await expect(page.getByTestId('sort-new')).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.getByTestId('sort-rec')).toHaveAttribute('aria-pressed', 'true')
 })
 
 test('热度更新不跳位、切换后重排、复制反馈与导入上报', async ({ page, context, baseURL }) => {
@@ -62,8 +64,12 @@ test('热度更新不跳位、切换后重排、复制反馈与导入上报', as
     clicks.push(route.request().postDataJSON())
     return route.fulfill({ json: { ok: true, counted: true, heat: 99 } })
   })
-  await page.goto('/')
+  // 三个示例 Bot 各在一个分组里，分组显示时看不出排序；进「示例·全部」专题（三个都在、不分组）来看。
+  await page.goto('/?c=demo-all')
   await expect(card(page, external).getByTestId('heat')).toHaveText('热度 5')
+  // 推荐 = 编辑在专题里排的顺序；切到最热才按热度排。
+  expect(await order(page)).toEqual([reviewer, weekly, external])
+  await page.getByTestId('sort-hot').click()
   expect(await order(page)).toEqual([external, reviewer, weekly])
   await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
   await card(page, weekly).getByTestId('btn-prompt').click()
@@ -167,8 +173,8 @@ test('详情、SSR 头像一致性、技能和任务源码链接、外部隐藏�
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', '把一周零散的聊天和笔记整理成一份周报')
   await expect(page.getByTestId('forked-from')).toContainText('示例·PRD 评审员')
   await expect(page.getByTestId('section-prereq')).toContainText('无')
-  // 额度：三格强度条 + 一个字；档位的含义不直接显示，在 title 和读屏文本里。
-  const meter = page.getByTestId('quota-meter')
+  // 额度在侧栏里：三根由矮到高的小柱 + 一个字；档位的含义不直接显示，在 title 和读屏文本里。
+  const meter = page.getByTestId('detail-rail').getByTestId('quota-meter')
   await expect(meter).toHaveAttribute('data-quota', '低')
   await expect(meter).toHaveAttribute('title', '偶尔用一下，几乎不占额度')
   await expect(meter.locator('.quota-level')).toHaveText('低')
@@ -194,27 +200,37 @@ test('详情、SSR 头像一致性、技能和任务源码链接、外部隐藏�
   await expect(page.getByTestId('section-routines').locator('p')).toHaveCount(0)
   await expect(page.getByTestId('forked-from')).toHaveCount(0)
   await page.goto(`/bots/${external}`)
-  // 来源只写在头部的作者行里，页面底部不再有一行来源说明。
-  await expect(page.getByTestId('bot-detail').locator('.detail-header .bot-origin')).toHaveText('· 社区收录')
+  // 来源写在侧栏里（官方市场 / 社区收录 / 作者投稿），页面底部不再有一行来源说明。
+  await expect(page.getByTestId('detail-rail').locator('.bot-origin')).toHaveText('社区收录')
   await expect(page.getByTestId('bot-detail')).not.toContainText('本站只收录链接')
   await expect(page.locator('.external-notice')).toHaveCount(0)
-  for (const id of ['btn-prompt', 'section-skills', 'section-screenshots', 'section-design']) {
+  // 外部收录没有安装提示词、截图、设计说明；技能用 about 里整理好的名字和一句话，不带源码链接。
+  for (const id of ['btn-prompt', 'section-screenshots', 'section-design']) {
     await expect(page.getByTestId(id)).toHaveCount(0)
   }
+  await expect(page.getByTestId('section-skills').getByTestId('skill-item')).toHaveCount(2)
+  await expect(page.getByTestId('section-skills').locator('a')).toHaveCount(0)
 })
 
 test('界面上没有解释性的句子：首屏、区块、页尾、404、搜索占位字', async ({ page }) => {
   await mockStats(page)
   await page.goto('/')
-  // 首屏只有砖墙、站名、搜索框；tagline 只留在 meta description 里。
-  await expect(page.locator('.shelf-intro > *')).toHaveCount(3)
-  await expect(page.locator('.shelf-intro p')).toHaveCount(0)
+  // 首屏的字只有站名和搜索框（其余是球池里的 Bot）；tagline 只留在 meta description 里。
+  await expect(page.locator('.pit-copy > *')).toHaveCount(2)
+  await expect(page.getByTestId('ballpit').locator('h1')).toHaveCount(1)
+  await expect(page.getByTestId('ballpit').locator('p')).toHaveCount(0)
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Grok Bot 模板货架/)
   await expect(page.getByTestId('search-trigger').locator('.search-trigger-text')).toHaveText('搜索')
   // 区块只有标题；列表区右侧保留计数。
   await expect(page.locator('.bz-section-head p')).toHaveCount(0)
-  await expect(page.locator('.bz-section-head h2')).toHaveText(['本周主推', '全部 Bot'])
+  await expect(page.locator('#featured-title')).toHaveText('本周主推')
+  await expect(page.locator('#squads-title')).toHaveText('小队')
+  await expect(page.locator('#collections-title')).toHaveText('专题')
+  await expect(page.locator('#all-title')).toHaveText('全部 Bot')
   await expect(page.locator('.bot-count')).toHaveText('共 3 个')
+  // 分组的组头只有吉祥物、分组名和数量，没有分组说明。
+  await expect(page.locator('.role-head p')).toHaveCount(0)
+  await expect(page.locator('.role-head').first()).toHaveText('产品1 个')
   // 页尾只有「我要投稿」：图标 + 动词。
   await expect(page.locator('.shelf-footer > *')).toHaveCount(1)
   await expect(page.getByTestId('contribute-link')).toHaveText('我要投稿')
@@ -244,7 +260,7 @@ test('整张卡可点进详情；头像、作者、导入、复制在它上面�
     const hit = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)
     return { cursor: getComputedStyle(hit).cursor, link: hit.closest('a')?.getAttribute('href') ?? null }
   }, selector)
-  for (const selector of ['.bot-tagline', '.bot-stats .stat-quota', '.category-tag']) {
+  for (const selector of ['.bot-tagline', '.bot-stats .stat-quota', '.bot-stats .stat-account']) {
     expect(await cursorAt(bot, selector), selector).toEqual({ cursor: 'pointer', link: `/bots/${weekly}` })
   }
   // 鼠标真的悬停上去之后（气泡打开、介绍淡出）也一样：介绍那一块点下去要进详情，不能被淡出的介绍吃掉。

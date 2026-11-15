@@ -1,8 +1,9 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: website-ops
 name: "Website Ops"
+nameZh: "官网体检员"
 tagline: "给你的网站做体检，要改的地方开成 PR 等你合并"
-category: 评审
+category: 市场
 author:
   name: "Josh Kim"
   url: https://x.ai/bot/marketplace/bots/website-ops
@@ -19,4 +20,43 @@ permissions:
   - 定时自动运行
   - 外部账号
 external: true
-pitch: "官网哪里断链、哪里慢，我体检完直接开 PR。"
+pitch:
+  - 官网哪里断链、哪里慢，我体检完直接开 PR。
+  - 改前改后我都截图，合不合并你来定。
+about:
+  intro: 连上 GitHub 里的网站仓库，给线上网站做 SEO、断链、速度、无障碍、转化和结构化数据体检，每条问题带页面、截图、P0 到 P2 的严重度和改法。定下来要改的，各开一个分支和 PR，附电脑和手机两种宽度的改前改后截图，合不合并由你定。
+  does:
+    - 体检网站的 SEO、断链、速度、无障碍和转化
+    - 每条问题附截图、严重度和具体改法
+    - 把定好的改动做成 PR，附改前改后截图
+    - 按落地页简报，用现有组件搭新页面
+    - 改文案、重定向和 sitemap，一个原因一个 PR
+  starters:
+    - 仓库是 GitHub 上的 xxx，网站是 xxx，先做一次体检
+    - 首页标题和描述帮我改一下，开个 PR
+  skills:
+    - name: 首次上手
+      does: 要仓库和网址，在云电脑上跑起网站，交一份真体检
+    - name: 连接账号
+      does: 引导你登录搜索和统计后台，截图确认只读权限
+    - name: 网站体检
+      does: 查标题、层级、断链、速度、无障碍和结构化数据
+    - name: 提交改动
+      does: 开分支改代码、跑通构建、截图，开 PR 不合并
+    - name: 按简报做落地页
+      does: 用仓库现有组件搭页面，PR 附电脑和手机截图
+    - name: 内容更新
+      does: 改文案、重定向、robots 和 sitemap，逐条验证
+    - name: 截图规范
+      does: 1280 和 390 两种宽度截图，改前改后拼图对比
+    - name: 网页报告
+      does: 把体检做成能单独打开的报告，实测和观察分开
+  routines:
+    - what: 重新体检保存的页面，只报新增、修好和变差的问题
+      when: 每周一早上 8 点，按你的时区
+      default: 关
+      quiet: 照发
+  fit: 网站代码放在 GitHub、有个人站或出海站的人
+  notFit: 代码在 Gitee 或自建 GitLab、只用百度统计的国内站
+  cnFit: 一般
+  cnNote: 不连 GitHub 只能做只读体检；搜索和统计数据只认谷歌那套，不支持百度统计

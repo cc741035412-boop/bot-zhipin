@@ -1,0 +1,45 @@
+# 测试用的示例小队：三个示例 Bot 组成，带队队形，所有可选字段都写了。
+slug: demo-squad
+name: 示例·周会小队
+tagline: 一个评审员带两个帮手，把周会前后的事包了
+formation: 带队
+origin: 本站编队
+author:
+  name: 示例作者
+  github: example-user
+addedAt: 2026-11-12
+members:
+  - bot: demo-prd-reviewer
+    title: 队长
+    does: 评审会前把 PRD 挑一遍，把活分给另外两位
+    lead: true
+  - bot: demo-weekly-digest
+    title: 记录员
+    does: 把一周的聊天和笔记整理成周报
+  - bot: demo-external
+    title: 外援
+    does: 按需要补一份外部资料
+    optional: true
+flow:
+  - from: you
+    to: demo-prd-reviewer
+    what: 写好的 PRD
+  - from: demo-prd-reviewer
+    to: demo-weekly-digest
+    what: 评审意见
+  - from: demo-weekly-digest
+    to: you
+    what: 本周周报
+setup:
+  - title: 放进同一个分区
+    detail: 在侧栏里把这三个示例 Bot 拖到同一个分区，方便一起叫。
+  - title: 告诉队长谁是谁
+    detail: 把下面的组队口令发给队长，它会记住另外两位的分工。
+kickoff: 你是这支小队的队长。记录员负责整理周报，外援负责补外部资料；有活先分给他们，再把结果汇总给我。
+tryout: 帮我看看这份 PRD，评审意见顺手记进本周周报。
+notes:
+  - 外援是可选成员，不装也能跑完整个流程。
+  - 记录员带定时任务，默认每周五整理一次。
+missing:
+  - name: 示例·排期员
+    does: 原本负责把评审意见排进迭代计划

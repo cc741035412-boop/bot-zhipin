@@ -1,8 +1,9 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: competitor-watch
 name: Competitor Watch
+nameZh: 竞品盯梢员
 tagline: 盯住竞品官网、定价和更新日志，有实质变化才发简报
-category: 调研
+category: 产品
 author:
   name: Shimecki
   url: https://x.ai/bot/marketplace/bots/competitor-watching
@@ -15,4 +16,41 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
-pitch: "竞品悄悄改了价？我比你先知道。"
+pitch:
+  - 竞品悄悄改了价？我比你先知道。
+  - 没实质变化我不吭声，有了才来找你。
+about:
+  intro: 给它 3 到 8 家竞品的网址或名字，它会给每家找定价、更新日志、产品和招聘页，先存一份快照。之后每次重抓、和上一份比，只报价格、套餐、新功能、定位这类实质变化，每条带来源链接。登录后的页面不进，价格不编。
+  does:
+    - 给竞品建一张盯梢清单，每家找四类页面
+    - 和上次快照比对，只报实质变化
+    - 每条变化附来源链接和日期
+    - 做一张你和竞品的定价套餐对比表
+    - 抓不到的页面明确标出来，不去猜
+  starters:
+    - 全程中文，帮我盯这三家竞品的定价页和更新日志
+    - 先给这几家出一张 API 定价对比表，定时任务先别开
+  skills:
+    - name: 上手引导
+      does: 先问盯谁，拿到名字马上建清单、抓基线
+    - name: 建盯梢清单
+      does: 新增或删掉竞品，或告诉你现在在盯谁
+    - name: 页面比对
+      does: 找出清单上的页面比上次变了什么
+    - name: 竞品周报
+      does: 按需或每周汇总变化，每行带来源链接
+    - name: 定价对比
+      does: 对比你和竞品的价格、套餐和用量限制
+  routines:
+    - what: 重抓清单上的页面，和上次比对，出一份带来源的变化简报
+      when: 每周一早上，按你的时区
+      default: 关
+      quiet: 照发
+    - what: 看各家的更新日志、发布说明和博客，有新发布才说
+      when: 每个工作日早上，按你的时区
+      default: 关
+      quiet: 不打扰
+  fit: 要盯海外产品或国内大模型开放平台官网的产品经理
+  notFit: 竞品动态主要发在公众号、微博、发布会上的，它看不到
+  cnFit: 好
+  cnNote: 不连 Slack、Notion、Linear 也能用，简报留在聊天里；国内站可能拦海外访问

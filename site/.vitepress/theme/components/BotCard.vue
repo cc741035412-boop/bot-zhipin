@@ -11,9 +11,12 @@ import { botPalette, categoryStyle } from '../color'
 import BotAvatar from './BotAvatar.vue'
 import BotActions from './BotActions.vue'
 import BotHeat from './BotHeat.vue'
+import BotName from './BotName.vue'
 import BzIcon from './BzIcon.vue'
 import ExternalHint from './ExternalHint.vue'
-const props = defineProps({ bot: { type: Object, required: true } })
+import RoleMascot from './RoleMascot.vue'
+// showCategory：第三行最前面的分组标签。首页按分组分段显示时不要它（组头已经说了），专题筛选、投稿预览里要。
+const props = defineProps({ bot: { type: Object, required: true }, showCategory: { type: Boolean, default: true } })
 // 投稿预览里的数据可能还没通过校验，元信息只在取值像样时才显示。
 const quota = computed(() => typeof props.bot.quotaCost === 'string' ? props.bot.quotaCost : '')
 const permissions = computed(() => Array.isArray(props.bot.permissions) ? props.bot.permissions : null)
@@ -32,7 +35,7 @@ const origin = computed(() => props.bot.external ? (props.bot.official ? '官方
       <BotAvatar v-if="active" ref="avatar" :bot="bot" whole-card />
       <div class="bot-head">
         <div class="bot-title">
-          <h3 class="bot-name"><a data-testid="detail-link" :href="preview ? '#submit-preview-detail' : bot.detailUrl" :target="preview ? '_self' : undefined" @click="preview && ($event.preventDefault(), showDetail())">{{ bot.name }}</a></h3>
+          <h3 class="bot-name"><a data-testid="detail-link" :href="preview ? '#submit-preview-detail' : bot.detailUrl" :target="preview ? '_self' : undefined" @click="preview && ($event.preventDefault(), showDetail())"><BotName :bot="bot" /></a></h3>
           <span v-if="!bot.external" class="bz-tag source-tag">作者投稿</span>
         </div>
         <p class="bot-byline">
@@ -43,7 +46,7 @@ const origin = computed(() => props.bot.external ? (props.bot.official ? '官方
       </div>
       <p class="bot-tagline">{{ bot.tagline }}</p>
       <div class="bot-stats">
-        <span class="bz-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
+        <span v-if="showCategory" class="bz-tag role category-tag" :style="categoryStyle(bot.category)"><RoleMascot :category="bot.category" :size="12" />{{ bot.category }}</span>
         <span v-if="quota" class="bot-stat stat-quota" :data-quota="quota"><BzIcon name="bolt" />额度 {{ quota }}</span>
         <span v-if="permissions" class="bot-stat stat-account"><BzIcon :name="needsAccount ? 'plug' : 'plug-off'" />{{ needsAccount ? '要连账号' : '不用连账号' }}</span>
         <span v-if="selfRunning" class="bot-stat stat-auto"><BzIcon name="clock" />会自己跑</span>

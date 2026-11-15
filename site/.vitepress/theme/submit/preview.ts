@@ -1,6 +1,6 @@
 import MarkdownIt from 'markdown-it'
 import { prepareDesignSource, installSafeDesignRules } from '../../../../scripts/lib/design-markdown.mjs'
-import { summarizeBot } from '../../../../scripts/lib/bot-summary.mjs'
+import { summarizeBot, decorateSummary } from '../../../../scripts/lib/bot-summary.mjs'
 import { validate } from '../../../../scripts/lib/validate/generated/bot-schema.mjs'
 import { submissionModel, type PreviewImage } from './model'
 export { summarizeBot }
@@ -49,10 +49,10 @@ export function renderDesign(markdown: string, {
 }
 
 export function previewModel(plaintext: string, {
-  images = [], login, addedAt, names = new Map(), now,
+  images = [], login, addedAt, names = new Map(), namesZh = new Map(), now,
 }: {
   images?: (PreviewImage | null)[]; login?: string | null; addedAt?: string
-  names?: Map<string, string>; now?: Date | string | number
+  names?: Map<string, string>; namesZh?: Map<string, string>; now?: Date | string | number
 } = {}) {
   const { model, plan, slug } = submissionModel(plaintext, { images, login, addedAt, now })
   const urls = new Map(plan.images.map((image: PreviewImage & { name: string }) => {
@@ -60,7 +60,8 @@ export function previewModel(plaintext: string, {
     return [image.name, url && /^(?:blob:|data:image\/(?:jpeg|png|webp|gif);base64,)/i.test(url) ? url : null]
   }))
   const asset = (name: string) => urls.get(decodeURIComponent(name)) ?? null
-  const summary = summarizeBot(model, { asset, names })
+  // 预览没有策展和小队：装饰字段取默认值（editorNote、pick 为 null，squads 为空），形状和货架上的一致。
+  const summary = decorateSummary(summarizeBot(model, { asset, names, namesZh }))
   validate(model.data)
   const invalid = [...(validate.errors || [])]
   const bad = (path: string) => !model.data || invalid.some((error) =>
@@ -74,6 +75,6 @@ export function previewModel(plaintext: string, {
       ? `https://github.com/${summary.author.github}`
       : summary.author.url || summary.templateUrl || null
   }
-  if (bad('/forkedFrom')) { summary.forkedFrom = null; summary.forkedFromName = null }
+  if (bad('/forkedFrom')) { summary.forkedFrom = null; summary.forkedFromName = null; summary.forkedFromNameZh = null }
   return { model, summary, designHtml: renderDesign(model.design || '', { slug, assetUrl: asset, screenshotNames: plan.images.map((image) => image.name), blockedUrl: typeof model.data?.templateUrl === 'string' ? model.data.templateUrl : undefined }), slug }
 }

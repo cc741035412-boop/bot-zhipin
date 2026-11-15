@@ -1,8 +1,8 @@
 # 外部收录：只收录链接，介绍由本站撰写，权限和准备事项是本站根据模板页公开描述做的判断。
 slug: media-downloader
 name: 下载专家
-tagline: 把 YouTube、B 站和播客转成中文文字稿，还能下载公开的论文报告
-category: 调研
+tagline: 把 YouTube、B 站和播客转成文字稿，还能下载公开的论文报告
+category: 内容
 author:
   name: kin
 templateUrl: https://x.ai/bot/z7xup0Ax1SBl2K84PELqF
@@ -15,4 +15,29 @@ permissions:
   - 外部账号
   - 联网
 external: true
-pitch: "两小时的视频懒得看？链接给我，我转成稿。"
+pitch:
+  - 两小时的视频懒得看？链接给我，我转成稿。
+  - 没字幕也行，我听一遍给你写下来。
+about:
+  intro: 发一个 YouTube、B 站、小宇宙或播客链接，它先找官方字幕，没有再用阿里云百炼的语音识别转写，交给你一份分段文字稿，有时间轴就再给一份带时间的。发 arXiv 链接或论文名，它下载公开的 PDF，告诉你页数和大小，付费墙后面的不碰。转写要用你自己的百炼 API Key，第一次会带你申请。
+  does:
+    - 把 YouTube、B 站、小宇宙和播客转成文字稿
+    - 有官方字幕先用字幕，没有才走语音识别
+    - 交分段原稿，有时间轴再给一份带时间的，不擅自润色
+    - 按 arXiv 链接、编号或论文名下载公开 PDF
+    - 第一次转写时带你申请百炼 API Key，不让你把密钥贴进聊天
+  starters:
+    - 这期小宇宙播客转成文字稿，我想先读一遍再决定听不听
+    - 把这个 YouTube 访谈转成文字稿，带上时间轴
+    - 帮我下载 DeepSeek 最新的技术报告 PDF
+  skills:
+    - name: 视频播客转写
+      does: 认出 YouTube、B 站、小宇宙或音频直链，先取字幕，没有再交 Paraformer 转写
+    - name: 百炼设置引导
+      does: 没有 API Key 时照阿里云官方文档带你开通百炼、建 Key、配成环境变量
+    - name: 论文下载
+      does: 只下公开 PDF，核对页数和大小后交原文件，不绕付费墙、不找盗版
+  fit: 常看长视频、播客和论文，想先读文字稿再决定看不看的人
+  notFit: 要下付费论文、会员视频或要登录才能看的内容的人
+  cnFit: 好
+  cnNote: 转写用阿里云百炼，要实名的阿里云账号和一把 API Key；B 站、小宇宙都支持，YouTube 可能拦云电脑的 IP

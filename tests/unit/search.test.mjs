@@ -3,7 +3,7 @@ import { searchBots } from '../../site/.vitepress/theme/search'
 
 // 默认字段都不含测试用的关键词，每条用例只改它关心的那一个字段。
 const bot = (slug, fields = {}) => ({
-  slug, name: '工具', tagline: '协助工作', category: '日常', author: { name: '作者' }, ...fields,
+  slug, name: '工具', tagline: '协助工作', category: '生活', author: { name: '作者' }, ...fields,
 })
 const slugs = (bots) => bots.map(({ slug }) => slug)
 

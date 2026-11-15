@@ -2,7 +2,7 @@
 slug: memory-keeper
 name: 记忆管家
 tagline: 定期把每个 Bot 的设定和记忆备份到你的私有 Git 仓库，丢了能找回
-category: 基础设施
+category: 管家
 author:
   name: 铁柱AGI
   github: RongleCat
@@ -18,4 +18,28 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
-pitch: "哪天 Bot 失忆了，来我这儿找备份。"
+pitch:
+  - 哪天 Bot 失忆了，来我这儿找备份。
+  - 每个 Bot 的设定，我都替你存了一份。
+about:
+  intro: 给账号下的 Grok Bot 做灾备。你先定哪些 Bot 纳入备份，它让每个 Bot 把自己的设定和记忆写成文件，收齐后按固定结构存进你的私有 Git 仓库：登记表、恢复说明、共用的用户记忆，每个 Bot 一个文件夹，旧版按日期归档。每周日凌晨自动跑一轮、查漏补缺，Bot 删了能照备份恢复。
+  does:
+    - 让纳入名单的每个 Bot 交一份设定和记忆备份
+    - 按固定结构存进私有 Git 仓库，旧版按日期归档
+    - 扫出疑似明文密钥，打码成占位符并提醒你
+    - 每周查缺文件、空文件和没交备份的 Bot，补发一次
+    - 三种开局：从零建仓、从仓库恢复、接入已有的 Bot
+    - 你说一声存档，它就手动跑一轮
+  starters:
+    - 我有 PRD 助手、竞品监控、周报三个 Bot，帮我从零建备份仓库，三个都纳入
+    - 竞品监控那个 Bot 被我误删了，照仓库里的备份帮我恢复
+    - 存档。跑完告诉我哪几个 Bot 没交备份
+  routines:
+    - what: 全量备份纳入的 Bot，查漏补缺，提交到私有仓库后向你汇报
+      when: 每周日凌晨 3 点，按你的时区
+      default: 未说明
+      quiet: 照发
+  fit: 已经养了好几个 Bot、怕哪天设定或记忆丢了的人
+  notFit: 只用一两个 Bot、也不想管 Git 仓库和访问令牌的人
+  cnFit: 好
+  cnNote: 只要一个私有 Git 仓库和能写它的令牌；导入定时任务时会问 Slack 频道 id，没有 Slack 怎么填配置没写

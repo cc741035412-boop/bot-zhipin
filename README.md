@@ -4,6 +4,7 @@ Grok Bot 模板货架：挑一个顺手的直接导入，也欢迎把你做的 B
 
 - 网站：https://bot-zhipin.pages.dev
 - 每个 Bot 是 [`bots/`](bots/) 下的一个文件夹，里面有岗位说明、技能、定时任务、截图和作者的设计说明
+- 几个 Bot 可以编成一支小队：[`squads/`](squads/) 下一支队一个文件，写清谁是队长、各管什么、怎么配合
 - 任何人都可以通过 PR 投稿，合并后网站自动更新，投稿者成为项目贡献者
 
 ## 怎么用货架上的 Bot
@@ -40,7 +41,7 @@ AI 只会问你几件它查不到的事，然后给你一个链接：**点开 �
 | 命令 | 作用 |
 |---|---|
 | `npm ci` | 安装全部依赖 |
-| `npm run validate` | 校验所有 Bot |
+| `npm run validate` | 校验所有 Bot、小队和策展文件 |
 | `npm run dev` | 本地预览页面 |
 | `npm run dev:full` | 本地预览 + 点击计数接口（Cloudflare Pages Functions + 本地 D1） |
 | `npm test` | 单元测试 |

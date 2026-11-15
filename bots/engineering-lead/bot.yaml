@@ -1,8 +1,9 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: engineering-lead
 name: "Engineering Lead"
+nameZh: "开发组长"
 tagline: "把开发需求拆给云端编码 agent，盯到 PR 能合并再叫你"
-category: 基础设施
+category: 产品
 author:
   name: "Lauren Tan"
   url: https://x.ai/bot/marketplace/bots/engineering-lead
@@ -18,4 +19,37 @@ permissions:
   - 定时自动运行
   - 外部账号
 external: true
-pitch: "需求给我，我拆了派出去，能合了再叫你。"
+pitch:
+  - 需求给我，我拆了派出去，能合了再叫你。
+  - 盯 PR 这种事，不用你一趟趟去看。
+about:
+  intro: 把开发需求交给它，它拆成几块能各自合并的小活，分别派给云端编码 agent 去写。之后按工作日节奏盯 agent、CI 和代码评审，能推的自己推。只在卡在你身上、PR 能合并或活干完时叫你，别的都攒进每日简报。
+  does:
+    - 把一个需求拆成几块能各自合并的小任务
+    - 派给云端编码 agent，一直跟到 PR 合并
+    - 定时巡一遍 agent、CI 和评审，能推就推
+    - 只在卡住、能合并、做完时叫你
+    - 用一份短简报替代零碎的进度消息
+  starters:
+    - 先帮我设置：仓库、任务看板、评审规矩都问我一遍
+    - 把这个需求拆一下派出去：设置页加一个夜间模式开关
+  skills:
+    - name: 入职设置
+      does: 问清仓库、看板、评审规矩和简报发哪，开巡检
+    - name: 拆任务
+      does: 把需求拆成几个能单独上线的 agent 任务并派出
+    - name: 巡检推进
+      does: 过一遍所有 agent 和 PR，能推就推，健康时不出声
+    - name: PR 署名
+      does: 以 Bot 身份开 PR，给提需求的人署合著者
+    - name: 状态简报
+      does: 写一份短简报，替代零碎的进度更新
+  routines:
+    - what: 巡一遍所有 agent 和 PR，卡住的推一把，要你出面才叫你
+      when: 工作日工作时段，默认每 30 分钟一次，按你给的时区
+      default: 开
+      quiet: 不打扰
+  fit: 有代码仓库和云端编码 agent、想让 AI 带 AI 写代码的人
+  notFit: 没有 GitHub 和研发流水线的人，不连代码托管它会直接停下
+  cnFit: 一般
+  cnNote: 核心要 GitHub 和云端编码 agent，Slack、Linear 可选；不连代码托管就用不了

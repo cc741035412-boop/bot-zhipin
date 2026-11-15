@@ -9,8 +9,8 @@ export const SITE = {
   branch: 'main',
 }
 
-// 品牌招牌独立于货架与排序：前 5 只站上排（橙色居中），后 4 只站下排并错开半格。
-// 上下左右和斜向相邻的砖都不同色系（暖橙 / 粉红 / 蓝紫 / 绿）。
+// 九只吉祥物：每个分组配一只（theme/color.ts 的 CATEGORY_MASCOTS，单测保证一一对应），标签页图标的颜色也从这里取。
+// 它们原先站在首屏的砖墙上；首屏换成球池（货架上的真 Bot）以后不再出现在首屏。顺序别动：单测按这个顺序检查相邻不撞色。
 export const HERO_MASCOTS = [
   { key: 'amber', shape: 'hex', color: '#f5a623' },
   { key: 'teal', shape: 'star', color: '#14b8a6' },
@@ -23,21 +23,51 @@ export const HERO_MASCOTS = [
   { key: 'brown', shape: 'pebble', color: '#9a6a3a' },
 ]
 
-// 首页主推：编辑挑的三个，按这个顺序排。这几个不在货架上时（比如测试数据），退回按热度取前三。
-export const FEATURED = ['idea-stress-test', 'quota-saver', 'copy-humanizer']
-
-// 首页货架的固定文案。界面上不放解释性的句子（决策 37）：这里只有标题、按钮、标签和状态反馈。
+// 首页货架的固定文案。界面上不放解释性的句子（决策 37）：这里只有标题、按钮、标签、计数和状态反馈。
+// 能出现在界面上的固定文字以 B2-UI 任务书第 2 节的清单为准，要加新的先问用户。
 // 搜索占位字首屏搜索框和搜索面板共用。
 export const SHELF_COPY = {
   searchPlaceholder: '搜索',
   searchLabel: '搜索 Bot',
   contribute: '我要投稿',
+  // 区块标题
   featuredTitle: '本周主推',
+  collectionsTitle: '专题',
   allTitle: '全部 Bot',
-  allCategories: '全部',
-  filterLabel: '按分类筛选',
-  emptyFilter: '这个分类下暂时没有 Bot',
+  // 工具栏：分组切换（「全部」+ 各分组名 + 数量）和排序。roleLabel、sortLabel 只给读屏。
+  allRoles: '全部',
+  roleLabel: '按分组筛选',
+  sortLabel: '排序',
+  sortRec: '推荐',
+  sortNew: '最新',
+  sortHot: '最热',
+  // 计数
+  total: (count) => `共 ${count} 个`,
+  groupCount: (count) => `${count} 个`,
+  collectionCount: (count) => `${count} 个 Bot`,
+  // 每组先露几张，其余展开
+  expand: (count) => `展开 ${count} 个`,
+  collapse: '收起',
+  // 专题筛选条：「专题：<标题> · N 个」+「清除」
+  collectionKind: '专题：',
+  filterCount: (count) => ` · ${count} 个`,
+  clear: '清除',
+  // 筛选为空
+  emptyFilter: '这个分组还没有 Bot',
   showAll: '看看全部',
+}
+
+// 每个分组一句说明。分组的取值和顺序只认 schema（bot.schema.json 的 category）；单测保证这里一个不多、一个不少。
+export const CATEGORY_COPY = {
+  产品: '想清楚做什么，写出来，做出来，再挑毛病',
+  市场: '盯竞品，定定位，做投放，看数据',
+  销售: '找客户，备会，跟进，复盘',
+  内容: '找选题，写稿，剪视频',
+  运营: '办活动，管行政，招人',
+  学习: '学东西，跟进展，备考',
+  求职: '改简历，练面试，找机会',
+  管家: '管你的 Bot：省额度、备份、接飞书、派活',
+  生活: '记账、健康，还有好玩的',
 }
 
 export const POKE_PITCHES = ['哎，痒！', '再戳我就变形了', '好啦好啦，我在呢', '你找我呀？']
@@ -76,9 +106,36 @@ export const DEFAULT_PITCHES = [
   '挑我吧，上岗不用培训。',
   '重复的活交给我，你去想更重要的事。',
   '不画大饼，只交能用的结果。',
-  '先看看我的设计说明，再决定要不要我。',
   '导入一次，天天替你跑腿。',
   '简历就在详情页，欢迎来面试。',
   '额度花在刀刃上，这事我在行。',
   '别急着走，点开看看我会什么。',
 ]
+
+// 小队：首页区块、小队页、搜索面板里的固定文字。界面上不放解释性的句子，这里只有标题、标签、按钮和状态反馈。
+export const SQUAD_COPY = {
+  title: '小队',
+  tag: '小队',
+  count: (n) => `${n} 个 Bot`,
+  recruit: '投稿小队',
+  start: '开始组队',
+  roster: '阵容',
+  flow: '怎么配合',
+  setup: '组队步骤',
+  cost: '整队的代价',
+  notes: '要知道的事',
+  optional: '可选',
+  missing: '未收录',
+  import: '导入',
+  imported: (done, total) => `已导入 ${done} / ${total}`,
+  // 只给读屏：每个成员前面那个打勾按钮的名字
+  importedLabel: '已导入',
+  copy: '复制',
+  copied: '已复制',
+  quota: '额度',
+  permissions: '权限',
+  prerequisites: '导入前准备',
+  you: '你',
+}
+/** 招募卡上「投稿小队」链到仓库里的投稿说明。 */
+export const SQUAD_CONTRIBUTE_URL = `${SITE.repo}/blob/${SITE.branch}/CONTRIBUTING.md#${encodeURIComponent('投稿小队')}`

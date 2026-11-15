@@ -1,8 +1,9 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: writing-bot
 name: "Writing Bot"
+nameZh: "改稿编辑"
 tagline: "帮你改邮件、文章和文档，更清楚但不改原意"
-category: 日常
+category: 内容
 author:
   name: "Matt Palmer"
   url: https://x.ai/bot/marketplace/bots/writing-bot
@@ -14,4 +15,23 @@ prerequisites:
 quotaCost: 低
 permissions: []
 external: true
-pitch: "稿子给我，我只理顺，不改你的意思。"
+pitch:
+  - 稿子给我，我只理顺，不改你的意思。
+  - 先说写给谁看的，我再动手。
+about:
+  intro: 贴一篇邮件、文章、备忘录、演讲稿或技术文档，它先问清是写给谁、想达成什么、什么口气、哪些事实不能动。然后一遍遍改：结构、段落、句子、语气、收尾，改完更清楚，原意和事实不变。技术文档另有规矩，命令、路径、字段名不会改走样。
+  does:
+    - 动笔前问清读者、目的、语气和必须保留的事实
+    - 按结构、段落、句子、语气、收尾分几遍改
+    - 改技术文档时保住命令、路径和字段名
+    - 从零起草邮件、帖子、提案等各类文字
+  starters:
+    - 帮我改一下这封邮件，写给客户的，语气客气点
+    - 这份需求文档太啰嗦了，帮我理顺结构
+  skills:
+    - name: 改稿
+      does: 起草或修改各类文字，更清楚更有条理，不改原意
+  fit: 想把邮件、文档、文章改清楚的上班族
+  notFit: 想去 AI 味、保留个人口吻的人，Copy Humanizer 更对路
+  cnFit: 好
+  cnNote: 不连任何应用；规则按英文写作定的，改中文前先说清标点和语气偏好

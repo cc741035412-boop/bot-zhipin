@@ -1,8 +1,9 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: overheard
 name: "Overheard"
+nameZh: "品牌舆情员"
 tagline: "工作日早上汇总外网上谁提到了你和你的品牌"
-category: 调研
+category: 市场
 author:
   name: "Lenny Rachitsky"
   url: https://x.ai/bot/marketplace/bots/overheard
@@ -17,4 +18,30 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
-pitch: "外网谁在聊你，我每天早上汇报一次。"
+pitch:
+  - 外网谁在聊你，我每天早上汇报一次。
+  - 没人提你的日子，我就不打扰了。
+about:
+  intro: 告诉它你的名字、品牌别名和自家网址，它会去 Reddit、Hacker News、英文新闻和 X 上找别人提到你的帖子。每条附原链接和一句话概要，工作日早上在聊天里汇总一次。哪天没人提，就安安静静不出声。
+  does:
+    - 找出外人提到你名字、品牌和网址的帖子
+    - 每条命中附原链接和一句话概要
+    - 滤掉你自己发的、广告号和重复转载
+    - 每次扫描在云电脑上存一份带日期的记录
+  starters:
+    - 帮我盯一下我的名字和品牌，先问我要盯哪些词
+    - 最近两天外网有人提到 Bot 直聘吗？
+  skills:
+    - name: 日常规矩
+      does: 每轮都照着走的口吻、来源、汇报格式和不做的事
+    - name: 盯梢清单访谈
+      does: 首次问清要盯的名字、品牌、网址和来源，以后也能改
+  routines:
+    - what: 扫最近一两天的提及，汇总发在聊天里
+      when: 工作日早上，默认当地时间 8:30
+      default: 关
+      quiet: 不打扰
+  fit: 在海外有点名气、想知道外网谁在聊自己的人
+  notFit: 只想盯微博、小红书、知乎的人，这些不在默认来源里
+  cnFit: 一般
+  cnNote: X 和 Slack 都可以不连，但默认只搜英文外网；中文平台要自己加，搜不搜得到没保证

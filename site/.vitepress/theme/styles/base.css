@@ -4,7 +4,7 @@
 
 /* ---------- 字体：圆体只给站名、标题、卡片上的 Bot 名和气泡 ---------- */
 :root { --vp-font-family-base: var(--bz-font-text); }
-.VPNavBarTitle .title, .shelf-intro h1, .section-heading h2, .block-heading h3, .featured-card h4, .bot-card h2,
+.VPNavBarTitle .title, .section-heading h2, .block-heading h3, .featured-card h4, .bot-card h2,
 .pitch-bubble, .detail-info h1, .detail-info > h2, .bot-detail section h2, .not-found h1, .bz-section-head h2,
 .bz-h1, .bz-h2, .bz-h3, .bz-title {
   font-family: var(--bz-font-display);
@@ -87,6 +87,31 @@
 /* 实心小标签：小队里的「队长」这类 */
 .bz-tag.solid { background-color: var(--bz-ink); color: var(--bz-page); }
 
+/* ---------- Bot 的名字 .bz-name（BotName.vue；只有写了中文叫法的 Bot 才有这层） ----------
+   中文叫法是主角：字号、字重、颜色都跟着所在的标题走。原名是配角：系统字体、小一号（13px）、三级灰，基线对齐跟在后面，间距 6。
+   默认只占一行，三种情况：
+   1. 放得下：两个都写全。
+   2. 放不下：中文叫法不让位，原名截断（省略号）。
+   3. 留给原名的地方不到 4 个字宽（4em）：原名整个不显示，不留一截「Co…」。中文叫法自己都放不下时才截它。
+   第 3 条的做法：容器允许换行、只露一行高。原名的起步宽度是 4em（比它短的原名按自己的宽度），这一行摆不下它就落到第二行，被裁掉。
+   整个名字抬到「整卡可点」那层伪元素上面，鼠标停上去能看到原名全称（title）；它本身在链接里面，点它照样进详情。 */
+.bz-name {
+  position: relative; z-index: 2; display: inline-flex; flex-wrap: wrap; align-items: baseline; column-gap: 6px;
+  min-width: 0; max-width: 100%; max-height: 1.45em; max-height: 1lh; overflow: hidden; vertical-align: top;
+}
+.bz-name > .bz-name-zh { flex: none; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.bz-name > .bz-name-orig {
+  flex: 1 1 4em; min-width: 0; max-width: max-content; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-family: var(--bz-font-text); font-size: var(--bz-fs-sm); font-weight: 400; letter-spacing: 0; color: var(--bz-text-3);
+}
+/* 名字本身只有 13–14px 的地方：原名降到 12px，间距 4 */
+.bz-name.small { column-gap: var(--bz-sp-1); }
+.bz-name.small > .bz-name-orig { font-size: var(--bz-fs-xs); }
+/* 详情页的大标题：可以换行。两个名字各是一整块：放不下时原名整个落到下一行，不从中文叫法中间断开；原名不截断，用 h3 档 */
+.bz-name.wrap { display: inline; max-height: none; overflow: visible; vertical-align: baseline; }
+.bz-name.wrap > :is(.bz-name-zh, .bz-name-orig) { display: inline-block; max-width: 100%; overflow: visible; white-space: normal; vertical-align: baseline; }
+.bz-name.wrap > .bz-name-orig { font-size: var(--bz-fs-h3); font-weight: 500; letter-spacing: -.01em; }
+
 /* ---------- 头像砖 .bz-tile ----------
    比例圆角 24%，玻璃底 + 细边 + 内高光，砖底一团 Bot 色柔光（伪元素，砖里不放文字）。
    Bot 占砖的 68%。尺寸只用 28、40、48、64、72、96、120：加 .s28 … .s120，或在外层设 --bz-tile-size。 */
@@ -165,7 +190,7 @@
 /* ---------- 头像按钮和跳动 ---------- */
 .avatar-stage { --bz-tile-size: 64px; }
 .bot-avatar { display: block; border-radius: 50%; cursor: pointer; transform-origin: center bottom; -webkit-tap-highlight-color: transparent; }
-.bot-avatar.is-speaking, .hero-bot.is-speaking { animation: bz-bounce 560ms var(--bz-ease-pop); }
+.bot-avatar.is-speaking { animation: bz-bounce 560ms var(--bz-ease-pop); }
 @keyframes bz-bounce {
   0%, 100% { transform: translateY(0) scale(1, 1); }
   24% { transform: translateY(2px) scale(1.07, .92); }

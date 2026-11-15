@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BotPortrait from './BotPortrait.vue'
+import { displayName } from '../../../../scripts/lib/bot-name.mjs'
 import { activePitch, nextPitch, nextPoke } from '../pitch'
 import { isReducedMotion, now, register } from '../live/clock'
 import type { Play } from '../live/playback'
 
-const props = defineProps<{ bot: { slug: string; name: string; avatar: string | null; pitch?: string | null }; wholeCard?: boolean }>()
+const props = defineProps<{ bot: { slug: string; name: string; nameZh?: string | null; avatar: string | null; pitch?: string | null; pitches?: string[] }; wholeCard?: boolean }>()
+// 摘要里的 pitches 是台词数组；旧数据只有 pitch 一句。
+const lines = () => props.bot.pitches?.length ? props.bot.pitches : props.bot.pitch
 const owner = Symbol('头像台词')
 const root = ref<HTMLElement>()
 const button = ref<HTMLButtonElement>()
@@ -69,7 +72,7 @@ function enter(event: PointerEvent) {
   if (event.pointerType !== 'mouse') return
   hovered.value = true
   play({ state: 'wide', hold: Infinity })
-  show(nextPitch(props.bot.slug, props.bot.pitch))
+  show(nextPitch(props.bot.slug, lines()))
 }
 function leave(event: PointerEvent) {
   if (event.pointerType !== 'mouse') return
@@ -77,11 +80,11 @@ function leave(event: PointerEvent) {
   close()
 }
 function focus() {
-  if (!pointerFocus) show(nextPitch(props.bot.slug, props.bot.pitch))
+  if (!pointerFocus) show(nextPitch(props.bot.slug, lines()))
 }
 function click(event: MouseEvent) {
   const pointer = 'pointerType' in event && event.pointerType
-  if (!pointer && event.detail === 0) show(nextPitch(props.bot.slug, props.bot.pitch))
+  if (!pointer && event.detail === 0) show(nextPitch(props.bot.slug, lines()))
   else {
     const poke = nextPoke(props.bot.slug)
     play({ state: poke.state })
@@ -118,7 +121,7 @@ defineExpose({ enter, leave, play })
     <div class="avatar-stage bz-tile" @pointerenter="!wholeCard && enter($event)" @pointerleave="!wholeCard && leave($event)">
       <button
         ref="button" type="button" class="bot-avatar" data-testid="avatar"
-        :aria-label="`听听${bot.name}的自荐`" :aria-describedby="open ? bubbleId : undefined"
+        :aria-label="`听听${displayName(bot)}的自荐`" :aria-describedby="open ? bubbleId : undefined"
         @pointerdown="pointerFocus = true"
         @focus="focus" @blur="close" @click="click"
       >

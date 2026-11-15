@@ -1,14 +1,20 @@
-// 分类色只在这里映射；展示的分类名仍来自 Bot 数据，合法枚举由 schema 校验。
-export const CATEGORY_COLORS: Readonly<Record<string, string>> = Object.freeze({
-  '调研': '#8b5cf6',
-  '定义': '#ff6a13',
-  '评审': '#ff2e93',
-  'AI 评测': '#14b8a6',
-  '学习': '#f5a623',
-  '求职': '#9a6a3a',
-  '日常': '#34d399',
-  '基础设施': '#3b82f6',
+// 分组的颜色和吉祥物只在这里映射；展示的分组名仍来自 Bot 数据，合法枚举由 schema 校验。
+// 每个分组配一只吉祥物，和 meta.mjs 的 HERO_MASCOTS 里对应那只同色同形（单测保证）。
+export const CATEGORY_MASCOTS: Readonly<Record<string, Readonly<{ shape: string; color: string }>>> = Object.freeze({
+  '产品': { shape: 'blob', color: '#ff6a13' },
+  '市场': { shape: 'sparkle', color: '#ff2e93' },
+  '销售': { shape: 'star', color: '#14b8a6' },
+  '内容': { shape: 'tablet', color: '#8b5cf6' },
+  '运营': { shape: 'hex', color: '#f5a623' },
+  '学习': { shape: 'pebble', color: '#9a6a3a' },
+  '求职': { shape: 'heart', color: '#f43f5e' },
+  '管家': { shape: 'cloud', color: '#3b82f6' },
+  '生活': { shape: 'teardrop', color: '#34d399' },
 })
+// 分组色就是吉祥物的颜色，不另写一份。
+export const CATEGORY_COLORS: Readonly<Record<string, string>> = Object.freeze(
+  Object.fromEntries(Object.entries(CATEGORY_MASCOTS).map(([category, mascot]) => [category, mascot.color])),
+)
 export function categoryStyle(category: string): Record<string, string> {
   return { '--bz-category-color': Object.hasOwn(CATEGORY_COLORS, category) ? CATEGORY_COLORS[category] : '#8a8a93' }
 }

@@ -1,8 +1,9 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: stills-clips-desk
 name: "Stills & Clips Desk"
+nameZh: "封面截取员"
 tagline: "从视频里截封面、剪短片，按平台尺寸导出"
-category: 日常
+category: 内容
 author:
   name: "Matt Palmer"
   url: https://x.ai/bot/marketplace/bots/image-gen-bot
@@ -16,4 +17,38 @@ permissions:
   - 云电脑文件
   - 定时自动运行
 external: true
-pitch: "几分几秒那一帧当封面？告诉我就行。"
+pitch:
+  - 几分几秒那一帧当封面？告诉我就行。
+  - 截图里的邮箱，我顺手给你打上码。
+about:
+  intro: 你指定时间点或时间段，它从已有视频里截封面、剧照，剪短片、无声循环或 GIF，也能把产品截图打码、裁剪、加边框。做好的图按投放位置导出几种尺寸，配上文件名、替代文本和配文。只处理拍过的素材，不生成新画面，也不替你挑哪段好看。
+  does:
+    - 按时间点从视频里截封面和剧照
+    - 按时间段剪短片、无声循环或 GIF
+    - 给产品截图打码、裁剪、加边框，放进文档用
+    - 按投放位置导出多种尺寸，配替代文本和配文
+  starters:
+    - 从这段视频 2 分 10 秒左右截一张封面
+    - 这张截图帮我把邮箱打码，裁成文档配图
+  skills:
+    - name: 上手引导
+      does: 问清你拍什么、常要什么素材，做出第一张图或第一段
+    - name: 尺寸和样式表
+      does: 记下素材发到哪、品牌叠字规则和各处尺寸
+    - name: 截帧
+      does: 按时间点或你描述的画面截成图片
+    - name: 截短片
+      does: 按时间段剪出短片、循环或 GIF
+    - name: 截图整理
+      does: 把产品截图打码、裁剪、加框，适配文档或 PPT
+    - name: 导出和配文
+      does: 定好尺寸、文件名和大小，写配文和替代文本
+  routines:
+    - what: 处理素材队列里等着的截图和短片，每次最多 5 个
+      when: 每周一次，周几几点你定
+      default: 关
+      quiet: 照发
+  fit: 常要做视频封面、给文档配截图的人
+  notFit: 想让它挑精彩片段或剪整条视频的人
+  cnFit: 好
+  cnNote: 上传就能用；默认尺寸是 YouTube、Instagram 规格，做小红书、视频号要先告诉它尺寸

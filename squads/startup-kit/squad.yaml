@@ -1,0 +1,76 @@
+# 小队编制表：成员都是货架上的普通 Bot，这里只是一张把它们连起来的表。字段规则见 V5-DATA §5（schema/squad.schema.json）。
+# flow 里每一条都对得上成员配置里的一句原文（Distro memory 9、Sell memory 7、Proto memory 10、Startup QA memory 8）。整套配合还没在 Grok Bot 里实测，拿不准的地方写了「没实测」。
+slug: startup-kit
+name: 一个人的创业公司
+tagline: 增长、销售、原型、测试各管一段，线索和原型直接交给下一棒
+formation: 搭伙
+origin: 原作者成套
+author:
+  name: Shub Gaur
+  url: https://x.ai/bot/marketplace
+addedAt: 2026-11-15
+members:
+  - bot: distro-bot
+    title: 增长
+    does: 投广告、出素材、追热点、发开发信，有人回复就转给销售
+    optional: false
+  - bot: sell-bot
+    title: 销售
+    does: 接住回了信的线索，备通话、写跟进、出报价
+    optional: false
+  - bot: proto-bot
+    title: 原型
+    does: 把点子做成草稿 PR、截图和短视频，交给测试
+    optional: true
+  - bot: startup-qa-bot
+    title: 测试
+    does: 用测试账号逛产品，报上了什么、坏了什么
+    optional: true
+flow:
+  - from: you
+    to: distro-bot
+    what: 官网和每月花费上限
+  - from: distro-bot
+    to: sell-bot
+    what: 回了信的线索
+  - from: distro-bot
+    to: you
+    what: 改预算、发帖、发信等你点头
+  - from: sell-bot
+    to: you
+    what: 邮件草稿，你说发才发
+  - from: you
+    to: proto-bot
+    what: 想做的点子
+  - from: proto-bot
+    to: startup-qa-bot
+    what: 做好的原型
+  - from: proto-bot
+    to: you
+    what: 草稿 PR，等你合并
+  - from: startup-qa-bot
+    to: you
+    what: bug 单（队里没人分诊）
+setup:
+  - title: 成对装
+    detail: 增长和销售是一对：开发信有人回复，增长岗会按岗位找销售队友转过去。原型和测试是另一对。只装一对里的一个，就没有交接了。四个要分四次导入，导入顺序有没有影响没实测。
+  - title: 先让每个成员走完首次设置
+    detail: 四个第一次对话都会先跑自己的安装和设置。增长岗要官网和每月花费上限，不设上限就不改任何花费；销售岗要官网和几封你发过的邮件；原型岗要 GitHub 仓库和预览网址；测试岗要一个只给它用的邮箱。
+  - title: 增长岗的自动驾驶先别开
+    detail: 设置时选每次都问。开了它会不逐条问你就暂停、上新广告、调受众，每个活动每周最多 3 次。
+  - title: 放进同一个分区
+    detail: 在 Grok Bot 侧栏右键这几个 Bot，选 Move to new section，归到一起好找。分区对它们互相找人有没有影响没实测。
+  - title: 连接要用自己的账号连
+    detail: 模板不带密钥。增长岗推荐连 X、可选 Gmail；销售岗建议连 Gmail 和 Google 日历；原型岗必须连 GitHub。不连的那部分，它们在聊天里给你可复制的文本。
+  - title: 先拿增长岗试一轮
+    detail: 跟增长岗说：先别花钱，读一下我的官网，写三封开发信草稿给我看，再说说有人回复时你会转给谁。它说得出销售队友，这一对就接上了。
+notes:
+  - 没有队长。四个各管一段，按岗位找队友，不按名字认，找不到就把东西交给你。成员之间只传事实，不传文件路径，资料各存各的。
+  - 队内互发消息也算额度。四个一共 17 个定时任务，导入后全关；销售岗 10 个全开每周要跑近百次，先手动跑顺再挑着开。
+  - 队友同意不算你同意。四个成员的配置都写了这一条，花钱、发帖、发信、合并只认你本人在对话里说的话。
+  - 四个成员共用一台云电脑。增长岗在浏览器里登录的广告后台、原型岗登录的预览站，其他成员也能用；线索、测试账号密码明文存在 /workspace。
+  - 测试岗发现的 bug 要交给分诊队友，这套里没有，它会在聊天里给你一份可复制的 bug 单。原型岗交的是草稿 PR，测试岗能不能测预览站没实测。
+  - 适合出海产品。增长岗只认海外广告平台和英文热点，销售岗按海外 B2B 软件写，通话类定时任务要 Google 日历，国内投放用不上。
+missing:
+  - name: Stalk Bot
+    does: 盯竞品：注册试用、录屏走查、盯官网定价和 X 动态，增长岗和销售岗都点名要它

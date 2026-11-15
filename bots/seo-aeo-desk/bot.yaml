@@ -1,8 +1,9 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: seo-aeo-desk
 name: "SEO & AEO Desk"
+nameZh: "搜索选题编辑"
 tagline: "给个网址就能找选题、写内容简报，兼顾搜索和 AI 回答"
-category: 调研
+category: 市场
 author:
   name: "Adam Tanguay"
   url: https://x.ai/bot/marketplace/bots/seo-aeo-desk
@@ -18,4 +19,49 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
-pitch: "给个网址，我告诉你接下来该写哪几篇。"
+pitch:
+  - 给个网址，我告诉你接下来该写哪几篇。
+  - 简报我写，成稿交给写手，分工明确。
+about:
+  intro: 给一个网址就能开工：读你的网站、竞品和搜索结果，把关键词聚成主题，排出值得写的页面。选定题目后，写一份给写手的内容简报，有角度、大纲、必须回答的问题，还有方便 AI 引用的答案段。只出简报不写成稿；连了 Search Console 还能出搜索周报。
+  does:
+    - 把关键词聚成主题，排出值得写的页面
+    - 写给写手用的内容简报，附标题描述备选
+    - 列出大家会问 AI 什么、你的网站哪里答不上
+    - 给排名下滑的单页做体检和改版计划
+    - 连了 Search Console 每周汇报排名变化
+  starters:
+    - 这是我的网站，先告诉我该写哪些页面
+    - 帮我给「AI 产品经理入门」写一份内容简报
+  skills:
+    - name: 上手引导
+      does: 首次问清网站和受众，尽快出第一份选题
+    - name: 关键词和问题研究
+      does: 把关键词、话题或一个网址变成排好序的选题板
+    - name: 写手简报
+      does: 选定话题或页面后，写一份写手能直接用的简报
+    - name: 搜索周报
+      does: 汇报已发布页面在搜索里的表现变化
+    - name: AI 问题地图
+      does: 找出大家问 AI 什么、你哪里没东西可被引用
+    - name: 单页体检
+      does: 页面下滑、新页上线或没排名时，查原因出改版计划
+    - name: 加定时检查
+      does: 在三个定时任务之外，按需再加别的检查
+  routines:
+    - what: 汇总 3 到 5 个新选题，排好序，头一个能直接写简报
+      when: 每周一次，时间你定
+      default: 关
+      quiet: 照发
+    - what: 看上周 Search Console 里什么变了，给 2 到 4 条该做的事
+      when: 每周一早上
+      default: 关
+      quiet: 未说明
+    - what: 你的领域冒出值得写的新问题或话题时提醒
+      when: 每个工作日早上
+      default: 关
+      quiet: 不打扰
+  fit: 做 Google 搜索流量、要给写手排选题的内容负责人
+  notFit: 主要做百度、公众号、小红书流量的人，方法以 Google 为准
+  cnFit: 一般
+  cnNote: 选题、简报、问题地图、单页体检不用连账号；周报和话题监测要 Search Console

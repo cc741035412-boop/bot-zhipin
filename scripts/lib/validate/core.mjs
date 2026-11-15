@@ -3,10 +3,12 @@ import { validateContent, validateTemplate } from './content.mjs'
 import { validateImages } from './images.mjs'
 import { redact, scanSecrets } from './secrets.mjs'
 import { botYamlSizeError } from '../yaml-limits.mjs'
+import { hasChinese } from '../bot-name.mjs'
 
 const DAY = 24 * 60 * 60 * 1000
 
-function validateDate(bot, now, report) {
+/** addedAt 是真实日期且不晚于明天（北京时间）。Bot 和小队共用。 */
+export function validateDate(bot, now, report) {
   const value = bot.data.addedAt
   // 非字符串或不符合 YYYY-MM-DD 的值由 schema 报告。
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return
@@ -69,6 +71,10 @@ export function validateModels(bots, { template, now = new Date(), others = [], 
       const data = bot.data
       if (typeof data.slug === 'string' && data.slug !== bot.slug) report(bot.yamlPath, 'slug', `slug ${data.slug} 和文件夹名不一致（文件夹是 ${bot.slug}）`, `将 slug 改为 ${bot.slug}，或把文件夹改成与 slug 一致的合法名称。`)
       validateDate(bot, now, report)
+      // 中文叫法里得有汉字；长度、类型、禁用字符由 schema 报告。
+      if (typeof data.nameZh === 'string' && data.nameZh && !hasChinese(data.nameZh)) {
+        report(bot.yamlPath, 'nameZh', `nameZh 当前值 ${JSON.stringify(data.nameZh)} 里没有中文`, 'nameZh 填中文叫法，比如「点子拆解员」；不需要中文叫法就删掉这一行，页面会直接用 name。')
+      }
       if (policy.submission) {
         if (data.external === true) report(bot.yamlPath, 'external', '网站投稿不允许 external: true', '删除 external 字段；外部收录只能由维护者处理。')
         if (typeof data.author?.github !== 'string' || data.author.github.toLowerCase() !== String(policy.submission.login).toLowerCase()) {
@@ -97,16 +103,21 @@ export function validateModels(bots, { template, now = new Date(), others = [], 
   return { errors, warnings }
 }
 
-export function formatResult({ bots, errors, warnings }) {
+/** squads 只有全量校验（Bot + 小队 + 策展）才会带；只校验 Bot 时不打印小队数。 */
+export function formatResult({ bots, squads, errors, warnings }) {
   const lines = []
   for (const [items, mark, label, advice] of [[errors, '✗', '问题', '改法'], [warnings, '!', '提醒', '建议']]) {
     for (const item of items) lines.push(`${mark} ${item.file}\n  位置：${item.where}\n  ${label}：${item.problem}\n  ${advice}：${item.fix}\n`)
   }
   if (errors.length) {
-    const failedBots = new Set(errors.map((item) => item.file.split('/')[1])).size
-    lines.push(`校验未通过：${failedBots} 个 Bot 共 ${errors.length} 处错误${warnings.length ? `（另有 ${warnings.length} 条提醒）` : ''}。按上面的「改法」逐条修改后，重新运行 npm run validate。`)
+    const failed = (prefix) => new Set(errors.filter((item) => item.file.startsWith(prefix)).map((item) => item.file.split('/')[1])).size
+    const failedBots = failed('bots/'), failedSquads = failed('squads/')
+    const curation = errors.some((item) => item.file.startsWith('curation/'))
+    // 只有 Bot 出错时写法和以前一样；小队、策展出错才追加在后面。
+    const scope = [(failedBots || !(failedSquads || curation)) && `${failedBots} 个 Bot`, failedSquads && `${failedSquads} 支小队`, curation && '策展文件'].filter(Boolean).join('、')
+    lines.push(`校验未通过：${scope} 共 ${errors.length} 处错误${warnings.length ? `（另有 ${warnings.length} 条提醒）` : ''}。按上面的「改法」逐条修改后，重新运行 npm run validate。`)
   } else {
-    lines.push(`✓ 校验通过：${bots.length} 个 Bot（其中 ${bots.filter((bot) => bot.data?.external === true).length} 个外部收录）`)
+    lines.push(`✓ 校验通过：${bots.length} 个 Bot（其中 ${bots.filter((bot) => bot.data?.external === true).length} 个外部收录）${squads ? `，${squads.length} 支小队` : ''}`)
   }
   return lines.join('\n')
 }

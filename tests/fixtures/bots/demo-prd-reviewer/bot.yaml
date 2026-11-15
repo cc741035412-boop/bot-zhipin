@@ -1,7 +1,7 @@
 slug: demo-prd-reviewer
 name: 示例·PRD 评审员
 tagline: 评审会前先帮你把 PRD 挑一遍毛病
-category: 评审
+category: 产品
 author:
   name: 示例作者
   github: example-user
@@ -15,3 +15,16 @@ permissions:
   - 联网
   - 外部账号
 pitch: 评审会上被问住之前，先让我问你一遍。
+about:
+  intro: 你把写好的 PRD 发给它，它按检查清单逐条过一遍，把问题按严重程度排好交给你。
+  does:
+    - 按清单检查目标、范围、验收标准有没有写清
+    - 把发现的问题按严重程度排序
+    - 给每个问题配一句怎么改
+  starters:
+    - 帮我评审这份 PRD：（贴正文或文档链接）
+    - 只看验收标准这一节，哪些没法验收？
+  fit: 评审会前想先自查一遍的产品经理
+  notFit: 还没动笔、只有一个想法的人
+  cnFit: 好
+  cnNote: 读飞书文档要先连飞书账号；直接贴正文不用连。

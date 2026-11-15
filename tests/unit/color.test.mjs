@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest'
-import { contrast, darkSwap, buttonColors, botPalette, CATEGORY_COLORS, categoryStyle } from '../../site/.vitepress/theme/color'
+import { contrast, darkSwap, buttonColors, botPalette, CATEGORY_COLORS, CATEGORY_MASCOTS, categoryStyle } from '../../site/.vitepress/theme/color'
 import { loadEnums } from '../../scripts/lib/load-bots.mjs'
-import { HERO_MASCOTS } from '../../site/.vitepress/meta.mjs'
+import { HERO_MASCOTS, CATEGORY_COPY } from '../../site/.vitepress/meta.mjs'
 import { shapeRadii } from '../../site/.vitepress/theme/face'
 
-describe('LB6 品牌与分类配置', () => {
+describe('LB6 品牌与分组配置', () => {
   test('固定九只（上排五只、下排四只）、橙色在上排正中、形状有效且至少五种、颜色互异', () => {
     expect(HERO_MASCOTS).toHaveLength(9)
     expect(new Set(HERO_MASCOTS.map((m) => m.key)).size).toBe(9)
@@ -32,7 +32,37 @@ describe('LB6 品牌与分类配置', () => {
     // 下排错开半格：第 i 只夹在上排第 i、i+1 只中间。
     bottom.forEach((value, i) => { expect(value).not.toBe(top[i]); expect(value).not.toBe(top[i + 1]) })
   })
-  test('分类映射完整覆盖 schema，无重复颜色，未知分类安全回退', () => {
+  test('分组枚举是固定顺序的 9 个，正好对上招牌的 9 只吉祥物', () => {
+    expect(loadEnums().categories).toEqual(['产品', '市场', '销售', '内容', '运营', '学习', '求职', '管家', '生活'])
+    expect(loadEnums().categories).toHaveLength(HERO_MASCOTS.length)
+  })
+  test('每个分组一只吉祥物：完整覆盖 schema，和招牌里对应那只同色同形，颜色形状都不重复', () => {
+    const categories = loadEnums().categories
+    expect(Object.keys(CATEGORY_MASCOTS).sort()).toEqual([...categories].sort())
+    for (const category of categories) {
+      const mascot = CATEGORY_MASCOTS[category]
+      expect(Object.keys(mascot).sort()).toEqual(['color', 'shape'])
+      expect(HERO_MASCOTS.filter((hero) => hero.shape === mascot.shape && hero.color === mascot.color), category).toHaveLength(1)
+      expect(CATEGORY_COLORS[category]).toBe(mascot.color)
+    }
+    expect(new Set(Object.values(CATEGORY_MASCOTS).map((m) => m.color)).size).toBe(categories.length)
+    expect(new Set(Object.values(CATEGORY_MASCOTS).map((m) => m.shape)).size).toBe(categories.length)
+    expect(CATEGORY_MASCOTS['产品']).toEqual({ shape: 'blob', color: '#ff6a13' })
+    expect(CATEGORY_MASCOTS['学习']).toEqual({ shape: 'pebble', color: '#9a6a3a' })
+    expect(CATEGORY_MASCOTS['求职']).toEqual({ shape: 'heart', color: '#f43f5e' })
+    expect(CATEGORY_MASCOTS['生活']).toEqual({ shape: 'teardrop', color: '#34d399' })
+    // 9 个分组用完招牌的 9 只，一只不剩。
+    expect(HERO_MASCOTS.filter((hero) => !Object.values(CATEGORY_MASCOTS).some((m) => m.shape === hero.shape && m.color === hero.color))).toEqual([])
+  })
+  test('每个分组一句说明：完整覆盖 schema，都是非空文字', () => {
+    expect(Object.keys(CATEGORY_COPY).sort()).toEqual([...loadEnums().categories].sort())
+    for (const copy of Object.values(CATEGORY_COPY)) expect(copy).toMatch(/\S{4,}/)
+    expect(CATEGORY_COPY['管家']).toBe('管你的 Bot：省额度、备份、接飞书、派活')
+    expect(CATEGORY_COPY['学习']).toBe('学东西，跟进展，备考')
+    expect(CATEGORY_COPY['求职']).toBe('改简历，练面试，找机会')
+    expect(CATEGORY_COPY['生活']).toBe('记账、健康，还有好玩的')
+  })
+  test('分组色完整覆盖 schema，无重复颜色，未知分组安全回退', () => {
     expect(Object.keys(CATEGORY_COLORS).sort()).toEqual([...loadEnums().categories].sort())
     expect(new Set(Object.values(CATEGORY_COLORS)).size).toBe(loadEnums().categories.length)
     for (const [name, color] of Object.entries(CATEGORY_COLORS)) {

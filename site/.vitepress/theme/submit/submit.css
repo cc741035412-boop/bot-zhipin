@@ -1,172 +1,372 @@
-:root { --bz-danger: #b91c1c; --bz-warning: #b45309; --bz-success-text: #15803d; --bz-radius-panel: 20px; }
-.dark { --bz-danger: #f87171; --bz-warning: #fbbf24; --bz-success-text: #4ade80; --bz-radius-panel: 20px; }
-.submit-page { line-height: 1.7; }
+/* 投稿页 /submit 的样式。视觉语言是全站的设计系统 v5（docs/dev/INTERACTION.md §0、§1、§1b）：
+   界面中性，颜色只来自 Bot；字号、间距、圆角只用阶梯上的数；按钮、标签、分段控件、图标都用公共部件。
+   这个文件只管投稿页自己的版式和状态，所有选择器都收在 .submit-* 之下（样式表在站内跳转后不会卸载，不能漏到别的页面）。
+   圆角按嵌套分三层：步骤卡和预览面板 16 → 里面的卡片（截图槽位、报错条目、指南小卡）12 → 控件、提示条、缩略图 8。
+   流程、状态、文案见 docs/dev/INTERACTION-SUBMIT.md；那份文档里的像素值是换皮前的，以这里为准。 */
+
+/* ---------- 0. 投稿页自己的 token ---------- */
+:root { --bz-danger: #b91c1c; --bz-warning: #b45309; --bz-success-text: #15803d; --bz-radius-panel: var(--bz-r-panel); }
+.dark { --bz-danger: #f87171; --bz-warning: #fbbf24; --bz-success-text: #4ade80; }
+.submit-page {
+  /* 面板的实底色：浅色是白卡片；深色里卡片是透明的，等于页面底色。给需要实底的地方（滚动提示的渐隐）用 */
+  --sb-panel: var(--bz-card);
+  --sb-mono: var(--vp-font-family-mono);
+  --sb-danger-fill: color-mix(in srgb, var(--bz-danger) 8%, var(--bz-paper));
+  --sb-danger-edge: color-mix(in srgb, var(--bz-danger) 32%, transparent);
+  --sb-success-fill: color-mix(in srgb, var(--bz-success) 12%, transparent);
+  --sb-success-edge: color-mix(in srgb, var(--bz-success) 36%, transparent);
+}
+.dark .submit-page { --sb-panel: var(--bz-page); }
+
+/* ---------- 1. 基础：点按高度、链接、文字小件 ---------- */
 .submit-page *, .submit-page *::before, .submit-page *::after { box-sizing: border-box; }
-.submit-page h3 { margin: 0; font-weight: 700; font-size: 16px; }
-.submit-page button, .submit-page a, .submit-page summary { -webkit-tap-highlight-color: transparent; }
-.submit-page button, .submit-page a, .submit-page summary { min-height: 40px; }
-.submit-page a:not(.shelf-button) { display: inline-block; padding-block: 7px; }
-.submit-page .bot-card h2 a { display: block; }
-.submit-page button { white-space: normal; }
-.submit-page button[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
-.submit-page button[aria-disabled="true"]:active { transform: none; }
-.submit-page .bot-actions button[aria-disabled="true"] { opacity: .5; }
+.submit-page :is(button, a, summary) { -webkit-tap-highlight-color: transparent; }
+/* 表单页的控件比货架高一档：所有按钮至少 40（触摸 44），实心主按钮 44，和详情页的「一键导入」一样高。分段控件里的两项不算，整条 40。 */
+.submit-page :is(button, .bz-btn, summary) { min-height: 40px; }
+/* 投稿页自己的按钮在窄屏上允许折行；预览里的按钮是货架的真组件，照货架的样子不折行 */
+.submit-page .bz-btn { white-space: normal; text-align: center; }
+.submit-page .submit-preview .bot-actions .bz-btn { white-space: nowrap; }
+.submit-page .bz-btn.sm { min-height: 40px; }
+.submit-page .bz-btn.primary { min-height: 44px; padding-inline: var(--bz-sp-4); }
+.submit-page .bz-btn[aria-busy="true"] { opacity: .7; cursor: progress; }
+/* 实心按钮复制成功：保持实心，只把图标换成对勾（绿字压在白底上看不清） */
+.submit-page .bz-btn.primary.copied, .submit-page .bz-btn.primary.copied:hover { border-color: transparent; color: var(--bz-primary-fg); }
 .submit-page :is(h1, h2, h3, h4, h5, h6)[tabindex="-1"]:focus { outline: none; }
-.submit-intro { margin-bottom: 32px; }
-.submit-intro h1 { font-size: 32px; font-weight: 700; line-height: 1.25; color: var(--bz-ink); }
-.submit-intro > p { margin-top: 14px; max-width: 36em; font-size: 15px; color: var(--bz-text-2); }
-.submit-muted { color: var(--bz-text-3); font-size: 13px; }
+.submit-page code { font-family: var(--sb-mono); }
+
+/* 文字按钮：公共的幽灵小按钮。占位 40 高（触摸 44）保证好点，悬停的底只画中间 32，看上去和货架上的小按钮一样大。 */
+.submit-page .submit-text-button { position: relative; isolation: isolate; flex: none; padding: 0 var(--bz-sp-2); }
+.submit-page .submit-text-button::before { content: ''; position: absolute; inset: 4px 0; z-index: -1; border-radius: var(--bz-r-control); transition: background-color var(--bz-dur) var(--bz-ease); }
+.submit-page .submit-text-button.ghost:hover { background-color: transparent; }
+.submit-page .submit-text-button:not(:disabled, [aria-disabled="true"]):hover::before { background-color: var(--bz-surface-3); }
+/* 键盘焦点的外框也画在中间那 32 上，不然 40 高的框会压到上下的字 */
+.submit-page .submit-text-button:focus-visible { outline: none; }
+.submit-page .submit-text-button:focus-visible::before { outline: 2px solid var(--bz-ink); outline-offset: 2px; }
+
+/* 行内链接：墨色加下划线，和详情页正文里的链接一样。点按范围用伪元素上下各撑出 10，不把行距撑开。 */
+.submit-page .submit-link { position: relative; color: var(--bz-ink); text-decoration: underline; text-decoration-color: var(--bz-border-hover); text-underline-offset: 3px; transition: text-decoration-color var(--bz-dur) var(--bz-ease); }
+.submit-page .submit-link:hover { text-decoration-color: currentColor; }
+.submit-page .submit-link::after { content: ''; position: absolute; inset: -10px -4px; }
+
+.submit-muted { font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-3); }
 .submit-danger { color: var(--bz-danger); }
-.submit-success { color: var(--bz-success-text); }
-.submit-success > span { color: var(--bz-success); }
-.submit-success code { display: block; margin-top: 4px; }
-.submit-button-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.submit-text-button { display: inline-flex; align-items: center; justify-content: center; padding: 8px; color: var(--bz-text-3); font-size: 13px; line-height: 1.5; cursor: pointer; border-radius: 8px; }
-.submit-text-button:hover { text-decoration: underline; color: var(--bz-ink); }
-.submit-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
-.submit-step, .submit-preview { min-width: 0; padding: 24px; border: 1px solid var(--bz-border); border-radius: var(--bz-radius-panel); background: var(--bz-paper); }
-.submit-step { font-size: 14px; }
-.submit-step-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
-.submit-step-heading h2 { flex: 1; font-size: 18px; font-weight: 700; line-height: 1.4; }
-.submit-step-number { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--bz-ink); color: var(--bz-paper); font-size: 14px; font-weight: 600; }
-.submit-step[data-state="locked"] .submit-step-number { background: transparent; color: var(--bz-text-3); border: 2px solid var(--bz-border); }
-.submit-step[data-state="error"] .submit-step-number { background: var(--bz-danger); color: var(--bz-paper); }
-.submit-step-status { color: var(--bz-text-3); font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.submit-step p + p, .submit-notice h3 + p, [data-testid="validation-errors"] > h3 + p { margin-top: 8px; }
-.submit-notice { padding: 12px 16px; border: 1px solid transparent; border-radius: 12px; background: var(--bz-surface-soft); font-size: 14px; line-height: 1.7; }
-.submit-notice.danger { border-color: color-mix(in srgb, var(--bz-danger) 35%, transparent); background: color-mix(in srgb, var(--bz-danger) 8%, var(--bz-paper)); }
+.submit-button-row { display: flex; flex-wrap: wrap; gap: var(--bz-sp-2); }
+.submit-button-row:empty { display: none; }
+
+/* ---------- 2. 页头 ---------- */
+.submit-intro { margin: var(--bz-sp-5) 0 var(--bz-sp-6); }
+.submit-intro > p { max-width: 46em; margin-top: var(--bz-sp-2); font-size: var(--bz-fs-title); line-height: 1.5; color: var(--bz-text-2); text-wrap: pretty; }
+
+/* ---------- 3. 提示条：中性一种、出错一种；圆角 8 ---------- */
+.submit-notice { padding: var(--bz-sp-3) var(--bz-sp-4); border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-control); background: var(--bz-surface-2); font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-2); }
+.submit-notice.with-icon { display: flex; gap: var(--bz-sp-3); }
+.submit-notice.with-icon > svg { margin-top: 2px; color: var(--bz-text-3); }
+.submit-notice.danger { border-color: var(--sb-danger-edge); background: var(--sb-danger-fill); color: var(--bz-ink); }
+.submit-notice h3 { display: flex; gap: var(--bz-sp-2); font-size: var(--bz-fs-body); line-height: 1.5; font-weight: 600; color: var(--bz-ink); }
+.submit-notice h3 > svg { margin-top: 3px; }
 .submit-notice.danger h3 { color: var(--bz-danger); }
-.submit-notice + .submit-notice, .submit-check > .submit-notice, .submit-check .submit-warnings { margin-top: 16px; }
-.submit-check > .submit-resume { margin: 0 0 20px; }
-.submit-resume { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px; }
-.submit-inapp { margin-bottom: 24px; }
-.submit-diagnostic { border-bottom: 1px solid var(--bz-border); padding: 16px 0; }
-.submit-diagnostic:last-of-type { margin-bottom: 16px; }
-.submit-diagnostic code { font-size: 13px; }
-.submit-diagnostic dl { display: grid; grid-template-columns: 3em minmax(0, 1fr); gap: 6px 10px; margin-top: 8px; }
-.submit-diagnostic dt { font-size: 13px; color: var(--bz-text-3); }
-.submit-diagnostic dd { margin: 0; }
-.submit-warnings h3 { color: var(--bz-warning); font-size: 14px; }
-.submit-guide-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
-.submit-guide-steps article { padding: 20px; border: 1px solid var(--bz-border); border-radius: 16px; }
-.submit-guide-steps h2 { font-size: 16px; font-weight: 700; margin: 14px 0 8px; }
-.submit-guide-steps p { font-size: 14px; color: var(--bz-text-2); }
-.submit-prompt { white-space: pre-wrap; font-size: 14px; line-height: 1.8; padding: 16px; border-radius: 12px; background: var(--bz-surface-soft); margin-bottom: 16px; }
-.submit-paste { margin: 28px 0; border: 1px solid var(--bz-border); border-radius: 16px; padding: 12px 20px; }
-.submit-paste summary { cursor: pointer; padding-block: 8px; font-size: 15px; font-weight: 600; }
-.submit-paste p { font-size: 14px; color: var(--bz-text-2); margin-top: 8px; }
-.submit-page textarea { width: 100%; min-width: 0; display: block; border: 1px solid var(--bz-border); border-radius: 10px; padding: 12px; background: var(--bz-paper); color: var(--bz-ink); resize: vertical; font: 13px/1.7 var(--vp-font-family-mono); margin-block: 16px; }
-.submit-guide footer p + p { margin-top: 6px; }
-.submit-preview { padding: 20px; }
-.submit-preview-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.submit-preview-heading h2 { font-size: 16px; line-height: 1.5; font-weight: 700; }
-.submit-preview-heading button { flex: none; }
-.submit-preview .sort-controls { width: max-content; margin: 16px 0 20px; }
-.submit-preview [data-testid="preview-card"] { width: min(100%, 380px); margin: auto; }
-.submit-preview .bot-card { width: 100%; }
-.submit-preview .bot-card .bot-actions > .shelf-button { min-width: 0; }
-.submit-preview [data-testid="preview-actions-note"] { margin-top: 8px; color: var(--bz-text-3); font-size: 13px; }
-.submit-preview .bot-detail { padding: 0; width: 100%; }
-.submit-preview .detail-header { flex-direction: column; align-items: stretch; gap: 24px; margin: 16px 0 32px; }
-.submit-preview .detail-header .avatar-stage { align-self: center; }
-.submit-preview .detail-info > h2 { font-size: 24px; font-weight: 700; line-height: 1.4; }
-.submit-preview .detail-info > p { font-size: 15px; }
-.submit-preview .detail-info > .bot-meta { font-size: 13px; }
-.submit-preview .detail-info .bot-actions > .shelf-button { flex: 1 1 auto; }
-.submit-preview .bot-detail section > h2 { font-size: 18px; }
-.submit-preview .bot-detail section + section { margin-top: 28px; }
-.submit-preview .bot-detail section, .submit-preview .design-body { font-size: 14px; }
-.submit-preview .bot-screenshots { grid-template-columns: minmax(0, 1fr); }
-.submit-preview .permission-list li, .submit-preview .quota-line { flex-wrap: wrap; }
-.submit-preview .design-body h3, .submit-preview .design-body h4, .submit-preview .design-body h5, .submit-preview .design-body h6 { font-size: 16px; font-weight: 600; margin-top: 24px; }
-.submit-preview .skill-list span, .submit-preview [data-testid="section-routines"] > span { font-size: 13px; color: var(--bz-text-3); }
-.submit-login > p { margin-top: 12px; color: var(--bz-text-2); }
-.submit-login .submit-notice { margin-bottom: 16px; }
-.submit-user { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.submit-user img, .submit-user-initial { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--bz-border); }
-.submit-user-initial { display: inline-flex; align-items: center; justify-content: center; background: var(--bz-surface-soft); }
-.submit-user [data-testid="user-login"] { font-size: 15px; font-weight: 600; }
-.submit-skeleton { display: block; width: 50%; height: 16px; margin-bottom: 8px; background: var(--bz-surface-soft); border-radius: 6px; }
-.submit-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 16px 0; }
-.submit-slots.is-locked { opacity: .5; }
-.submit-lock-message { text-align: center; margin-top: 16px; padding: 8px; font-size: 14px; font-weight: 600; }
-.submit-slot { min-width: 0; border: 2px dashed var(--bz-border); border-radius: 16px; padding: 12px; cursor: pointer; transition: border-color 120ms ease, background-color 120ms ease, opacity 150ms ease; }
-.submit-slot header { font-size: 14px; line-height: 1.6; }
-.submit-slot header code { display: block; font-size: 12px; color: var(--bz-text-3); }
-.submit-slot header p { color: var(--bz-text-2); font-size: 13px; margin-top: 6px; }
-.submit-slot-image { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 160px; margin: 12px 0; text-align: center; font-size: 13px; color: var(--bz-text-2); }
-.submit-slot-image img { max-height: 160px; width: 100%; object-fit: contain; border: 1px solid var(--bz-border); border-radius: 12px; }
-.submit-slot[data-state="dragover"] { border-style: solid; border-color: var(--bz-ink); background: var(--bz-surface-soft); }
-.submit-slot[data-state="failed"], .submit-slot[data-state="too-large"], .submit-slot[data-state="unsupported"] { border-style: solid; border-color: var(--bz-danger); }
-.submit-slot[data-state="compressing"] img, .submit-slot[data-state="failed"] img { opacity: .5; }
-.submit-slot[data-state="done"] { border-style: solid; }
-.submit-slot > p { font-size: 13px; }
-.submit-slot-buttons { display: flex; flex-wrap: wrap; gap: 2px; }
-.submit-shot-done { position: absolute; right: 2px; top: 2px; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--bz-success); color: #fff; }
-.submit-slot-progress { background: var(--bz-surface-soft); height: 4px; border-radius: 4px; overflow: hidden; margin-block: 8px; }
-.submit-slot-progress > span { display: block; height: 100%; background: var(--bz-ink); transition: width 200ms linear; }
-.submit-compress-bar { height: 4px; overflow: hidden; background: var(--bz-surface-soft); border-radius: 4px; }
-.submit-compress-bar::after { content: ''; display: block; width: 40%; height: 100%; background: var(--bz-ink); animation: submit-compress 1.2s linear infinite; }
-.submit-license { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; cursor: pointer; padding-block: 10px; }
-.submit-license input { flex: none; width: 20px; height: 20px; margin-top: 2px; accent-color: var(--bz-ink); }
-.submit-license span { flex: 1; }
-.submit-authorization [data-testid="license-help"] { color: var(--bz-text-2); }
-.submit-send, .submit-authorization > .submit-notice { margin-top: 20px; }
-.submit-blockers { list-style: none; margin: 12px 0 0; padding: 0; color: var(--bz-text-2); font-size: 13px; }
-.submit-blockers li::before { content: '·'; color: var(--bz-text-3); margin-right: 8px; }
-.submit-request-id { font: 13px/1.7 var(--vp-font-family-mono); user-select: text; }
-.submit-authorization .submit-notice .shelf-button { margin-top: 8px; }
-.submit-result { animation: submit-arrive 220ms ease; }
-.submit-result > h2 { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
-.submit-result > p { color: var(--bz-text-2); }
-.submit-progress { list-style: none; margin: 28px 0; padding: 0; }
-.submit-progress li { display: flex; position: relative; align-items: flex-start; gap: 14px; padding-bottom: 24px; }
-.submit-progress li:not(:last-child)::before { content: ''; position: absolute; width: 2px; background: var(--bz-border); left: 9px; top: 20px; bottom: 0; }
-.submit-progress h3 { font-size: 15px; font-weight: 600; }
-.submit-progress p { color: var(--bz-text-2); font-size: 13px; }
-.submit-progress-dot { position: relative; display: grid; place-items: center; flex: none; width: 20px; height: 20px; margin-top: 3px; border: 2px solid var(--bz-border); border-radius: 50%; font-size: 12px; }
-.submit-progress [data-state="done"] .submit-progress-dot { background: var(--bz-ink); border-color: var(--bz-ink); color: var(--bz-paper); }
-.submit-progress [data-state="current"] .submit-progress-dot { border-color: var(--bz-ink); }
-.submit-progress [data-state="current"] .submit-progress-dot::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--bz-ink); }
-.submit-progress [data-state="failed"] .submit-progress-dot { background: var(--bz-danger); border-color: var(--bz-danger); color: var(--bz-paper); }
-.submit-progress-check { animation: submit-check 280ms var(--bz-ease-pop); }
+/* 条里一块接一块：间距 8，按钮行前面 12（前面加 .submit-page 是为了压过 .shelf-page 对段落外边距的归零） */
+.submit-page .submit-notice > * + * { margin-top: var(--bz-sp-2); }
+.submit-page .submit-notice > * + .submit-button-row, .submit-page .submit-notice > * + .bz-btn { margin-top: var(--bz-sp-3); }
+.submit-page .submit-notice.with-icon > * + * { margin-top: 0; }
+.submit-notice + .submit-notice { margin-top: var(--bz-sp-3); }
+.submit-request-id { font-family: var(--sb-mono); font-size: var(--bz-fs-xs); line-height: 1.5; color: var(--bz-text-2); user-select: text; }
+.submit-inapp { margin-bottom: var(--bz-sp-5); }
+.submit-resume { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 var(--bz-sp-3); margin-bottom: var(--bz-sp-4); padding-block: var(--bz-sp-1); padding-right: var(--bz-sp-2); }
+.submit-page .submit-resume > * + *, .submit-page .submit-resume > .bz-btn { margin-top: 0; }
+
+/* ---------- 4. 指南（还没有投稿包） ---------- */
+/* 三步小卡：和首页主推卡一样的格子（三列、间距 16、细边加内高光），图标放在一块小玻璃砖里 */
+.submit-guide-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--bz-sp-4); }
+.submit-guide-steps article { min-width: 0; padding: var(--bz-sp-5); border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-1); box-shadow: var(--bz-highlight); }
+.submit-guide-icon { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-tile); background: var(--bz-surface-2); box-shadow: var(--bz-highlight); color: var(--bz-ink); }
+.submit-guide-steps h2 { margin-top: var(--bz-sp-4); }
+.submit-guide-steps p { margin-top: var(--bz-sp-1); font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); color: var(--bz-text-2); text-wrap: pretty; }
+/* 提示词卡：玻璃底，上面是全文，下面是这一屏唯一的实心按钮 */
+.submit-prompt-card { margin-top: var(--bz-sp-4); padding: var(--bz-sp-5); border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-2); box-shadow: var(--bz-highlight); }
+.submit-prompt { margin-bottom: var(--bz-sp-5); white-space: pre-wrap; font-size: var(--bz-fs-body); line-height: 1.8; color: var(--bz-ink); }
+/* 「已经有投稿包了？」：收起时是一行，箭头展开时转 90° */
+.submit-paste { margin-top: var(--bz-sp-4); padding: 0 var(--bz-sp-5); border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-1); box-shadow: var(--bz-highlight); }
+.submit-page .submit-paste summary { display: flex; align-items: center; gap: var(--bz-sp-2); min-height: 56px; margin-inline: calc(-1 * var(--bz-sp-5)); padding-inline: var(--bz-sp-5); border-radius: calc(var(--bz-r-card) - 1px); list-style: none; cursor: pointer; font-size: var(--bz-fs-body); line-height: 1.5; font-weight: 600; color: var(--bz-ink); }
+.submit-paste summary::-webkit-details-marker { display: none; }
+.submit-paste summary > svg { color: var(--bz-text-3); transition: transform var(--bz-dur) var(--bz-ease), color var(--bz-dur) var(--bz-ease); }
+.submit-paste summary:hover > svg { color: var(--bz-ink); }
+.submit-paste[open] summary > svg { transform: rotate(90deg); }
+.submit-paste > p { font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-2); }
+.submit-paste > .bz-btn { margin-bottom: var(--bz-sp-5); }
+.submit-guide-notes { margin-top: var(--bz-sp-5); font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-3); }
+.submit-guide-notes p + p { margin-top: var(--bz-sp-2); }
+.submit-page .submit-guide-notes .submit-link { color: var(--bz-text-2); }
+.submit-page .submit-guide-notes .submit-link:hover { color: var(--bz-ink); }
+/* 输入框：玻璃底、控件圆角、等宽字；聚焦用全站那一种外框 */
+.submit-page :is(.submit-paste, .submit-fallback) textarea { display: block; width: 100%; min-width: 0; margin-block: var(--bz-sp-4); padding: var(--bz-sp-3); resize: vertical; border: 1px solid var(--bz-border-strong); border-radius: var(--bz-r-control); background: var(--bz-surface-2); color: var(--bz-ink); font: var(--bz-fs-sm) / var(--bz-lh-body) var(--sb-mono); transition: border-color var(--bz-dur) var(--bz-ease); }
+.submit-page :is(.submit-paste, .submit-fallback) textarea:hover { border-color: var(--bz-border-hover); }
+
+/* ---------- 5. 步骤卡和整体网格 ---------- */
+/* 这只 Bot 的颜色由 SubmitPage 用内联样式给到网格上（--bz-bot-light / --bz-bot-dark），只给预览面板和结果面板的柔光用 */
+.submit-grid { --bz-bot-color: var(--bz-bot-light, #8a8a93); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--bz-sp-4); align-items: start; }
+.dark .submit-grid { --bz-bot-color: var(--bz-bot-dark, #8a8a93); }
+.submit-step, .submit-preview { position: relative; min-width: 0; border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-panel); background: var(--bz-surface-1); box-shadow: var(--bz-highlight); }
+.submit-step { padding: var(--bz-sp-5); transition: opacity var(--bz-dur) var(--bz-ease); }
+/* 提交中：别的步骤整体淡下去，④ 里只淡掉勾选那两行，按钮和进度那句话照常 */
+.submit-step[inert]:not(.submit-authorization), .submit-authorization[inert] :is(.submit-license, [data-testid="license-help"]) { opacity: .5; }
+.submit-step-heading { display: flex; align-items: center; flex-wrap: wrap; gap: var(--bz-sp-2) var(--bz-sp-3); margin-bottom: var(--bz-sp-4); }
+.submit-step-heading h2 { flex: 1; min-width: 0; }
+/* 序号：24 的小圆。当前步是玻璃圈加墨色数字，完成是淡绿底的对勾，锁定只剩一圈细线，出错是淡红底的叹号。实心留给主按钮。 */
+.submit-step-number { display: inline-grid; place-items: center; flex: none; width: 24px; height: 24px; border: 1px solid var(--bz-border-strong); border-radius: 50%; background: var(--bz-surface-2); box-shadow: var(--bz-highlight); color: var(--bz-ink); font-size: var(--bz-fs-xs); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; transition: color var(--bz-dur) var(--bz-ease), background-color var(--bz-dur) var(--bz-ease), border-color var(--bz-dur) var(--bz-ease); }
+.submit-step-number svg { stroke-width: 2.5; }
+.submit-step[data-state="done"] .submit-step-number { border-color: var(--sb-success-edge); background: var(--sb-success-fill); box-shadow: none; color: var(--bz-success-text); }
+.submit-step[data-state="locked"] .submit-step-number { border-color: var(--bz-hairline); background: transparent; box-shadow: none; color: var(--bz-text-3); }
+.submit-step[data-state="locked"] .submit-step-heading h2 { color: var(--bz-text-2); }
+.submit-step[data-state="error"] .submit-step-number { border-color: var(--sb-danger-edge); background: color-mix(in srgb, var(--bz-danger) 14%, transparent); box-shadow: none; color: var(--bz-danger); }
+/* 右边的状态短语：和首页区块标题右边的计数同一个样子 */
+.submit-step-status { flex: none; font-size: var(--bz-fs-xs); line-height: var(--bz-lh-xs); font-weight: 600; color: var(--bz-text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.submit-step > p, .submit-errors > p { font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); color: var(--bz-text-2); text-wrap: pretty; }
+.submit-step > .submit-notice { font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); }
+.submit-step > .submit-muted { font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-3); }
+
+/* ---------- 6. ① 检查投稿包 ---------- */
+.submit-check > .submit-notice:not(.submit-resume), .submit-check > .submit-warnings { margin-top: var(--bz-sp-4); }
+.submit-check > .submit-step-heading + .submit-notice { margin-top: 0; }
 .submit-dots { animation: submit-dots 1.2s ease infinite; }
+/* 通过：一行。对勾和文字用成功色，slug 是一枚等宽的小标签 */
+.submit-step > .submit-success { display: flex; flex-wrap: wrap; align-items: center; gap: var(--bz-sp-2); font-weight: 600; color: var(--bz-success-text); }
+.submit-success > svg { color: var(--bz-success); stroke-width: 2; }
+.submit-success > span { min-width: 0; }
+.submit-success > code { display: inline-flex; align-items: center; min-width: 0; min-height: 22px; margin-left: var(--bz-sp-1); padding: 2px var(--bz-sp-2); border-radius: var(--bz-r-control); background: var(--bz-surface-2); font-size: var(--bz-fs-xs); line-height: 1.5; font-weight: 400; color: var(--bz-text-3); }
+/* 没通过：标题带警示图标；每条诊断是一张小卡（和详情页的技能条目同一个样子），等宽的文件路径在上，位置 / 问题 / 改法三行在下 */
+.submit-errors > h3 { display: flex; gap: var(--bz-sp-2); font-family: var(--bz-font-display); font-size: var(--bz-fs-title); line-height: var(--bz-lh-title); font-weight: 600; letter-spacing: -.01em; }
+.submit-errors > h3 > svg { margin-top: 3px; }
+.submit-errors > p { margin-top: var(--bz-sp-1); }
+.submit-diagnostic { margin-top: var(--bz-sp-2); padding: var(--bz-sp-4) 20px; border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-2); box-shadow: var(--bz-highlight); }
+.submit-errors > p + .submit-diagnostic { margin-top: var(--bz-sp-4); }
+.submit-diagnostic code { display: flex; align-items: center; gap: 6px; font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); font-weight: 600; color: var(--bz-ink); }
+.submit-diagnostic code > svg { color: var(--bz-text-3); }
+.submit-diagnostic dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--bz-sp-1) var(--bz-sp-4); margin: var(--bz-sp-3) 0 0; }
+.submit-diagnostic dt { font-size: var(--bz-fs-sm); line-height: 24px; color: var(--bz-text-3); }
+.submit-diagnostic dd { margin: 0; font-size: var(--bz-fs-body); line-height: 24px; color: var(--bz-ink); }
+.submit-errors > .bz-btn { margin-top: var(--bz-sp-4); }
+.submit-warnings h3 { font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); font-weight: 600; color: var(--bz-warning); }
+.submit-warnings p { margin-top: var(--bz-sp-1); font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-2); }
+
+/* ---------- 7. ② 登录 ---------- */
+.submit-login > .submit-notice { margin-bottom: var(--bz-sp-4); }
+.submit-login > [data-testid="login-why"] { margin-top: var(--bz-sp-4); }
+.submit-login > .submit-signup { margin-top: var(--bz-sp-2); font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); }
+.submit-user { display: flex; align-items: center; flex-wrap: wrap; gap: var(--bz-sp-1) var(--bz-sp-3); }
+.submit-user img, .submit-user-initial { flex: none; width: 28px; height: 28px; border: 1px solid var(--bz-hairline); border-radius: 50%; }
+.submit-user-initial { display: inline-grid; place-items: center; background: var(--bz-surface-2); font-size: var(--bz-fs-xs); font-weight: 600; color: var(--bz-text-2); }
+.submit-user [data-testid="user-login"] { font-size: var(--bz-fs-body); line-height: 1.5; font-weight: 600; }
+.submit-skeleton { display: block; width: 50%; height: 16px; margin-bottom: var(--bz-sp-2); border-radius: var(--bz-r-control); background: var(--bz-surface-3); }
+
+/* ---------- 8. ③ 放截图 ---------- */
+.submit-lock-message { display: flex; align-items: center; gap: var(--bz-sp-2); margin-top: var(--bz-sp-4); font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); font-weight: 600; color: var(--bz-ink); }
+.submit-lock-message > svg { color: var(--bz-text-3); }
+.submit-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--bz-sp-4); margin: var(--bz-sp-4) 0; }
+.submit-lock-message + .submit-slots { margin-top: var(--bz-sp-3); }
+.submit-slots.is-locked { opacity: .5; }
+/* 槽位：空的是虚线框的投放区（和首页空状态同一种框）；放好后边变实线；出错换成危险色的细边和一层淡底。边一律 1px。 */
+.submit-slot { display: flex; flex-direction: column; min-width: 0; padding: var(--bz-sp-4); border: 1px dashed var(--bz-border-strong); border-radius: var(--bz-r-card); background: var(--bz-surface-2); cursor: pointer; transition: border-color var(--bz-dur-fast) ease, background-color var(--bz-dur-fast) ease, box-shadow var(--bz-dur-fast) ease; }
+.submit-slot[aria-disabled="true"] { cursor: not-allowed; }
+.submit-slot header { display: flex; flex-wrap: wrap; align-items: center; gap: 2px var(--bz-sp-2); font-size: var(--bz-fs-sm); line-height: 22px; }
+.submit-slot header strong { font-weight: 600; color: var(--bz-ink); }
+.submit-slot header code { flex: 1 0 100%; min-width: 0; font-size: var(--bz-fs-xs); line-height: 1.5; color: var(--bz-text-3); }
+.submit-slot header p { flex: 1 0 100%; margin-top: 2px; font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-2); }
+.submit-slot-image { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--bz-sp-2); min-height: 160px; margin: var(--bz-sp-3) 0; text-align: center; font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-2); }
+.submit-slot-image > svg { color: var(--bz-text-3); transition: color var(--bz-dur-fast) ease; }
+/* 中文默认哪儿都能断行：这里只许在空格和标点处断，不把「点击选择」劈成两半 */
+.submit-slot-image p { max-width: 100%; word-break: keep-all; }
+.submit-slot-image img { width: 100%; max-height: 160px; object-fit: contain; border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-control); background: var(--bz-surface-2); transition: opacity 150ms ease; }
+.submit-slot > p { font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-2); font-variant-numeric: tabular-nums; }
+.submit-slot > p + p { margin-top: 2px; }
+.submit-slot > p.submit-danger { color: var(--bz-danger); }
+@media (hover: hover) {
+  .submit-slot[data-state="empty"]:not([aria-disabled="true"]):hover { border-color: var(--bz-border-hover); background: var(--bz-surface-3); }
+  .submit-slot[data-state="empty"]:not([aria-disabled="true"]):hover .submit-slot-image > svg { color: var(--bz-ink); }
+}
+.submit-slot[data-state="dragover"] { border-style: solid; border-color: var(--bz-ink); background: var(--bz-surface-3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--bz-ink) 12%, transparent); }
+.submit-slot[data-state="dragover"] .submit-slot-image { color: var(--bz-ink); }
+.submit-slot[data-state="dragover"] .submit-slot-image > svg { color: var(--bz-ink); }
+.submit-slot:is([data-state="done"], [data-state="uploading"], [data-state="queued"], [data-state="compressing"]) { border-style: solid; border-color: var(--bz-hairline); }
+.submit-slot:is([data-state="failed"], [data-state="too-large"], [data-state="unsupported"]) { border-style: solid; border-color: color-mix(in srgb, var(--bz-danger) 50%, transparent); background: color-mix(in srgb, var(--bz-danger) 6%, transparent); }
+.submit-slot:is([data-state="compressing"], [data-state="failed"]) img { opacity: .5; }
+/* 传好的对勾：压在缩略图右上角，外面一圈和槽位同色的细环把它和图分开 */
+.submit-shot-done { position: absolute; right: -6px; top: -6px; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--bz-success); box-shadow: 0 0 0 2px var(--sb-panel); color: var(--bz-primary-fg); }
+.submit-shot-done svg { stroke-width: 2.5; }
+.submit-slot-progress, .submit-compress-bar { height: 4px; margin-bottom: var(--bz-sp-2); overflow: hidden; border-radius: 2px; background: var(--bz-surface-3); }
+.submit-slot-progress > span { display: block; height: 100%; border-radius: 2px; background: var(--bz-ink); transition: width 200ms linear; }
+.submit-compress-bar::after { content: ''; display: block; width: 40%; height: 100%; border-radius: 2px; background: var(--bz-ink); animation: submit-compress 1.2s linear infinite; }
+/* 幽灵按钮自己有左右 8 的内边距：往外收 8，让文字和槽位里别的内容左对齐；往下收 8，不把槽位撑高 */
+.submit-slot-buttons { display: flex; flex-wrap: wrap; gap: 0 var(--bz-sp-1); margin: auto calc(-1 * var(--bz-sp-2)) calc(-1 * var(--bz-sp-2)); padding-top: var(--bz-sp-1); }
+.submit-slot-buttons:empty { display: none; }
+.submit-shots > .submit-muted { margin-top: var(--bz-sp-4); }
+
+/* ---------- 9. ④ 授权并提交 ---------- */
+.submit-license { display: flex; align-items: flex-start; gap: var(--bz-sp-3); min-height: 44px; padding-block: 10px; cursor: pointer; font-size: var(--bz-fs-body); line-height: 24px; color: var(--bz-ink); transition: opacity var(--bz-dur) var(--bz-ease); }
+.submit-license span { flex: 1; min-width: 0; }
+/* 勾选框：自己画的 20 方块。没勾是玻璃底加一圈边，勾上是实心（深色白底、浅色墨底）配一个对勾。 */
+.submit-license input { -webkit-appearance: none; appearance: none; flex: none; width: 20px; height: 20px; margin: 2px 0 0; border: 1px solid var(--bz-border-hover); border-radius: 6px; background: var(--bz-surface-2) center / 14px 14px no-repeat; cursor: pointer; transition: background-color var(--bz-dur-fast) ease, border-color var(--bz-dur-fast) ease; }
+.submit-license:hover input:not(:checked) { border-color: var(--bz-ink); }
+.submit-license input:checked { border-color: transparent; background-color: var(--bz-primary-bg); background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
+.dark .submit-license input:checked { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230b0b0d' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m5 12.5 4.5 4.5L19 7.5'/%3E%3C/svg%3E"); }
+/* 说明那行缩进到和勾选框后面的文字对齐 */
+.submit-authorization > [data-testid="license-help"] { padding-left: calc(20px + var(--bz-sp-3)); transition: opacity var(--bz-dur) var(--bz-ease); }
+.submit-authorization > .submit-notice { margin-top: var(--bz-sp-5); }
+/* 待审 PR 一行一个链接，挨得近：不用伪元素撑点按范围（上下两条会互相盖住），直接让每个链接自己占满 40 高 */
+.submit-pulls { list-style: none; margin: var(--bz-sp-1) 0 0; padding: 0; }
+.submit-page .submit-pulls .submit-link { display: inline-flex; align-items: center; min-height: 40px; }
+.submit-page .submit-pulls .submit-link::after { content: none; }
+/* 备用通道（改用 Issue 投稿）：自成一组，上面一条细线；按钮和它后面那句说明排成一行 */
+.submit-page .submit-notice > .submit-fallback { display: flex; flex-wrap: wrap; align-items: center; gap: var(--bz-sp-2) var(--bz-sp-3); margin-top: var(--bz-sp-3); padding-top: var(--bz-sp-3); border-top: 1px solid var(--sb-danger-edge); color: var(--bz-text-2); }
+.submit-page .submit-button-row:empty + .submit-fallback { border-top: 0; padding-top: 0; }
+.submit-fallback > p:first-child, .submit-fallback > textarea { flex: 1 0 100%; }
+.submit-page .submit-fallback > textarea { margin-block: 0; }
+.submit-fallback > p:last-child { flex: 1 1 12em; }
+.submit-send { margin-top: var(--bz-sp-5); }
+.submit-authorization > .submit-sending { margin-top: var(--bz-sp-3); }
+.submit-blockers { list-style: none; margin: var(--bz-sp-3) 0 0; padding: 0; font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-2); }
+.submit-blockers li { position: relative; padding-left: var(--bz-sp-4); }
+.submit-blockers li + li { margin-top: 2px; }
+.submit-blockers li::before { content: ''; position: absolute; left: 4px; top: calc(.75em - 2px); width: 4px; height: 4px; border-radius: 50%; background: var(--bz-text-3); }
+
+/* ---------- 10. 提交成功 ---------- */
+.submit-result { isolation: isolate; animation: submit-arrive 220ms ease; }
+/* 左上角一团这只 Bot 颜色的柔光，和首页主推卡一个画法；伪元素，不垫在文字祖先的背景里 */
+.submit-result::before, .submit-preview::before { content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; }
+.submit-result::before { background: radial-gradient(90% 70% at 8% 0%, color-mix(in srgb, var(--bz-bot-color) 14%, transparent), transparent 70%); }
+.dark .submit-result::before { background: radial-gradient(90% 70% at 8% 0%, color-mix(in srgb, var(--bz-bot-color) 18%, transparent), transparent 70%); }
+.submit-result-head { display: flex; align-items: flex-start; gap: var(--bz-sp-4); }
+.submit-result-head > div { min-width: 0; }
+.submit-result-mark { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border: 1px solid var(--sb-success-edge); border-radius: 50%; background: var(--sb-success-fill); color: var(--bz-success-text); }
+.submit-result-mark svg { stroke-width: 2; }
+.submit-result-head h2 { padding-top: 5px; }
+.submit-result-head p { margin-top: var(--bz-sp-2); font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); color: var(--bz-text-2); text-wrap: pretty; }
+.submit-progress { list-style: none; margin: var(--bz-sp-6) 0 0; padding: 0; }
+.submit-progress li { position: relative; display: flex; align-items: flex-start; gap: var(--bz-sp-4); padding-bottom: var(--bz-sp-5); }
+.submit-progress li:last-child { padding-bottom: 0; }
+/* 连线：1px，画在 40 宽那一列的正中；走过的那几段更实一些 */
+.submit-progress li:not(:last-child)::before { content: ''; position: absolute; left: 19.5px; top: 26px; bottom: 2px; width: 1px; background: var(--bz-border-strong); }
+.submit-progress li[data-state="done"]:not(:last-child)::before { background: var(--bz-text-3); }
+.submit-progress h3 { font-size: var(--bz-fs-body); line-height: 1.5; font-weight: 600; color: var(--bz-ink); }
+.submit-progress p { margin-top: 2px; font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-2); }
+.submit-progress [data-state="pending"] h3 { color: var(--bz-text-2); }
+.submit-progress [data-state="pending"] p { color: var(--bz-text-3); }
+.submit-progress-dot { position: relative; display: grid; place-items: center; flex: none; width: 20px; height: 20px; margin: 1px 10px 0; border: 1px solid var(--bz-border-strong); border-radius: 50%; }
+.submit-progress-dot svg { stroke-width: 2.5; }
+.submit-progress [data-state="done"] .submit-progress-dot { border-color: var(--bz-ink); background: var(--bz-ink); color: var(--bz-page); }
+.submit-progress [data-state="current"] .submit-progress-dot { border-color: var(--bz-ink); animation: submit-pulse 2s ease-out infinite; }
+.submit-progress [data-state="current"] .submit-progress-dot::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--bz-ink); }
+.submit-progress [data-state="failed"] .submit-progress-dot { border-color: var(--bz-danger); background: var(--bz-danger); color: var(--bz-page); }
+.submit-progress-check { display: grid; place-items: center; animation: submit-check 280ms var(--bz-ease-pop); }
+.submit-result > .submit-result-note, .submit-result > .submit-button-row { margin-left: calc(40px + var(--bz-sp-4)); }
+.submit-result > .submit-result-note { margin-top: var(--bz-sp-4); }
+.submit-result > .submit-button-row { margin-top: var(--bz-sp-5); }
+
+/* ---------- 11. 预览面板 ---------- */
+/* 面板是一块舞台：顶上垫一团这只 Bot 颜色的柔光，里面的卡片和详情用的就是货架的真组件。
+   面板的栏宽和手机差不多，所以里面的标题按手机那一档字号走，看到的就是手机上的样子。 */
+.submit-preview { --bz-fs-h1: 28px; --bz-fs-h2: 22px; --bz-fs-h3: 18px; isolation: isolate; }
+.submit-preview::before { background: radial-gradient(120% 320px at 50% 0%, color-mix(in srgb, var(--bz-bot-color) 10%, transparent), transparent 72%); }
+.dark .submit-preview::before { background: radial-gradient(120% 320px at 50% 0%, color-mix(in srgb, var(--bz-bot-color) 14%, transparent), transparent 72%); }
+.submit-preview-scroll { padding: var(--bz-sp-5); }
+.submit-preview-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--bz-sp-2); min-width: 0; }
+.submit-preview-heading h2 { min-width: 0; }
+.submit-preview-heading .submit-text-button { margin: -8px calc(-1 * var(--bz-sp-2)) -8px 0; }
+.submit-preview-heading .submit-text-button > svg { transition: transform var(--bz-dur) var(--bz-ease); }
+.submit-preview-heading .submit-text-button[aria-expanded="true"] > svg { transform: rotate(180deg); }
+.submit-preview [data-testid="preview-note"] { margin-top: var(--bz-sp-1); }
+.submit-preview .sort-controls { margin-top: var(--bz-sp-4); }
+/* 选中块：tests/e2e/submit.spec.mjs「预览切换」把它钉成两种主题下都是 #141418 底、白字。
+   深色（主打）在这个底色上再叠一层 10% 的白，看上去和首页的分段控件一样；浅色就是墨色块配白字，和首页的白块不同，见交接说明。 */
+.submit-preview .sort-controls::after { background-color: #141418; }
+.dark .submit-preview .sort-controls::after { background-image: linear-gradient(rgba(255, 255, 255, .1), rgba(255, 255, 255, .1)); }
+.submit-preview .sort-controls > button[aria-pressed="true"] { color: #fff; }
+.submit-preview :is([data-testid="preview-card"], [data-testid="preview-detail"]) { margin-top: var(--bz-sp-4); }
+.submit-preview [data-testid="preview-card"] { width: min(100%, 380px); margin-inline: auto; }
+.submit-preview .bot-card { width: 100%; }
+/* 详情预览：窄栏里竖排，和真实详情页在手机上的版式一致（头像靠左，光晕跟着头像）。
+   公共样式 misc.css 里还留着几条换皮前的 .submit-preview 规则（头像居中、光晕居中），这里按 v5 详情页的样子压回去。 */
+.submit-preview .bot-detail { width: 100%; padding: 0; }
+.submit-preview .detail-header { flex-direction: column; }
+/* 详情头部自己带着上方 64 的留白（给头像的气泡用，公共样式定的），这里就不再另加间距 */
+.submit-page .submit-preview [data-testid="preview-detail"] { margin-top: 0; }
+.submit-page .submit-preview .detail-header .avatar-root { align-self: flex-start; }
+.submit-page .submit-preview .detail-header::before { left: -112px; top: -112px; }
+.submit-preview .detail-info { width: 100%; }
+.submit-preview .bot-screenshots { grid-template-columns: minmax(0, 1fr); }
+/* 投稿包里的设计说明，标题在预览里整体降两级（页面只留一个 h1）：h4 对应上架后的 h2，h5 对应 h3 */
+.submit-page .submit-preview .design-body :is(h3, h4) { margin: var(--bz-sp-5) 0 var(--bz-sp-2); font-size: var(--bz-fs-title); line-height: var(--bz-lh-title); font-weight: 600; letter-spacing: 0; color: var(--bz-ink); }
+.submit-page .submit-preview .design-body :is(h5, h6) { margin: var(--bz-sp-4) 0 var(--bz-sp-1); font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); font-weight: 600; color: var(--bz-ink); }
+.submit-page .submit-preview .design-body > :first-child { margin-top: 0; }
+
+/* ---------- 12. 动画 ---------- */
 @keyframes submit-compress { from { transform: translateX(-100%); } to { transform: translateX(350%); } }
 @keyframes submit-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes submit-check { from { transform: scale(.6); } to { transform: scale(1); } }
 @keyframes submit-dots { 50% { opacity: .3; } }
+@keyframes submit-pulse { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--bz-ink) 28%, transparent); } 70%, to { box-shadow: 0 0 0 8px transparent; } }
+
+/* ---------- 13. 响应式 ---------- */
+@media (min-width: 768px) {
+  /* 面板头排成一行：标题和那句说明在左，分段控件在右（平板上再往右是「收起预览」），和首页「标题在左、控件在右」一样。
+     只是把两层容器摊平了摆进同一个网格，DOM 顺序不变；收起时 v-show 的内联 display:none 照样生效。 */
+  .submit-preview-inner { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: var(--bz-sp-3); align-items: center; }
+  .submit-preview-heading, .submit-preview #submit-preview-body { display: contents; }
+  .submit-preview-heading h2 { grid-column: 1; grid-row: 1; }
+  .submit-preview [data-testid="preview-note"] { grid-column: 1; grid-row: 2; }
+  .submit-preview .sort-controls { grid-column: 2; grid-row: 1 / span 2; margin-top: 0; }
+  .submit-preview-heading .submit-text-button { grid-column: 3; grid-row: 1 / span 2; margin-block: 0; }
+  .submit-preview :is([data-testid="preview-card"], [data-testid="preview-detail"]) { grid-column: 1 / -1; margin-top: var(--bz-sp-5); }
+}
 @media (min-width: 1024px) {
-  .submit-grid { grid-template-columns: minmax(0, 1fr) 420px; column-gap: 40px; }
+  .submit-grid { grid-template-columns: minmax(0, 1fr) 420px; column-gap: var(--bz-sp-6); }
   .submit-step { grid-column: 1; }
-  .submit-preview { grid-column: 2; grid-row: 1 / span 4; position: sticky; top: calc(var(--vp-nav-height) + 24px); max-height: calc(100dvh - var(--vp-nav-height) - 48px); display: flex; flex-direction: column; overflow: hidden; }
-  .submit-preview-scroll { min-height: 0; overflow-y: auto; scrollbar-gutter: stable; }
-  .submit-preview-scroll-hint { position: absolute; bottom: 20px; left: 20px; right: 20px; margin: 0; background: var(--bz-paper); color: var(--bz-text-3); font-size: 13px; text-align: center; pointer-events: none; }
-  .submit-preview-scroll-hint::before { content: ''; position: absolute; bottom: 100%; left: 0; right: 0; height: 48px; background: linear-gradient(to bottom, transparent, var(--bz-paper)); pointer-events: none; }
+  .submit-preview { grid-column: 2; grid-row: 1 / span 4; position: sticky; top: calc(var(--vp-nav-height) + var(--bz-sp-5)); max-height: calc(100dvh - var(--vp-nav-height) - var(--bz-sp-7)); display: flex; flex-direction: column; overflow: hidden; }
+  /* 滚动条占位两边对称：有经典滚动条的系统上，切到详情页时内容不会横跳，左右留白也还是一样宽 */
+  .submit-preview-scroll { min-height: 0; overflow-y: auto; scrollbar-gutter: stable both-edges; scrollbar-width: thin; scrollbar-color: var(--bz-border-strong) transparent; }
+  .submit-preview-inner { grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--bz-sp-4); }
   .submit-preview-heading [data-testid="preview-toggle"] { display: none; }
+  /* 还有内容没露出来时，底部一条渐隐加一句提示；底色用面板的实底 */
+  .submit-preview-scroll-hint { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: var(--bz-sp-3) 0; background: var(--sb-panel); color: var(--bz-text-3); font-size: var(--bz-fs-xs); line-height: var(--bz-lh-xs); font-weight: 600; text-align: center; pointer-events: none; }
+  .submit-preview-scroll-hint::before { content: ''; position: absolute; bottom: 100%; left: 0; right: 0; height: var(--bz-sp-7); background: linear-gradient(to bottom, color-mix(in srgb, var(--sb-panel) 0%, transparent), var(--sb-panel)); pointer-events: none; }
+}
+@media (max-width: 899px) {
+  /* 指南三步改成竖排，每一步是「砖在左、字在右」的一行 */
+  .submit-guide-steps { grid-template-columns: minmax(0, 1fr); }
+  .submit-guide-steps article { display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: var(--bz-sp-4); padding: 20px; }
+  .submit-guide-icon { grid-row: span 2; }
+  .submit-guide-steps h2 { margin-top: 0; }
 }
 @media (max-width: 767px) {
-  .submit-intro h1 { font-size: 26px; }
-  .submit-guide-steps { grid-template-columns: minmax(0, 1fr); }
-  .submit-guide-steps article { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 8px 16px; }
-  .submit-guide-steps svg { grid-row: span 2; }
-  .submit-guide-steps h2 { margin: 0; }
-  .submit-step { padding: 20px; }
+  .submit-intro { margin-top: var(--bz-sp-4); }
+  .submit-intro > p { font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); }
+  .submit-step, .submit-prompt-card { padding: 20px; }
+  /* 预览面板在手机上只留 16 的边：里面那张卡尽量接近它在货架上的真实宽度，按钮才会像真的那样并排 */
+  .submit-preview-scroll { padding: var(--bz-sp-4); }
+  .submit-paste { padding-inline: 20px; }
+  .submit-page .submit-paste summary { margin-inline: -20px; padding-inline: 20px; }
+  .submit-paste > .bz-btn { margin-bottom: 20px; }
+  .submit-prompt { line-height: var(--bz-lh-body); }
   .submit-slots { grid-template-columns: minmax(0, 1fr); }
   .submit-slot-image { min-height: 120px; }
-  .submit-send { width: 100%; }
-  .submit-preview-heading h2 { font-size: 14px; }
-  .submit-preview { padding: 16px; }
+  .submit-send, .submit-prompt-card > .bz-btn, .submit-paste > .bz-btn, .submit-errors > .bz-btn.primary { width: 100%; }
+  /* 窄屏上结果面板不缩进：对勾在标题上面，进度点还在左边那一列 */
+  .submit-result-head { flex-direction: column; gap: var(--bz-sp-3); }
+  .submit-result-head h2 { padding-top: 0; }
+  .submit-progress li { gap: var(--bz-sp-3); }
+  .submit-progress-dot { margin-inline: 0; }
+  .submit-progress li:not(:last-child)::before { left: 9.5px; }
+  .submit-result > .submit-result-note, .submit-result > .submit-button-row { margin-left: 0; }
 }
 @media (max-width: 359px) {
-  .submit-step-heading { gap: 8px; }
-  .submit-step-heading h2 { font-size: 17px; }
   .submit-step-status { margin-left: auto; }
-  .submit-preview .bot-card { padding-inline: 16px; }
-  .submit-preview .bot-card .avatar-stage { margin-inline: -16px; }
-  .submit-preview .bot-card .shelf-button { flex-basis: 100%; }
+  .submit-diagnostic { padding-inline: var(--bz-sp-4); }
 }
 @media (pointer: coarse) {
-  .submit-page button, .submit-page a, .submit-page summary { min-height: 44px; }
+  .submit-page :is(button, .bz-btn, summary), .submit-page .bz-btn.sm { min-height: 44px; }
+  .submit-page .submit-text-button::before { inset-block: 6px; }
+  .submit-page .submit-link::after { inset-block: -12px; }
+  .submit-page .submit-pulls .submit-link { min-height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .submit-page *, .submit-page *::before, .submit-page *::after { animation: none !important; transition: opacity 120ms ease !important; }
