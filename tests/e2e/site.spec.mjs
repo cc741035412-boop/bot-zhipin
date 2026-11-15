@@ -167,8 +167,8 @@ test('详情、SSR 头像一致性、技能和任务源码链接、外部隐藏�
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', '把一周零散的聊天和笔记整理成一份周报')
   await expect(page.getByTestId('forked-from')).toContainText('示例·PRD 评审员')
   await expect(page.getByTestId('section-prereq')).toContainText('无')
-  // 额度：三格强度条 + 一个字；档位的含义不直接显示，在 title 和读屏文本里。
-  const meter = page.getByTestId('quota-meter')
+  // 额度在侧栏里：三根由矮到高的小柱 + 一个字；档位的含义不直接显示，在 title 和读屏文本里。
+  const meter = page.getByTestId('detail-rail').getByTestId('quota-meter')
   await expect(meter).toHaveAttribute('data-quota', '低')
   await expect(meter).toHaveAttribute('title', '偶尔用一下，几乎不占额度')
   await expect(meter.locator('.quota-level')).toHaveText('低')
@@ -194,13 +194,16 @@ test('详情、SSR 头像一致性、技能和任务源码链接、外部隐藏�
   await expect(page.getByTestId('section-routines').locator('p')).toHaveCount(0)
   await expect(page.getByTestId('forked-from')).toHaveCount(0)
   await page.goto(`/bots/${external}`)
-  // 来源只写在头部的作者行里，页面底部不再有一行来源说明。
-  await expect(page.getByTestId('bot-detail').locator('.detail-header .bot-origin')).toHaveText('· 社区收录')
+  // 来源写在侧栏里（官方市场 / 社区收录 / 作者投稿），页面底部不再有一行来源说明。
+  await expect(page.getByTestId('detail-rail').locator('.bot-origin')).toHaveText('社区收录')
   await expect(page.getByTestId('bot-detail')).not.toContainText('本站只收录链接')
   await expect(page.locator('.external-notice')).toHaveCount(0)
-  for (const id of ['btn-prompt', 'section-skills', 'section-screenshots', 'section-design']) {
+  // 外部收录没有安装提示词、截图、设计说明；技能用 about 里整理好的名字和一句话，不带源码链接。
+  for (const id of ['btn-prompt', 'section-screenshots', 'section-design']) {
     await expect(page.getByTestId(id)).toHaveCount(0)
   }
+  await expect(page.getByTestId('section-skills').getByTestId('skill-item')).toHaveCount(2)
+  await expect(page.getByTestId('section-skills').locator('a')).toHaveCount(0)
 })
 
 test('界面上没有解释性的句子：首屏、区块、页尾、404、搜索占位字', async ({ page }) => {
