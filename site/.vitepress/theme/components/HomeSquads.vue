@@ -8,6 +8,7 @@ import { SQUAD_COPY, SQUAD_CONTRIBUTE_URL } from '../../meta.mjs'
 import SquadCard from './SquadCard.vue'
 import BotStill from './BotStill.vue'
 import BzIcon from './BzIcon.vue'
+import ExternalHint from './ExternalHint.vue'
 
 // 招募卡上的三个空位：中间大一号，是留给队长的位置。
 const SEATS = ['pebble', 'blob', 'hex']
@@ -24,7 +25,7 @@ const SEATS = ['pebble', 'blob', 'hex']
         <div class="recruit-seats" aria-hidden="true">
           <BotStill v-for="(shape, index) in SEATS" :key="shape" ghost :shape="shape" :class="{ lead: index === 1 }" />
         </div>
-        <a class="bz-btn sm" :href="SQUAD_CONTRIBUTE_URL" target="_blank" rel="noopener noreferrer"><BzIcon name="plus" />{{ SQUAD_COPY.recruit }}<span class="bz-sr-only">（在新标签页打开）</span></a>
+        <a class="bz-btn sm" :href="SQUAD_CONTRIBUTE_URL" target="_blank" rel="noopener noreferrer"><BzIcon name="plus" />{{ SQUAD_COPY.recruit }}<ExternalHint /></a>
       </div>
     </div>
   </section>

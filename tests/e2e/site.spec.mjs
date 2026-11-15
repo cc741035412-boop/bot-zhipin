@@ -213,7 +213,7 @@ test('界面上没有解释性的句子：首屏、区块、页尾、404、搜�
   await expect(page.getByTestId('search-trigger').locator('.search-trigger-text')).toHaveText('搜索')
   // 区块只有标题；列表区右侧保留计数。
   await expect(page.locator('.bz-section-head p')).toHaveCount(0)
-  await expect(page.locator('.bz-section-head h2')).toHaveText(['本周主推', '全部 Bot'])
+  await expect(page.locator('.bz-section-head h2')).toHaveText(['本周主推', '小队', '全部 Bot'])
   await expect(page.locator('.bot-count')).toHaveText('共 3 个')
   // 页尾只有「我要投稿」：图标 + 动词。
   await expect(page.locator('.shelf-footer > *')).toHaveCount(1)

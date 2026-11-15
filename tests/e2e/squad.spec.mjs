@@ -102,10 +102,13 @@ test.describe('首页的小队区块', () => {
     await expect(link).toHaveAttribute('href', SQUAD_CONTRIBUTE_URL)
     await expect(link).toHaveAttribute('target', '_blank')
     await expect(link.locator('svg')).toHaveAttribute('data-icon', 'plus')
-    // 卡上没有别的字（给读屏的那句「在新标签页打开」不算）。
+    // 和站里其他外链一样：后面一个对读屏隐藏的「↗」，外加一句读屏文本。
+    await expect(link.locator('.external-icon[aria-hidden="true"]')).toHaveCount(1)
+    await expect(link).toContainText('（在新标签页打开）')
+    // 卡上没有别的字（外链的「↗」小箭头和给读屏的那句「在新标签页打开」不算）。
     const visible = await recruit.evaluate((el) => {
       const copy = el.cloneNode(true)
-      copy.querySelectorAll('.bz-sr-only').forEach((node) => node.remove())
+      copy.querySelectorAll('.bz-sr-only, .external-icon').forEach((node) => node.remove())
       return copy.textContent.trim()
     })
     expect(visible).toBe(SQUAD_COPY.recruit)
