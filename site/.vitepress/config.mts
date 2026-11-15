@@ -1,5 +1,6 @@
 import { defineConfig, type HeadConfig } from 'vitepress'
-import { SITE } from './meta.mjs'
+import { SITE, CONTRIBUTE_URL } from './meta.mjs'
+import { generateHeaders } from '../../scripts/gen-headers.mjs'
 import { botWatch } from './bot-watch.mjs'
 
 export default defineConfig({
@@ -10,6 +11,7 @@ export default defineConfig({
   appearance: true,
   vite: { plugins: [botWatch()] },
   lastUpdated: false,
+  async buildEnd(config) { await generateHeaders(config.outDir) },
   transformPageData(pageData) {
     const bot = pageData.params?.bot
     if (bot) {
@@ -33,7 +35,7 @@ export default defineConfig({
       : []
   },
   themeConfig: {
-    nav: [{ text: '我要投稿', link: `${SITE.repo}/blob/${SITE.branch}/CONTRIBUTING.md` }],
+    nav: [{ text: '我要投稿', link: CONTRIBUTE_URL }],
     socialLinks: [{ icon: 'github', link: SITE.repo }],
     outline: { label: '本页目录' },
     darkModeSwitchLabel: '外观',
