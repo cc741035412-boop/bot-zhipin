@@ -49,7 +49,10 @@ function play(detail: Play) {
   if (!isReducedMotion()) playback.play(detail, now())
 }
 function eventPlay(event: Event) { play((event as CustomEvent<Play>).detail) }
-defineExpose({ play })
+function dispatch(detail: Play) {
+  svg.value?.dispatchEvent(new CustomEvent('bz-play', { detail }))
+}
+defineExpose({ play: dispatch })
 
 const attrs = useAttrs()
 // 根属性不依赖 frame：避免每帧 fallthrough 合并 style，覆盖运行时 CSS 变量或重复写颜色。
@@ -96,7 +99,7 @@ onMounted(() => {
     el: svg.value,
     state: () => state.value,
     busy: () => playback.busy,
-    play,
+    play: dispatch,
   })
 })
 onBeforeUnmount(() => {

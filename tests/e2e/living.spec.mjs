@@ -13,7 +13,11 @@ test.beforeEach(async ({ page, context }) => {
 test('全卡 wide 常驻、读屏全文与视觉打字分离；动作回 wide、离开不打断', async ({ page }) => {
   await page.goto('/')
   const c = card(page), bot = c.getByTestId('live-bot'), bubble = c.getByTestId('pitch-bubble')
+  await bot.evaluate((el) => el.addEventListener('bz-play', (event) => {
+    el.dataset.lastPlay = `${event.detail.state}:${event.detail.hold}`
+  }))
   await c.locator('.bot-tagline').hover()
+  await expect(bot).toHaveAttribute('data-last-play', 'wide:Infinity')
   await expect(bot).toHaveAttribute('data-state', 'wide')
   await expect(bubble.getByTestId('typing')).toBeVisible()
   const text = await bubble.getAttribute('data-text')
