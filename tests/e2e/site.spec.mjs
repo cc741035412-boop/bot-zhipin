@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { CONTRIBUTE_URL, DEFAULT_PITCHES, installPrompt } from '../../site/.vitepress/meta.mjs'
+import { CONTRIBUTE_URL, DEFAULT_PITCHES, FOOTER, SITE, installPrompt } from '../../site/.vitepress/meta.mjs'
 import { renderDesigns } from '../../site/.vitepress/data/design-renderer.mjs'
 
 const weekly = 'demo-weekly-digest'
@@ -231,8 +231,10 @@ test('界面上没有解释性的句子：首屏、区块、页尾、404、搜�
   // 分组的组头只有吉祥物、分组名和数量，没有分组说明。
   await expect(page.locator('.role-head p')).toHaveCount(0)
   await expect(page.locator('.role-head').first()).toHaveText('产品1 个')
-  // 页尾只有「我要投稿」：图标 + 动词。
-  await expect(page.locator('.shelf-footer > *')).toHaveCount(1)
+  // 首页最后是「飞轮」四步，第三步带「我要投稿」：图标 + 动词。
+  await expect(page.locator('#flywheel-title')).toHaveText('飞轮')
+  await expect(page.getByTestId('flywheel-step')).toHaveText([/^1找到 Bot/, /^2用起来/, /^3投稿上架.*我要投稿$/, /^4被更多人看见/])
+  await expect(page.getByTestId('flywheel').getByTestId('contribute-link')).toHaveCount(1)
   await expect(page.getByTestId('contribute-link')).toHaveText('我要投稿')
   await expect(page.getByTestId('contribute-link').locator('svg')).toHaveAttribute('data-icon', 'plus')
   // 搜索面板的占位字和首屏一致。
@@ -351,4 +353,27 @@ test('手机无横向滚动、深色模式与可选交付截图', async ({ page 
   await page.evaluate(() => document.documentElement.classList.add('dark'))
   await expect(page.getByTestId('bot-detail')).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+})
+
+test('每一页底部都有页脚：创建人、开源仓库、鸣谢', async ({ page }) => {
+  for (const path of ['/', `/bots/${weekly}`, '/submit']) {
+    await page.goto(path)
+    const footer = page.getByTestId('site-footer')
+    await expect(footer).toHaveCount(1)
+    await expect(footer.getByTestId('footer-creator')).toHaveText(`${FOOTER.creatorLabel}：${FOOTER.creator} · ${FOOTER.org}`)
+    await expect(footer.getByTestId('footer-repo')).toHaveAttribute('href', SITE.repo)
+    await expect(footer.getByTestId('footer-repo')).toHaveAttribute('target', '_blank')
+    await expect(footer.getByTestId('footer-thanks')).toHaveText(FOOTER.thanks)
+  }
+  // 手机宽度：页脚和飞轮都不撑出横向滚动，飞轮排成两行两列（1 2 / 4 3）
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+  await page.getByTestId('site-footer').scrollIntoViewIfNeeded()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0)
+  const boxes = await page.getByTestId('flywheel-step').evaluateAll((nodes) => nodes.map((node) => { const r = node.getBoundingClientRect(); return { x: Math.round(r.x), y: Math.round(r.y) } }))
+  expect(boxes[1].y).toBe(boxes[0].y)
+  expect(boxes[2].x).toBe(boxes[1].x)
+  expect(boxes[3].x).toBe(boxes[0].x)
+  expect(boxes[3].y).toBe(boxes[2].y)
+  expect(boxes[2].y).toBeGreaterThan(boxes[1].y)
 })

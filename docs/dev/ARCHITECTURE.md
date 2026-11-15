@@ -41,6 +41,8 @@
 | `site/.vitepress/theme/components/FeaturedCard.vue` | 精选大卡：活 Bot、名字、介绍、作者、热度、导入；不带气泡 | 维护者 |
 | `site/.vitepress/theme/components/SearchTrigger.vue` | 长得像输入框的按钮（首屏和工具栏各一个），只负责派发 `bz-search-open` | 维护者 |
 | `site/.vitepress/theme/components/SearchPalette.vue` + `theme/search.ts` | 搜索命令面板和它的匹配、排序规则；挂在 Layout 的 `layout-bottom` 插槽，全站可用 | 维护者 |
+| `site/.vitepress/theme/components/SiteFooter.vue` | 全站页脚：创建人、开源仓库、鸣谢（文字在 `meta.mjs` 的 `FOOTER`）；也挂在 `layout-bottom` | 维护者 |
+| `site/.vitepress/theme/components/HomeFlywheel.vue` | 首页最后一块「飞轮」，四步一圈，第三步带「我要投稿」（文字在 `meta.mjs` 的 `FLYWHEEL`） | 维护者 |
 | `site/.vitepress/theme/components/BotCard.vue`、`BotAvatar.vue`、`BotActions.vue` | 列表卡：article 是容器查询的容器，里面的 `.bot-card-body` 是版式网格；头像外层在卡片里 `display: contents`，玻璃砖和气泡各占一格。/submit 的投稿预览复用这几个组件 | 维护者 |
 | `site/.vitepress/theme/components/BotDetail.vue` | 详情页（一份「简历」）：头部 + 吸顶侧栏（导入、三项属性、作者来源）+ 主栏的一块块内容；同样被投稿预览复用。配套 `DetailStarters.vue`（开场白，点一下复制）、`BotMini.vue`（小头像）；「同组的 Bot」和小队成员小头像由 `site/.vitepress/data/detail.mjs` 在构建时算好，经 `site/bots/[slug].paths.mjs` 放进路由参数。规格见 INTERACTION §9 | 维护者 |
 | `site/.vitepress/data/faces.json` | slug → color / shape / fetchedAt 的离线真脸数据，静态 import | 维护者 |

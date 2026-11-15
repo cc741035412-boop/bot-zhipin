@@ -2,6 +2,7 @@ import DefaultTheme from 'vitepress/theme'
 import { h } from 'vue'
 import NotFound from './components/NotFound.vue'
 import SearchPalette from './components/SearchPalette.vue'
+import SiteFooter from './components/SiteFooter.vue'
 import { inBrowser, type Theme } from 'vitepress'
 import './styles/tokens.css'
 import './styles/base.css'
@@ -16,7 +17,8 @@ export default {
   extends: DefaultTheme,
   Layout: () => h(DefaultTheme.Layout, null, {
     'not-found': () => h(NotFound),
-    'layout-bottom': () => h(SearchPalette),
+    // 全站页脚接在内容后面；搜索面板是浮层，放哪都一样
+    'layout-bottom': () => [h(SiteFooter), h(SearchPalette)],
   }),
   enhanceApp() {
     // 标签页小图标换成一只随机变化的 Bot；单独成块，不拖慢首屏。

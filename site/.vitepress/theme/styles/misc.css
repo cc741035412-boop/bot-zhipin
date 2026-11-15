@@ -46,3 +46,25 @@
 @media (max-width: 359px) {
   .prompt-fallback { padding: var(--bz-sp-4); }
 }
+
+/* ---------- 全站页脚（SiteFooter.vue） ----------
+   和内容区同宽；左边站名和创建人，右边开源仓库和鸣谢。小字、灰色，链接悬停才变亮。 */
+.site-footer {
+  --bz-gutter: 32px;
+  position: relative; z-index: 1; padding: var(--bz-sp-7) max(var(--bz-gutter), calc((100% - 1140px) / 2)) var(--bz-sp-8);
+  border-top: 1px solid var(--bz-hairline); font-size: var(--bz-fs-sm); line-height: 1.6; color: var(--bz-text-3);
+}
+.site-footer-inner { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--bz-sp-5) var(--bz-sp-7); }
+.site-footer-brand { display: grid; gap: var(--bz-sp-2); }
+.site-footer p { margin: 0; }
+.site-footer-name { display: flex; align-items: center; gap: var(--bz-sp-2); font-family: var(--bz-font-display); font-size: var(--bz-fs-title); font-weight: 600; color: var(--bz-ink); }
+.site-footer-meta { display: grid; gap: var(--bz-sp-2); margin: 0; }
+.site-footer-meta > div { display: flex; gap: var(--bz-sp-4); }
+.site-footer-meta dt { flex: none; width: 4em; color: var(--bz-text-3); }
+.site-footer-meta dd { margin: 0; color: var(--bz-text-2); }
+.site-footer a { display: inline-flex; align-items: center; gap: 2px; color: var(--bz-text-2); text-decoration: none; transition: color 150ms ease-in-out; }
+.site-footer a:hover { color: var(--bz-ink); }
+.site-footer a svg { width: 12px; height: 12px; }
+.site-footer-sep { margin: 0 var(--bz-sp-2); }
+.site-footer-license { white-space: nowrap; }
+@media (max-width: 679px) { .site-footer { --bz-gutter: 16px; } }

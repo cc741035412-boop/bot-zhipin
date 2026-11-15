@@ -250,8 +250,53 @@ img.bot-still { display: block; flex: none; border-radius: 50%; object-fit: cove
 /* ---------- 8. 筛选为空、页尾 ---------- */
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: var(--bz-sp-4); padding: var(--bz-sp-8) var(--bz-sp-4); border: 1px dashed var(--bz-border-strong); border-radius: var(--bz-r-card); background: var(--bz-surface-2); text-align: center; }
 .shelf-page .empty-state p { font-size: var(--bz-fs-body); line-height: 1.6; color: var(--bz-text-2); }
-/* 页尾只有一枚「我要投稿」，居中放在细线下面 */
-.shelf-footer { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: var(--bz-sp-9); padding-top: var(--bz-sp-7); border-top: 1px solid var(--bz-hairline); }
+
+/* ---------- 8b. 飞轮：四步一圈（HomeFlywheel.vue） ----------
+   宽屏四张卡一行，卡与卡之间的空当正中一枚圆箭头；下面一道虚线弧从第四张绕回第一张，箭头朝上指回第一步。
+   窄屏两行两列、顺时针（1 2 / 4 3），箭头依次朝右、下、左、上，本身就是一圈，不要弧线。 */
+.flywheel { --fw-gap: var(--bz-sp-6); }
+.flywheel-ring { position: relative; padding-bottom: var(--bz-sp-7); }
+.flywheel-steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--fw-gap); margin: 0; padding: 0; list-style: none; }
+.flywheel-step {
+  position: relative; display: flex; flex-direction: column; gap: var(--bz-sp-2); min-width: 0; padding: var(--bz-sp-5);
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-1); box-shadow: var(--bz-highlight);
+}
+.flywheel-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--bz-sp-2); }
+.flywheel-num { font-family: var(--bz-font-display); font-size: var(--bz-fs-sm); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--bz-text-3); }
+.shelf-page .flywheel-step h3 { margin: 0; font-family: var(--bz-font-display); font-size: var(--bz-fs-title); line-height: 1.4; font-weight: 600; color: var(--bz-ink); }
+.shelf-page .flywheel-step p { margin: 0; font-size: var(--bz-fs-sm); line-height: 1.6; color: var(--bz-text-2); }
+.flywheel-cta { align-self: flex-start; margin-top: var(--bz-sp-2); }
+.flywheel-arrow {
+  position: absolute; top: 50%; right: calc(var(--fw-gap) / -2); z-index: 1; display: grid; place-items: center;
+  width: 24px; height: 24px; margin: -12px -12px 0 0; border: 1px solid var(--bz-border-strong); border-radius: 50%;
+  background: var(--bz-page); color: var(--bz-text-3);
+}
+.flywheel-arrow svg, .flywheel-return svg { width: 14px; height: 14px; }
+.flywheel-step:last-child .flywheel-arrow { display: none; }
+.flywheel-return {
+  position: absolute; bottom: var(--bz-sp-2); left: calc((100% - 3 * var(--fw-gap)) / 8); right: calc((100% - 3 * var(--fw-gap)) / 8);
+  height: calc(var(--bz-sp-7) - var(--bz-sp-2)); border: 1px dashed var(--bz-border-strong); border-top: 0;
+  border-radius: 0 0 var(--bz-r-panel) var(--bz-r-panel); pointer-events: none;
+}
+/* 弧线正中一枚朝左的圆箭头：从第四步回到第一步 */
+.flywheel-back { top: auto; right: 50%; bottom: 0; margin: 0 -12px -12.5px 0; transform: rotate(180deg); }
+@media (max-width: 899px) {
+  .flywheel { --fw-gap: var(--bz-sp-5); }
+  .flywheel-ring { padding-bottom: 0; }
+  .flywheel-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "s1 s2" "s4 s3"; }
+  .flywheel-step[data-step="1"] { grid-area: s1; }
+  .flywheel-step[data-step="2"] { grid-area: s2; }
+  .flywheel-step[data-step="3"] { grid-area: s3; }
+  .flywheel-step[data-step="4"] { grid-area: s4; }
+  .flywheel-return { display: none; }
+  .flywheel-step[data-step="2"] .flywheel-arrow { top: auto; right: 50%; bottom: calc(var(--fw-gap) / -2); margin: 0 -12px -12px 0; transform: rotate(90deg); }
+  .flywheel-step[data-step="3"] .flywheel-arrow { right: auto; left: calc(var(--fw-gap) / -2); margin: -12px 0 0 -12px; transform: rotate(180deg); }
+  .flywheel-step[data-step="4"] .flywheel-arrow { display: grid; top: calc(var(--fw-gap) / -2); right: 50%; margin: -12px -12px 0 0; transform: rotate(-90deg); }
+}
+@media (max-width: 679px) {
+  .flywheel { --fw-gap: var(--bz-sp-4); }
+  .flywheel-step { padding: var(--bz-sp-4); }
+}
 
 /* ---------- 9. 投稿预览复用列表卡：把 submit.css 里旧版式留下的偏移归零 ---------- */
 .submit-preview .bot-card.bot-card { padding: 0; }
@@ -280,7 +325,7 @@ img.bot-still { display: block; flex: none; border-radius: 50%; object-fit: cove
   .role-group[data-folded="true"] .bot-card:nth-child(n + 3) { display: none; }
 }
 @media (max-width: 679px) {
-  .shelf-section, .shelf-footer { margin-top: var(--bz-sp-8); }
+  .shelf-section { margin-top: var(--bz-sp-8); }
   .role-group + .role-group { margin-top: var(--bz-sp-7); }
   /* 手机：只有分组那一条吸顶（它自己变成玻璃条），排序换到下面一行，跟着页面滚走 */
   .shelf-all { --bz-toolbar-h: 40px; }
