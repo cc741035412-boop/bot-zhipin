@@ -1,6 +1,7 @@
 import { ApiError } from './errors'
 import { GitHubError } from './github'
 import { json, scheduleCleanup } from './http'
+import { assertTestEndpoints } from './submit-config'
 import type { ApiContext } from './types'
 
 export const ERRORS = {
@@ -44,13 +45,17 @@ export async function handleSubmitApi(context: ApiContext, action: (now: number)
   const now = Date.now()
   let response: Response
   try {
+    // Also covers unsupported methods and every auth/submit handler.
+    assertTestEndpoints(context.env, context.request)
     scheduleCleanup(context, now)
     response = await action(now)
   } catch (error) {
     if (error instanceof ApiError) {
       const known = Object.hasOwn(ERRORS, error.code)
       const code = known ? error.code as keyof typeof ERRORS : 'server_error'
-      const { status, message } = ERRORS[code]
+      const { status } = ERRORS[code]
+      const message = code === 'github_error' && error.status === 503
+        ? '状态暂时刷新不了，过一会儿再看' : ERRORS[code].message
       const headers: Record<string, string> = {}
       if (code === 'rate_limited') {
         const seconds = error.extra.retryAfter

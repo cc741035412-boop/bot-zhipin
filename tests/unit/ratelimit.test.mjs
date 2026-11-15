@@ -31,21 +31,23 @@ const options = { bucket: 'login', key: 'hashed-test-ip', ...RATE_LIMITS.login }
 const now = 1_800_000_000_000
 
 describe('真实临时 D1 限流', () => {
-  it('完整七个 bucket 的固定窗口和限额', () => {
+  it('完整九个 bucket 的固定窗口和限额', () => {
     expect(RATE_LIMITS).toEqual({
-      login: { windowMs: 3_600_000, limit: 20 },
+      login: { windowMs: 3_600_000, limit: 120 },
       shot: { windowMs: 86_400_000, limit: 60, byteLimit: 62_914_560 },
-      'shot-all': { windowMs: 86_400_000, limit: 300 },
+      'shot-all': { windowMs: 86_400_000, limit: 1000 },
+      'submit-try': { windowMs: 3_600_000, limit: 40 },
       submit: { windowMs: 86_400_000, limit: 10 },
       'submit-slug': { windowMs: 120_000, limit: 1 },
       'submit-all': { windowMs: 3_600_000, limit: 20 },
       status: { windowMs: 60_000, limit: 30 },
+      'status-gh': { windowMs: 3_600_000, limit: 600 },
     })
   })
 
-  it('第 20 次通过，第 21 次拒绝，拒绝仍计数', async () => {
-    for (let n = 1; n <= 21; n++) {
-      expect(await hit(db, options, now)).toEqual({ ok: n <= 20, n, bytes: 0, retryAfter: 3600 })
+  it('第 120 次通过，第 121 次拒绝，拒绝仍计数', async () => {
+    for (let n = 1; n <= 121; n++) {
+      expect(await hit(db, options, now)).toEqual({ ok: n <= 120, n, bytes: 0, retryAfter: 3600 })
     }
   })
 
@@ -73,7 +75,7 @@ describe('真实临时 D1 限流', () => {
 
   it('30 并发命中由单条 UPSERT 原子累计，无丢次数/字节', async () => {
     const results = await Promise.all(Array.from({ length: 30 }, () => hit(db, { ...options, bytes: 7 }, now)))
-    expect(results.filter((r) => r.ok)).toHaveLength(20)
+    expect(results.filter((r) => r.ok)).toHaveLength(30)
     expect(results.map((r) => r.n).sort((a, b) => a - b)).toEqual(Array.from({ length: 30 }, (_, i) => i + 1))
     expect(await db.prepare('SELECT n, bytes FROM rate_limits').first()).toEqual({ n: 30, bytes: 210 })
   })
@@ -85,7 +87,7 @@ describe('真实临时 D1 限流', () => {
     }
     await db.prepare("INSERT INTO web_submissions VALUES (123, 'demo', 1, 'submission/web-123-demo', ?1, ?1)").bind(now).run()
     await deleteExpiredLimits(db, now)
-    expect((await db.prepare('SELECT * FROM rate_limits').all()).results).toHaveLength(7)
+    expect((await db.prepare('SELECT * FROM rate_limits').all()).results).toHaveLength(9)
     expect(await db.prepare('SELECT COUNT(*) AS n FROM web_submissions').first('n')).toBe(1)
   })
 

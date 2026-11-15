@@ -61,7 +61,8 @@ validateModels(models, { template, now, others = [], policy = {} }) // → { err
 - `policy.submission = { login }`：
   - 禁止 `external: true`（报 `bot.yaml / external`）；
   - 要求 `author.github` 等于 `login`，忽略大小写。
-- 错误条目 `{ file, where, problem, fix }`，`file` 形如 `bots/<slug>/<rel>`，和现在完全一样。
+- 错误条目 `{ file, where, problem, fix }`，`file` 形如 `bots/<slug>/<rel>`，和现在完全一样。按 `file|where` 用 Map 去重，每个 Bot 最多列出 50 条错误，另追加「还有 N 处问题没列出，先改完上面这些再校验」汇总（N 为去重后未列出的条目数）。
+- YAML 解析前按 UTF-8 字节限制：`bot.yaml` ≤8192 字节、`SKILL.md` 的 frontmatter 内容（不含围栏）≤4096 字节。超限不解析；长内容移到 Markdown 正文。未知 schema 字段名超过 64 字符不计算编辑距离、不提供猜测字段名。现有 Bot 和 fixtures 的校验输出保持逐字一致。
 
 ### 2.4 服务端统一改写的字段
 
@@ -118,6 +119,7 @@ applyServerFields(botYamlText, { login, addedAt }) // → 新的 bot.yaml 文本
 
 - 上面任何一项缺失（`SUBMIT_DRY_RUN_USER_IDS`、`SESSION_SECRET_PREV` 除外），`/api/submit*` 和 `/api/auth/start` 返回 503 `submit_disabled`，页面切到「改用 GitHub Issue 投稿」。
 - `wrangler.toml` 里，ID 类变量在 App 建好前留空字符串。
+- 测试主机只允许 `127.0.0.1`、`localhost`、`[::1]` 和以 `.test` 结尾的主机名。`ALLOW_TEST_ENDPOINTS=1` 时，请求主机不在此集合，所有 `/api/auth/*`、`/api/submit*`（含不支持的方法）均返回 503 `submit_disabled`；两个 GitHub base 必须配置且主机在此集合，否则同样 503，不回退到真实 GitHub。URL 使用方原有的协议、凭据、路径校验保持不变。未开测试开关时保持线上行为，忽略测试 base。
 
 ### 3.2 公共约定
 
@@ -145,7 +147,8 @@ applyServerFields(botYamlText, { login, addedAt }) // → 新的 bot.yaml 文本
 **接口：**
 
 - `GET /api/auth/start`
-  - 限流：每 IP 每小时 20 次。
+  - 只处理 `Sec-Fetch-Mode` 缺失或为 `navigate` 的请求；其他值直接 400 `bad_request`，不计数、不设 cookie。
+  - 限流：每 IP 每小时 120 次。
   - 生成 32 字节 `state` 和 PKCE `verifier`（S256），写 oauth cookie。
   - 302 到 `${OAUTH_BASE}/login/oauth/authorize`，参数：`client_id`、`redirect_uri=${origin}/api/auth/callback`、`state`、`code_challenge`、`code_challenge_method=S256`、`allow_signup=true`。**不带 scope。**
 - `GET /api/auth/callback?code&state`
@@ -169,30 +172,31 @@ applyServerFields(botYamlText, { login, addedAt }) // → 新的 bot.yaml 文本
 - 不需要自定义请求头（页面用 XHR 读上传进度，同源请求）。槽位顺序由提交时 `screenshots` 数组的顺序决定。
 - 返回 200：`{ ok:true, receipt, sha, size, format, exp }`，`exp` 是回执过期时间（毫秒时间戳，现在 + 24 小时）。
   - `receipt = base64url(JSON{ v:1, uid, sha, size, format, exp: 现在+24h }).base64url(HMAC)`。
-- 限流：每人每天 60 次或 60MB；全站每天 300 次。
+- 限流：每人每天 60 次或 60MB；全站每天 1000 次。
 
 ### 3.5 提交 `POST /api/submit`
 
 请求体（JSON，≤ 700KB）：
 
 ```json
-{ "bundle": "<明文或 BZB1 令牌>", "screenshots": ["<receipt>", "…"], "license": true, "dryRun": false }
+{ "bundle": "<BOT-ZHIPIN-BUNDLE v1 明文>", "screenshots": ["<receipt>", "…"], "license": true, "dryRun": false }
 ```
 
 处理顺序（任何一步失败都不写 GitHub）：
 
 1. 要求登录。`license !== true` 返回 400 `license_required`。`dryRun` 为 true 但当前用户 id 不在 `SUBMIT_DRY_RUN_USER_IDS` 里，返回 403。
-2. 限流：每人每天 10 次；同一人同一 slug 每 2 分钟 1 次；全站每小时 20 次。超了返回 429 `rate_limited`，带 `retryAfter` 秒数和 `Retry-After` 头。
-3. 解包：`decodeToken` 或 `unpack`，失败返回 400 `bad_request`，带 `errors`。
+2. 校验前仅计 `submit-try`（每人每小时 40 次）；解出 slug 后，非 dryRun 再计 `submit-slug`（同一人同一 slug 每 2 分钟 1 次）。每人每天 10 次和全站每小时 20 次的发布额度延后到第 10 步之后扣。超限返回 429 `rate_limited`，带 `retryAfter` 秒数和 `Retry-After` 头。
+3. 只 `unpack` 一次明文，允许首尾空白和代码围栏；`BZB1:` 一律 400 `bad_request`，不调用 `decodeToken`，不做服务端解压。浏览器仍可解压链接，原生 base64url strict 解码优先，旧浏览器回退；发送给服务端的始终是明文。解包同时拒绝非良构 UTF-16（孤立代理码元），失败带 `errors`。
 4. 回执：逐个验签，`uid` 必须等于当前用户，未过期，至少一张。失败返回 400 `receipt_invalid`，带 `slots: [下标]`（对应请求数组的位置，从 0 开始）。
 5. 拿安装令牌：用 App 私钥签 RS256 JWT，`POST /app/installations/{id}/access_tokens`，参数 `{ repositories: ['bot-zhipin'], permissions: { contents:'write', pull_requests:'write' } }`。令牌在 isolate 内存里缓存，最多 50 分钟。
 6. `GET /git/ref/heads/main` 拿 `mainHead`；`GET /git/commits/{mainHead}` 拿根 tree。
 7. 判断是谁的：`GET /contents/bots/{slug}/bot.yaml?ref={mainHead}`。
-   - 404：是新投稿，`addedAt` 取北京时间当天。
-   - 已存在：如果是 `external: true`，或 `author.github` 和登录账号不同（忽略大小写），返回 409 `slug_taken`。否则是更新，`addedAt` 沿用原值。
+   - 404：是新投稿，`addedAt` 取北京时间当天，不查询 `bot_owners`；成功建好 PR 后写入或覆盖数字 id 绑定。
+   - 已存在：`external: true` 仍返回 409 `slug_taken`。`bot_owners` 有记录时只比较 `user_id` 与会话 id，不同返回 409，不再比较 login（支持改名，防旧用户名被接管）。
+   - 已存在但没有绑定记录（老 Bot）：沿用 `author.github` 与 login 忽略大小写的核对，不同返回 409。通过则沿用原 `addedAt`，PR 标题前缀改为「⚠ 更新已上架 Bot：」，正文开头加醒目提示「这个 Bot 之前没有绑定作者数字 ID，只按 GitHub 用户名核对，请人工确认是原作者」。成功建好或更新 PR 后写入绑定。
 8. 同时未合并的网站投稿 PR（见 `web_submissions` 表）达到 3 个且不是在更新其中一个时，返回 409 `pr_limit`，带 `pulls: [{ number, url, slug }]`。数之前先查这几个 PR 的状态，把已合并或已关闭的行删掉。
-9. `applyServerFields` 改写 `bot.yaml`；`planScreenshots` 定截图文件名并改写 Markdown 里的引用；`modelFromBundle` 建模型；用 `submit-context.json`（经 `ASSETS.fetch`，60 秒缓存，照 `slugs.ts` 的写法）调 `validateModels`，参数 `{ template, now, others: index 去掉本 slug, policy: { submission: { login } } }`。有错误返回 422 `invalid`，带 `errors`（含密钥扫描结果）。**校验和密钥扫描必须在任何写操作之前完成。**
-10. `dryRun` 到这里结束，返回 200 `{ ok:true, dryRun:true, slug, update, files: [路径…], warnings }`。
+9. `applyServerFields` 改写 `bot.yaml`；`planScreenshots` 定截图文件名并改写 Markdown 里的引用；`modelFromBundle` 建模型；用 `submit-context.json`（经 `ASSETS.fetch`，60 秒缓存，照 `slugs.ts` 的写法）调 `validateModels`，参数 `{ template, now, others: index 去掉本 slug, policy: { submission: { login } } }`。有错误返回 422 `invalid`，带 `errors`（含密钥扫描结果）。**校验和密钥扫描必须在任何 GitHub 仓库写操作之前完成。** 改写后模型还必须严格满足 `author.github === login`、`addedAt === 预期值`；不满足返回 422，问题「bot.yaml 的作者或日期字段写法特殊，无法自动填写」，改法「用普通的 `author:` 和 `addedAt:` 写法」。
+10. `dryRun` 到这里结束，返回 200 `{ ok:true, dryRun:true, slug, update, files: [路径…], warnings }`；只扣 `submit-try`，不写 `bot_owners`。非 dryRun 此时才扣 `submit`、`submit-all`，通过后才能开始首次 GitHub 写入。
 11. 建 tree：
     - 第一次 `POST /git/trees`，不带 base_tree：文本条目用 `content` 内联，截图条目用 `sha`；`mode` 一律 `100644`，`type` 一律 `blob`；路径相对 `bots/<slug>/`。
     - 第二次 `POST /git/trees`：`base_tree` 设为 main 的根 tree，只放一个条目 `{ path: 'bots/<slug>', mode: '040000', type: 'tree', sha: <上一步的子树> }`。
@@ -201,7 +205,7 @@ applyServerFields(botYamlText, { login, addedAt }) // → 新的 bot.yaml 文本
 13. 分支 `refs/heads/submission/web-<id>-<slug>`：不存在就 `POST /git/refs` 建，存在就 `PATCH`（force）。分支名先过正则 `^submission/web-[1-9]\d{0,19}-[a-z0-9]+(?:-[a-z0-9]+)*$`。
 14. 查 head 为 `owner:<分支>` 的已开 PR：没有就建（`base: main`），有就更新标题和正文。PR 正文模板见 §3.7。
 15. GraphQL `enablePullRequestAutoMerge(input: { pullRequestId, mergeMethod: MERGE })`。失败不报错，`autoMerge: false` 并带一条 warning。
-16. upsert `web_submissions`。
+16. upsert `web_submissions`；`bot_owners` 在第 14 步 PR 成功后 upsert（失败不绑定，dryRun 不绑定）。
 17. 返回 200：`{ ok:true, slug, update, branch, pr: { number, url }, liveUrl: '<SITE.url>/bots/<slug>', autoMerge, warnings }`。`errors`/`warnings` 的条目一律是 `{ file, where, problem, fix }`。
 
 GitHub 客户端（`functions/_lib/github.ts`）只导出上面用到的固定操作（`createBlob`、`getRef`、`getCommit`、`getContent`、`createTree`、`createCommit`、`upsertRef`、`findOpenPr`、`createPr`、`updatePr`、`enableAutoMerge`、`getPr`、`getChecks`、`getReviews`、`compare`、`installationToken`、OAuth 的三个调用）。**不导出通用的 request 方法。** 每个方法内部检查 URL 落在 `/repos/${SUBMIT_REPO}/…`、`/app/installations/${id}/access_tokens`、`/user`、`/applications/${client_id}/token`、`/login/oauth/*`、`/graphql` 之内，写 ref 的方法再检查一次分支正则。
@@ -215,6 +219,8 @@ GitHub 客户端（`functions/_lib/github.ts`）只导出上面用到的固定�
   { "ok": true, "state": "checking|failed|waiting_review|approved|merged|live|closed", "checks": "pending|success|failure", "slug": "…", "url": "…", "liveUrl": "…或 null" }
   ```
 
+- 缓存按 PR 号分两层：isolate 内存 Map + D1 `pr_status`，`checking` 缓存 30 秒，其余成功状态 120 秒。内存有界，D1 保留最后结果供过期兜底；命中任一有效缓存时完全不调 GitHub，同 isolate 的同 PR 并发刷新合并。
+- 真正刷新前扣全站 `status-gh`（每小时 600 次，按一次状态刷新计，不是每条 REST 调用计）。超预算返回缓存，即使已过期；无缓存返回 503 `github_error`，文案「状态暂时刷新不了，过一会儿再看」。失败或非投稿 PR 不缓存；普通 GitHub 故障仍用原 502 处理。缓存对外仍是 `Cache-Control: no-store`。
 - 判断规则：
   - 已关闭但没合并 → `closed`；
   - 已合并：本部署 `build.json` 的 `commit` 与 merge 提交相同或在其后（`compare` 的 status 是 `identical` 或 `ahead`）→ `live`，否则 `merged`；
@@ -242,7 +248,7 @@ GitHub 客户端（`functions/_lib/github.ts`）只导出上面用到的固定�
 <!-- bot-zhipin-web-submission uid=<id> slug=<slug> -->
 ```
 
-### 3.8 D1（`migrations/0002_submit.sql`）
+### 3.8 D1（`migrations/0002_submit.sql`、`0003_submit_hardening.sql`）
 
 ```sql
 CREATE TABLE IF NOT EXISTS rate_limits (
@@ -255,20 +261,31 @@ CREATE TABLE IF NOT EXISTS web_submissions (
   branch TEXT NOT NULL, created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL,
   PRIMARY KEY (user_id, slug)
 );
+-- 0003_submit_hardening.sql；时间戳均为服务器毫秒。
+CREATE TABLE IF NOT EXISTS pr_status (
+  pr INTEGER PRIMARY KEY, body TEXT NOT NULL, fetched_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS bot_owners (
+  slug TEXT PRIMARY KEY, user_id INTEGER NOT NULL, updated_at INTEGER NOT NULL
+);
 ```
 
 - 计数用 `INSERT … ON CONFLICT DO UPDATE SET n = n + 1, bytes = bytes + ? RETURNING n, bytes`，一条语句完成。
 - 过期行沿用 `scheduleCleanup` 的 1% 概率清理。
 
-| bucket | key | 窗口 | 上限 |
-|---|---|---|---|
-| `login` | IP 哈希 | 1 小时 | 20 |
-| `shot` | 用户 id | 1 天 | 60 次 / 60MB |
-| `shot-all` | `*` | 1 天 | 300 |
-| `submit` | 用户 id | 1 天 | 10 |
-| `submit-slug` | `id:slug` | 2 分钟 | 1 |
-| `submit-all` | `*` | 1 小时 | 20 |
-| `status` | IP 哈希 | 1 分钟 | 30 |
+| bucket | key | 窗口 | 上限 | 计数时机 |
+|---|---|---|---|---|
+| `login` | IP 哈希 | 1 小时 | 120 | 登录导航（无 mode 头也允许） |
+| `shot` | 用户 id | 1 天 | 60 次 / 60MB | 上传前 |
+| `shot-all` | `*` | 1 天 | 1000 | 上传前 |
+| `submit-try` | 用户 id | 1 小时 | 40 | 解包/校验前，含 dryRun |
+| `submit` | 用户 id | 1 天 | 10 | 校验及密钥扫描通过后、首次 GitHub 写入前，非 dryRun |
+| `submit-slug` | `id:slug` | 2 分钟 | 1 | 解包后、校验前，非 dryRun |
+| `submit-all` | `*` | 1 小时 | 20 | 同 `submit` |
+| `status` | IP 哈希 | 1 分钟 | 30 | 每次合法状态查询，含缓存命中 |
+| `status-gh` | `*` | 1 小时 | 600 | 缓存未命中或过期、真正刷新前 |
+
+计数仍采用固定窗口；预算拒绝会计入尝试数但不调用 GitHub。发布额度不是原子预占/退款机制（本轮不做）。
 
 ### 3.9 错误码
 
@@ -287,7 +304,7 @@ CREATE TABLE IF NOT EXISTS web_submissions (
 | `unsupported_type` | 415 | 只支持 PNG、JPG、WEBP、GIF 截图。 |
 | `invalid` | 422 | 还没通过检查（见 errors）。 |
 | `rate_limited` | 429 | 操作太频繁，请稍后再试（`Retry-After` 头 + `retryAfter` 秒）。 |
-| `github_error` | 502 | GitHub 暂时没响应，请稍后再试（带 `requestId`）。 |
+| `github_error` | 502 / 503 | 普通上游故障 502：GitHub 暂时没响应，请稍后再试（带 `requestId`）。状态刷新预算耗尽且没有缓存时 503：状态暂时刷新不了，过一会儿再看。 |
 | `submit_disabled` | 503 | 网站投稿暂时关闭，请改用 GitHub Issue 投稿。 |
 
 ## 4. 前端（L3 逻辑、L4 界面）

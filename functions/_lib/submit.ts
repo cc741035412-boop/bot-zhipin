@@ -2,8 +2,8 @@ import { parseDocument } from 'yaml'
 import { modelFromBundle } from '../../scripts/lib/bot-model.mjs'
 import { validateModels } from '../../scripts/lib/validate/core.mjs'
 import { applyServerFields } from '../../scripts/lib/submit-fields.mjs'
-import { decodeToken } from '../../scripts/lib/bundle-web.mjs'
-import { assertSlug, unpack, LIMITS } from '../../scripts/submission/bundle-core.mjs'
+import { botYamlTooLarge, botYamlSizeError } from '../../scripts/lib/yaml-limits.mjs'
+import { unpack, LIMITS } from '../../scripts/submission/bundle-core.mjs'
 import { planScreenshots } from '../../scripts/submission/screenshot-plan.mjs'
 import { SubmissionError } from '../../scripts/submission/errors.mjs'
 import { redact } from '../../scripts/lib/validate/secrets.mjs'
@@ -81,6 +81,7 @@ export async function verifyReceipts(values: unknown, user: SessionUser, secrets
 export function validateSubmission(bundle: ReturnType<typeof unpack>, images: Receipt[], user: SessionUser,
   addedAt: string, context: SubmitContext, now: number) {
   const yamlPath = `bots/${bundle.slug}/bot.yaml`
+  if (botYamlTooLarge(bundle.files[yamlPath])) fail('invalid', { errors: [{ file: yamlPath, ...botYamlSizeError }] })
   let yaml: string
   try { yaml = applyServerFields(bundle.files[yamlPath], { login: user.login, addedAt }) }
   catch {
@@ -92,6 +93,11 @@ export function validateSubmission(bundle: ReturnType<typeof unpack>, images: Re
   let model: ReturnType<typeof modelFromBundle>
   try { model = modelFromBundle(plan, plan.images) }
   catch { fail('invalid', { errors: [{ file: yamlPath, where: '格式', problem: '无法解析 Bot 内容。', fix: '检查 YAML 和技能 frontmatter，避免循环或过量别名。' }] }) }
+  if (model.yamlTooLarge) fail('invalid', { errors: [{ file: yamlPath, ...botYamlSizeError }] })
+  if (model.data?.author?.github !== user.login || model.data?.addedAt !== addedAt) {
+    fail('invalid', { errors: [{ file: yamlPath, where: 'author.github / addedAt',
+      problem: 'bot.yaml 的作者或日期字段写法特殊，无法自动填写', fix: '用普通的 `author:` 和 `addedAt:` 写法' }] })
+  }
   const result = validateModels([model], {
     template: context.templateModel, now: new Date(now), others: context.index.filter((item) => item.slug !== bundle.slug),
     policy: { submission: { login: user.login } },
@@ -107,8 +113,8 @@ export async function computeSubmission(text: string, receipts: unknown, user: S
   return validateSubmission(bundle, images, user, addedAt, context, now)
 }
 
-function prBody(slug: string, user: SessionUser, update: boolean, warnings: Item[]): string {
-  return `## 网站投稿
+function prBody(slug: string, user: SessionUser, update: boolean, warnings: Item[], legacyOwner: boolean): string {
+  return `${legacyOwner ? '> ⚠ **这个 Bot 之前没有绑定作者数字 ID，只按 GitHub 用户名核对，请人工确认是原作者**\n\n' : ''}## 网站投稿
 
 - Bot：\`bots/${slug}/\`（${update ? '更新' : '新增'}）
 - 投稿人：@${user.login}（GitHub 账号已登录验证）
@@ -132,21 +138,11 @@ export async function submitBot(body: Record<string, unknown>, user: SessionUser
   // 1. Authentication has already happened in the HTTP adapter.
   if (body.license !== true) fail('license_required')
   if (body.dryRun === true && !(deps.dryRunUserIds || '').split(',').map((id) => id.trim()).includes(String(user.id))) fail('forbidden_origin')
-  // 2. Global/user quotas precede parsing. Decode only to locate the slug quota key;
-  // full structural unpack/diagnostics remain step 3. No caller-supplied slug is trusted.
-  await rate(db, 'submit', String(user.id), now)
-  await rate(db, 'submit-all', '*', now)
-  let text: string, hint: string | undefined
-  try {
-    if (typeof body.bundle !== 'string') throw new Error()
-    text = body.bundle.startsWith('BZB1:') ? await decodeToken(body.bundle) : body.bundle
-    hint = /^=== bots\/([^/\r\n]+)\//m.exec(text)?.[1]
-    if (hint) assertSlug(hint)
-  } catch (error) { fail('bad_request', { errors: safeErrors(error) }) }
-  if (hint) await rate(db, 'submit-slug', `${user.id}:${hint}`, now)
-  // 3–4. Bounded unpack and purpose-separated receipt verification.
+  // 2–4. Only plaintext: one bounded unpack, never decompress on the server.
+  await rate(db, 'submit-try', String(user.id), now)
   let bundle: ReturnType<typeof unpack>
-  try { bundle = unpack(text) } catch (error) { fail('bad_request', { errors: safeErrors(error) }) }
+  try { bundle = unpack(body.bundle) } catch (error) { fail('bad_request', { errors: safeErrors(error) }) }
+  if (body.dryRun !== true) await rate(db, 'submit-slug', `${user.id}:${bundle.slug}`, now)
   const images = await verifyReceipts(body.screenshots, user, secrets, now)
   const slug = bundle.slug
   const branch = `submission/web-${user.id}-${slug}`
@@ -158,6 +154,7 @@ export async function submitBot(body: Record<string, unknown>, user: SessionUser
   const existing = await gh.getContent(`bots/${slug}/bot.yaml`, mainHead)
   let addedAt = new Date(now + 8 * 3_600_000).toISOString().slice(0, 10)
   const update = existing !== null
+  let legacyOwner = false
   if (existing) {
     let data
     try {
@@ -165,8 +162,14 @@ export async function submitBot(body: Record<string, unknown>, user: SessionUser
       if (doc.errors.length) throw new Error()
       data = doc.toJS()
     } catch { throw new GitHubError(502) }
-    if (data?.external === true || typeof data?.author?.github !== 'string'
-      || data.author.github.toLowerCase() !== user.login.toLowerCase()) fail('slug_taken')
+    if (data?.external === true) fail('slug_taken')
+    const owner = await db.prepare('SELECT user_id FROM bot_owners WHERE slug = ?1').bind(slug).first<{ user_id: number }>()
+    if (owner) {
+      if (owner.user_id !== user.id) fail('slug_taken')
+    } else {
+      if (typeof data?.author?.github !== 'string' || data.author.github.toLowerCase() !== user.login.toLowerCase()) fail('slug_taken')
+      legacyOwner = true
+    }
     if (typeof data.addedAt !== 'string') throw new GitHubError(502)
     addedAt = data.addedAt
   }
@@ -186,6 +189,9 @@ export async function submitBot(body: Record<string, unknown>, user: SessionUser
   const prefix = `bots/${slug}/`
   const files = [...Object.keys(plan.files), ...plan.images.map((image: Receipt & { name: string }) => `${prefix}screenshots/${image.name}`)]
   if (body.dryRun === true) return { ok: true, dryRun: true, slug, update, files, warnings }
+  // Charge publishing quotas only after validation/secrets and the dryRun exit.
+  await rate(db, 'submit', String(user.id), now)
+  await rate(db, 'submit-all', '*', now)
   // 11. New subtree without base_tree removes old-only files; outer tree preserves everything else.
   const entries: Parameters<GitHub['createTree']>[0]['entries'] = Object.entries(plan.files).map(([path, content]) => ({
     path: path.slice(prefix.length), mode: '100644', type: 'blob', content: content as string,
@@ -199,8 +205,13 @@ export async function submitBot(body: Record<string, unknown>, user: SessionUser
     author: { name: user.login, email: `${user.id}+${user.login}@users.noreply.github.com` } })
   await gh.upsertRef(branch, commit)
   const open = await gh.findOpenPr(branch)
-  const prInput = { title, body: prBody(slug, user, update, warnings) }
+  const prInput = { title: legacyOwner ? `⚠ 更新已上架 Bot：${model.data.name}（网站投稿）` : title,
+    body: prBody(slug, user, update, warnings, legacyOwner) }
   const pr = open ? await gh.updatePr(open.number, prInput) : await gh.createPr({ ...prInput, head: branch, base: 'main' })
+  // No main Bot means a new submission: overwrite any obsolete binding only after PR success.
+  await db.prepare(`INSERT INTO bot_owners (slug, user_id, updated_at) VALUES (?1, ?2, ?3)
+    ON CONFLICT (slug) DO UPDATE SET user_id = excluded.user_id, updated_at = excluded.updated_at`)
+    .bind(slug, user.id, now).run()
   // 15–17. Auto-merge is best effort; persistence is not.
   let autoMerge = false
   try { autoMerge = await gh.enableAutoMerge(pr.node_id) } catch { /* no upstream diagnostics */ }

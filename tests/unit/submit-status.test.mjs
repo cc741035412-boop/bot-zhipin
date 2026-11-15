@@ -12,9 +12,15 @@ const get = (query = 'pr=7') => status.onRequestGet(ctx(new Request(`${origin}/a
 beforeEach(() => {
   vi.spyOn(Math, 'random').mockReturnValue(0.5)
   count = 1
+  const cached = new Map()
+  vi.spyOn(Date, 'now').mockReturnValue(1_800_000_000_000)
   env = { SESSION_SECRET: 's'.repeat(40), IP_SALT: 'local', ALLOW_TEST_ENDPOINTS: '1', SUBMIT_REPO: 'owner/repo',
     GITHUB_APP_ID: '1', GITHUB_APP_INSTALLATION_ID: '1', GITHUB_APP_BOT_LOGIN: 'local[bot]', GITHUB_APP_PRIVATE_KEY: 'local-mock', OAUTH_CLIENT_ID: 'local', OAUTH_CLIENT_SECRET: 'local',
-    DB: { prepare: () => ({ bind: () => ({ first: async () => ({ n: count, bytes: 0 }) }) }) },
+    GITHUB_API_BASE: 'http://api.gh.test', GITHUB_OAUTH_BASE: 'http://oauth.gh.test',
+    DB: { prepare: (sql) => ({ bind: (...args) => ({
+      first: async () => sql.includes('FROM pr_status') ? cached.get(args[0]) ?? null : { n: count, bytes: 0 },
+      run: async () => { cached.set(args[0], { body: args[1], fetched_at: args[2] }); return {} },
+    }) }) },
     ASSETS: { fetch: vi.fn(async () => Response.json({ commit: merge, builtAt: 'now' })) },
   }
   pr = { number: 7, html_url: 'https://github.test/pull/7', state: 'open', merged: false, merge_commit_sha: merge, head: { ref: 'submission/web-123-status-demo', sha: 'd'.repeat(40) } }
@@ -49,6 +55,7 @@ describe('投稿状态七态', () => {
     const base = { user: { login: 'Owner' }, submitted_at: '2026-11-14' }
     gh.getReviews.mockResolvedValue([{ ...base, id: 1, state: 'APPROVED' }, { ...base, id: 2, state: 'DISMISSED' }])
     expect((await (await get()).json()).state).toBe('waiting_review')
+    Date.now.mockReturnValue(Date.now() + 120_000) // Refresh only after the new status cache expires.
     gh.getReviews.mockResolvedValue([{ ...base, id: 1, state: 'APPROVED' }, { ...base, id: 2, state: 'COMMENTED' }])
     expect((await (await get()).json()).state).toBe('approved')
   })

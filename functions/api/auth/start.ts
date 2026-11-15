@@ -3,7 +3,7 @@ import { toBase64Url } from '../../_lib/bytes'
 import { hashIp } from '../../_lib/clicks'
 import { clientIp } from '../../_lib/http'
 import { hit, RATE_LIMITS } from '../../_lib/ratelimit'
-import { handleSubmitApi, submitMethodNotAllowed } from '../../_lib/respond'
+import { fail, handleSubmitApi, submitMethodNotAllowed } from '../../_lib/respond'
 import { oauthSetCookie } from '../../_lib/session'
 import { assertSubmitEnabled, authorizationUrl } from '../../_lib/submit-config'
 import type { Env } from '../../_lib/types'
@@ -11,6 +11,8 @@ import type { Env } from '../../_lib/types'
 export const onRequestGet: PagesFunction<Env> = (context) => handleSubmitApi(context, async (now) => {
   const { env, request } = context
   assertSubmitEnabled(env)
+  const mode = request.headers.get('Sec-Fetch-Mode')
+  if (mode !== null && mode !== 'navigate') fail('bad_request')
   const key = await hashIp(env.IP_SALT, clientIp(request, { ALLOW_TEST_IP: env.ALLOW_TEST_ENDPOINTS }), 'login')
   const limit = await hit(env.DB, { bucket: 'login', key, ...RATE_LIMITS.login }, now)
   if (!limit.ok) {

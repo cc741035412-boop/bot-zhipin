@@ -1,4 +1,5 @@
 import { fromBase64, toBase64, toBase64Url } from './bytes'
+import { assertTestEndpoints } from './submit-config'
 import type { Env } from './types'
 
 export const SUBMISSION_BRANCH_RE = /^submission\/web-[1-9]\d{0,19}-[a-z0-9]+(?:-[a-z0-9]+)*$/
@@ -77,6 +78,7 @@ interface TreeEntry { path: string; mode: '100644' | '040000'; type: 'blob' | 't
 interface Author { name: string; email: string; date?: string }
 
 export function createGitHub(env: Env) {
+  assertTestEndpoints(env)
   const apiBase = endpointBase(env.ALLOW_TEST_ENDPOINTS === '1' && env.GITHUB_API_BASE ? env.GITHUB_API_BASE : 'https://api.github.com')
   const oauthBase = endpointBase(env.ALLOW_TEST_ENDPOINTS === '1' && env.GITHUB_OAUTH_BASE ? env.GITHUB_OAUTH_BASE : 'https://github.com')
   const repo = env.SUBMIT_REPO || ''
