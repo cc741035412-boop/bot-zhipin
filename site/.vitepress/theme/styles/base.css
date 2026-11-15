@@ -1,0 +1,61 @@
+/* 基础部件。这里是卡片车道为了能跑放的最小可用版，类名和取值照 V5-DESIGN §2；合并时以设计系统车道的版本为准。 */
+
+/* ---------- 按钮 ---------- */
+.bz-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex: none;
+  height: 36px; padding: 0 14px; border-radius: var(--bz-r-control);
+  border: 1px solid color-mix(in srgb, var(--bz-bot-color, transparent) 34%, var(--bz-border-strong));
+  background: color-mix(in srgb, var(--bz-bot-color, transparent) 10%, var(--bz-surface-2));
+  box-shadow: var(--bz-highlight); color: var(--bz-ink);
+  font-family: var(--bz-font-text); font-size: 14px; font-weight: 600; line-height: 1; white-space: nowrap; text-decoration: none;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--bz-dur) var(--bz-ease), border-color var(--bz-dur) var(--bz-ease), color var(--bz-dur) var(--bz-ease), filter var(--bz-dur) var(--bz-ease), transform var(--bz-dur) var(--bz-ease);
+}
+.bz-btn:hover {
+  border-color: color-mix(in srgb, var(--bz-bot-color, transparent) 60%, var(--bz-border-strong));
+  background: color-mix(in srgb, var(--bz-bot-color, transparent) 18%, var(--bz-surface-2));
+  color: var(--bz-ink);
+}
+.bz-btn:active { transform: scale(.98); }
+.bz-btn > svg { flex: none; }
+.bz-btn.sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.bz-btn.primary, .bz-btn.primary:hover { border-color: transparent; background: var(--bz-ink); box-shadow: none; color: #ffffff; }
+.dark .bz-btn.primary, .dark .bz-btn.primary:hover { background: #ffffff; color: #0b0b0d; }
+.bz-btn.primary:hover { filter: brightness(.92); }
+.bz-btn.ghost { border-color: transparent; background: transparent; box-shadow: none; color: var(--bz-text-2); }
+.bz-btn.ghost:hover { border-color: transparent; background: var(--bz-surface-3); color: var(--bz-ink); }
+@media (pointer: coarse) { .bz-btn, .bz-btn.sm { height: 44px; } }
+
+/* ---------- 标签 ---------- */
+.bz-tag {
+  display: inline-flex; align-items: center; gap: 4px; flex: none; height: 22px; padding: 0 8px; border-radius: var(--bz-r-control);
+  background: var(--bz-surface-2); color: var(--bz-text-2);
+  font-family: var(--bz-font-text); font-size: var(--bz-fs-xs); font-weight: 600; line-height: 1; white-space: nowrap;
+}
+
+/* ---------- 区块标题 ---------- */
+.bz-section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.bz-section-head h2 { font-family: var(--bz-font-display); font-size: var(--bz-fs-h2); font-weight: 650; line-height: 1.25; letter-spacing: -.01em; }
+.bz-section-head p { margin-top: 4px; font-size: var(--bz-fs-sm); line-height: 1.5; color: var(--bz-text-2); }
+
+/* ---------- 分段控件：全站唯一的胶囊。选中滑块按容器上的 data-sort 滑动 ---------- */
+.bz-seg {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; position: relative; isolation: isolate; flex: none; height: 40px; padding: 3px;
+  border: 1px solid var(--bz-hairline); border-radius: 999px; background: var(--bz-surface-2); box-shadow: var(--bz-highlight);
+}
+.bz-seg > button {
+  position: relative; padding: 0 16px; border: 0; border-radius: 999px; background: transparent; color: var(--bz-text-2);
+  font-family: var(--bz-font-text); font-size: var(--bz-fs-sm); font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer;
+  transition: color var(--bz-dur) var(--bz-ease);
+}
+.bz-seg > button:hover, .bz-seg > button[aria-pressed="true"] { color: var(--bz-ink); }
+.bz-seg::after {
+  content: ''; position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc((100% - 6px) / 2); z-index: -1; border-radius: 999px;
+  background: var(--bz-seg-active); box-shadow: var(--bz-seg-shadow); transform: translateX(0); transition: transform var(--bz-dur-slow) var(--bz-ease-spring);
+}
+.bz-seg[data-sort="new"]::after { transform: translateX(100%); }
+@media (pointer: coarse) { .bz-seg { height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .bz-seg::after { transition: none !important; } }
+
+/* ---------- 气泡：样子不变，圆角收到卡片这一档 ---------- */
+.shelf-page .pitch-bubble { border-radius: var(--bz-r-card); }

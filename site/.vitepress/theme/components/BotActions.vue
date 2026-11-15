@@ -9,7 +9,8 @@ import { useBotAction } from '../live/scope'
 const play = useBotAction()
 import ExternalHint from './ExternalHint.vue'
 
-const props = defineProps<{ bot: { slug: string; templateUrl: string; external: boolean } }>()
+// compact：列表卡用小号按钮（「导入」+ 幽灵款的复制）；详情页用实心的「一键导入」+ 次级的复制。
+const props = defineProps<{ bot: { slug: string; templateUrl: string; external: boolean }; compact?: boolean }>()
 const copied = ref(false)
 const fallback = ref(false)
 const dialog = ref<HTMLDialogElement>()
@@ -49,15 +50,15 @@ onBeforeUnmount(() => clearTimeout(timer))
 
 <template>
   <div class="bot-actions">
-    <button v-if="preview" data-testid="btn-import" type="button" class="shelf-button primary action-import" aria-disabled="true">一键导入</button>
-    <a v-else data-testid="btn-import" class="shelf-button primary action-import" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot">一键导入<ExternalHint /></a>
-    <button v-if="!bot.external" ref="copyButton" data-testid="btn-prompt" type="button" class="shelf-button action-prompt" :class="{ copied }" :aria-disabled="preview || undefined" @click="copyPrompt">{{ copied ? '已复制 ✓' : '复制安装提示词' }}</button>
+    <button v-if="preview" data-testid="btn-import" type="button" class="bz-btn action-import" :class="compact ? 'sm' : 'primary'" aria-disabled="true">{{ compact ? '导入' : '一键导入' }}</button>
+    <a v-else data-testid="btn-import" class="bz-btn action-import" :class="compact ? 'sm' : 'primary'" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot">{{ compact ? '导入' : '一键导入' }}<ExternalHint /></a>
+    <button v-if="!bot.external" ref="copyButton" data-testid="btn-prompt" type="button" class="bz-btn action-prompt" :class="[compact && 'ghost sm', { copied }]" :aria-disabled="preview || undefined" @click="copyPrompt">{{ copied ? '已复制 ✓' : '复制安装提示词' }}</button>
   </div>
   <p v-if="preview" class="bot-actions-note" data-testid="preview-actions-note">上架后可用</p>
   <dialog v-if="fallback && !bot.external" ref="dialog" class="prompt-fallback" data-testid="prompt-fallback" :aria-labelledby="`copy-title-${bot.slug}`" :aria-describedby="`copy-help-${bot.slug}`" @click="backdrop" @close="fallback = false; copyButton?.focus()">
     <h2 :id="`copy-title-${bot.slug}`">复制没成功，请手动复制</h2>
     <p :id="`copy-help-${bot.slug}`">全选下面的文字，复制后发给你的 Grok Bot</p>
     <textarea ref="field" aria-label="安装提示词" readonly :value="installPrompt(bot.slug)" rows="7" />
-    <button type="button" class="shelf-button" @click="dialog?.close()">关闭</button>
+    <button type="button" class="bz-btn" @click="dialog?.close()">关闭</button>
   </dialog>
 </template>

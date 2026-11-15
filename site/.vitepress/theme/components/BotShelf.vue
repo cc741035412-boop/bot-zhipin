@@ -9,6 +9,7 @@ import BotCard from './BotCard.vue'
 import FeaturedCard from './FeaturedCard.vue'
 import HeroPortrait from './HeroPortrait.vue'
 import SearchTrigger from './SearchTrigger.vue'
+import BzIcon from './BzIcon.vue'
 import { enterHero } from '../live/reactions'
 import DefaultAvatar from './DefaultAvatar.vue'
 import LiveAnnouncer from './LiveAnnouncer.vue'
@@ -82,51 +83,50 @@ onBeforeUnmount(() => { alive = false; releaseEntry?.() })
       <h1>{{ SITE.name }}</h1>
       <p class="hero-sub"><span v-for="(clause, index) in taglineClauses" :key="index">{{ clause }}</span></p>
       <SearchTrigger class="hero-search" data-testid="search-trigger" />
-      <a data-testid="contribute-link" class="shelf-button contribute" :href="CONTRIBUTE_URL"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" /></svg>{{ SHELF_COPY.contribute }}</a>
     </header>
-    <section class="shelf-section" aria-labelledby="shelf-title">
-      <header class="section-heading">
-        <h2 id="shelf-title">{{ SHELF_COPY.sectionTitle }}</h2>
-        <p>{{ SHELF_COPY.sectionSub }}</p>
-      </header>
-      <div v-if="featured.length" class="featured">
-        <div class="block-heading">
-          <h3>{{ SHELF_COPY.featuredTitle }}</h3>
+    <section v-if="featured.length" class="shelf-section" aria-labelledby="featured-title">
+      <header class="bz-section-head">
+        <div>
+          <h2 id="featured-title">{{ SHELF_COPY.featuredTitle }}</h2>
           <p>{{ SHELF_COPY.featuredSub }}</p>
         </div>
-        <div class="featured-grid" :class="{ 'grid-enter': featuredEntering }" @animationend="featuredEntering = false">
-          <FeaturedCard v-for="bot in featured" :key="bot.slug" :bot="bot" />
-        </div>
+      </header>
+      <div class="featured-grid" :class="{ 'grid-enter': featuredEntering }" @animationend="featuredEntering = false">
+        <FeaturedCard v-for="bot in featured" :key="bot.slug" :bot="bot" />
       </div>
+    </section>
+    <section id="all" class="shelf-section" aria-labelledby="all-title">
+      <header class="bz-section-head">
+        <div><h2 id="all-title">{{ SHELF_COPY.allTitle }}</h2></div>
+        <span v-if="bots.length" class="bot-count">共 {{ visible.length }} 个</span>
+      </header>
       <div v-if="bots.length" class="shelf-toolbar">
-        <div class="sort-controls" :data-sort="sort" role="group" aria-label="排序">
-          <button type="button" data-testid="sort-hot" class="shelf-button" :aria-pressed="sort === 'hot'" @click="select('hot')">热门</button>
-          <button type="button" data-testid="sort-new" class="shelf-button" :aria-pressed="sort === 'new'" @click="select('new')">最新</button>
+        <div class="bz-seg" :data-sort="sort" role="group" aria-label="排序">
+          <button type="button" data-testid="sort-hot" :aria-pressed="sort === 'hot'" @click="select('hot')">热门</button>
+          <button type="button" data-testid="sort-new" :aria-pressed="sort === 'new'" @click="select('new')">最新</button>
         </div>
         <div class="filter-chips" role="group" :aria-label="SHELF_COPY.filterLabel">
           <button type="button" data-testid="filter-category" class="filter-chip all" :aria-pressed="filter === ALL" @click="choose(ALL)"><i class="chip-dot all" aria-hidden="true" />{{ SHELF_COPY.allCategories }}</button>
           <button v-for="category in categories" :key="category" type="button" data-testid="filter-category" class="filter-chip" :style="categoryStyle(category)" :aria-pressed="filter === category" @click="choose(category)"><i class="chip-dot" aria-hidden="true" />{{ category }}</button>
         </div>
-        <span class="bot-count">共 {{ visible.length }} 个 Bot</span>
-        <SearchTrigger class="toolbar-search" data-testid="search-trigger-toolbar" />
       </div>
       <div v-if="visible.length" class="bot-grid" :class="{ 'grid-enter': entering }" @animationend="entering = false">
         <BotCard v-for="bot in visible" :key="bot.slug" :bot="bot" />
       </div>
       <div v-else-if="bots.length" data-testid="empty-filter" class="empty-state">
-        <DefaultAvatar slug="empty-shelf" rest="sleep" :size="120" />
+        <DefaultAvatar slug="empty-shelf" rest="sleep" :size="96" />
         <p>{{ SHELF_COPY.emptyFilter }}</p>
-        <button type="button" class="shelf-button" @click="choose(ALL)">{{ SHELF_COPY.showAll }}</button>
+        <button type="button" class="bz-btn" @click="choose(ALL)">{{ SHELF_COPY.showAll }}</button>
       </div>
       <div v-else data-testid="empty-state" class="empty-state">
-        <DefaultAvatar slug="empty-shelf" rest="sleep" :size="160" />
+        <DefaultAvatar slug="empty-shelf" rest="sleep" :size="120" />
         <p>货架上还没有 Bot</p>
-        <a class="shelf-button" :href="CONTRIBUTE_URL">做第一个投稿的人</a>
+        <a class="bz-btn" :href="CONTRIBUTE_URL">做第一个投稿的人</a>
       </div>
     </section>
     <footer v-if="bots.length" class="shelf-footer">
       <p>{{ SHELF_COPY.footer }}</p>
-      <a class="shelf-button contribute" :href="CONTRIBUTE_URL"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" /></svg>{{ SHELF_COPY.contribute }}</a>
+      <a data-testid="contribute-link" class="bz-btn" :href="CONTRIBUTE_URL"><BzIcon name="plus" />{{ SHELF_COPY.contribute }}</a>
     </footer>
   </main>
 </template>

@@ -1,0 +1,182 @@
+/* 首页：区块、精选卡、工具栏、列表卡、页尾、筛选为空。
+   卡片里的头像砖、名字、作者行、介绍、标签着色、操作按钮，详情页和投稿预览也在用，统一写在这里。
+   只用 V5-DESIGN §1、§2 里写了名字的 token 和基础类。 */
+
+/* ---------- 1. 区块 ---------- */
+.shelf-section { position: relative; z-index: 1; margin-top: var(--bz-sp-9); scroll-margin-top: calc(var(--vp-nav-height) + var(--bz-sp-4)); }
+.bot-count { flex: none; padding-bottom: 3px; font-size: var(--bz-fs-xs); font-weight: 600; line-height: 1.3; color: var(--bz-text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* ---------- 2. 卡片共用的小件 ---------- */
+/* 头像砖里的 Bot 占砖的 68%；按钮的可点范围用伪元素撑到整块砖。 */
+.avatar-stage, .featured-tile { border-radius: 24%; }
+.bot-avatar { position: relative; display: block; width: 68%; height: 68%; border-radius: 50%; cursor: pointer; transform-origin: center bottom; -webkit-tap-highlight-color: transparent; }
+.bot-avatar::after { content: ''; position: absolute; inset: -24%; }
+.shelf-page .bot-avatar:focus-visible { outline-offset: 3px; }
+.bot-avatar img, .bot-avatar svg { display: block; width: 100%; height: 100%; }
+.featured-tile img, .bot-avatar img { object-fit: cover; border-radius: 50%; border: 1px solid var(--bz-hairline); }
+
+.bot-head { min-width: 0; }
+.bot-title { display: flex; align-items: center; gap: var(--bz-sp-2); min-width: 0; }
+.bot-name { min-width: 0; font-family: var(--bz-font-display); font-size: var(--bz-fs-title); font-weight: 600; line-height: 1.35; letter-spacing: -.01em; color: var(--bz-ink); }
+.bot-name a:hover { text-decoration: underline; }
+.bot-byline { font-size: var(--bz-fs-sm); line-height: 1.5; color: var(--bz-text-3); }
+/* 卡片里的作者行只占一行：作者名太长就省略，后面的「· 官方市场」始终留着 */
+.bot-head .bot-byline { display: flex; min-width: 0; margin-top: 2px; }
+.bot-head .bot-author { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.bot-origin { flex: none; margin-left: .4em; white-space: nowrap; }
+.bot-byline a { color: inherit; }
+.bot-byline a:hover { color: var(--bz-ink); }
+.bot-tagline {
+  min-height: 3.2em; font-size: var(--bz-fs-body); line-height: 1.6; color: var(--bz-text-2); text-wrap: pretty;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+
+/* 一行元信息：图标 16、项间距 16，全是三级灰；只有「额度 高」提醒一下。 */
+.bot-stats { display: flex; flex-wrap: wrap; align-items: center; gap: var(--bz-sp-1) var(--bz-sp-4); min-width: 0; min-height: 22px; }
+.bot-heat, .bot-stat { display: inline-flex; align-items: center; gap: 6px; font-size: var(--bz-fs-sm); line-height: 22px; color: var(--bz-text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bot-heat svg, .bot-stat svg { flex: none; }
+.bot-heat.is-loading { opacity: .65; }
+.stat-quota[data-quota="高"] { color: var(--bz-quota-high); }
+
+/* 标签着色：分类色、来源色都是 14% 混卡片底，字是 40% 混墨色。 */
+.bz-tag.category-tag, .bz-tag.source-tag { background: color-mix(in srgb, var(--bz-tag-color) 14%, var(--bz-card)); color: color-mix(in srgb, var(--bz-tag-color) 40%, var(--bz-ink)); }
+.bz-tag.category-tag { --bz-tag-color: var(--bz-category-color); }
+/* 来源标签只剩「作者投稿」一种；官方市场、社区收录都写在作者行里 */
+.bz-tag.source-tag { --bz-tag-color: #ff6a13; }
+
+/* 操作按钮（BotActions）：卡片和详情页共用 */
+.bot-actions { display: flex; flex-wrap: wrap; gap: var(--bz-sp-3); }
+.bz-btn.copied, .bz-btn.copied:hover { border-color: color-mix(in srgb, var(--bz-success) 55%, transparent); color: var(--bz-success); }
+.bot-actions-note { font-size: var(--bz-fs-sm); line-height: 1.5; color: var(--bz-text-3); }
+
+/* ---------- 3. 精选卡 ---------- */
+.featured-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--bz-sp-4); }
+.featured-card {
+  position: relative; isolation: isolate; display: flex; flex-direction: column; min-width: 0; padding: var(--bz-sp-5);
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-1);
+  box-shadow: var(--bz-highlight); transition: border-color 150ms ease-in-out;
+}
+/* 顶上常驻一团 Bot 色柔光，从头像那一侧漫开；悬停更亮 */
+.featured-card::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: calc(var(--bz-r-card) - 1px); pointer-events: none; opacity: .7;
+  background: radial-gradient(110% 90% at 12% 0%, color-mix(in srgb, var(--bz-bot-color) 16%, transparent), transparent 68%);
+  transition: opacity 150ms ease-in-out;
+}
+.dark .featured-card::before { background: radial-gradient(110% 90% at 12% 0%, color-mix(in srgb, var(--bz-bot-color) 22%, transparent), transparent 68%); }
+.featured-head { display: flex; align-items: center; gap: var(--bz-sp-4); min-width: 0; }
+.featured-tile { width: 72px; height: 72px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.featured-tile svg, .featured-tile img { display: block; width: 68%; height: 68%; }
+.featured-card .bot-tagline { margin-top: var(--bz-sp-4); }
+.featured-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--bz-sp-3); margin-top: auto; padding-top: var(--bz-sp-5); }
+@media (hover: hover) {
+  .featured-card:hover { border-color: color-mix(in srgb, var(--bz-bot-color) 42%, var(--bz-hairline)); }
+  .featured-card:hover::before { opacity: 1; }
+  .featured-card:hover .bz-tile::before { opacity: 1; }
+}
+
+/* ---------- 4. 工具栏：左排序，右分类 ---------- */
+.shelf-toolbar { display: flex; align-items: center; gap: var(--bz-sp-4); margin-bottom: var(--bz-sp-5); }
+.filter-chips {
+  display: flex; gap: var(--bz-sp-2); min-width: 0; margin: -4px -4px -4px auto; padding: 4px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+}
+.filter-chips::-webkit-scrollbar { display: none; }
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 6px; flex: none; height: 32px; padding: 0 12px 0 10px;
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-control); background: transparent; color: var(--bz-text-2);
+  font-family: var(--bz-font-text); font-size: var(--bz-fs-sm); font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer;
+  transition: color var(--bz-dur) var(--bz-ease), border-color var(--bz-dur) var(--bz-ease), background-color var(--bz-dur) var(--bz-ease);
+}
+.chip-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--bz-category-color); }
+.chip-dot.all { background: conic-gradient(#ff6a13, #f5a623, #34d399, #14b8a6, #3b82f6, #8b5cf6, #ff2e93, #ff6a13); }
+.filter-chip:hover { background: var(--bz-surface-3); color: var(--bz-ink); }
+.filter-chip[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--bz-category-color) 55%, transparent);
+  background: color-mix(in srgb, var(--bz-category-color) 14%, transparent); color: var(--bz-ink);
+}
+/* 「全部」没有分类色：选中时只比轨道亮一档 */
+.filter-chip.all[aria-pressed="true"] { border-color: var(--bz-border-strong); background: var(--bz-surface-3); }
+
+/* ---------- 5. 列表和列表卡 ---------- */
+.bot-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--bz-sp-4); }
+.grid-enter { animation: bz-grid-enter 200ms ease; }
+@keyframes bz-grid-enter { from { opacity: .35; } to { opacity: 1; } }
+.bot-card {
+  position: relative; container-type: inline-size; display: flex; flex-direction: column; min-width: 0;
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-1);
+  box-shadow: var(--bz-highlight); transition: border-color 150ms ease-in-out;
+}
+/* 悬停层：左上角一团 Bot 色径向光，叠在自上而下的柔光上；卡片本身不位移、不缩放。 */
+.bot-card::after {
+  content: ''; position: absolute; inset: 0; z-index: 0; border-radius: calc(var(--bz-r-card) - 1px); pointer-events: none; opacity: 0;
+  background-image: radial-gradient(120% 150% at 0% 0%, color-mix(in srgb, var(--bz-bot-color) 18%, transparent), transparent 62%),
+    radial-gradient(100% 100% at 50% 0%, transparent 0%, var(--bz-surface-3) 150%);
+  transition: opacity 150ms ease-in-out;
+}
+@media (hover: hover) {
+  .bot-card:hover { border-color: color-mix(in srgb, var(--bz-bot-color) 45%, var(--bz-hairline)); }
+  .bot-card:hover::after { opacity: 1; }
+  .bot-card:hover .bz-tile::before { opacity: 1; }
+}
+/* 触摸点开气泡、键盘聚焦头像时也亮起来 */
+.bot-card:has(.pitch-bubble[data-open="true"]) { border-color: color-mix(in srgb, var(--bz-bot-color) 45%, var(--bz-hairline)); }
+.bot-card:has(.pitch-bubble[data-open="true"])::after { opacity: 1; }
+/* 三行：砖 + 名字 + 导入 / 介绍 / 元信息。多出来的高度落在介绍和元信息之间，同一行的卡片底行对齐。 */
+.bot-card-body {
+  position: relative; z-index: 1; flex: 1; display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; grid-template-rows: auto 1fr auto;
+  grid-template-areas: "avatar head import" "pitch pitch pitch" "stats stats prompt";
+  gap: var(--bz-sp-3); align-items: center; padding: 20px var(--bz-sp-5);
+}
+.bot-card .avatar-root, .bot-card .bot-actions { display: contents; }
+.bot-card .avatar-stage { grid-area: avatar; align-self: start; width: 48px; height: 48px; }
+.bot-card .bot-head { grid-area: head; }
+.bot-card .bot-tagline { grid-area: pitch; align-self: start; transition: opacity var(--bz-dur-fast) ease; }
+.bot-card-body:has(.pitch-bubble[data-open="true"]) > .bot-tagline { opacity: 0; }
+.bot-card .bot-stats { grid-area: stats; }
+/* 和 48 的砖垂直居中；名字换行时按钮不跟着往下掉 */
+.bot-card .action-import { grid-area: import; justify-self: end; align-self: start; margin-top: var(--bz-sp-2); }
+/* 幽灵按钮比这一行高，用负边距收回去，不把卡片撑高 */
+.bot-card .action-prompt { grid-area: prompt; justify-self: end; margin-block: -5px; margin-right: calc(-1 * var(--bz-sp-3)); }
+.bot-card .bot-actions-note { grid-column: 1 / -1; }
+/* 气泡：绝对定位在介绍那一格里（左上对齐），不占高度，长了就往下盖住元信息；尖角指着头像 */
+.bot-card .pitch-bubble { position: absolute; grid-area: pitch; top: 0; left: 0; max-width: 100%; transform-origin: 24px top; }
+.bot-card .pitch-bubble::after { left: 18px; }
+/* 卡片自己变窄时（手机、投稿预览）：导入挪到最下面撑满一行，复制和它并排 */
+@container (max-width: 399px) {
+  .bot-card-body { grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: auto 1fr auto auto; grid-template-areas: "avatar head" "pitch pitch" "stats stats" "actions actions"; padding: 20px; }
+  .bot-card .bot-actions { display: flex; grid-area: actions; gap: var(--bz-sp-2); margin-top: var(--bz-sp-1); }
+  .bot-card .bot-actions > .bz-btn { flex: 1 1 0; min-width: 0; height: 44px; margin: 0; }
+}
+@container (max-width: 319px) {
+  .bot-card .bot-actions > .bz-btn { flex-basis: 100%; }
+}
+
+/* ---------- 6. 筛选为空、页尾 ---------- */
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: var(--bz-sp-4); padding: var(--bz-sp-8) var(--bz-sp-4); border: 1px dashed var(--bz-border-strong); border-radius: var(--bz-r-card); background: var(--bz-surface-2); text-align: center; }
+.shelf-page .empty-state p { font-size: var(--bz-fs-body); line-height: 1.6; color: var(--bz-text-2); }
+.shelf-footer { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: var(--bz-sp-4); margin-top: var(--bz-sp-9); padding-top: var(--bz-sp-7); border-top: 1px solid var(--bz-hairline); text-align: center; }
+.shelf-footer p { font-size: var(--bz-fs-body); line-height: 1.6; color: var(--bz-text-2); text-wrap: balance; }
+
+/* ---------- 7. 投稿预览复用列表卡：把 submit.css 里旧版式留下的偏移归零 ---------- */
+.submit-preview .bot-card.bot-card { padding: 0; }
+.submit-preview .bot-card .bot-card-body .avatar-stage { margin: 0; }
+.submit-preview .bot-card .bot-name a { padding-block: 0; }
+
+/* ---------- 8. 响应式 ---------- */
+@media (max-width: 1099px) {
+  /* 分类换到第二行，自己横向滑动，右端渐隐 */
+  .shelf-toolbar { flex-wrap: wrap; row-gap: var(--bz-sp-3); }
+  .filter-chips {
+    flex: 1 0 100%; margin-left: -4px;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+  .filter-chips::after { content: ''; flex: none; width: 20px; }
+}
+@media (max-width: 899px) {
+  .featured-grid, .bot-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 679px) {
+  .shelf-section, .shelf-footer { margin-top: var(--bz-sp-8); }
+}
+@media (pointer: coarse) {
+  .filter-chip { height: 44px; }
+}

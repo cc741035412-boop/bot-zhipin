@@ -1,0 +1,47 @@
+/* 设计系统 v5 的 token。这里是卡片车道为了能跑放的最小可用版，名字和取值照 V5-DESIGN §1；合并时以设计系统车道的版本为准。 */
+:root {
+  --bz-font-text: system-ui, -apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif;
+  /* 字号阶梯 */
+  --bz-fs-display: clamp(44px, 5.6vw, 72px);
+  --bz-fs-h1: 32px;
+  --bz-fs-h2: 24px;
+  --bz-fs-h3: 20px;
+  --bz-fs-title: 16px;
+  --bz-fs-body: 15px;
+  --bz-fs-sm: 13px;
+  --bz-fs-xs: 12px;
+  /* 间距阶梯 */
+  --bz-sp-1: 4px;
+  --bz-sp-2: 8px;
+  --bz-sp-3: 12px;
+  --bz-sp-4: 16px;
+  --bz-sp-5: 24px;
+  --bz-sp-6: 32px;
+  --bz-sp-7: 48px;
+  --bz-sp-8: 64px;
+  --bz-sp-9: 96px;
+  /* 圆角三档 */
+  --bz-r-control: 8px;
+  --bz-r-card: 12px;
+  --bz-r-panel: 16px;
+  --bz-radius-card: 12px;
+  /* 面和边 */
+  --bz-surface-1: #ffffff;
+  --bz-surface-2: rgba(20, 20, 24, .03);
+  --bz-surface-3: rgba(20, 20, 24, .06);
+  --bz-border-strong: rgba(20, 20, 24, .16);
+  /* 动效 */
+  --bz-dur-fast: 120ms;
+  --bz-dur: 180ms;
+  --bz-dur-slow: 280ms;
+  --bz-ease: cubic-bezier(.2, .8, .2, 1);
+}
+.dark {
+  --bz-surface-1: transparent;
+  --bz-surface-2: rgba(255, 255, 255, .04);
+  --bz-surface-3: rgba(255, 255, 255, .07);
+  --bz-border-strong: rgba(255, 255, 255, .14);
+}
+@media (max-width: 679px) {
+  :root { --bz-fs-h1: 28px; --bz-fs-h2: 22px; --bz-fs-h3: 18px; }
+}

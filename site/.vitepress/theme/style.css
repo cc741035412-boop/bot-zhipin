@@ -268,48 +268,9 @@
 .shelf-button.primary:hover { background: var(--bz-btn-bg, var(--bz-ink-hover)); color: var(--bz-btn-fg, var(--bz-paper)); border-color: transparent; filter: brightness(1.08); }
 .shelf-button:active { transform: scale(.96); }
 .shelf-button.copied { color: var(--bz-success); border-color: var(--bz-success); }
-/* 「我要投稿」：搜索框下面的小玻璃胶囊 */
-.shelf-button.contribute { margin-top: 20px; padding-inline: 16px 18px; border-color: var(--bz-hairline); background: var(--bz-glass); box-shadow: var(--bz-highlight); color: var(--bz-text-2); }
-.shelf-button.contribute:hover { border-color: var(--bz-border); background: var(--bz-glass); color: var(--bz-ink); }
-@media (hover: hover) { .shelf-button.contribute:hover { transform: translateY(-2px); } }
-.shelf-button.contribute:active { transform: scale(.96); }
 .external-icon { display: inline-block; margin-left: 3px; font-size: 12px; line-height: 1; flex: none; }
 
-/* ---------- 5. 内容区：区标题、精选、工具栏 ---------- */
-.shelf-section { position: relative; z-index: 1; margin-top: 128px; }
-.section-heading { margin-bottom: 64px; text-align: center; }
-.section-heading h2 { font-size: 40px; font-weight: 600; line-height: 1.2; letter-spacing: -.01em; }
-.section-heading p { margin-top: 12px; font-size: 16px; line-height: 1.6; color: var(--bz-text-2); text-wrap: balance; }
-.block-heading { margin-bottom: 24px; }
-.block-heading h3 { font-size: 20px; font-weight: 600; line-height: 1.4; }
-.block-heading p { margin-top: 2px; font-size: 15px; line-height: 1.6; color: var(--bz-text-2); }
-.featured-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
-.featured-card {
-  position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 32px;
-  border: 1px solid var(--bz-hairline); border-radius: var(--bz-radius-card); background: var(--bz-card-bg);
-  box-shadow: var(--bz-highlight), var(--bz-card-shadow); text-align: center; transition: border-color 150ms ease-in-out;
-}
-/* 顶上常驻一团 Bot 色柔光，悬停更亮 */
-.featured-card::before {
-  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: .75;
-  background: radial-gradient(78% 58% at 50% 0%, color-mix(in srgb, var(--bz-bot-color) var(--bz-featured-glow), transparent), transparent 74%);
-  transition: opacity 150ms ease-in-out;
-}
-.featured-tile { width: 96px; height: 96px; border-radius: 22px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-.featured-tile svg, .featured-tile img { display: block; width: 66px; height: 66px; }
-.featured-tile img, .bot-avatar img { object-fit: cover; border-radius: 50%; border: 1px solid var(--bz-border); }
-.featured-card h4 { margin-top: 24px; font-size: 20px; font-weight: 600; line-height: 1.4; }
-.featured-card h4 a:hover, .bot-card h2 a:hover { text-decoration: underline; }
-.featured-card .bot-tagline { min-height: 48px; margin-top: 6px; }
-.bot-tagline { font-size: 15px; line-height: 1.6; color: var(--bz-text-2); text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-.featured-card .featured-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 14px; margin-top: 16px; }
-.featured-card .shelf-button { margin-top: 22px; }
-@media (hover: hover) {
-  .featured-card:hover { border-color: color-mix(in srgb, var(--bz-bot-color) 42%, var(--bz-hairline)); }
-  .featured-card:hover::before { opacity: 1; background: radial-gradient(96% 72% at 50% 0%, color-mix(in srgb, var(--bz-bot-color) calc(var(--bz-featured-glow) + 8%), transparent), transparent 76%); }
-  .featured-card:hover .bz-tile::before { opacity: 1; }
-}
-.shelf-toolbar { display: flex; align-items: center; gap: 16px; margin: 96px 0 28px; }
+/* ---------- 5. 旧分段控件：/submit 的预览切换还在用这个类名；首页的区块、精选、工具栏在 styles/home.css ---------- */
 /* 分段控件：一块选中滑块在两个按钮之间滑动；投稿预览页复用这套位置规则 */
 .sort-controls {
   display: grid; grid-template-columns: repeat(2, 1fr); position: relative; isolation: isolate; flex: none; height: 48px; padding: 3px;
@@ -323,65 +284,8 @@
   background: var(--bz-seg-active); box-shadow: var(--bz-seg-shadow); transform: translateX(0); transition: transform 280ms var(--bz-ease-spring);
 }
 .sort-controls[data-sort="new"]::after { transform: translateX(100%); }
-.filter-chips {
-  display: flex; flex: 1 1 0; gap: 8px; min-width: 0; padding: 4px; margin: -4px; overflow-x: auto; overscroll-behavior-x: contain;
-  scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
-}
-.filter-chips::-webkit-scrollbar { display: none; }
-.filter-chips::after { content: ''; flex: none; width: 20px; }
-.filter-chip {
-  display: inline-flex; align-items: center; gap: 7px; flex: none; height: 36px; padding: 0 14px 0 12px;
-  border: 1px solid var(--bz-hairline); border-radius: 999px; background: transparent; color: var(--bz-text-2);
-  font-size: 13px; font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer;
-  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
-}
-.chip-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--bz-category-color); }
-.chip-dot.all { background: conic-gradient(#ff6a13, #f5a623, #34d399, #14b8a6, #3b82f6, #8b5cf6, #ff2e93, #ff6a13); }
-.filter-chip:hover { border-color: color-mix(in srgb, var(--bz-category-color, var(--bz-ink)) 45%, var(--bz-hairline)); color: var(--bz-ink); }
-.filter-chip[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--bz-category-color) 55%, transparent);
-  background: color-mix(in srgb, var(--bz-category-color) 14%, transparent); color: var(--bz-ink);
-}
-/* 「全部」没有分类色：选中时只比轨道亮一档 */
-.filter-chip.all[aria-pressed="true"] { border-color: color-mix(in srgb, var(--bz-ink) 20%, transparent); background: color-mix(in srgb, var(--bz-ink) 9%, transparent); }
-.bot-count { flex: none; font-size: 13px; color: var(--bz-text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
-.toolbar-search { width: 280px; height: 43px; font-size: 14px; }
 
-/* ---------- 6. 列表和卡片 ---------- */
-.bot-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
-.grid-enter { animation: bz-grid-enter 200ms ease; }
-@keyframes bz-grid-enter { from { opacity: .35; } to { opacity: 1; } }
-.bot-card {
-  position: relative; container-type: inline-size; display: flex; flex-direction: column; min-width: 0;
-  border: 1px solid var(--bz-hairline); border-radius: var(--bz-radius-card); background: var(--bz-card-bg);
-  box-shadow: var(--bz-highlight), var(--bz-card-shadow); transition: border-color 150ms ease-in-out;
-}
-/* 悬停层：左上角一团 Bot 色径向光，叠在自上而下的柔光上；卡片本身不位移、不缩放。 */
-.bot-card::after {
-  content: ''; position: absolute; inset: 0; z-index: 0; border-radius: calc(var(--bz-radius-card) - 1px); pointer-events: none; opacity: 0;
-  background-image: radial-gradient(120% 150% at 0% 0%, color-mix(in srgb, var(--bz-bot-color) 20%, transparent), transparent 62%),
-    radial-gradient(100% 100% at 50% 0%, var(--bz-hover-from) 0%, var(--bz-hover-to) 150%);
-  transition: opacity 150ms ease-in-out;
-}
-@media (hover: hover) {
-  .bot-card:hover { border-color: color-mix(in srgb, var(--bz-bot-color) 45%, var(--bz-hairline)); }
-  .bot-card:hover::after { opacity: 1; }
-  .bot-card:hover .bz-tile::before { opacity: 1; }
-}
-/* 触摸点开气泡、键盘聚焦头像时也亮起来 */
-.bot-card:has(.pitch-bubble[data-open="true"]) { border-color: color-mix(in srgb, var(--bz-bot-color) 45%, var(--bz-hairline)); }
-.bot-card:has(.pitch-bubble[data-open="true"])::after { opacity: 1; }
-.bot-card-body {
-  position: relative; z-index: 1; flex: 1; display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; grid-template-rows: auto 1fr auto;
-  grid-template-areas: "avatar head import" "pitch pitch pitch" "stats stats prompt";
-  gap: 16px; align-items: center; padding: 28px;
-}
-.bot-card .avatar-root, .bot-card .bot-actions { display: contents; }
-.bot-card .avatar-stage { grid-area: avatar; align-self: start; }
-.avatar-stage { --bz-avatar-size: 56px; width: 64px; height: 64px; border-radius: 16px; }
-.bot-avatar { display: block; width: var(--bz-avatar-size); height: var(--bz-avatar-size); border-radius: 50%; cursor: pointer; transform-origin: center bottom; -webkit-tap-highlight-color: transparent; }
-.shelf-page .bot-avatar:focus-visible { outline-offset: 3px; }
-.bot-avatar img, .bot-avatar svg { display: block; width: 100%; height: 100%; }
+/* ---------- 6. 活体跳动和旧标签：列表和卡片在 styles/home.css，详情页在 styles/detail.css ---------- */
 .bot-avatar.is-speaking, .hero-bot.is-speaking { animation: bz-bounce 560ms var(--bz-ease-pop); }
 @keyframes bz-bounce {
   0%, 100% { transform: translateY(0) scale(1, 1); }
@@ -389,42 +293,7 @@
   54% { transform: translateY(-10px) scale(.96, 1.05); }
   80% { transform: translateY(0) scale(1.02, .98); }
 }
-.bot-head { grid-area: head; min-width: 0; }
-.bot-card h2 { font-size: 17px; font-weight: 700; line-height: 1.35; letter-spacing: -.005em; }
-.bot-card h2 a { display: block; }
-.bot-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; font-size: 13px; color: var(--bz-text-3); line-height: 1.6; }
-.bot-card .bot-meta { margin-top: 6px; }
-.bot-meta a, .bot-author { color: var(--bz-text-3); font-size: 13px; }
 .bot-tag { display: inline-flex; align-items: center; min-height: 22px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--bz-bot-color, #8a8a93) 14%, var(--bz-card)); color: var(--bz-text-2); font-size: 12px; font-weight: 600; line-height: 20px; white-space: nowrap; }
-.category-tag { background: color-mix(in srgb, var(--bz-category-color) 16%, var(--bz-card)); color: color-mix(in srgb, var(--bz-category-color) 40%, var(--bz-ink)); }
-.external-tag { background: var(--bz-surface-soft); }
-.bot-card .bot-tagline { grid-area: pitch; align-self: start; min-height: 62px; transition: opacity 120ms ease; }
-.bot-card-body:has(.pitch-bubble[data-open="true"]) > .bot-tagline { opacity: 0; }
-.bot-stats { grid-area: stats; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 16px; min-width: 0; min-height: 24px; }
-.bot-heat, .bot-stat { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; line-height: 22px; color: var(--bz-text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.bot-heat svg, .bot-stat svg { flex: none; }
-.bot-heat.is-loading { opacity: .65; }
-.bot-heat svg.is-hot { color: var(--bz-flame); }
-.stat-quota[data-quota="低"] svg { color: var(--bz-quota-low); }
-.stat-quota[data-quota="中"] svg { color: var(--bz-quota-mid); }
-.stat-quota[data-quota="高"] svg { color: var(--bz-quota-high); }
-.bot-actions { display: flex; flex-wrap: wrap; gap: 10px; }
-/* 贴着第一行顶部、和 64px 的砖垂直居中；名字换行时按钮不跟着往下掉 */
-.bot-card .action-import { grid-area: import; justify-self: end; align-self: start; margin-top: 12px; }
-.bot-card .action-prompt { grid-area: prompt; justify-self: end; }
-.bot-card .bot-actions-note { grid-column: 1 / -1; }
-/* 卡片自己变窄时（手机、投稿预览）：导入按钮挪到底部，和复制按钮并排 */
-@container (max-width: 399px) {
-  .bot-card-body { grid-template-columns: 64px minmax(0, 1fr); grid-template-rows: auto 1fr auto auto; grid-template-areas: "avatar head" "pitch pitch" "stats stats" "actions actions"; gap: 14px; padding: 20px; }
-  .bot-card .bot-actions { display: flex; grid-area: actions; }
-  .bot-card .bot-actions > .shelf-button { flex: 1 1 auto; align-self: auto; margin-top: 0; padding-inline: 14px; }
-}
-@container (max-width: 479px) { .stat-permissions { display: none; } }
-
-/* 页尾：一条细线、一句话、再给一次投稿入口 */
-.shelf-footer { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; margin-top: 96px; padding-top: 40px; border-top: 1px solid var(--bz-hairline); text-align: center; }
-.shelf-footer p { font-size: 14px; line-height: 1.6; color: var(--bz-text-3); }
-.shelf-footer .shelf-button.contribute { margin-top: 16px; }
 
 /* ---------- 7. 台词气泡（漫画风：实底、粗描边、Bot 色硬投影） ---------- */
 .shelf-page .pitch-bubble {
@@ -436,8 +305,6 @@
   transform: translateY(-5px) scale(.94); transform-origin: 32px top;
   transition: opacity 120ms ease, transform 120ms ease, visibility 0s 120ms;
 }
-/* 卡片里：盖在介绍那一块上，尖角朝上指着头像 */
-.bot-card .pitch-bubble { grid-area: pitch; align-self: start; justify-self: start; }
 .typing { display: flex; align-items: center; justify-content: center; gap: 4px; height: 20.3px; }
 .typing > i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; animation: bz-typing 600ms ease-in-out infinite alternate; }
 .typing > i:nth-child(2) { animation-delay: 100ms; }
@@ -454,112 +321,16 @@
 .shelf-page .prompt-fallback h2 { margin: 0 0 12px; font-size: 20px; line-height: 1.4; }
 .prompt-fallback p { font-size: 14px; line-height: 1.7; color: var(--bz-text-2); }
 .prompt-fallback textarea { display: block; width: 100%; margin: 16px 0; padding: 12px; resize: vertical; border: 1px solid var(--bz-border); border-radius: 10px; background: var(--bz-surface-soft); color: var(--bz-ink); font: inherit; font-size: 14px; line-height: 1.7; }
-.empty-state { padding: 56px 16px; border: 1px dashed var(--bz-border); border-radius: var(--bz-radius-card); background: var(--bz-glass); text-align: center; }
-.empty-state > svg { margin: auto; }
-.shelf-page .empty-state p { margin: 20px 0; font-size: 18px; color: var(--bz-text-2); }
 .shelf-page.not-found { display: flex; flex-direction: column; align-items: center; padding-block: 72px 120px; text-align: center; }
 .not-found-stage { width: 232px; height: 232px; margin-bottom: 36px; border-radius: 52px; }
 .not-found-stage svg { display: block; width: 168px; height: 168px; }
 .not-found h1 { font-size: 36px; font-weight: 700; line-height: 1.3; }
 .shelf-page.not-found p { margin: 14px 0 28px; font-size: 16px; color: var(--bz-text-2); }
 
-/* ---------- 9. 详情页 ---------- */
-.bot-detail { padding-inline: max(var(--bz-gutter), calc((100% - 920px) / 2)); }
-.back-link { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px 0 12px; border: 1px solid var(--bz-hairline); border-radius: 999px; background: var(--bz-glass); box-shadow: var(--bz-highlight); color: var(--bz-text-2); font-size: 13px; font-weight: 600; transition: color 150ms ease, border-color 150ms ease; }
-.back-link:hover { border-color: var(--bz-border); }
-/* 头部上方留出气泡的位置，气泡不会盖住「返回货架」 */
-.detail-header { position: relative; isolation: isolate; display: flex; align-items: center; gap: 40px; margin: 68px 0 48px; }
-/* Bot 色的一团柔光垫在舞台后面：伪元素，不是文字祖先的背景 */
-.detail-header::before {
-  content: ''; position: absolute; z-index: -1; left: -120px; top: -110px; width: 440px; height: 420px; pointer-events: none;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--bz-bot-color) 22%, transparent), transparent);
-}
-.detail-header .avatar-root { position: relative; flex: none; }
-.detail-header .avatar-stage { --bz-avatar-size: 160px; width: 200px; height: 200px; border-radius: 44px; }
-.detail-header .pitch-bubble {
-  position: absolute; left: 50%; bottom: calc(100% - 10px); width: max-content; max-width: min(260px, 100vw - 48px);
-  translate: -50% 0; transform: translateY(6px) scale(.92); transform-origin: center bottom;
-}
-.detail-header .pitch-bubble::after { left: calc(50% - 6px); top: auto; bottom: -8px; transform: rotate(45deg); }
-.detail-info { min-width: 0; flex: 1; }
-.detail-info h1, .detail-info > h2 { font-size: 40px; font-weight: 700; line-height: 1.2; letter-spacing: -.01em; text-wrap: balance; }
-.detail-info > p { margin-top: 12px; font-size: 18px; line-height: 1.6; color: var(--bz-text-2); }
-.detail-info > .bot-meta { margin: 18px 0 0; gap: 6px 14px; font-size: 13px; color: var(--bz-text-3); }
-.detail-info .bot-actions { margin-top: 24px; }
-.detail-info .bot-actions > .shelf-button { flex: 0 0 auto; }
-.detail-info [data-testid="forked-from"] { margin-top: 10px; font-size: 14px; }
-.bot-detail > section, .shelf-page .external-notice {
-  padding: 26px 32px; border: 1px solid var(--bz-hairline); border-radius: var(--bz-radius-card);
-  background: var(--bz-glass); box-shadow: var(--bz-highlight);
-}
-.bot-detail > section + section { margin-top: 16px; }
-.shelf-page .external-notice { margin-bottom: 16px; padding-block: 16px; color: var(--bz-text-2); line-height: 1.8; }
-.bot-detail section > h2 { margin-bottom: 14px; font-size: 20px; font-weight: 600; line-height: 1.4; }
-.bot-detail section p, .bot-detail section li { line-height: 1.8; color: var(--bz-text-2); }
-.bot-detail section a:not(.screenshot-link), .detail-info [data-testid="forked-from"] a { color: var(--bz-ink); text-decoration: underline; }
-.bot-detail section a:hover { color: var(--bz-ink-hover); }
-.bot-detail ul { padding-left: 22px; list-style: disc; }
-.bot-detail li + li { margin-top: 8px; }
-.quota-line { display: flex; align-items: center; gap: 10px; }
-.quota-tag { flex: none; color: var(--bz-quota-color); background: color-mix(in srgb, var(--bz-quota-color) 12%, transparent); }
-.quota-tag[data-quota="低"] { --bz-quota-color: var(--bz-quota-low); }
-.quota-tag[data-quota="中"] { --bz-quota-color: var(--bz-quota-mid); }
-.quota-tag[data-quota="高"] { --bz-quota-color: var(--bz-quota-high); }
-.bot-detail .permission-list, .bot-detail .skill-list { list-style: none; padding: 0; }
-.permission-list li { display: flex; align-items: baseline; gap: 12px; }
-.permission-list .bot-tag { flex: none; }
-.bot-screenshots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.screenshot-link { display: block; min-width: 0; }
-.screenshot-link img, .screenshot-error { width: 100%; aspect-ratio: 16 / 10; object-fit: contain; border-radius: 12px; border: 1px solid var(--bz-border); background: var(--bz-surface-soft); }
-.screenshot-error { display: flex; align-items: center; justify-content: center; color: var(--bz-text-3); }
-.screenshot-caption { display: block; margin-top: 8px; font-size: 13px; color: var(--bz-text-3); }
-.skill-list li { padding: 18px 20px; border: 1px solid color-mix(in srgb, var(--bz-bot-color) 30%, var(--bz-border)); border-radius: 12px; background: color-mix(in srgb, var(--bz-bot-color) 5%, transparent); }
-.skill-list code { font-family: var(--vp-font-family-mono); font-weight: 600; color: var(--bz-ink); }
-.skill-list p { margin: 8px 0 12px; }
-.skill-list a, [data-testid="section-routines"] > a { font-size: 14px; }
-.design-body { max-width: 720px; min-width: 0; }
-.design-body img { max-width: 100%; height: auto; border-radius: 12px; }
-.design-body pre { max-width: 100%; overflow-x: auto; }
-/* 设计说明里的小标题比区块标题低一级 */
-.shelf-page .design-body h2 { margin: 28px 0 12px; padding-top: 24px; border-top-color: var(--bz-hairline); font-size: 17px; font-weight: 600; line-height: 1.5; letter-spacing: 0; }
-.shelf-page .design-body > h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
-.shelf-page .design-body h3 { margin: 20px 0 6px; font-size: 15px; font-weight: 600; line-height: 1.6; color: var(--bz-ink); }
-.shelf-page .design-body p { margin: 10px 0; }
-
-/* ---------- 10. 投稿预览复用卡片和详情：把旧版式留下的偏移归零 ---------- */
-.submit-preview .bot-card.bot-card { padding: 0; }
-.submit-preview .bot-card .bot-card-body .avatar-stage { margin: 0; }
-.submit-preview .bot-detail .detail-header { margin-top: 64px; }
-.submit-preview .detail-header .avatar-root { align-self: center; }
-.submit-preview .detail-header::before { left: calc(50% - 220px); }
-.submit-preview .bot-detail > section { padding: 18px 20px; }
-
 /* ---------- 11. 响应式 ---------- */
 @media (max-width: 1099px) {
   .hero-portraits { --bz-hero-tile: 96px; --bz-hero-gap: 16px; }
   .hero-portrait { border-radius: 22px; }
-  .featured-grid { gap: 20px; }
-  .featured-card { padding: 28px 22px; }
-  .shelf-toolbar { flex-wrap: wrap; row-gap: 16px; }
-  .filter-chips { order: 3; flex: 1 0 100%; }
-  .bot-count { margin-left: auto; }
-  .toolbar-search { width: 240px; }
-}
-@media (max-width: 899px) {
-  .featured-grid, .bot-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .featured-card { padding: 32px; }
-  .toolbar-search { width: 44px; padding: 0; justify-content: center; }
-  .toolbar-search .search-trigger-text, .toolbar-search .search-trigger-keys { display: none; }
-}
-@media (max-width: 767px) {
-  .detail-header { flex-direction: column; align-items: stretch; gap: 24px; margin-bottom: 36px; }
-  .detail-header .avatar-root { align-self: center; }
-  .detail-header::before { left: calc(50% - 220px); }
-  .detail-info h1, .detail-info > h2 { font-size: 30px; }
-  .detail-info > p { font-size: 16px; }
-  .bot-detail > section { padding: 22px 20px; }
-  .shelf-page .external-notice { padding-inline: 20px; }
-  .bot-screenshots { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 679px) {
   .shelf-page { --bz-gutter: 16px; }
@@ -571,21 +342,13 @@
   .shelf-intro .hero-sub { margin-top: 16px; font-size: 18px; }
   .hero-search { margin-top: 28px; width: 100%; }
   .search-trigger-keys { display: none; }
-  .shelf-section { margin-top: 88px; }
-  .section-heading { margin-bottom: 40px; }
-  .section-heading h2 { font-size: 28px; }
-  .section-heading p { font-size: 15px; }
-  .shelf-toolbar { margin-top: 64px; gap: 12px; }
-  .shelf-footer { margin-top: 64px; }
   .sort-controls .shelf-button { padding-inline: 16px; }
-  .permission-list li { flex-wrap: wrap; gap: 4px 12px; }
 }
 @media (max-width: 359px) {
-  .detail-info .bot-actions > .shelf-button { flex: 1 0 100%; }
   .prompt-fallback { padding: 20px; }
 }
 @media (pointer: coarse) {
-  .shelf-button, .filter-chip, .back-link, .toolbar-search { min-height: 44px; }
+  .shelf-button { min-height: 44px; }
   .sort-controls { height: 52px; }
 }
 @media (prefers-reduced-motion: reduce) {

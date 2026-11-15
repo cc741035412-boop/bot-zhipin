@@ -11,11 +11,17 @@ import { botPalette, categoryStyle } from '../color'
 import BotAvatar from './BotAvatar.vue'
 import BotActions from './BotActions.vue'
 import BotHeat from './BotHeat.vue'
+import BzIcon from './BzIcon.vue'
 import ExternalHint from './ExternalHint.vue'
 const props = defineProps({ bot: { type: Object, required: true } })
 // 投稿预览里的数据可能还没通过校验，元信息只在取值像样时才显示。
 const quota = computed(() => typeof props.bot.quotaCost === 'string' ? props.bot.quotaCost : '')
-const permissions = computed(() => Array.isArray(props.bot.permissions) ? props.bot.permissions.length : 0)
+const permissions = computed(() => Array.isArray(props.bot.permissions) ? props.bot.permissions : null)
+// 门槛从权限现算：要连外部账号或借浏览器登录态的，算「要连账号」；带定时运行的，算「会自己跑」。
+const needsAccount = computed(() => !!permissions.value?.some((item) => item === '外部账号' || item === '浏览器 Cookie'))
+const selfRunning = computed(() => !!permissions.value?.includes('定时自动运行'))
+// 来源：外部收录的写进作者行（官方市场 / 社区收录）；作者自己投稿的在名字右边挂「作者投稿」标签。
+const origin = computed(() => props.bot.external ? (props.bot.official ? '官方市场' : '社区收录') : '')
 </script>
 
 <template>
@@ -24,25 +30,25 @@ const permissions = computed(() => Array.isArray(props.bot.permissions) ? props.
     <div class="bot-card-body">
       <BotAvatar v-if="active" ref="avatar" :bot="bot" whole-card />
       <div class="bot-head">
-        <h2><a data-testid="detail-link" :href="preview ? '#submit-preview-detail' : bot.detailUrl" :target="preview ? '_self' : undefined" @click="preview && ($event.preventDefault(), showDetail())">{{ bot.name }}</a></h2>
-        <div class="bot-meta">
-          <span class="bot-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
-          <span v-if="bot.external" class="bot-tag external-tag">{{ bot.official ? '官方市场' : '外部收录' }}</span>
+        <div class="bot-title">
+          <h3 class="bot-name"><a data-testid="detail-link" :href="preview ? '#submit-preview-detail' : bot.detailUrl" :target="preview ? '_self' : undefined" @click="preview && ($event.preventDefault(), showDetail())">{{ bot.name }}</a></h3>
+          <span v-if="!bot.external" class="bz-tag source-tag">作者投稿</span>
+        </div>
+        <p class="bot-byline">
           <span v-if="preview" class="bot-author">by {{ bot.author.name }}</span>
           <a v-else data-testid="author-link" class="bot-author" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
-        </div>
+          <span v-if="origin" class="bot-origin">· {{ origin }}</span>
+        </p>
       </div>
       <p class="bot-tagline">{{ bot.tagline }}</p>
       <div class="bot-stats">
-        <BotHeat :slug="bot.slug" />
-        <span v-if="quota" class="bot-stat stat-quota" :data-quota="quota">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M13.5 2.5 5 13.5h6L10.5 21.5 19 10.5h-6l.5-8Z" /></svg>额度 {{ quota }}
-        </span>
-        <span class="bot-stat stat-permissions">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5.5c0 4.2 2.9 7.6 7 9 4.1-1.4 7-4.8 7-9V6l-7-3Z" /><path d="m9.2 12 2 2 3.6-4" /></svg>{{ permissions ? `${permissions} 项权限` : '无需权限' }}
-        </span>
+        <span class="bz-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
+        <span v-if="quota" class="bot-stat stat-quota" :data-quota="quota"><BzIcon name="bolt" />额度 {{ quota }}</span>
+        <span v-if="permissions" class="bot-stat stat-account"><BzIcon :name="needsAccount ? 'plug' : 'plug-off'" />{{ needsAccount ? '要连账号' : '不用连账号' }}</span>
+        <span v-if="selfRunning" class="bot-stat stat-auto"><BzIcon name="clock" />会自己跑</span>
+        <BotHeat :slug="bot.slug" compact />
       </div>
-      <BotActions :bot="bot" />
+      <BotActions :bot="bot" compact />
     </div>
   </article>
 </template>
