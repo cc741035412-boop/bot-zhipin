@@ -14,13 +14,26 @@ const model = (extra = {}) => ({
 })
 it('摘要完整字段和默认值稳定', () => {
   expect(summarizeBot(model())).toEqual({
-    slug: 'demo', name: '示例', tagline: '一句真实介绍', category: undefined,
+    slug: 'demo', name: '示例', nameZh: null, tagline: '一句真实介绍', category: undefined,
     author: { name: '作者', github: 'demo', url: null, link: 'https://github.com/demo' },
     templateUrl: 'https://x.ai/bot/demo', addedAt: undefined, prerequisites: ['无'], quotaCost: undefined,
     permissions: [], needsAccount: false, selfRunning: false, pitch: null, pitches: [], about: null,
-    forkedFrom: null, forkedFromName: null, external: false, official: false,
+    forkedFrom: null, forkedFromName: null, forkedFromNameZh: null, external: false, official: false,
     avatar: null, screenshots: [], skills: [], hasRoutines: false, routinesUrl: null, detailUrl: '/bots/demo',
   })
+})
+it('中文叫法：name 始终是原名，nameZh 写了才有；类型不对（投稿预览里可能没过校验）当作没写', () => {
+  expect(summarizeBot(model({ name: 'Idea Stress Test', nameZh: '点子拆解员' }))).toMatchObject({ name: 'Idea Stress Test', nameZh: '点子拆解员' })
+  for (const nameZh of [undefined, null, '', 123, ['点子拆解员'], { zh: '点子拆解员' }]) {
+    expect(summarizeBot(model({ name: 'Idea Stress Test', nameZh })), JSON.stringify(nameZh)).toMatchObject({ name: 'Idea Stress Test', nameZh: null })
+  }
+})
+it('改编自：原 Bot 的原名和中文叫法各走各的映射，没有中文叫法是 null', () => {
+  const names = new Map([['original', 'Original Bot'], ['plain', '原作']])
+  const namesZh = new Map([['original', '原版助理'], ['plain', undefined]])
+  expect(summarizeBot(model({ forkedFrom: 'original' }), { names, namesZh })).toMatchObject({ forkedFromName: 'Original Bot', forkedFromNameZh: '原版助理' })
+  expect(summarizeBot(model({ forkedFrom: 'plain' }), { names, namesZh })).toMatchObject({ forkedFromName: '原作', forkedFromNameZh: null })
+  expect(summarizeBot(model({ forkedFrom: 'original' }), { names })).toMatchObject({ forkedFromName: 'Original Bot', forkedFromNameZh: null })
 })
 it.each([
   ['官方市场外部收录', true, 'https://x.ai/bot/marketplace/bots/demo', true],
@@ -35,8 +48,9 @@ it.each([
 it('没有策展和小队时，wrapper 等于共享摘要加默认装饰（所有现有 Bot 和 fixtures 逐字相同）', () => {
   for (const bots of [readBots(), loadAllBots('tests/fixtures/bots')]) {
     const names = new Map(bots.map((bot) => [bot.slug, bot.data.name]))
+    const namesZh = new Map(bots.map((bot) => [bot.slug, bot.data.nameZh]))
     expect(JSON.stringify(botSummaries(bots, { squads: [], curation: {} })))
-      .toBe(JSON.stringify(bots.map((bot) => ({ ...summarizeBot(bot, { names }), editorNote: null, pick: null, squads: [] }))))
+      .toBe(JSON.stringify(bots.map((bot) => ({ ...summarizeBot(bot, { names, namesZh }), editorNote: null, pick: null, squads: [] }))))
   }
 })
 it('作者主页优先于模板，GitHub 优先于主页', () => {
@@ -163,6 +177,10 @@ it('fixtures 的货架数据：装饰来自策展和小队文件', () => {
   expect(by['demo-prd-reviewer'].about.does).toHaveLength(3)
   expect(by['demo-weekly-digest']).toMatchObject({ pick: 0, editorNote: null, selfRunning: true, about: null, pitches: [] })
   expect(by['demo-external']).toMatchObject({ pick: null, editorNote: null, pitch: '我是外面请来的，链接点开就能用。' })
+  // 三个示例里只有外部收录那个带中文叫法；另外两个名字本来就是中文，nameZh 是 null。
+  expect(by['demo-external']).toMatchObject({ name: 'Demo External Helper', nameZh: '示例·外部收录' })
+  expect(by['demo-prd-reviewer']).toMatchObject({ name: '示例·PRD 评审员', nameZh: null })
+  expect(by['demo-weekly-digest']).toMatchObject({ forkedFromName: '示例·PRD 评审员', forkedFromNameZh: null })
   expect(by['demo-external'].pitches).toHaveLength(2)
   expect(by['demo-external'].about.routines).toEqual([
     { what: '检查资料有没有更新', when: '每天早上 9 点', default: '关', quiet: '不打扰' },

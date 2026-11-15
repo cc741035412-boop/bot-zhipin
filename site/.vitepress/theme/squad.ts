@@ -1,5 +1,6 @@
 // 小队的排版计算：合影里谁站哪、流程图里节点和连线怎么摆。
 // 全是纯函数，不碰 DOM：服务端渲染、浏览器、单测算出来的结果一样。
+import { displayName } from '../../../scripts/lib/bot-name.mjs'
 
 export const YOU = 'you'
 
@@ -98,12 +99,15 @@ export function lineup(members: readonly LineupMember[], formation: string, vari
   }
 }
 
-/** 小队卡上的那行名单：有队长写「队长 名字 · 专员 N 个」（「队长」取它在队里的岗位名），没有就把名字连起来。 */
-export function rosterLine(members: readonly { name: string; title?: string | null; lead?: boolean }[]): string {
+/**
+ * 小队卡上的那行名单：有队长写「队长 名字 · 专员 N 个」（「队长」取它在队里的岗位名），没有就把名字连起来。
+ * 名字是界面上叫它的那个：有中文叫法用中文叫法。这一行是一句纯文字，不带原名。
+ */
+export function rosterLine(members: readonly { name: string; nameZh?: string | null; title?: string | null; lead?: boolean }[]): string {
   const lead = members.find((member) => member.lead)
-  if (!lead) return members.map((member) => member.name).join(' · ')
+  if (!lead) return members.map((member) => displayName(member)).join(' · ')
   const rest = members.length - 1
-  return `${lead.title || '队长'} ${lead.name}${rest > 0 ? ` · 专员 ${rest} 个` : ''}`
+  return `${lead.title || '队长'} ${displayName(lead)}${rest > 0 ? ` · 专员 ${rest} 个` : ''}`
 }
 
 /* ---------------------------------------------------------------- 流程图 */

@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: pitch-deck-coach
 name: "Pitch Deck Coach"
+nameZh: "路演稿教练"
 tagline: "像投资人一样读完你的融资路演稿，指出哪里不信、哪里记不住"
 category: 产品
 author:

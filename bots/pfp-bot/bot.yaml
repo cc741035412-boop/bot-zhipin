@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: pfp-bot
 name: "Pfp Bot"
+nameZh: "头像画师"
 tagline: "把你或宠物的照片画成 Grok Bot 风格的小头像"
 category: 生活
 author:

@@ -46,6 +46,8 @@ export function syncAssets({ botsDir = BOTS_DIR, squadsDir = squadsDirFor(botsDi
     index: bots.map(({ slug, data }) => ({
       slug, name: data.name, templateUrl: data.templateUrl, authorGithub: data.author?.github || null,
       addedAt: data.addedAt, external: data.external === true,
+      // 中文叫法只在写了的时候带上（投稿预览里「改编自」那一行用）
+      ...(typeof data.nameZh === 'string' && data.nameZh ? { nameZh: data.nameZh } : {}),
     })).sort((a, b) => a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0),
     template: { files: Object.fromEntries(template.files.filter((file) => file.text !== null && /\.(?:yaml|md)$/.test(file.path))
       .map((file) => [relative(template.dir, file.path).split('\\').join('/'), file.text])) },

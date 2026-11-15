@@ -4,7 +4,7 @@
 
 - `demo-prd-reviewer`（分组：产品）：完整的普通 Bot，有头像、一句 pitch、`about`（介绍、能做的事、第一句话、适合谁）、两个技能、定时任务
 - `demo-weekly-digest`（分组：内容）：没有头像、pitch 和 `about`，有两张截图，`forkedFrom: demo-prd-reviewer`
-- `demo-external`（分组：管家）：外部收录（`external: true`），只有 bot.yaml；有两句 pitch，`about` 里带自带技能和定时任务
+- `demo-external`（分组：管家）：外部收录（`external: true`），只有 bot.yaml；有两句 pitch，`about` 里带自带技能和定时任务。三个里只有它的名字是英文（`name: Demo External Helper`，写满 20 个字符）并带中文叫法（`nameZh: 示例·外部收录`），用来测「中文叫法为主、原名跟在后面」
 
 旁边两个目录是配套的小队和策展：
 

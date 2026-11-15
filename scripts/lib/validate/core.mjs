@@ -3,6 +3,7 @@ import { validateContent, validateTemplate } from './content.mjs'
 import { validateImages } from './images.mjs'
 import { redact, scanSecrets } from './secrets.mjs'
 import { botYamlSizeError } from '../yaml-limits.mjs'
+import { hasChinese } from '../bot-name.mjs'
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -70,6 +71,10 @@ export function validateModels(bots, { template, now = new Date(), others = [], 
       const data = bot.data
       if (typeof data.slug === 'string' && data.slug !== bot.slug) report(bot.yamlPath, 'slug', `slug ${data.slug} 和文件夹名不一致（文件夹是 ${bot.slug}）`, `将 slug 改为 ${bot.slug}，或把文件夹改成与 slug 一致的合法名称。`)
       validateDate(bot, now, report)
+      // 中文叫法里得有汉字；长度、类型、禁用字符由 schema 报告。
+      if (typeof data.nameZh === 'string' && data.nameZh && !hasChinese(data.nameZh)) {
+        report(bot.yamlPath, 'nameZh', `nameZh 当前值 ${JSON.stringify(data.nameZh)} 里没有中文`, 'nameZh 填中文叫法，比如「点子拆解员」；不需要中文叫法就删掉这一行，页面会直接用 name。')
+      }
       if (policy.submission) {
         if (data.external === true) report(bot.yamlPath, 'external', '网站投稿不允许 external: true', '删除 external 字段；外部收录只能由维护者处理。')
         if (typeof data.author?.github !== 'string' || data.author.github.toLowerCase() !== String(policy.submission.login).toLowerCase()) {

@@ -17,6 +17,7 @@
 | `scripts/lib/load-bots.mjs` | 读取 bots/ 的共享代码（只读不校验） | 维护者，改了影响校验器和网站 |
 | `scripts/lib/load-squads.mjs`、`load-curation.mjs` | 读取小队和策展（只读不校验，不跟随符号链接）；目录怎么定见下面「约定」 | 维护者 |
 | `scripts/lib/bot-summary.mjs`、`squad-summary.mjs`、`curation-summary.mjs` | 网站用的数据形状，纯函数：Bot 摘要及其装饰、小队摘要、策展整理 | 维护者，改了影响所有页面 |
+| `scripts/lib/bot-name.mjs` + `site/.vitepress/theme/components/BotName.vue` | Bot 怎么称呼：`name` 是原名，`nameZh` 是可选的中文叫法。`displayName` / `originalName` / `fullName` 三个纯函数定规矩（构建脚本和页面共用），`BotName.vue` 负责画（中文叫法为主、原名跟在后面）。页面上要写 Bot 名字一律用它，规格见 `INTERACTION.md` §3.4 | 维护者 |
 | `scripts/validate.mjs` + `scripts/lib/validate/` | `npm run validate`：Bot + 小队 + 策展的全量校验；`validate/squads.mjs` 是小队和策展的校验内核 | 维护者 |
 | `scripts/gen-schema-validator.mjs` | `npm run gen:schema`：把三份 schema 各预编译成 `scripts/lib/validate/generated/<名字>-schema.mjs` | 维护者 |
 | `scripts/sync-assets.mjs` | 构建前把截图、头像复制到 `site/public/bot-assets/`，并生成 `site/public/api-data/slugs.json`、`squad-slugs.json` | 维护者 |
@@ -77,6 +78,8 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 | 字段 | 含义 |
 |---|---|
 | `category` | 分组，9 选 1（产品、市场、销售、内容、运营、学习、求职、管家、生活） |
+| `name` / `nameZh` | `name` 始终是原名；`nameZh` 是中文叫法，没写是 `null`。界面上叫它什么用 `displayName(bot)`（`scripts/lib/bot-name.mjs`），不要自己拼 |
+| `forkedFromName` / `forkedFromNameZh` | 「改编自」那个 Bot 的原名和中文叫法（没有是 `null`） |
 | `pitches` | 台词数组（没写是 `[]`）；`pitch` 保留，取第一句或 `null` |
 | `about` | **只在完整摘要里**，列表数据没有这个键。没写是 `null`；写了就是 `{ intro, does[], starters[], skills[{name, does}], routines[{what, when, default, quiet}], fit, notFit, cnFit, cnNote }`，缺的数组是 `[]`、缺的字符串是 `null` |
 | `needsAccount` | 权限里有「外部账号」或「浏览器 Cookie」 |
@@ -96,7 +99,7 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 |---|---|
 | `detailUrl` | `/squads/<slug>` |
 | `author.link` | GitHub 主页，没有就用 `author.url`，都没有是 `null` |
-| `members[]` | `{ bot, title, does, lead, optional }` 加上对应 Bot 摘要的 `name`、`tagline`、`category`、`detailUrl`、`templateUrl`、`quotaCost`、`permissions`、`prerequisites`、`avatar`、`needsAccount`、`selfRunning`；`bot` 是 slug |
+| `members[]` | `{ bot, title, does, lead, optional }` 加上对应 Bot 摘要的 `name`、`nameZh`、`tagline`、`category`、`detailUrl`、`templateUrl`、`quotaCost`、`permissions`、`prerequisites`、`avatar`、`needsAccount`、`selfRunning`；`bot` 是 slug |
 | `leader` | 队长的 slug，没有是 `null` |
 | `quota` | `{ max, perMember: [{ bot, quotaCost }] }`，`max` 是成员里最高的一档 |
 | `permissions` | 成员权限的并集：`[{ permission, bots: [slug] }]`，按 schema 枚举顺序 |
@@ -125,6 +128,7 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 - **小队和策展放在哪**：默认是仓库里的 `squads/` 和 `curation/shelf.yaml`。规则是「跟着 Bot 目录取兄弟目录」：`<Bot 目录的上级>/squads`、`<上级>/curation/shelf.yaml`，所以只设 `BOTS_DIR=tests/fixtures/bots` 就会一起用 fixtures 的小队和策展；要单独指定用环境变量 `SQUADS_DIR`、`CURATION_FILE`。目录或文件不存在就当空，不报错。
 - **引用必须落在货架上**：小队成员、策展里的 slug 都要是货架上的 Bot，`npm run validate` 会拦；下架一个被引用的 Bot 要同时改小队和策展。网站构建时再兜一层底：对不上的那一项丢掉并打印警告，成员不到 2 个的小队不出页面。
 - **分组**：字段名是 `category`，界面和文档里叫「分组」，意思是「这个 Bot 干的是哪一行」。一共 9 个：产品、市场、销售、内容、运营、学习、求职、管家、生活（决策 38）。取值和顺序只在 `schema/bot.schema.json`；颜色和吉祥物在 `theme/color.ts`，一句说明在 `meta.mjs` 的 `CATEGORY_COPY`，单测保证它们和枚举一个不多、一个不少。
+- **Bot 的名字**：`name` 是原名（和 x.ai 模板页上的一致，不翻译），`nameZh` 是可选的中文叫法（决策 41）。写了中文叫法的，全站以它称呼这个 Bot，原名跟在后面；排序、读屏、网页标题也按它来；搜索两个名字都认。规矩在 `scripts/lib/bot-name.mjs`，显示规格在 `INTERACTION.md` §3.4。新写页面时不要直接输出 `bot.name`，用 `BotName.vue` 或 `displayName()`。
 - **开发热更新**：`bot-watch.mjs` 同时监听 Bot 目录、小队目录和策展文件，哪一处变了都重启 dev server 刷新数据和动态路由。
 - 图片引用：`/bot-assets/<slug>/<文件名>`。
 - 不复制原站（fork 来源）的任何文字、图片和组件代码。

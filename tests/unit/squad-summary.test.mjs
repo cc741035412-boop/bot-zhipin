@@ -14,14 +14,14 @@ import { syncAssets } from '../../scripts/sync-assets.mjs'
 
 const enums = loadEnums()
 const bot = (slug, extra = {}) => ({
-  slug, name: `名字-${slug}`, tagline: `介绍-${slug}`, category: '产品', detailUrl: `/bots/${slug}`, templateUrl: `https://x.ai/bot/${slug}`,
+  slug, name: `名字-${slug}`, nameZh: null, tagline: `介绍-${slug}`, category: '产品', detailUrl: `/bots/${slug}`, templateUrl: `https://x.ai/bot/${slug}`,
   quotaCost: '低', permissions: [], prerequisites: ['无'], avatar: null, needsAccount: false, selfRunning: false,
   // 下面这些不该被带进成员里。
   author: { name: '作者' }, addedAt: '2026-11-01', about: null, pitches: [], screenshots: [], skills: [],
   ...extra,
 })
 const shelf = () => new Map([
-  bot('lead-bot', { quotaCost: '中', permissions: ['联网', '云电脑文件'], prerequisites: ['一个飞书账号', '无'], avatar: '/bot-assets/lead-bot/avatar.png' }),
+  bot('lead-bot', { nameZh: '带队的', quotaCost: '中', permissions: ['联网', '云电脑文件'], prerequisites: ['一个飞书账号', '无'], avatar: '/bot-assets/lead-bot/avatar.png' }),
   bot('second-bot', { quotaCost: '高', permissions: ['定时自动运行', '联网', '外部账号'], prerequisites: ['一份名单'], needsAccount: true, selfRunning: true, category: '市场' }),
   bot('third-bot'),
   bot('unused-bot', { quotaCost: '高', permissions: ['代我发消息'] }),
@@ -60,17 +60,17 @@ describe('小队摘要', () => {
     expect(summary((d) => { d.author = { name: '作者', url: 'https://example.com' } }).author).toEqual({ name: '作者', github: null, url: 'https://example.com', link: 'https://example.com' })
     expect(summary((d) => { d.author = { name: '作者' } }).author.link).toBe(null)
   })
-  it('成员并入对应 Bot 摘要的 11 个字段，不多带别的', () => {
+  it('成员并入对应 Bot 摘要的 12 个字段（含中文叫法），不多带别的', () => {
     const [lead, second, third] = summary().members
     expect(lead).toEqual({
       bot: 'lead-bot', title: '队长', does: '把活分给两位帮手', lead: true, optional: false,
-      name: '名字-lead-bot', tagline: '介绍-lead-bot', category: '产品', detailUrl: '/bots/lead-bot', templateUrl: 'https://x.ai/bot/lead-bot',
+      name: '名字-lead-bot', nameZh: '带队的', tagline: '介绍-lead-bot', category: '产品', detailUrl: '/bots/lead-bot', templateUrl: 'https://x.ai/bot/lead-bot',
       quotaCost: '中', permissions: ['联网', '云电脑文件'], prerequisites: ['一个飞书账号', '无'], avatar: '/bot-assets/lead-bot/avatar.png',
       needsAccount: false, selfRunning: false,
     })
-    expect(second).toMatchObject({ bot: 'second-bot', lead: false, optional: false, category: '市场', quotaCost: '高', needsAccount: true, selfRunning: true })
+    expect(second).toMatchObject({ bot: 'second-bot', nameZh: null, lead: false, optional: false, category: '市场', quotaCost: '高', needsAccount: true, selfRunning: true })
     expect(third).toMatchObject({ bot: 'third-bot', title: '替补', lead: false, optional: true })
-    for (const member of [lead, second, third]) expect(Object.keys(member)).toHaveLength(16)
+    for (const member of [lead, second, third]) expect(Object.keys(member)).toHaveLength(17)
   })
   it('leader 是队长的 slug；没有队长是 null', () => {
     expect(summary().leader).toBe('lead-bot')

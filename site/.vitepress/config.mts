@@ -2,6 +2,7 @@ import { defineConfig, type HeadConfig } from 'vitepress'
 import { SITE, CONTRIBUTE_URL } from './meta.mjs'
 import { generateHeaders } from '../../scripts/gen-headers.mjs'
 import { botWatch } from './bot-watch.mjs'
+import { fullName } from '../../scripts/lib/bot-name.mjs'
 
 export default defineConfig({
   lang: 'zh-CN',
@@ -21,13 +22,15 @@ export default defineConfig({
   async buildEnd(config) { await generateHeaders(config.outDir) },
   transformPageData(pageData) {
     // Bot 详情页和小队页都用自己的名字当标题、一句话介绍当 description。
+    // 有中文叫法的 Bot，标题是「中文叫法（原名）」：标签页上先看到中文，搜原名也搜得到。
     const bot = pageData.params?.bot || pageData.params?.squad
     if (bot) {
-      pageData.title = bot.name
+      const title = fullName(bot)
+      pageData.title = title
       // 客户端路由切换时 VitePress 用 setAttribute 写入它（安全）；服务端那行不转义的
       // description 会因下面 transformHead 已提供 description 而被跳过（isDescriptionOverridden）。
       pageData.description = bot.tagline
-      pageData.frontmatter.title = bot.name
+      pageData.frontmatter.title = title
       delete pageData.frontmatter.description
       pageData.frontmatter.head = [
         ...((pageData.frontmatter.head || []) as HeadConfig[]).filter(([tag, attrs]) => !(tag === 'meta' && attrs?.name === 'description')),

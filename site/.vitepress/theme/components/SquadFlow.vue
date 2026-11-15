@@ -5,6 +5,7 @@
 -->
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import BotName from './BotName.vue'
 import BotPortrait from './BotPortrait.vue'
 import SquadStill from './SquadStill.vue'
 import BzIcon from './BzIcon.vue'
@@ -14,7 +15,7 @@ import { nextPoke } from '../pitch'
 import { SQUAD_COPY } from '../../meta.mjs'
 import { FLOW_MIN_WIDTH, YOU, flowLayout, type FlowEdge } from '../squad'
 
-interface Member { bot: string; name: string; title: string | null; avatar: string | null; lead: boolean }
+interface Member { bot: string; name: string; nameZh?: string | null; title: string | null; avatar: string | null; lead: boolean }
 const props = defineProps<{ squad: { formation: string; members: Member[]; flow: { from: string; to: string; what: string | null }[] } }>()
 
 const root = ref<HTMLElement>()
@@ -27,7 +28,7 @@ const palette = (slug: string) => {
   const member = bySlug.value.get(slug)
   return member ? botPalette(member.avatar ? '#8a8a93' : avatarColor(slug)) : undefined
 }
-const portrait = (member: Member) => ({ slug: member.bot, name: member.name, avatar: member.avatar })
+const portrait = (member: Member) => ({ slug: member.bot, name: member.name, nameZh: member.nameZh, avatar: member.avatar })
 const nodes = computed(() => (layout.value?.nodes ?? []).map((node) => ({ ...node, member: bySlug.value.get(node.id) })))
 
 // 悬停某个节点：和它相连的线亮成它的颜色，其余变淡。
@@ -90,7 +91,7 @@ onBeforeUnmount(() => observer?.disconnect())
           <span class="flow-tile bz-tile bz-bot-scope" :style="palette(node.id)">
             <BotPortrait :ref="keep(node.id)" :bot="portrait(node.member)" :rest="hot === node.id ? 'wide' : 'idle'" />
           </span>
-          <span class="flow-caption"><b>{{ node.member.name }}</b><i v-if="node.member.title">{{ node.member.title }}</i></span>
+          <span class="flow-caption"><b><BotName :bot="node.member" short /></b><i v-if="node.member.title">{{ node.member.title }}</i></span>
         </template>
         <span v-else class="flow-you">{{ SQUAD_COPY.you }}</span>
       </div>
@@ -100,9 +101,9 @@ onBeforeUnmount(() => observer?.disconnect())
     <li v-for="(step, index) in steps" :key="index">
       <span class="flow-what">{{ step.what }}</span>
       <span class="flow-route">
-        <span class="flow-who"><SquadStill v-if="who(step.from)" :bot="portrait(who(step.from)!)" /><i v-else class="flow-you-dot" aria-hidden="true" />{{ who(step.from)?.name ?? SQUAD_COPY.you }}</span>
+        <span class="flow-who"><SquadStill v-if="who(step.from)" :bot="portrait(who(step.from)!)" /><i v-else class="flow-you-dot" aria-hidden="true" /><BotName v-if="who(step.from)" :bot="who(step.from)!" short /><template v-else>{{ SQUAD_COPY.you }}</template></span>
         <BzIcon name="arrow-right" :size="12" /><span class="bz-sr-only">交给</span>
-        <span class="flow-who"><SquadStill v-if="who(step.to)" :bot="portrait(who(step.to)!)" /><i v-else class="flow-you-dot" aria-hidden="true" />{{ who(step.to)?.name ?? SQUAD_COPY.you }}</span>
+        <span class="flow-who"><SquadStill v-if="who(step.to)" :bot="portrait(who(step.to)!)" /><i v-else class="flow-you-dot" aria-hidden="true" /><BotName v-if="who(step.to)" :bot="who(step.to)!" short /><template v-else>{{ SQUAD_COPY.you }}</template></span>
       </span>
     </li>
   </ol>

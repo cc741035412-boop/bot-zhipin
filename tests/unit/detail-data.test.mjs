@@ -34,8 +34,20 @@ describe('详情页的「同组的 Bot」', () => {
   })
   it('只带卡片要用的字段，不把 about 全文带进别人的页面', () => {
     expect(relatedBots(shelf, shelf[0])[0]).toEqual({
-      slug: 'picked-first', name: 'picked-first', avatar: '/bot-assets/picked-first/avatar.png', tagline: 'picked-first 的介绍', detailUrl: '/bots/picked-first',
+      slug: 'picked-first', name: 'picked-first', nameZh: null, avatar: '/bot-assets/picked-first/avatar.png', tagline: 'picked-first 的介绍', detailUrl: '/bots/picked-first',
     })
+  })
+  it('有中文叫法的带上中文叫法；同一天上架的按显示出来的名字排（有中文叫法按中文叫法）', () => {
+    const mixed = [
+      bot('self'),
+      // 原名 Zebra 排在后面，中文叫法「阿」排在前面：按显示的名字排，它应该在「波」前面。
+      bot('zebra', { name: 'Zebra', nameZh: '阿尔法助理' }),
+      bot('plain', { name: '波波' }),
+    ]
+    const related = relatedBots(mixed, mixed[0])
+    expect(related.map((item) => item.slug)).toEqual(['zebra', 'plain'])
+    expect(related[0]).toMatchObject({ name: 'Zebra', nameZh: '阿尔法助理' })
+    expect(related[1]).toMatchObject({ name: '波波', nameZh: null })
   })
   it('分组里只有自己时是空的', () => {
     expect(relatedBots(shelf, shelf[5])).toEqual([])
@@ -56,7 +68,10 @@ describe('详情页「所在小队」的成员小头像', () => {
   it('只给这个 Bot 所在的小队；队长排最前，其余按编制表的顺序', () => {
     const lineups = squadLineups(squads, { squads: [{ slug: 'alpha' }, { slug: 'beta' }] })
     expect(Object.keys(lineups)).toEqual(['alpha', 'beta'])
-    expect(lineups.alpha).toEqual([{ slug: 'a', name: '甲', avatar: '/a.png' }, { slug: 'b', name: '乙', avatar: null }, { slug: 'c', name: '丙', avatar: null }])
+    expect(lineups.alpha).toEqual([{ slug: 'a', name: '甲', nameZh: null, avatar: '/a.png' }, { slug: 'b', name: '乙', nameZh: null, avatar: null }, { slug: 'c', name: '丙', nameZh: null, avatar: null }])
+    // 成员有中文叫法时一起带上（自定义头像的替代文字用）
+    expect(squadLineups([{ slug: 'alpha', members: [{ bot: 'a', name: 'Alpha', nameZh: '阿尔法', avatar: null, lead: true }] }], { squads: [{ slug: 'alpha' }] }).alpha)
+      .toEqual([{ slug: 'a', name: 'Alpha', nameZh: '阿尔法', avatar: null }])
     expect(lineups.beta.map((member) => member.slug)).toEqual(['x', 'b'])
   })
   it('不在任何小队里时是空对象', () => {

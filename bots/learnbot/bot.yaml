@@ -1,6 +1,7 @@
 # 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: learnbot
 name: "LearnBot"
+nameZh: "术语讲解员"
 tagline: "每个工作日教你一个工程或 AI 术语，白话讲给非技术人"
 category: 学习
 author:

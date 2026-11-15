@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: ad-spend-watch
 name: "Ad Spend Watch"
+nameZh: "广告预算看守员"
 tagline: "盯广告花费和效果，超线就提醒并给出改法，不碰账户"
 category: 市场
 author:

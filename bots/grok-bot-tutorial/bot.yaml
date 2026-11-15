@@ -1,6 +1,7 @@
 # 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: grok-bot-tutorial
 name: "Grok Bot Tutorial"
+nameZh: "Grok Bot 入门教练"
 tagline: "20 节实操课，带新手一步步学会用 Grok Bot"
 category: 学习
 author:

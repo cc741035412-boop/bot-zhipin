@@ -7,6 +7,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import SquadLineup from './SquadLineup.vue'
 import SquadFlow from './SquadFlow.vue'
+import BotName from './BotName.vue'
 import BotPortrait from './BotPortrait.vue'
 import SquadStill from './SquadStill.vue'
 import BzIcon from './BzIcon.vue'
@@ -20,9 +21,11 @@ import { announce } from '../announce'
 import { nextPoke } from '../pitch'
 import { isReducedMotion } from '../live/clock'
 import { parseImported, squadStorageKey } from '../squad'
+// 读屏文本和悬停提示里怎么称呼成员：有中文叫法用中文叫法。
+import { displayName } from '../../../../scripts/lib/bot-name.mjs'
 
 interface Member {
-  bot: string; name: string; title: string | null; does: string | null; lead: boolean; optional: boolean
+  bot: string; name: string; nameZh?: string | null; title: string | null; does: string | null; lead: boolean; optional: boolean
   avatar: string | null; detailUrl: string; templateUrl: string; quotaCost: string
 }
 interface Squad {
@@ -45,7 +48,7 @@ const bySlug = computed(() => new Map(props.squad.members.map((member) => [membe
 const member = (slug: string) => bySlug.value.get(slug)!
 const leader = computed(() => props.squad.leader ? bySlug.value.get(props.squad.leader) ?? null : null)
 const palette = (item: Member) => botPalette(item.avatar ? '#8a8a93' : avatarColor(item.bot))
-const portrait = (item: Member) => ({ slug: item.bot, name: item.name, avatar: item.avatar })
+const portrait = (item: Member) => ({ slug: item.bot, name: item.name, nameZh: item.nameZh, avatar: item.avatar })
 const hasFlow = computed(() => props.squad.flow.some((step) => step.what))
 
 /* ---------- 已导入的成员：只在本机记住 ---------- */
@@ -185,7 +188,7 @@ onBeforeUnmount(() => {
             <BotPortrait :ref="keep(item.bot)" :bot="portrait(item)" :rest="hoveredRow === item.bot ? 'wide' : 'idle'" />
           </div>
           <div class="roster-who">
-            <h3 class="roster-name"><a data-testid="member-link" :href="item.detailUrl">{{ item.name }}</a></h3>
+            <h3 class="roster-name"><a data-testid="member-link" :href="item.detailUrl"><BotName :bot="item" /></a></h3>
             <span v-if="item.title" class="bz-tag" :class="{ solid: item.lead }" data-testid="member-title">{{ item.title }}</span>
             <span v-if="item.optional" class="bz-tag" data-testid="member-optional">{{ SQUAD_COPY.optional }}</span>
           </div>
@@ -193,7 +196,7 @@ onBeforeUnmount(() => {
           <a
             class="bz-btn sm roster-import" data-testid="member-import" :data-done="String(done(item.bot))"
             :href="item.templateUrl" target="_blank" rel="noopener noreferrer" @click="importMember(item.bot)"
-          ><BzIcon :name="done(item.bot) ? 'check' : 'arrow-up-right'" />{{ SQUAD_COPY.import }}<span class="bz-sr-only">{{ item.name }}（在新标签页打开）</span></a>
+          ><BzIcon :name="done(item.bot) ? 'check' : 'arrow-up-right'" />{{ SQUAD_COPY.import }}<span class="bz-sr-only">{{ displayName(item) }}（在新标签页打开）</span></a>
         </li>
         <li v-for="item in squad.missing" :key="`missing-${item.name}`" class="roster-row is-missing" data-testid="squad-missing">
           <div class="roster-tile bz-tile" aria-hidden="true"><SquadStill ghost shape="pebble" /></div>
@@ -233,13 +236,13 @@ onBeforeUnmount(() => {
               <li v-for="item in squad.members" :key="item.bot" class="setup-member bz-bot-scope" :class="{ 'is-done': done(item.bot) }" :style="palette(item)" data-testid="setup-member" :data-slug="item.bot">
                 <button
                   type="button" class="member-check" data-testid="member-check" :aria-pressed="done(item.bot)"
-                  :aria-label="`${item.name} ${SQUAD_COPY.importedLabel}`" @click="toggle(item.bot)"
+                  :aria-label="`${displayName(item)} ${SQUAD_COPY.importedLabel}`" @click="toggle(item.bot)"
                 ><BzIcon name="check" :size="12" /></button>
                 <SquadStill :bot="portrait(item)" />
-                <span class="setup-member-name">{{ item.name }}</span>
+                <span class="setup-member-name"><BotName :bot="item" small /></span>
                 <a
                   class="bz-btn sm ghost" data-testid="setup-import" :href="item.templateUrl" target="_blank" rel="noopener noreferrer" @click="importMember(item.bot)"
-                ><BzIcon name="arrow-up-right" />{{ SQUAD_COPY.import }}<span class="bz-sr-only">{{ item.name }}（在新标签页打开）</span></a>
+                ><BzIcon name="arrow-up-right" />{{ SQUAD_COPY.import }}<span class="bz-sr-only">{{ displayName(item) }}（在新标签页打开）</span></a>
               </li>
             </ul>
           </div>
@@ -251,7 +254,7 @@ onBeforeUnmount(() => {
           <div v-else class="step-body">
             <div class="squad-message" :data-testid="`squad-${step.kind}`">
               <header>
-                <span v-if="leader" class="message-to bz-bot-scope" :style="palette(leader)"><BzIcon name="send" /><SquadStill :bot="portrait(leader)" /><b>{{ leader.name }}</b></span>
+                <span v-if="leader" class="message-to bz-bot-scope" :style="palette(leader)"><BzIcon name="send" /><SquadStill :bot="portrait(leader)" /><b><BotName :bot="leader" short /></b></span>
                 <button type="button" class="bz-btn sm ghost" :class="{ copied: copied === step.kind }" :data-testid="`copy-${step.kind}`" @click="copyText(step.kind)">
                   <BzIcon :name="copied === step.kind ? 'check' : 'copy'" />{{ copied === step.kind ? SQUAD_COPY.copied : SQUAD_COPY.copy }}
                 </button>
@@ -275,7 +278,7 @@ onBeforeUnmount(() => {
           <ul class="cost-list">
             <li v-for="item in squad.quota.perMember" :key="item.bot" class="cost-row" :title="copy.quota[item.quotaCost]">
               <SquadStill :bot="portrait(member(item.bot))" />
-              <span class="cost-name">{{ member(item.bot).name }}</span>
+              <span class="cost-name"><BotName :bot="member(item.bot)" short /></span>
               <span class="squad-quota" :data-quota="item.quotaCost">
                 <span class="squad-quota-bars" aria-hidden="true"><i /><i /><i /></span>{{ item.quotaCost }}
                 <span v-if="copy.quota[item.quotaCost]" class="bz-sr-only">：{{ copy.quota[item.quotaCost] }}</span>
@@ -289,7 +292,7 @@ onBeforeUnmount(() => {
             <li v-for="item in squad.permissions" :key="item.permission" class="cost-row" :title="copy.permissions[item.permission]">
               <span class="cost-name">{{ item.permission }}<span v-if="copy.permissions[item.permission]" class="bz-sr-only">：{{ copy.permissions[item.permission] }}</span></span>
               <span class="cost-bots">
-                <span v-for="slug in item.bots" :key="slug" :title="member(slug).name"><SquadStill :bot="portrait(member(slug))" /><span class="bz-sr-only">{{ member(slug).name }}</span></span>
+                <span v-for="slug in item.bots" :key="slug" :title="displayName(member(slug))"><SquadStill :bot="portrait(member(slug))" /><span class="bz-sr-only">{{ displayName(member(slug)) }}</span></span>
               </span>
             </li>
           </ul>
@@ -299,7 +302,7 @@ onBeforeUnmount(() => {
           <h3>{{ SQUAD_COPY.prerequisites }}</h3>
           <ul class="prereq-list">
             <li v-for="entry in squad.prerequisites" :key="entry.bot">
-              <p class="prereq-who"><SquadStill :bot="portrait(member(entry.bot))" />{{ member(entry.bot).name }}</p>
+              <p class="prereq-who"><SquadStill :bot="portrait(member(entry.bot))" /><BotName :bot="member(entry.bot)" short /></p>
               <ul><li v-for="(item, index) in entry.items" :key="index">{{ item }}</li></ul>
             </li>
           </ul>

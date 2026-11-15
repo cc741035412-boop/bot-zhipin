@@ -94,6 +94,10 @@ describe('rosterLine：小队卡上的那行名单', () => {
   it('没有队长：把名字连起来', () => {
     expect(rosterLine([{ name: '甲' }, { name: '乙' }, { name: '丙' }])).toBe('甲 · 乙 · 丙')
   })
+  it('有中文叫法的用中文叫法，这一行不带原名', () => {
+    expect(rosterLine([{ name: 'Project Manager', nameZh: '项目经理', title: '队长', lead: true }, { name: 'A' }, { name: 'B' }])).toBe('队长 项目经理 · 专员 2 个')
+    expect(rosterLine([{ name: 'Clip Bot', nameZh: '短片剪辑师' }, { name: '下载专家', nameZh: null }])).toBe('短片剪辑师 · 下载专家')
+  })
 })
 
 const squad = (formation, members, flow) => ({ formation, members, flow })
@@ -283,7 +287,7 @@ describe('已导入的成员', () => {
 describe('searchSquads：搜索面板里的小队', () => {
   const squads = [
     { slug: 'one-person-marketing', name: '一个人的市场部', tagline: '一个项目经理带四个专员', formation: '带队', author: { name: 'Josh Kim' }, members: [{ name: 'Project Manager', title: '队长' }, { name: 'Website Ops', title: '官网' }] },
-    { slug: 'video-relay', name: '短视频流水线', tagline: '找选题、剪片子、出封面', formation: '接力', author: { name: '示例作者' }, members: [{ name: 'Clip Bot', title: '剪辑' }] },
+    { slug: 'video-relay', name: '短视频流水线', tagline: '找选题、剪片子、出封面', formation: '接力', author: { name: '示例作者' }, members: [{ name: 'Clip Bot', nameZh: '短片剪辑师', title: '剪辑' }] },
   ]
   const slugs = (list) => list.map((item) => item.slug)
   it('空查询按传入顺序返回，最多 limit 支', () => {
@@ -294,6 +298,8 @@ describe('searchSquads：搜索面板里的小队', () => {
     ['市场部', ['one-person-marketing']], ['流水线', ['video-relay']], ['小队', ['one-person-marketing', 'video-relay']],
     ['接力', ['video-relay']], ['josh', ['one-person-marketing']], ['website ops', ['one-person-marketing']], ['剪辑', ['video-relay']],
     ['video', ['video-relay']], ['不存在', []],
+    // 成员的原名和中文叫法都能把小队搜出来
+    ['clip bot', ['video-relay']], ['短片剪辑', ['video-relay']],
   ])('搜「%s」', (query, expected) => {
     expect(slugs(searchSquads(squads, query))).toEqual(expected)
   })

@@ -264,6 +264,8 @@ span.skill-source, span.routine-source { color: var(--bz-text-3); }
 .submit-preview .detail-header .pitch-bubble::after { left: 42px; }
 .submit-preview .bot-detail .detail-header::before { top: 48px; left: -112px; }
 .submit-preview .bot-detail .detail-info > h2 { font-size: var(--bz-fs-h2); line-height: 1.25; }
+/* 预览里的标题只有 24px：跟在后面的原名再降一档到 16px，主次才分得开 */
+.submit-preview .bot-detail .detail-info > h2 .bz-name-orig { font-size: var(--bz-fs-title); }
 .submit-preview .bot-detail .detail-rail { margin-top: var(--bz-sp-5); padding: var(--bz-sp-4); }
 .submit-preview .bot-detail .detail-main { margin-top: var(--bz-sp-6); }
 .submit-preview .bot-detail .detail-main > section { margin-top: 0; padding: var(--bz-sp-5) 0 0; }

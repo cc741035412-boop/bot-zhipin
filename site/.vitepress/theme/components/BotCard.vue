@@ -11,6 +11,7 @@ import { botPalette, categoryStyle } from '../color'
 import BotAvatar from './BotAvatar.vue'
 import BotActions from './BotActions.vue'
 import BotHeat from './BotHeat.vue'
+import BotName from './BotName.vue'
 import BzIcon from './BzIcon.vue'
 import ExternalHint from './ExternalHint.vue'
 import RoleMascot from './RoleMascot.vue'
@@ -34,7 +35,7 @@ const origin = computed(() => props.bot.external ? (props.bot.official ? '官方
       <BotAvatar v-if="active" ref="avatar" :bot="bot" whole-card />
       <div class="bot-head">
         <div class="bot-title">
-          <h3 class="bot-name"><a data-testid="detail-link" :href="preview ? '#submit-preview-detail' : bot.detailUrl" :target="preview ? '_self' : undefined" @click="preview && ($event.preventDefault(), showDetail())">{{ bot.name }}</a></h3>
+          <h3 class="bot-name"><a data-testid="detail-link" :href="preview ? '#submit-preview-detail' : bot.detailUrl" :target="preview ? '_self' : undefined" @click="preview && ($event.preventDefault(), showDetail())"><BotName :bot="bot" /></a></h3>
           <span v-if="!bot.external" class="bz-tag source-tag">作者投稿</span>
         </div>
         <p class="bot-byline">

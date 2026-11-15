@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: x-brief
 name: "X Brief"
+nameZh: "X 简报员"
 tagline: "盯你选的 X 账号和话题，每天一份带链接的简报"
 category: 内容
 author:

@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: talent-discovery
 name: "Talent Discovery"
+nameZh: "人才搜寻员"
 tagline: "按岗位要求在公开网络上找候选人，每个人都附出处"
 category: 运营
 author:

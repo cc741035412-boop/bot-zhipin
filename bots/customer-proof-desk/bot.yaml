@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: customer-proof-desk
 name: "Customer Proof Desk"
+nameZh: "客户案例整理员"
 tagline: "把客户访谈稿整理成案例、证言和能直接引用的原话"
 category: 销售
 author:

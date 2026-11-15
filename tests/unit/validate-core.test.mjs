@@ -92,7 +92,9 @@ it('上下文只发布约定字段，模板/文案/限额/哈希与真源一致'
   } })
   expect(context.index.map((item) => item.slug)).toEqual(loadAllBots(fixture).map((bot) => bot.slug))
   expect(context.index[0].authorGithub).toBe(null)
-  for (const item of context.index) expect(Object.keys(item).sort()).toEqual(['addedAt', 'authorGithub', 'external', 'name', 'slug', 'templateUrl'])
+  // 中文叫法只在写了的时候带上：示例里只有外部收录那个有。
+  for (const item of context.index) expect(Object.keys(item).sort()).toEqual(['addedAt', 'authorGithub', 'external', 'name', ...(item.slug === 'demo-external' ? ['nameZh'] : []), 'slug', 'templateUrl'])
+  expect(context.index.find((item) => item.slug === 'demo-external')).toMatchObject({ name: 'Demo External Helper', nameZh: '示例·外部收录' })
   expect(YAML.parse(context.template.files['bot.yaml'])).toEqual(template.data)
   expect(context.template.files['DESIGN.md']).toBe(template.design)
   const build = JSON.parse(readFileSync(join(apiData, 'build.json'), 'utf8'))

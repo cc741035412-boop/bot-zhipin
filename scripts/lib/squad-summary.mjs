@@ -7,7 +7,7 @@ const rows = (value) => Array.isArray(value) ? value.filter((item) => item !== n
 /** flow 里代表用户本人的写法。 */
 const YOU = 'you'
 // 成员从 Bot 摘要里带过来的字段。
-const MEMBER_FIELDS = ['name', 'tagline', 'category', 'detailUrl', 'templateUrl', 'quotaCost', 'permissions', 'prerequisites', 'avatar', 'needsAccount', 'selfRunning']
+const MEMBER_FIELDS = ['name', 'nameZh', 'tagline', 'category', 'detailUrl', 'templateUrl', 'quotaCost', 'permissions', 'prerequisites', 'avatar', 'needsAccount', 'selfRunning']
 
 /**
  * squad：读出来的小队模型（用到 slug 和 data）。

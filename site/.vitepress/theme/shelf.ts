@@ -1,4 +1,5 @@
 // 首页「全部 Bot」的排序、分组和地址栏状态：纯函数，不碰 DOM，服务端和单测都能直接跑。
+import { displayName } from '../../../scripts/lib/bot-name.mjs'
 
 export type ShelfSort = 'rec' | 'new' | 'hot'
 export const SHELF_SORTS: readonly ShelfSort[] = ['rec', 'new', 'hot']
@@ -15,6 +16,8 @@ export const NARROW_QUERY = '(max-width: 899px)'
 export interface ShelfBot {
   slug: string
   name: string
+  /** 中文叫法（可选）。有它的话，按名字排序时用它，和界面上显示的一致。 */
+  nameZh?: string | null
   category: string
   addedAt: string
   pick?: number | null
@@ -27,13 +30,13 @@ const byName = new Intl.Collator('zh-CN')
 const heatOf = (heat: Heat, slug: string) => heat[slug] ?? 0
 
 /**
- * 三种排序的比较函数。
+ * 三种排序的比较函数。「按名字」指界面上显示的那个名字：有中文叫法按中文叫法，没有按原名。
  * 最新：上架日期新的在前，同一天按名字。
  * 最热：热度高的在前，热度一样按「最新」。
  * 推荐：编辑置顶的（pick 有值）按置顶顺序排在最前，其余按「最热」。
  */
 export function shelfComparator<T extends ShelfBot>(sort: ShelfSort, heat: Heat = {}): (a: T, b: T) => number {
-  const newest = (a: T, b: T) => String(b.addedAt).localeCompare(String(a.addedAt)) || byName.compare(a.name, b.name)
+  const newest = (a: T, b: T) => String(b.addedAt).localeCompare(String(a.addedAt)) || byName.compare(displayName(a), displayName(b))
   const hottest = (a: T, b: T) => heatOf(heat, b.slug) - heatOf(heat, a.slug) || newest(a, b)
   if (sort === 'new') return newest
   if (sort === 'hot') return hottest

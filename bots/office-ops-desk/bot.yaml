@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: office-ops-desk
 name: "Office Ops Desk"
+nameZh: "行政助理"
 tagline: "帮行政盯快递、报修和同事生日，按时出日报周报"
 category: 运营
 author:

@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: sales-call-coach
 name: "Sales Call Coach"
+nameZh: "销售通话教练"
 tagline: "贴一段销售通话转写，逐项打分，告诉你下次改哪里"
 category: 销售
 author:
