@@ -27,7 +27,8 @@ export async function submitIssue(input, adapters) {
   } catch (error) {
     const errors = errorItems(error)
     await adapters.comment(input.number, failureComment(errors))
-    return { ok: false, errors }
+    // 投稿本身的问题（已在 Issue 里给出改法）不算工作流失败，免得给投稿人发「运行失败」邮件；只有内部错误才标失败。
+    return { ok: false, errors, internal: !(error instanceof SubmissionError) }
   }
 }
 
@@ -42,7 +43,7 @@ async function main() {
       id: process.env.ISSUE_AUTHOR_ID, number: process.env.ISSUE_NUMBER,
     }, adapters)
     console.log(result.ok ? '✓ 投稿检查通过，PR 和 CI 已处理。' : '投稿未通过，中文改法已更新到 Issue 评论。')
-    process.exitCode = result.ok ? 0 : 1
+    process.exitCode = result.ok || !result.internal ? 0 : 1
   } catch {
     console.error('投稿工作流未完成。请维护者检查 Actions 权限与运行环境；本脚本只能在 GitHub Actions 中运行。')
     process.exitCode = 1
