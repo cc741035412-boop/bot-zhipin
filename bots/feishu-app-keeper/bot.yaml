@@ -1,0 +1,18 @@
+# 外部收录：只收录链接，介绍由本站撰写，权限和准备事项是本站根据模板页公开描述做的判断。
+slug: feishu-app-keeper
+name: 飞书应用管家
+tagline: 给每个 Bot 配一个专属飞书机器人，在飞书里就能直接找它干活
+category: 基础设施
+author:
+  name: 铁柱AGI
+  github: RongleCat
+templateUrl: https://x.ai/bot/AJpUlCwa8tyMX7L5UHnuY
+addedAt: 2026-11-14
+prerequisites:
+  - 一个能创建自建应用的飞书账号
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 外部账号
+  - 联网
+external: true

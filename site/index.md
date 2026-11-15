@@ -1,8 +1,10 @@
 ---
 layout: page
-title: Bot 直聘
+pageClass: bz-layout
 ---
 
-# Bot 直聘
+<script setup>
+import BotShelf from './.vitepress/theme/components/BotShelf.vue'
+</script>
 
-货架建设中。
+<BotShelf />

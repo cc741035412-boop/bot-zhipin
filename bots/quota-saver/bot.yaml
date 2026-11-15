@@ -1,0 +1,18 @@
+# 外部收录：只收录链接，介绍由本站撰写，权限和准备事项是本站根据模板页公开描述做的判断。
+slug: quota-saver
+name: 额度省省助手
+tagline: 定时任务先在电脑上免费预检，有变化才叫醒 Bot，少烧空转额度
+category: 基础设施
+author:
+  name: 铁柱AGI
+  github: RongleCat
+templateUrl: https://x.ai/bot/gOdlWNIcvTPU_C8iHklMS
+addedAt: 2026-11-14
+prerequisites:
+  - 一台能长期开机、跑定时脚本的电脑
+  - 至少一个正在用的 Grok Bot 定时任务
+quotaCost: 低
+permissions:
+  - 定时自动运行
+  - 联网
+external: true

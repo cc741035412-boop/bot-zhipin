@@ -1,0 +1,15 @@
+slug: demo-weekly-digest
+name: 示例·周报整理员
+tagline: 把一周零散的聊天和笔记整理成一份周报
+category: 日常
+author:
+  name: 另一位示例作者
+  github: another-example
+templateUrl: https://x.ai/bot/demo-weekly-digest-000
+addedAt: 2026-11-10
+prerequisites: 无
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+forkedFrom: demo-prd-reviewer

@@ -2,13 +2,14 @@
 // 这里只负责「读」和「如实报告读到了什么」，不做任何校验判断；校验规则在 scripts/lib/validate/。
 // 改这个文件会同时影响校验器和网站，改之前看 docs/dev/ARCHITECTURE.md。
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { lstatSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import YAML from 'yaml'
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
-export const BOTS_DIR = join(ROOT, 'bots')
+// 测试时可以用环境变量 BOTS_DIR 指向别的目录（比如 tests/fixtures/bots），相对路径按仓库根目录算
+export const BOTS_DIR = process.env.BOTS_DIR ? resolve(ROOT, process.env.BOTS_DIR) : join(ROOT, 'bots')
 export const SCHEMA_PATH = join(ROOT, 'schema', 'bot.schema.json')
 
 export const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif']
@@ -26,9 +27,10 @@ export function loadEnums() {
 
 /** bots/ 下的 Bot 文件夹名。以 _ 或 . 开头的（比如 _template）不算 Bot。 */
 export function listBotDirs(botsDir = BOTS_DIR) {
-  if (!existsSync(botsDir)) return []
+  if (!lstatSync(botsDir, { throwIfNoEntry: false })?.isDirectory()) return []
   return readdirSync(botsDir, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && !d.name.startsWith('_') && !d.name.startsWith('.'))
+    // 链接也作为待检查条目返回，但 loadBot 不会进入它；否则校验器会漏报。
+    .filter((d) => (d.isDirectory() || d.isSymbolicLink()) && !d.name.startsWith('_') && !d.name.startsWith('.'))
     .map((d) => d.name)
     .sort()
 }
@@ -51,17 +53,16 @@ export function parseFrontmatter(text) {
   return { data, body: src.slice(m[0].length), error: null }
 }
 
-function readIf(path) {
-  return existsSync(path) ? readFileSync(path, 'utf8') : null
-}
-
-function walk(dir, out = []) {
-  for (const d of readdirSync(dir, { withFileTypes: true })) {
-    const p = join(dir, d.name)
-    if (d.isDirectory()) walk(p, out)
-    else if (d.isFile()) out.push(p)
-  }
-  return out
+// 先建立不含符号链接的文件/目录清单，所有读取都必须来自这份清单。
+// 不使用 exists/stat：悬空链接也必须报告，目录链接绝不能递归。
+function walk(path, files, directories, symlinks, rel) {
+  const stat = lstatSync(path, { throwIfNoEntry: false })
+  if (!stat) return
+  if (stat.isSymbolicLink()) symlinks.push(rel(path))
+  else if (stat.isDirectory()) {
+    directories.add(path)
+    for (const name of readdirSync(path).sort()) walk(join(path, name), files, directories, symlinks, rel)
+  } else if (stat.isFile()) files.set(path, { path, rel: rel(path), size: stat.size })
 }
 
 /**
@@ -73,6 +74,11 @@ export function loadBot(slug, botsDir = BOTS_DIR) {
   const dir = join(botsDir, slug)
   const base = dirname(botsDir) // 让 rel 形如 bots/<slug>/...
   const rel = (p) => relative(base, p).split('\\').join('/')
+
+  const files = new Map(), directories = new Set(), symlinks = []
+  if (lstatSync(botsDir, { throwIfNoEntry: false })?.isSymbolicLink()) symlinks.push(rel(botsDir))
+  else walk(dir, files, directories, symlinks, rel)
+  const readIf = (path) => files.has(path) ? readFileSync(path, 'utf8') : null
 
   const yamlPath = join(dir, 'bot.yaml')
   const raw = readIf(yamlPath)
@@ -95,40 +101,34 @@ export function loadBot(slug, botsDir = BOTS_DIR) {
   }
 
   const skillsDir = join(dir, 'skills')
-  const skills = existsSync(skillsDir)
-    ? readdirSync(skillsDir, { withFileTypes: true })
-        .filter((d) => d.isDirectory())
-        .map((d) => d.name)
-        .sort()
-        .map((name) => {
-          const path = join(skillsDir, name, 'SKILL.md')
-          const text = readIf(path)
-          const fm = text === null ? { data: null, body: '', error: null } : parseFrontmatter(text)
-          return {
-            name, // 文件夹名
-            path,
-            rel: rel(path),
-            exists: text !== null,
-            raw: text,
-            frontmatter: fm.data,
-            frontmatterError: fm.error,
-            body: fm.body,
-          }
-        })
-    : []
+  const skills = [...directories]
+    .filter((path) => dirname(path) === skillsDir)
+    .map((path) => relative(skillsDir, path))
+    .sort()
+    .map((name) => {
+      const path = join(skillsDir, name, 'SKILL.md')
+      const text = readIf(path)
+      const fm = text === null ? { data: null, body: '', error: null } : parseFrontmatter(text)
+      return {
+        name, // 文件夹名
+        path,
+        rel: rel(path),
+        exists: text !== null,
+        raw: text,
+        frontmatter: fm.data,
+        frontmatterError: fm.error,
+        body: fm.body,
+      }
+    })
 
   const shotsDir = join(dir, 'screenshots')
-  const screenshots = existsSync(shotsDir)
-    ? readdirSync(shotsDir, { withFileTypes: true })
-        .filter((d) => d.isFile() && !d.name.startsWith('.'))
-        .map((d) => d.name)
-        .sort()
-        .map((file) => {
-          const path = join(shotsDir, file)
-          const ext = file.slice(file.lastIndexOf('.')).toLowerCase()
-          return { file, path, rel: rel(path), size: statSync(path).size, isImage: IMAGE_EXTS.includes(ext) }
-        })
-    : []
+  const screenshots = [...files.values()]
+    .filter(({ path }) => dirname(path) === shotsDir && !relative(shotsDir, path).startsWith('.'))
+    .map(({ path, rel, size }) => {
+      const file = relative(shotsDir, path)
+      const ext = file.slice(file.lastIndexOf('.')).toLowerCase()
+      return { file, path, rel, size, isImage: IMAGE_EXTS.includes(ext) }
+    })
 
   const avatarPath = join(dir, 'avatar.png')
 
@@ -144,11 +144,12 @@ export function loadBot(slug, botsDir = BOTS_DIR) {
     role: readIf(join(dir, 'ROLE.md')),
     design: readIf(join(dir, 'DESIGN.md')),
     routines: readIf(join(dir, 'routines.md')),
-    avatar: existsSync(avatarPath) ? { path: avatarPath, rel: rel(avatarPath), size: statSync(avatarPath).size } : null,
+    avatar: files.get(avatarPath) || null,
     skills,
     screenshots,
     // 文件夹里所有文件，给密钥扫描用
-    files: existsSync(dir) ? walk(dir).map((p) => ({ path: p, rel: rel(p), size: statSync(p).size })) : [],
+    files: [...files.values()],
+    symlinks,
   }
 }
 
