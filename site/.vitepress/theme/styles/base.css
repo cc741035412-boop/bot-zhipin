@@ -142,6 +142,8 @@
 .shelf-page :is(.bz-seg, .sort-controls) > button { min-height: 0; }
 :is(.bz-seg, .sort-controls) > button:hover { border-color: transparent; background: transparent; color: var(--bz-ink); }
 :is(.bz-seg, .sort-controls) > button:active { transform: none; }
+/* 点按范围撑满整条的高度（触摸时整条 44） */
+:is(.bz-seg, .sort-controls) > button::before { content: ''; position: absolute; inset: -4px 0; }
 :is(.bz-seg, .sort-controls) > button[aria-pressed="true"] { color: var(--bz-ink); }
 :is(.bz-seg, .sort-controls)::after {
   content: ''; position: absolute; top: 3px; bottom: 3px; left: 3px; z-index: -1; width: calc((100% - 6px) / var(--bz-seg-count));
@@ -156,6 +158,7 @@
 .bz-seg.free { display: flex; gap: 2px; min-width: 0; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; }
 .bz-seg.free::-webkit-scrollbar { display: none; }
 .bz-seg.free::after { content: none; }
+.bz-seg.free > button::before { inset: -3px 0; }
 .bz-seg.free > button { flex: none; padding: 0 var(--bz-sp-3); transition: color var(--bz-dur) var(--bz-ease), background-color var(--bz-dur) var(--bz-ease); }
 .bz-seg.free > button[aria-pressed="true"] { background: var(--bz-seg-active); box-shadow: var(--bz-seg-shadow); }
 

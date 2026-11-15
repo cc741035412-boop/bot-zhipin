@@ -68,8 +68,15 @@ for (const scheme of ['light', 'dark']) {
         return [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3)
       }
       const luminance = (rgb) => rgb.map((v) => v / 255).map((v) => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4).reduce((sum, v, i) => sum + v * [.2126, .7152, .0722][i], 0)
+      // 半透明底（中性标签用的 --bz-surface-2）要叠到祖先的底色上再算。
+      const parse = (css) => { const m = css.match(/[\d.]+(?:e-?\d+)?/g).map(Number); return { c: m.slice(0, 3).map((v) => css.startsWith('color(') ? v * 255 : v), a: m.length > 3 ? m[3] : 1 } }
+      const backdrop = (node) => {
+        const layers = []
+        for (let at = node; at; at = at.parentElement) { const layer = parse(getComputedStyle(at).backgroundColor); if (layer.a > 0) layers.push(layer); if (layer.a === 1) break }
+        return layers.reverse().reduce((under, layer) => under.map((v, i) => Math.round(layer.c[i] * layer.a + v * (1 - layer.a))), [255, 255, 255])
+      }
       const sample = (node) => {
-        const style = getComputedStyle(node), fg = rgb(style.color), bg = rgb(style.backgroundColor)
+        const style = getComputedStyle(node), fg = rgb(style.color), bg = backdrop(node)
         const a = luminance(fg), b = luminance(bg)
         return { fg, bg, ratio: (Math.max(a, b) + .05) / (Math.min(a, b) + .05) }
       }
