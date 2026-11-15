@@ -1,13 +1,15 @@
 import type { D1Database } from '@cloudflare/workers-types'
 
 export const RATE_LIMITS = {
-  login: { windowMs: 3_600_000, limit: 20 },
+  login: { windowMs: 3_600_000, limit: 120 },
   shot: { windowMs: 86_400_000, limit: 60, byteLimit: 60 * 1024 * 1024 },
-  'shot-all': { windowMs: 86_400_000, limit: 300 },
+  'shot-all': { windowMs: 86_400_000, limit: 1000 },
+  'submit-try': { windowMs: 3_600_000, limit: 40 },
   submit: { windowMs: 86_400_000, limit: 10 },
   'submit-slug': { windowMs: 120_000, limit: 1 },
   'submit-all': { windowMs: 3_600_000, limit: 20 },
   status: { windowMs: 60_000, limit: 30 },
+  'status-gh': { windowMs: 3_600_000, limit: 600 },
 } as const
 
 interface Limit {

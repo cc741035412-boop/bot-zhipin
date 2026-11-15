@@ -22,7 +22,7 @@ let gh, db, deps, tracked, writes, events, limits, input
 beforeEach(async () => {
   tracked = []; writes = []; events = []; limits = new Map()
   db = { prepare: (sql) => ({ bind: (...args) => ({
-    first: async () => { const key = `${args[0]}:${args[1]}`; const n = (limits.get(key) || 0) + 1; limits.set(key, n); events.push(args[0]); return { n, bytes: 0 } },
+    first: async () => { if (sql.includes('FROM bot_owners')) return null; const key = `${args[0]}:${args[1]}`; const n = (limits.get(key) || 0) + 1; limits.set(key, n); events.push(args[0]); return { n, bytes: 0 } },
     all: async () => ({ results: tracked }),
     run: async () => { writes.push({ sql, args }); return {} },
   }) }) }
@@ -41,7 +41,7 @@ describe('网站提交流程（纯注入，无网络）', () => {
   it('按序限流、解包；新投稿改写署名和北京时间，写两层安全 tree、单提交、PR 和 upsert', async () => {
     const result = await submitBot(input, user, deps)
     expect(result).toMatchObject({ ok: true, update: false, slug: 'flow-demo', branch: 'submission/web-123-flow-demo', liveUrl: 'https://site.test/bots/flow-demo', autoMerge: true })
-    expect(events).toEqual(['submit', 'submit-all', 'submit-slug', 'installationToken', 'getRef', 'getCommit', 'getContent', 'createTree', 'createTree', 'createCommit', 'upsertRef', 'findOpenPr', 'createPr', 'enableAutoMerge'])
+    expect(events).toEqual(['submit-try', 'submit-slug', 'installationToken', 'getRef', 'getCommit', 'getContent', 'submit', 'submit-all', 'createTree', 'createTree', 'createCommit', 'upsertRef', 'findOpenPr', 'createPr', 'enableAutoMerge'])
     const [inner, outer] = gh.createTree.mock.calls.map(([v]) => v)
     expect(inner.baseTree).toBeUndefined()
     expect(inner.entries.every((e) => e.mode === '100644' && e.type === 'blob' && !e.path.startsWith('/') && !e.path.includes('..'))).toBe(true)
@@ -56,10 +56,12 @@ describe('网站提交流程（纯注入，无网络）', () => {
     expect(writes.at(-1).sql).toContain('ON CONFLICT')
     expect(writes.at(-1).args).toEqual([123, 'flow-demo', 7, 'submission/web-123-flow-demo', now])
   })
-  it('BZB1 令牌与明文走同样限流和校验', async () => {
+  it('BZB1 令牌只扣尝试额度，400 拒绝且不访问 GitHub', async () => {
     input.bundle = await encodeToken(input.bundle)
-    expect((await submitBot(input, user, deps)).ok).toBe(true)
-    expect(limits.get('submit-slug:123:flow-demo')).toBe(1)
+    await expect(submitBot(input, user, deps)).rejects.toMatchObject({ status: 400, code: 'bad_request' })
+    expect(limits.get('submit-slug:123:flow-demo')).toBeUndefined()
+    expect(limits.get('submit-try:123')).toBe(1)
+    expect(gh.installationToken).not.toHaveBeenCalled()
   })
   it('同 slug 第二次请求被 429 拦在 GitHub 前', async () => {
     await submitBot(input, user, deps)

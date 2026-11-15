@@ -2,6 +2,7 @@ import { validateSchema } from './schema.mjs'
 import { validateContent, validateTemplate } from './content.mjs'
 import { validateImages } from './images.mjs'
 import { redact, scanSecrets } from './secrets.mjs'
+import { botYamlSizeError } from '../yaml-limits.mjs'
 
 const DAY = 24 * 60 * 60 * 1000
 
@@ -31,21 +32,36 @@ export function validateModels(bots, { template, now = new Date(), others = [], 
   }
   const slugs = new Set([...bots.map((bot) => bot.data?.slug), ...others.map((bot) => bot.slug)].filter((slug) => typeof slug === 'string'))
   for (const bot of bots) {
+    const errorMap = new Map(), warningMap = new Map()
+    let omitted = 0
     const report = (path, where, problem, fix, warning = false) => {
-      const file = `bots/${bot.slug}/${path}`
-      const item = Object.fromEntries(Object.entries({ file, where, problem, fix }).map(([key, value]) => [key, redact(value)]))
-      const target = warning ? warnings : errors
-      const previous = target.find((entry) => entry.file === item.file && entry.where === item.where)
+      const file = redact(`bots/${bot.slug}/${path}`)
+      where = redact(where)
+      const target = warning ? warnings : errors, seen = warning ? warningMap : errorMap
+      const key = `${file}|${where}`
+      if (!warning && !seen.has(key) && seen.size >= 50) {
+        seen.set(key, null)
+        omitted++
+        return
+      }
+      if (seen.has(key) && seen.get(key) === null) return
+      const item = { file, where, problem: redact(problem), fix: redact(fix) }
+      const previous = seen.get(key)
       if (previous) {
         if (!previous.problem.includes(item.problem)) previous.problem += `；${item.problem}`
         if (!previous.fix.includes(item.fix)) previous.fix += ` ${item.fix}`
-      } else target.push(item)
+      } else {
+        seen.set(key, item)
+        target.push(item)
+      }
     }
     for (const link of bot.symlinks) {
       report(link, '文件类型', '不允许符号链接（文件或目录）', '删除符号链接，改为此 Bot 文件夹内的真实文件或目录；不要引用文件夹外的内容。')
     }
     // 即使 YAML 坏了也继续检查其他文件和密钥，不回显解析器的原文片段。
-    if (bot.yamlError) {
+    if (bot.yamlTooLarge) {
+      report(bot.yamlPath, botYamlSizeError.where, botYamlSizeError.problem, botYamlSizeError.fix)
+    } else if (bot.yamlError) {
       const line = Number(/at line (\d+)/.exec(bot.yamlError)?.[1] || 1)
       report(bot.yamlPath, `第 ${line} 行`, `YAML 格式错误（第 ${line} 行）：${bot.raw === null ? '找不到 bot.yaml' : '无法解析为合法的「键: 值」映射'}`, bot.raw === null ? '在这个 Bot 文件夹内创建 bot.yaml，可参考 bots/_template/bot.yaml，填写真实信息。' : '检查这一行及上一行的缩进、冒号、引号、括号和重复字段；顶层必须是「键: 值」映射。')
     } else {
@@ -75,6 +91,8 @@ export function validateModels(bots, { template, now = new Date(), others = [], 
     validateImages(bot, report)
     validateTemplate(bot, template, report)
     scanSecrets(bot, report)
+    if (omitted) errors.push({ file: `bots/${bot.slug}/`, where: '错误汇总',
+      problem: `还有 ${omitted} 处问题没列出，先改完上面这些再校验`, fix: '先改完上面这些，再运行 npm run validate。' })
   }
   return { errors, warnings }
 }

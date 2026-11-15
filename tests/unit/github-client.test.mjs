@@ -130,7 +130,9 @@ describe('受限 GitHub 客户端', () => {
   })
 
   it.each(['https://evil.test/path', 'https://user:pass@evil.test', 'file:///tmp/foo', 'http://api.gh.test/#fragment'])('测试地址也不得夹路径/凭据/非 HTTP：%s', (GITHUB_API_BASE) => {
-    expect(() => createGitHub({ ...env, GITHUB_API_BASE })).toThrow(GitHubError)
+    if (GITHUB_API_BASE.startsWith('file:')) {
+      expect(() => createGitHub({ ...env, GITHUB_API_BASE })).toThrowError(expect.objectContaining({ status: 503, code: 'submit_disabled' }))
+    } else expect(() => createGitHub({ ...env, GITHUB_API_BASE })).toThrow(GitHubError)
   })
 
   it('每个带路径的读取方法拒绝白名单外 URL/编码穿越，不先申请令牌', async () => {

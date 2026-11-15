@@ -74,6 +74,7 @@ export function pack({ slug, files, screenshots = [] }) {
 
 export function unpack(input) {
   if (typeof input !== 'string' || byteLength(input) > LIMITS.expandedBytes) bad('投稿包展开后不能超过 512KB。')
+  if (!input.isWellFormed()) bad('投稿包不是良构 UTF-16 文本，不能包含孤立的代理码元。')
   const text = stripFence(input)
   const first = /^BOT-ZHIPIN-BUNDLE v1\r?\n/.exec(text)
   if (!first) bad('投稿包版本或开头不正确。')

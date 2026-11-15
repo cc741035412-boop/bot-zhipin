@@ -195,8 +195,8 @@ describe('GitHub 登录流程（所有外部请求均为 mock）', () => {
     expect(cookies(result)).toHaveLength(2)
   })
 
-  it('每 IP 小时第 21 次直接跳 failed&retry；只存加盐哈希', async () => {
-    for (let i = 0; i < 20; i++) expect((await begin()).headers.get('Location')).toContain('/login/oauth/authorize?')
+  it('每 IP 小时第 121 次直接跳 failed&retry；只存加盐哈希', async () => {
+    for (let i = 0; i < 120; i++) expect((await begin()).headers.get('Location')).toContain('/login/oauth/authorize?')
     const response = await begin()
     expect(response.headers.get('Location')).toBe('/submit?login=failed&retry=3600')
     expect(cookies(response)).toHaveLength(0)
@@ -204,7 +204,7 @@ describe('GitHub 登录流程（所有外部请求均为 mock）', () => {
     expect(rows).toHaveLength(1)
     expect(rows[0].key).toMatch(/^[a-f0-9]{64}$/)
     expect(JSON.stringify(rows)).not.toContain('192.0.2.1')
-    expect(rows[0].n).toBe(21)
+    expect(rows[0].n).toBe(121)
   })
 
   it('登录的 X-Test-IP 仅受 ALLOW_TEST_ENDPOINTS=1 控制，IPv6 /64 合桶', async () => {

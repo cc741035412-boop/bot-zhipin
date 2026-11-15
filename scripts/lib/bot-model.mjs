@@ -1,5 +1,6 @@
 // 与存储无关的 Bot 模型。所有路径均相对 Bot 目录，图片内容由适配器提供。
 import YAML from 'yaml'
+import { BOT_YAML_BYTES, botYamlTooLarge, SKILL_FRONTMATTER_BYTES, utf8Bytes } from './yaml-limits.mjs'
 
 export const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif']
 
@@ -7,6 +8,7 @@ export function parseFrontmatter(text) {
   const src = text.replace(/^\uFEFF/, '')
   const m = /^---\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(src)
   if (!m) return { data: null, body: src, error: null }
+  if (utf8Bytes(m[1]) > SKILL_FRONTMATTER_BYTES) return { data: null, body: src.slice(m[0].length), error: null, tooLarge: true }
   const doc = YAML.parseDocument(m[1], { prettyErrors: true })
   if (doc.errors.length) return { data: null, body: src.slice(m[0].length), error: doc.errors[0].message }
   const data = doc.toJS()
@@ -27,9 +29,10 @@ export function buildBotModel(slug, { files, dirs = [], symlinks = [] }) {
     for (let i = 1; i < parts.length; i++) directories.add(parts.slice(0, i).join('/'))
   }
   const raw = readIf('bot.yaml')
+  const yamlTooLarge = byPath.get('bot.yaml')?.size > BOT_YAML_BYTES || botYamlTooLarge(raw)
   let data = null, yamlError = null
   if (raw === null) yamlError = '找不到 bot.yaml'
-  else {
+  else if (!yamlTooLarge) {
     const doc = YAML.parseDocument(raw, { prettyErrors: true })
     if (doc.errors.length) yamlError = doc.errors[0].message
     else {
@@ -43,7 +46,7 @@ export function buildBotModel(slug, { files, dirs = [], symlinks = [] }) {
   const skills = [...directories].filter((path) => /^skills\/[^/]+$/.test(path)).sort().map((dir) => {
     const name = dir.slice(7), path = `${dir}/SKILL.md`, text = readIf(path)
     const fm = text === null ? { data: null, body: '', error: null } : parseFrontmatter(text)
-    return { name, path, rel: path, exists: text !== null, raw: text, frontmatter: fm.data, frontmatterError: fm.error, body: fm.body }
+    return { name, path, rel: path, exists: text !== null, raw: text, frontmatter: fm.data, frontmatterError: fm.error, frontmatterTooLarge: fm.tooLarge === true, body: fm.body }
   })
   const screenshots = entries.filter(({ rel }) => /^screenshots\/[^./][^/]*$/.test(rel)).map((entry) => {
     const file = entry.rel.slice(12), dot = file.lastIndexOf('.')
@@ -52,7 +55,7 @@ export function buildBotModel(slug, { files, dirs = [], symlinks = [] }) {
     return { ...entry, file, isImage: IMAGE_EXTS.includes(ext) }
   })
   return {
-    slug, rel: '', yamlPath: 'bot.yaml', yamlRel: 'bot.yaml', raw, data, yamlError,
+    slug, rel: '', yamlPath: 'bot.yaml', yamlRel: 'bot.yaml', raw, data, yamlError, yamlTooLarge,
     role: readIf('ROLE.md'), design: readIf('DESIGN.md'), routines: readIf('routines.md'),
     avatar: byPath.get('avatar.png') || null, skills, screenshots, files: entries, symlinks: [...symlinks],
   }

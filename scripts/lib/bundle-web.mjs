@@ -23,9 +23,18 @@ export async function decodeToken(input) {
   let text
   try {
     const encoded = token.slice(5)
-    const binary = atob(encoded.replaceAll('-', '+').replaceAll('_', '/'))
-    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
-    if (base64url(bytes) !== encoded) throw new Error('非规范编码')
+    // BZB1 omits padding; strict native decoding requires a complete last chunk.
+    const enc = encoded + '='.repeat((4 - encoded.length % 4) % 4)
+    let bytes
+    if (typeof Uint8Array.fromBase64 === 'function') {
+      bytes = Uint8Array.fromBase64(enc, { alphabet: 'base64url', lastChunkHandling: 'strict' })
+    } else {
+      const remainder = encoded.length % 4
+      const last = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_'.indexOf(encoded.at(-1))
+      if (remainder === 1 || (remainder === 2 && (last & 15)) || (remainder === 3 && (last & 3))) throw new Error('非规范编码')
+      const binary = atob(encoded.replaceAll('-', '+').replaceAll('_', '/'))
+      bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0))
+    }
     const reader = streamOf(bytes).pipeThrough(new DecompressionStream('gzip')).getReader()
     const chunks = []
     let total = 0

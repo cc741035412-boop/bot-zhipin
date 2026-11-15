@@ -1,7 +1,10 @@
 import { parseDocument, isMap } from 'yaml'
+import { botYamlTooLarge, botYamlSizeError } from './yaml-limits.mjs'
+import { fail } from '../submission/errors.mjs'
 
 /** 只改服务器拥有的字段；Document 保留注释、引号和未改字段的节点。 */
 export function applyServerFields(botYamlText, { login, addedAt }) {
+  if (botYamlTooLarge(botYamlText)) fail('bot.yaml', botYamlSizeError.where, botYamlSizeError.problem, botYamlSizeError.fix)
   const doc = parseDocument(botYamlText)
   if (doc.errors.length || !isMap(doc.contents)) throw new Error('bot.yaml 无法解析为合法的「键: 值」映射。')
   // toString 会规范化未改字段的空格；只取改写字段的序列化片段，其他原文不动。

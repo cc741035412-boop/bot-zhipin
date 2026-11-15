@@ -22,6 +22,7 @@ beforeEach(async () => {
   counts = {}; seen = []; pending = []
   env = {
     SESSION_SECRET: 's'.repeat(40), IP_SALT: 'local', ALLOW_TEST_ENDPOINTS: '1', SUBMIT_REPO: 'owner/repo',
+    GITHUB_API_BASE: 'http://api.gh.test', GITHUB_OAUTH_BASE: 'http://oauth.gh.test',
     GITHUB_APP_ID: '1', GITHUB_APP_INSTALLATION_ID: '1', GITHUB_APP_BOT_LOGIN: 'local[bot]', GITHUB_APP_PRIVATE_KEY: 'local-mock', OAUTH_CLIENT_ID: 'local', OAUTH_CLIENT_SECRET: 'local',
     DB: { prepare: () => ({ bind: (...args) => ({ first: async () => { seen.push(args); return counts[args[0]] || { n: 1, bytes: args[3] } } }) }) },
   }
@@ -52,7 +53,7 @@ describe('截图和提交 HTTP 边界', () => {
     expect(cancel).toHaveBeenCalled(); expect(gh.createBlob).not.toHaveBeenCalled()
   })
   it.each(['shot', 'shot-all'])('%s 限额返回 429 和 Retry-After，不上传 blob', async (bucket) => {
-    counts[bucket] = { n: bucket === 'shot' ? 61 : 301, bytes: 0 }
+    counts[bucket] = { n: bucket === 'shot' ? 61 : 1001, bytes: 0 }
     const res = await shot.onRequestPost(ctx(request()))
     expect(res.status).toBe(429); expect(Number(res.headers.get('Retry-After'))).toBeGreaterThan(0)
     expect((await res.json()).retryAfter).toBeGreaterThan(0)

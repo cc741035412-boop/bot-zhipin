@@ -34,7 +34,9 @@ export function validateContent(bot, template, report) {
       report(skill.path, '文件', '技能文件夹缺少 SKILL.md', `在 skills/${skill.name}/ 中创建 SKILL.md，填写 name、description 的 frontmatter 和技能正文。`)
       continue
     }
-    if (skill.frontmatterError) {
+    if (skill.frontmatterTooLarge) {
+      report(skill.path, 'frontmatter', 'SKILL.md 的 frontmatter 超过 4KB', 'frontmatter 只放技能名称和简介，长内容写进 SKILL.md 正文。')
+    } else if (skill.frontmatterError) {
       const line = Number(/at line (\d+)/.exec(skill.frontmatterError)?.[1] || 1) + 1
       report(skill.path, 'frontmatter', `frontmatter YAML 格式错误（第 ${line} 行），必须是合法的「键: 值」映射`, '检查 --- 之间的 YAML 缩进、冒号、引号，name 和 description 都要填写非空文字。')
     } else if (!skill.frontmatter) {
