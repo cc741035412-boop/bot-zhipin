@@ -1,6 +1,6 @@
 import { Worker, isMainThread, parentPort, workerData } from 'node:worker_threads'
 import { createMarkdownRenderer } from 'vitepress'
-import { stripComments, stripDesignFrontmatter } from '../../../scripts/lib/design-content.mjs'
+import { prepareDesignSource, installSafeDesignRules } from '../../../scripts/lib/design-markdown.mjs'
 
 // VitePress 1.6 的 renderer 是进程级单例。隔离投稿内容，避免 html:false
 // 污染站点模板编译，也避免 dev 模式复用 html:true 的站点 renderer。
@@ -32,30 +32,9 @@ if (!isMainThread) {
   // 禁止读取服务器文件（<<< / @include）；include 只存在于页面编译器，
   // 此处只调用 renderer，额外禁用 renderer 的 snippet 插件。
   md.disable('snippet')
-  const image = md.renderer.rules.image
-  md.renderer.rules.image = (tokens, index, options, env, self) => {
-    const token = tokens[index]
-    const src = token.attrGet('src') || ''
-    const local = /^(?:\.\/)?screenshots\/(.+)$/.exec(src)
-    // 允许中文/空格文件名的 URL 编码，但不允许编码后的穿越、分隔符或查询参数。
-    let safeLocal = false
-    if (local && !/[\\?#]/.test(local[1])) {
-      try {
-        safeLocal = local[1].split('/').every((part) => {
-          const decoded = decodeURIComponent(part)
-          return decoded && decoded !== '.' && decoded !== '..' && !/[\\/%?#\u0000-\u001f]/.test(decoded)
-        })
-      } catch { /* 畸形 URL 编码降级为链接 */ }
-    }
-    if (safeLocal) {
-      token.attrSet('src', `/bot-assets/${env.slug}/${local[1]}`)
-      return image(tokens, index, options, env, self)
-    }
-    const alt = self.renderInlineAsText(token.children || [], options, env) || '图片链接'
-    return `<a href="${md.utils.escapeHtml(src)}" target="_blank" rel="noreferrer">${md.utils.escapeHtml(alt)}</a>`
-  }
+  installSafeDesignRules(md, { assetUrl: (name, env) => `/bot-assets/${env.slug}/${name}` })
   parentPort.postMessage(Object.fromEntries(workerData.map(({ slug, design }) => {
-    const body = stripComments(stripDesignFrontmatter(design || '')).replace(/^# [^\r\n]*(?:\r?\n|$)/m, '')
+    const body = prepareDesignSource(design)
     return [slug, md.render(body, { slug })]
   })))
 }
