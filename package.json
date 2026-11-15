@@ -17,7 +17,8 @@
     "dev:full": "node scripts/ensure-dev-vars.mjs && npm run build && wrangler d1 migrations apply DB --local && wrangler pages dev --port 8788",
     "new-bot": "node scripts/new-bot.mjs",
     "check": "npm run validate && npm test && npm run build",
-    "gen:schema": "node scripts/gen-schema-validator.mjs"
+    "gen:schema": "node scripts/gen-schema-validator.mjs",
+    "gen:favicon": "node scripts/gen-favicon.mjs"
   },
   "dependencies": {
     "yaml": "^2.9.1"
