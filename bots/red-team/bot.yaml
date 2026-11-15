@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: red-team
+name: "Red Team"
+tagline: "需求文档、方案发出去前，先让它替反方挑刺再改一版"
+category: 评审
+author:
+  name: "Josh"
+  url: https://x.com/nearbycoder
+templateUrl: https://x.ai/bot/0h3dhN9lfJ3raaAYvqn42
+addedAt: 2026-11-15
+prerequisites:
+  - "贴一份草稿、方案或决策就能开始"
+  - "默认出六段长报告，只想快速过一遍就说 quick pass"
+quotaCost: 低
+permissions:
+  - 联网
+pitch: "方案发出去之前，先让我替反方挑挑刺。"
+external: true

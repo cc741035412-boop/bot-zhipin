@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: research-bot
+name: "Research Bot"
+tagline: "查资料先给结论，每条说法都标出处"
+category: 调研
+author:
+  name: "Arthur MacWaters"
+  url: https://x.com/ArthurMacwaters
+templateUrl: https://x.ai/bot/Nn0ykGa3vJ6YS7ib7F6yH
+addedAt: 2026-11-15
+prerequisites:
+  - "无，直接提问"
+  - "配置只有一段人设，链接和引文要自己点开核对"
+quotaCost: 中
+permissions:
+  - 联网
+pitch: "你问，我先给结论，再告诉你出处在哪。"
+external: true

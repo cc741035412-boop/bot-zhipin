@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: daily-lingo
+name: "Daily Lingo"
+tagline: "每天 10 分钟外语课，按你的兴趣出题，带复习和打卡"
+category: 学习
+author:
+  name: "Joseph Snyder"
+  url: https://x.com/BTC_Yogi
+templateUrl: https://x.ai/bot/pegWv3F8t7KSEwQ3sxd6A
+addedAt: 2026-11-15
+prerequisites:
+  - "无；第一次会问学哪门语言、母语和每天几点上课"
+  - "上手后每天推一课、每周日推周报，忙的时候可以暂停"
+quotaCost: 中
+permissions:
+  - 定时自动运行
+pitch: "每天十分钟，按你爱聊的话题学外语。"
+external: true

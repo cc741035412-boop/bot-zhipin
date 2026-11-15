@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: sweeper
+name: "Sweeper / 清道夫"
+tagline: "帮你看清额度花在哪，砍掉空转的定时任务"
+category: 基础设施
+author:
+  name: "Mai Yang"
+  url: https://x.com/MaiYangAI
+templateUrl: https://x.ai/bot/SD6hgpiXqbV_LkMetf2fC
+addedAt: 2026-11-15
+prerequisites:
+  - "一张 Grok Bot 设置里 Usage & Billing 页的截图"
+  - "它可能建议暂停或删除别的 Bot 的定时任务，每次都会先问你"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+pitch: "你的额度花哪了？我一个个 Bot 帮你查。"
+external: true

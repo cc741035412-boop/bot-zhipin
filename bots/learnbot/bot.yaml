@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: learnbot
+name: "LearnBot"
+tagline: "每个工作日教你一个工程或 AI 术语，白话讲给非技术人"
+category: 学习
+author:
+  name: "Grace Clarke"
+  url: https://x.com/graceclarke
+templateUrl: https://x.ai/bot/2gmdsU86wH7HBvbB7_T2C
+addedAt: 2026-11-15
+prerequisites:
+  - "导入时把时区设成北京时间，否则会在半夜推送"
+  - "首次使用就会开工作日早上的推送；想要中文解释，第一次就跟它说"
+quotaCost: 低
+permissions:
+  - 定时自动运行
+pitch: "每个工作日一个 AI 术语，用大白话讲给你。"
+external: true

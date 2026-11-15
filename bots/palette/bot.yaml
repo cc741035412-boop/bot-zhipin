@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: palette
+name: "Palette"
+tagline: "发一张照片，取出四个主次分明的配色"
+category: 日常
+author:
+  name: "Michael Davies"
+  url: https://x.com/subforti
+templateUrl: https://x.ai/bot/yfrTgGSwB_DZNUxx0g05V
+addedAt: 2026-11-15
+prerequisites:
+  - "一张照片"
+  - "默认用英式英语回复，想要中文直接说"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+pitch: "发张照片，我给你取四个配色。"
+external: true

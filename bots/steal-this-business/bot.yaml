@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: steal-this-business
+name: "Steal This Business"
+tagline: "拆一家公司，判断它的生意里有没有你能做的机会"
+category: 调研
+author:
+  name: "aditya jha"
+  url: https://x.com/adxtyahq
+templateUrl: https://x.ai/bot/Ojrv95GLUG1nO1p1RWzVK
+addedAt: 2026-11-15
+prerequisites:
+  - "给公司名、网址或赛道就行"
+  - "主要查英文信源，拆国内公司时资料可能不全"
+quotaCost: 中
+permissions:
+  - 联网
+pitch: "给我一家公司，我拆拆它的生意里有没有你的机会。"
+external: true

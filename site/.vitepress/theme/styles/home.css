@@ -129,7 +129,7 @@
 .bot-card .avatar-root, .bot-card .bot-actions { display: contents; }
 /* 列表里不要方砖：像 Grok Bot 的列表那样，Bot 直接放大，身体填满头像框；脚下只留一团它的颜色。 */
 .bot-card .avatar-stage { grid-area: avatar; align-self: start; width: 52px; height: 52px; border-color: transparent; background: none; box-shadow: none; }
-.bot-card .bot-avatar { width: 46px; height: 46px; }
+.bot-card .bot-avatar { width: 44px; height: 44px; }
 .bot-card .avatar-stage::before { display: none; }
 .bot-card .bot-head { grid-area: head; }
 .bot-card .bot-tagline { grid-area: pitch; align-self: start; transition: opacity var(--bz-dur-fast) ease; }

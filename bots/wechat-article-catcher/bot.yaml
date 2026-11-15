@@ -1,0 +1,20 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: wechat-article-catcher
+name: "微信文章捕手"
+tagline: "贴公众号文章链接，原样存成 Markdown 和图片，免登录"
+category: 调研
+author:
+  name: "铁柱AGI"
+  github: RongleCat
+templateUrl: https://x.ai/bot/J2AgMXbgmrqq2zyRt8y7g
+addedAt: 2026-11-15
+prerequisites:
+  - "一条公众号文章链接，不用登录微信"
+  - "第一次会自动装 Python 包和 Chromium，要等几分钟"
+  - "靠伪装微信客户端抓取，微信一改就可能失效；转载要作者授权"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 联网
+pitch: "公众号文章链接给我，原样存下来，不用登录。"
+external: true

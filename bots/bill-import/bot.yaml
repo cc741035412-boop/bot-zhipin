@@ -1,0 +1,19 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: bill-import
+name: "账单进口"
+tagline: "把微信、支付宝账单导进个人账本，你确认才写入"
+category: 日常
+author:
+  name: "Tony Chan"
+  url: https://x.com/coolbat1999
+templateUrl: https://x.ai/bot/A3pcjyO0dAkvRGxD4VGeH
+addedAt: 2026-11-15
+prerequisites:
+  - "支付宝或微信导出的账单 CSV，或者账单截图"
+  - "账本可以放本地表格、Google 表格或 Notion"
+  - "账单和账本会留在共享云电脑上"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+pitch: "微信支付宝的账单导出来给我，我帮你记账。"
+external: true

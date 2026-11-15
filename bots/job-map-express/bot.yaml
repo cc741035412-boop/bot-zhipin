@@ -1,0 +1,16 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: job-map-express
+name: "Job Map Express"
+tagline: "用 JTBD 把用户要完成的事画成步骤和成功指标"
+category: 定义
+author:
+  name: "Mike Boysen"
+templateUrl: https://x.ai/bot/f8P45KE_1HnIUPSqM-EEX
+addedAt: 2026-11-15
+prerequisites:
+  - "告诉它要分析的任务、谁在做、要多细"
+  - "地图是模型推出来的，拿去用前要找真实用户核对"
+quotaCost: 低
+permissions: []
+pitch: "用户到底想办成什么事？我帮你画成步骤。"
+external: true

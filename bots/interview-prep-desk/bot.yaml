@@ -1,0 +1,19 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: interview-prep-desk
+name: "Interview Prep Desk"
+tagline: "按岗位出面试题库，用你的真实经历逐题陪练打分"
+category: 求职
+author:
+  name: "Cypher Monkey"
+  url: https://x.com/Cypher0x9
+templateUrl: https://x.ai/bot/aPnGMEOruUeNLfKtUDc7I
+addedAt: 2026-11-15
+prerequisites:
+  - "目标岗位的 JD，再加三五条你自己的真实经历"
+  - "默认练行为面和岗位基础题，产品 case、估算题要先说明"
+  - "它磨单题、不给过不过的结论；整场彩排配合 The Interviewer 用"
+quotaCost: 低
+permissions:
+  - 联网
+pitch: "按这个岗位出题，你用真事儿来答。"
+external: true

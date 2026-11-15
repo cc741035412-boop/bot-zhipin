@@ -250,9 +250,9 @@ for (const dark of [false, true]) {
     expect(await bot.evaluate((el) => getComputedStyle(el).boxShadow)).toContain('inset')
     // 48 的砖、比例圆角 24%，Bot 占砖内框（去掉 1px 细边）的 68%。
     const stage = await bot.locator('.avatar-stage').boundingBox(), avatar = await bot.getByTestId('avatar').boundingBox()
-    // 列表里不要方砖：52 的格子里 Bot 直接放到 46，身体填满头像框。
+    // 列表里不要方砖：52 的格子里 Bot 直接放到 44，身体填满头像框；跳动时离气泡还留得下尖角。
     expect([stage.width, stage.height]).toEqual([52, 52])
-    expect([avatar.width, avatar.height]).toEqual([46, 46])
+    expect([avatar.width, avatar.height]).toEqual([44, 44])
     await expect(bot.locator('.avatar-stage')).toHaveCSS('border-radius', '24%')
     // 介绍固定两行高，下面不再给气泡留空带：整张卡不超过 190。
     expect((await bot.locator('.bot-tagline').boundingBox()).height).toBe(48)
@@ -312,7 +312,7 @@ test('同一个排序指示块滑动、头像玻璃砖静止不漂移、正热�
   })).toEqual({ animation: 'none', image: 'none', glowAnimation: 'none', glow: true })
   // 首屏唯一一直在流动的是 Hero 背后的极光。
   expect(await page.locator('.hero-aurora > i').first().evaluate((el) => { const css = getComputedStyle(el); return [css.animationIterationCount, css.animationDirection] })).toEqual(['infinite', 'alternate'])
-  await expect(card(page).getByTestId('heat').locator('svg')).toHaveClass('is-hot')
+  await expect(card(page).getByTestId('heat').locator('svg')).toHaveClass(/is-hot/)
   // 没有热度的卡片不显示热度这一项，也不占位。
   await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
 })

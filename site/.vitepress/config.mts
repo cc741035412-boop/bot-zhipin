@@ -8,6 +8,13 @@ export default defineConfig({
   title: SITE.name,
   description: SITE.tagline,
   cleanUrls: true,
+  // 静态图标给没有脚本、不支持 SVG 图标的环境兜底；脚本起来后由 theme/live/favicon.ts 接管。
+  // 三个文件由 npm run gen:favicon 生成。.ico 写 sizes 是为了不让 Chrome 优先选它而放着 SVG 不用。
+  head: [
+    ['link', { rel: 'icon', href: '/favicon.ico', sizes: '32x32' }],
+    ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
+    ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
+  ],
   appearance: true,
   vite: { plugins: [botWatch()] },
   lastUpdated: false,
