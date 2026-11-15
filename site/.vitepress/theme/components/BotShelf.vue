@@ -8,6 +8,7 @@ import { heatState, loadHeat } from '../heat'
 import { categoryStyle } from '../color'
 import BotCard from './BotCard.vue'
 import FeaturedCard from './FeaturedCard.vue'
+import HomeSquads from './HomeSquads.vue'
 import HeroPortrait from './HeroPortrait.vue'
 import SearchTrigger from './SearchTrigger.vue'
 import BzIcon from './BzIcon.vue'
@@ -92,6 +93,7 @@ onBeforeUnmount(() => { alive = false; releaseEntry?.() })
         <FeaturedCard v-for="bot in featured" :key="bot.slug" :bot="bot" />
       </div>
     </section>
+    <HomeSquads />
     <section id="all" class="shelf-section" aria-labelledby="all-title">
       <header class="bz-section-head">
         <div><h2 id="all-title">{{ SHELF_COPY.allTitle }}</h2></div>
