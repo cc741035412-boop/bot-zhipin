@@ -22,13 +22,16 @@ export const HERO_MASCOTS = [
   { key: 'brown', shape: 'pebble', color: '#9a6a3a' },
 ]
 
+// 首页主推：编辑挑的三个，按这个顺序排。这几个不在货架上时（比如测试数据），退回按热度取前三。
+export const FEATURED = ['idea-stress-test', 'quota-saver', 'copy-humanizer']
+
 // 首页货架的固定文案；搜索占位字和搜索面板里的输入框保持一致。
 export const SHELF_COPY = {
   searchPlaceholder: '搜 Bot：名字、分类、作者…',
   searchLabel: '搜索 Bot',
   contribute: '我要投稿',
-  featuredTitle: '精选',
-  featuredSub: '热度最高的三位',
+  featuredTitle: '本周主推',
+  featuredSub: '编辑挑的三个。',
   allTitle: '全部 Bot',
   allCategories: '全部',
   filterLabel: '按分类筛选',

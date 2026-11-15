@@ -250,9 +250,9 @@ for (const dark of [false, true]) {
     expect(await bot.evaluate((el) => getComputedStyle(el).boxShadow)).toContain('inset')
     // 48 的砖、比例圆角 24%，Bot 占砖内框（去掉 1px 细边）的 68%。
     const stage = await bot.locator('.avatar-stage').boundingBox(), avatar = await bot.getByTestId('avatar').boundingBox()
-    expect([stage.width, stage.height]).toEqual([48, 48])
-    expect(avatar.width / (stage.width - 2)).toBeCloseTo(.68, 2)
-    expect(avatar.height / (stage.height - 2)).toBeCloseTo(.68, 2)
+    // 列表里不要方砖：52 的格子里 Bot 直接放到 46，身体填满头像框。
+    expect([stage.width, stage.height]).toEqual([52, 52])
+    expect([avatar.width, avatar.height]).toEqual([46, 46])
     await expect(bot.locator('.avatar-stage')).toHaveCSS('border-radius', '24%')
     // 介绍固定两行高，下面不再给气泡留空带：整张卡不超过 190。
     expect((await bot.locator('.bot-tagline').boundingBox()).height).toBe(48)

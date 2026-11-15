@@ -15,7 +15,7 @@
   -webkit-mask-image: radial-gradient(ellipse 58% 62% at 50% 34%, #000 0%, rgba(0, 0, 0, .9) 24%, rgba(0, 0, 0, .68) 44%, rgba(0, 0, 0, .4) 62%, rgba(0, 0, 0, .18) 78%, rgba(0, 0, 0, .05) 91%, transparent 100%);
   mask-image: radial-gradient(ellipse 58% 62% at 50% 34%, #000 0%, rgba(0, 0, 0, .9) 24%, rgba(0, 0, 0, .68) 44%, rgba(0, 0, 0, .4) 62%, rgba(0, 0, 0, .18) 78%, rgba(0, 0, 0, .05) 91%, transparent 100%);
 }
-/* 三团色光：橙在左、紫居中偏上、青绿在右；各自慢慢漂，只动 transform，不旋转 */
+/* 三团色光：玫红在左、紫居中偏上、青绿在右；各自慢慢漂，只动 transform，不旋转。左边不用橙：橙在黑底上会发棕。 */
 .hero-aurora > i {
   position: absolute; left: calc(50% + var(--bz-glow-x)); top: var(--bz-glow-y);
   width: var(--bz-glow-w); height: var(--bz-glow-h); margin: calc(var(--bz-glow-h) / -2) 0 0 calc(var(--bz-glow-w) / -2);
@@ -23,7 +23,7 @@
   animation: bz-aurora var(--bz-glow-time) ease-in-out infinite alternate;
 }
 /* 横向位置按 1440 宽时的 28% / 52% / 74% 定；更宽的屏幕不再往外散，光始终在砖墙背后 */
-.hero-aurora > i:nth-child(1) { --bz-glow: #ff6a13; --bz-glow-x: max(-22vw, -317px); --bz-glow-y: 40%; --bz-glow-time: 18s; --bz-drift-x: 24px; --bz-drift-y: -14px; }
+.hero-aurora > i:nth-child(1) { --bz-glow: #ff3d6e; --bz-glow-x: max(-22vw, -317px); --bz-glow-y: 40%; --bz-glow-time: 18s; --bz-drift-x: 24px; --bz-drift-y: -14px; }
 .hero-aurora > i:nth-child(2) { --bz-glow: #8b5cf6; --bz-glow-x: min(2vw, 29px); --bz-glow-y: 20%; --bz-glow-time: 24s; --bz-drift-x: -18px; --bz-drift-y: 24px; animation-delay: -9s; }
 .hero-aurora > i:nth-child(3) { --bz-glow: #14b8a6; --bz-glow-x: min(24vw, 346px); --bz-glow-y: 42%; --bz-glow-time: 21s; --bz-drift-x: -24px; --bz-drift-y: -16px; animation-delay: -5s; }
 .hero-aurora > i:nth-child(n + 4) { display: none; }
