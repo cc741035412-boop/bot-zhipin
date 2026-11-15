@@ -1,7 +1,27 @@
 {
+  "competitor-watch": {
+    "color": "#777777",
+    "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
+  "critiquito": {
+    "color": "#000000",
+    "shape": "squircle",
+    "fetchedAt": "2026-11-15"
+  },
+  "dr-eggbot": {
+    "color": "#ff263c",
+    "shape": "teardrop",
+    "fetchedAt": "2026-11-15"
+  },
   "feishu-app-keeper": {
     "color": "#777777",
     "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
+  "idea-stress-test": {
+    "color": "#1084fe",
+    "shape": "squircle",
     "fetchedAt": "2026-11-15"
   },
   "media-downloader": {
@@ -14,9 +34,19 @@
     "shape": "hex",
     "fetchedAt": "2026-11-15"
   },
+  "pm-bot": {
+    "color": "#777777",
+    "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
   "quota-saver": {
     "color": "#ff9800",
     "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
+  "the-interviewer": {
+    "color": "#ff9800",
+    "shape": "blob",
     "fetchedAt": "2026-11-15"
   }
 }
