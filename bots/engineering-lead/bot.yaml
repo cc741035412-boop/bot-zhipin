@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: engineering-lead
 name: "Engineering Lead"
+nameZh: "开发组长"
 tagline: "把开发需求拆给云端编码 agent，盯到 PR 能合并再叫你"
 category: 产品
 author:

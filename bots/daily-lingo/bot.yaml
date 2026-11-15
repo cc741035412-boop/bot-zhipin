@@ -1,6 +1,7 @@
 # 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: daily-lingo
 name: "Daily Lingo"
+nameZh: "外语陪练"
 tagline: "每天 10 分钟外语课，按你的兴趣出题，带复习和打卡"
 category: 学习
 author:

@@ -1,6 +1,7 @@
 # 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: ai-claim-checker
 name: "AI Claim Checker"
+nameZh: "AI 说法核查员"
 tagline: "贴 AI 发布帖或跑分图，逐条核查真假并附出处"
 category: 产品
 author:

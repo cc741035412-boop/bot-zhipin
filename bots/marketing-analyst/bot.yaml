@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: marketing-analyst
 name: "Marketing Analyst"
+nameZh: "投放数据分析师"
 tagline: "把广告投放数据做成周报月报，每个数字都标来源"
 category: 市场
 author:

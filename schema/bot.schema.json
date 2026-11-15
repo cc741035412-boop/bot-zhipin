@@ -15,6 +15,7 @@
       "maxLength": 40
     },
     "name": { "description": "Bot 的名字", "type": "string", "minLength": 1, "maxLength": 20, "pattern": "^[^<>\"]*$" },
+    "nameZh": { "description": "中文叫法（可选）。名字不是中文时可以给一个，像岗位名，一眼看出它干什么；页面上以它为主，原名跟在后面", "type": "string", "minLength": 2, "maxLength": 20, "pattern": "^[^<>\"]*$" },
     "tagline": { "description": "一句话介绍", "type": "string", "minLength": 4, "maxLength": 40, "pattern": "^[^<>\"]*$" },
     "category": {
       "description": "分组",

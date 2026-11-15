@@ -144,7 +144,7 @@ img.squad-still { overflow: clip; border: 1px solid var(--bz-hairline); border-r
 /* ---------- 5. 阵容：一张编制表 ---------- */
 .roster { margin: 0; padding: 0; list-style: none; border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-1); box-shadow: var(--bz-highlight); }
 .roster-row {
-  position: relative; isolation: isolate; display: grid; grid-template-columns: 48px minmax(0, 340px) minmax(0, 1fr) auto; align-items: center;
+  position: relative; isolation: isolate; display: grid; grid-template-columns: 48px minmax(0, 400px) minmax(0, 1fr) auto; align-items: center;
   column-gap: var(--bz-sp-4); min-height: 72px; padding: var(--bz-sp-3) var(--bz-sp-4);
 }
 .roster-row + .roster-row { border-top: 1px solid var(--bz-hairline); }
@@ -159,6 +159,11 @@ img.squad-still { overflow: clip; border: 1px solid var(--bz-hairline); border-r
 }
 .roster-tile { --bz-tile-size: 48px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 .roster-who { display: flex; flex-wrap: wrap; align-items: center; gap: var(--bz-sp-1) var(--bz-sp-2); min-width: 0; }
+/* 宽屏上这一格是定宽的一列：名字是「中文叫法 + 原名」时只占一行，放不下先截原名，岗位标签不往下掉。
+   窄屏上这一格独占一行、够宽，照旧让标签换行，名字不截 */
+@media (min-width: 900px) {
+  .roster-who:has(.bz-name) { flex-wrap: nowrap; }
+}
 .roster-name { min-width: 0; margin-right: var(--bz-sp-1); font-family: var(--bz-font-display); font-size: var(--bz-fs-title); line-height: var(--bz-lh-title); font-weight: 600; letter-spacing: -.01em; color: var(--bz-ink); }
 .roster-name a { color: inherit; text-decoration: none; }
 /* 整行可点进这个成员的详情页：名字的链接铺满整行，头像（戳）和「导入」在它上面 */

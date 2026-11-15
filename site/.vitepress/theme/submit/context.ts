@@ -1,5 +1,5 @@
 export interface SubmitContext {
-  index: Array<{ slug: string; name?: string; templateUrl?: string; authorGithub?: string | null; addedAt?: string; external?: boolean }>
+  index: Array<{ slug: string; name?: string; nameZh?: string; templateUrl?: string; authorGithub?: string | null; addedAt?: string; external?: boolean }>
   template: { files: Record<string, string> }
   copy?: { permissions: Record<string, string>; quota: Record<string, string> }
   limits?: { files: number; fileBytes: number; totalBytes: number; imageBytes: number }

@@ -1,6 +1,7 @@
 # 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: job-map-express
 name: "Job Map Express"
+nameZh: "用户任务梳理员"
 tagline: "用 JTBD 把用户要完成的事画成步骤和成功指标"
 category: 产品
 author:

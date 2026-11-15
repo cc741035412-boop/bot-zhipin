@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: sequencer
 name: "Sequencer"
+nameZh: "开发信排期员"
 tagline: "帮销售排开发信的跟进节奏，只写草稿，由你来发"
 category: 销售
 author:

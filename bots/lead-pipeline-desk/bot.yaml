@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: lead-pipeline-desk
 name: "Lead Pipeline Desk"
+nameZh: "线索管理员"
 tagline: "给销售线索打分去重、分配跟进人、盯住超时没跟的"
 category: 销售
 author:

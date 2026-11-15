@@ -34,7 +34,11 @@ function summarizeAbout(about) {
   return Object.values(summary).some((value) => Array.isArray(value) ? value.length : value !== null) ? summary : null
 }
 
-export function summarizeBot(bot, { asset, names = new Map() } = {}) {
+/**
+ * names / namesZh：slug → 原名 / 中文叫法，只用来给「改编自」那一行找原 Bot 怎么称呼。
+ * 摘要里 name 始终是原名，nameZh 是中文叫法（没写是 null）；界面上怎么称呼由 scripts/lib/bot-name.mjs 定。
+ */
+export function summarizeBot(bot, { asset, names = new Map(), namesZh = new Map() } = {}) {
   const data = bot.data || {}
   const source = `${SITE.repo}/blob/${SITE.branch}/bots/${bot.slug}`
   asset ||= (file) => `/bot-assets/${bot.slug}/${encodeURIComponent(file)}`
@@ -45,6 +49,7 @@ export function summarizeBot(bot, { asset, names = new Map() } = {}) {
   return {
     slug: bot.slug,
     name: data.name,
+    nameZh: text(data.nameZh),
     tagline: data.tagline,
     category: data.category,
     author: {
@@ -65,6 +70,7 @@ export function summarizeBot(bot, { asset, names = new Map() } = {}) {
     about: summarizeAbout(data.about),
     forkedFrom: data.forkedFrom || null,
     forkedFromName: names.get(data.forkedFrom) || data.forkedFrom || null,
+    forkedFromNameZh: text(namesZh.get(data.forkedFrom)),
     external: data.external === true,
     official: data.external === true && typeof author.url === 'string' && author.url.startsWith(OFFICIAL_MARKETPLACE_PREFIX),
     avatar: bot.avatar ? asset('avatar.png') : null,

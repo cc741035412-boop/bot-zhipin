@@ -13,7 +13,7 @@ import { isReducedMotion } from '../live/clock'
 import { lineup, type LineupVariant } from '../squad'
 import type { Play } from '../live/playback'
 
-interface Member { bot: string; name: string; title?: string | null; avatar: string | null; lead: boolean }
+interface Member { bot: string; name: string; nameZh?: string | null; title?: string | null; avatar: string | null; lead: boolean }
 const props = withDefaults(defineProps<{
   members: Member[]
   formation: string
@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
 const layout = computed(() => lineup(props.members, props.formation, props.variant))
 const cast = computed(() => layout.value.slots.map((slot) => {
   const member = props.members.find((item) => item.bot === slot.bot)!
-  return { slot, member, portrait: { slug: member.bot, name: member.name, avatar: member.avatar }, palette: botPalette(member.avatar ? '#8a8a93' : avatarColor(member.bot)) }
+  return { slot, member, portrait: { slug: member.bot, name: member.name, nameZh: member.nameZh, avatar: member.avatar }, palette: botPalette(member.avatar ? '#8a8a93' : avatarColor(member.bot)) }
 }))
 const stage = computed(() => props.variant === 'stage')
 const hovered = ref<string | null>(null)

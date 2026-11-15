@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: event-producer
 name: "Event Producer"
+nameZh: "活动统筹"
 tagline: "办活动的流程表、嘉宾名单和当天清单，它一条龙排好"
 category: 运营
 author:
