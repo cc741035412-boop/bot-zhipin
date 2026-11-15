@@ -12,18 +12,18 @@ featured:
     note: 改稿不改意思，每处改动都告诉你为什么。写完的东西有 AI 味，交给它。
 
 # 「推荐」排序的置顶顺序，排在前面的先出现；没写进来的 Bot 排在它们后面。
-picks: [idea-stress-test, pm-bot, critiquito, startup-qa-bot, competitor-watch, product-marketer, ai-search-visibility, sales-call-coach, copy-humanizer, media-downloader, writing-bot, video-editor, clip-bot, video-edit-desk, x-brief, event-producer, meeting-recap-deck, quota-saver, memory-keeper, feishu-app-keeper, dr-eggbot, the-interviewer, pfp-bot]
+picks: [idea-stress-test, pm-bot, critiquito, startup-qa-bot, competitor-watch, product-marketer, ai-search-visibility, sales-call-coach, copy-humanizer, media-downloader, writing-bot, video-editor, clip-bot, video-edit-desk, x-brief, event-producer, meeting-recap-deck, quota-saver, memory-keeper, feishu-app-keeper, dr-eggbot, the-interviewer, pfp-bot, zuozuo-ai-intel, wechat-article-catcher, ledger-keeper, decoder, resume-tailor-desk, ai-pm-os]
 
 # 专题，按这里写的顺序显示；每个专题 2～12 个 Bot，Bot 也按写的顺序排。
 collections:
   - slug: zero-setup
     title: 零门槛上手
     blurb: 不用连账号，贴进去就能用
-    bots: [idea-stress-test, writing-bot, critiquito, copy-humanizer, sales-call-coach, event-producer, the-interviewer, meeting-recap-deck]
+    bots: [idea-stress-test, writing-bot, critiquito, copy-humanizer, sales-call-coach, event-producer, the-interviewer, meeting-recap-deck, decoder, wechat-article-catcher, resume-tailor-desk]
   - slug: pm-kit
     title: 产品经理工具箱
     blurb: 从调研到验收，按干活的顺序排好了
-    bots: [competitor-watch, last30days, idea-stress-test, pm-bot, proto-bot, figma-bro, critiquito, startup-qa-bot]
+    bots: [competitor-watch, last30days, idea-stress-test, pm-bot, proto-bot, figma-bro, critiquito, startup-qa-bot, ai-pm-os, red-team, job-map-express, experiment-designer]
   - slug: solo-video
     title: 一个人做短视频
     blurb: 找选题、扒素材、剪片子、出封面
@@ -31,11 +31,11 @@ collections:
   - slug: daily-brief
     title: 每天一份简报
     blurb: 定好时间它们自己跑，早上看结果
-    bots: [x-brief, overheard, competitor-watch, market-researcher, ai-search-visibility, startup-qa-bot, ad-spend-watch]
+    bots: [x-brief, overheard, competitor-watch, market-researcher, ai-search-visibility, startup-qa-bot, ad-spend-watch, zuozuo-ai-intel, ai-daily-radar, grok-bot-changelog]
   - slug: community
     title: 社区原创
     blurb: 中文作者做的，解决的是我们自己的麻烦
-    bots: [quota-saver, memory-keeper, feishu-app-keeper, media-downloader, the-interviewer]
+    bots: [quota-saver, memory-keeper, feishu-app-keeper, media-downloader, the-interviewer, wechat-article-catcher, ledger-keeper, bill-import, weight-coach, zuozuo-ai-intel, memory-cleanup, sweeper]
 
 # 详情页的「编辑点评」：Bot 的 slug 对应一句话，4～100 字。
 editorNotes:
@@ -81,7 +81,7 @@ editorNotes:
   ledger-keeper: 本地优先，飞书出问题也照记，是很实用的国内记账方案。授权连文档和知识库都要了，入账也不预览，记错要自己改。
   market-researcher: 方法讲究：按投放天数判断素材疲劳，实测和推断分开标。周报要截大量图，单次很耗额度。
   marketing-analyst: 数字处处有出处，不编原因。简介说会盯花费，可没排定时任务，得自己喊它查；问数邮件每小时巡检很烧额度。
-  media-downloader: 作者在 X 上的介绍帖有 880 多个收藏。有字幕先用字幕，转写走国内的阿里云百炼，B 站、小宇宙都认，对国内用户顺手。英文内容要中文稿，得另外说一声翻译。
+  media-downloader: 作者在 X 上的介绍帖有 880 多个收藏。有字幕先用字幕，转写走国内的阿里云百炼，B 站、小宇宙都认，对国内用户顺手。只出原文稿，不带翻译。
   meeting-recap-deck: 每行都能追回笔记，原话和数字不编，缺了就标出来。会后自动起草要连日历和笔记来源。
   memory-cleanup: 先批后删很稳，还会揪出权限给得太宽的记忆。它本质是一份技能，装进要清理的那个 Bot 里用更靠谱。
   memory-keeper: Bot 多了以后备份是刚需，国内麦当 Bot 小镇照它的玩法做的卡片被认领了 669 次。密钥不进仓库，没配好远程仓库不会说备份完成。令牌只授权这一个仓库、设好过期时间。

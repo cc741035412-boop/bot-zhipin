@@ -13,6 +13,8 @@ prerequisites:
   - 做网页按钮界面那个技能会在共享云电脑上装 Tailscale 并联网
 quotaCost: 高
 permissions:
+  - 云电脑文件
+  - 联网
   - 定时自动运行
 external: true
 pitch:
