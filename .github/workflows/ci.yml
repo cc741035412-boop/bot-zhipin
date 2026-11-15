@@ -1,10 +1,11 @@
 # 提 PR 时检查：校验所有 Bot、跑测试、构建网站。
-# 只用 pull_request 触发，不使用特权事件；只读权限，不需要任何密钥。
+# PR 或手动派发触发；只读权限，不需要任何密钥。
 name: CI
 
 on:
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -29,7 +30,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: 检查投稿范围与上架日期
-        run: node scripts/check-pr-scope.mjs --base HEAD^1 --head HEAD --association "${{ github.event.pull_request.author_association }}"
+        run: node scripts/check-pr-scope.mjs --base HEAD^1 --head HEAD --association "${{ github.event_name == 'pull_request' && github.event.pull_request.author_association || 'CONTRIBUTOR' }}"
       - name: 校验所有 Bot
         run: npm run validate
       - name: 单元测试

@@ -107,14 +107,14 @@ it('ref 不存在或形似 git 选项时中文失败，不接受工作区替代�
   }
 })
 
-it('CI 只读 pull_request，拉取两层历史并按合并提交首父检查范围', () => {
+it('CI 只读 PR/手动派发，拉取两层历史并按首父严格检查范围', () => {
   const workflow = YAML.parse(readFileSync(join(ROOT, '.github/workflows/ci.yml'), 'utf8'))
-  expect(Object.keys(workflow.on)).toEqual(['pull_request'])
+  expect(Object.keys(workflow.on)).toEqual(['pull_request', 'workflow_dispatch'])
   expect(workflow.permissions).toEqual({ contents: 'read' })
   const steps = workflow.jobs['validate-and-build'].steps
   const checkout = steps.find((step) => step.uses?.startsWith('actions/checkout@'))
   expect(checkout.with).toMatchObject({ 'fetch-depth': 2, 'persist-credentials': false })
   const scope = steps.find((step) => step.run?.includes('check-pr-scope.mjs'))
-  expect(scope.run).toBe('node scripts/check-pr-scope.mjs --base HEAD^1 --head HEAD --association "${{ github.event.pull_request.author_association }}"')
+  expect(scope.run).toBe('node scripts/check-pr-scope.mjs --base HEAD^1 --head HEAD --association "${{ github.event_name == \'pull_request\' && github.event.pull_request.author_association || \'CONTRIBUTOR\' }}"')
   expect(steps.indexOf(scope)).toBeLessThan(steps.findIndex((step) => step.run === 'npm run validate'))
 })
