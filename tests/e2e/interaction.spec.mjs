@@ -228,10 +228,10 @@ for (const dark of [false, true]) {
     const surface = dark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 20, 24, 0.03)'
     const hairline = dark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(20, 20, 24, 0.08)'
     await expect(page.locator('body')).toHaveCSS('background-color', background)
-    // 「我要投稿」在首页底部的飞轮第三步里，是一枚中性的次级按钮：圆角 8、高 36、墨色字，不是胶囊。
+    // 「我要投稿」挪到页尾，是一枚中性的次级按钮：圆角 8、高 36、墨色字，不是胶囊。
     const contribute = page.getByTestId('contribute-link')
     await expect(page.getByTestId('ballpit').getByTestId('contribute-link')).toHaveCount(0)
-    await expect(page.getByTestId('flywheel').getByTestId('contribute-link')).toHaveCount(1)
+    await expect(page.locator('.shelf-footer').getByTestId('contribute-link')).toHaveCount(1)
     await expect(contribute).toHaveCSS('border-radius', '8px')
     await expect(contribute).toHaveCSS('color', ink)
     expect((await contribute.boundingBox()).height).toBe(36)

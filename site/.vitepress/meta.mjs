@@ -79,18 +79,6 @@ export const NOT_FOUND = {
 
 export const CONTRIBUTE_URL = '/submit'
 
-// 首页最后一块「飞轮」：这个货架怎么转起来。用户要求加（2026-11-15「讲一下我这个东西的飞轮」），文字给用户审过再上线。
-// 四步围成一圈，第四步回到第一步；第三步带「我要投稿」按钮。mascot 是 HERO_MASCOTS 里的 key。
-export const FLYWHEEL = {
-  title: '飞轮',
-  steps: [
-    { title: '找到 Bot', text: '按分组、小队、专题找，一键导入 Grok Bot', mascot: 'blue' },
-    { title: '用起来', text: '放进真实工作里用，改成你自己的', mascot: 'orange' },
-    { title: '投稿上架', text: '调好的 Bot 和小队投上来，署你的名', mascot: 'pink' },
-    { title: '被更多人看见', text: '导入越多热度越高，好作品进主推', mascot: 'mint' },
-  ],
-}
-
 // 全站页脚。用户定（2026-11-15）：创建人「贾程博 · 深圳且曼学院」，鸣谢只写且曼学院，放开源仓库链接。
 export const FOOTER = {
   creatorLabel: '创建人',

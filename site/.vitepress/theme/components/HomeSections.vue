@@ -1,5 +1,5 @@
 <!--
-  首页首屏以下的全部区块：本周主推 → 小队 → 专题 → 全部 Bot（工具栏 + 列表）→ 飞轮。
+  首页首屏以下的全部区块：本周主推 → 小队 → 专题 → 全部 Bot（工具栏 + 列表）→ 页尾。
   「全部 Bot」有三种状态：按分组分段（默认）、选中单个分组、专题筛选。分组和专题写进地址栏（?role= / ?c=）。
 -->
 <script lang="ts">
@@ -31,7 +31,6 @@ import BzIcon from './BzIcon.vue'
 import DefaultAvatar from './DefaultAvatar.vue'
 import FeaturedCard from './FeaturedCard.vue'
 import HomeCollections from './HomeCollections.vue'
-import HomeFlywheel from './HomeFlywheel.vue'
 import HomeSquads from './HomeSquads.vue'
 import RoleGroup from './RoleGroup.vue'
 import ShelfToolbar from './ShelfToolbar.vue'
@@ -216,5 +215,7 @@ onBeforeUnmount(() => {
     </div>
   </section>
 
-  <HomeFlywheel v-if="bots.length" />
+  <footer v-if="bots.length" class="shelf-footer">
+    <a data-testid="contribute-link" class="bz-btn" :href="CONTRIBUTE_URL"><BzIcon name="plus" />{{ SHELF_COPY.contribute }}</a>
+  </footer>
 </template>
