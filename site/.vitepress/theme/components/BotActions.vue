@@ -3,6 +3,8 @@ import { nextTick, onBeforeUnmount, ref } from 'vue'
 import { installPrompt } from '../../meta.mjs'
 import { reportClick } from '../heat'
 import { announceCopy } from '../announce'
+import { useBotAction } from '../live/scope'
+const play = useBotAction()
 import ExternalHint from './ExternalHint.vue'
 
 const props = defineProps<{ bot: { slug: string; templateUrl: string; external: boolean } }>()
@@ -17,6 +19,7 @@ async function copyPrompt() {
   try {
     await navigator.clipboard.writeText(installPrompt(props.bot.slug))
     copied.value = true
+    play({ state: 'wink' })
     void announceCopy()
     clearTimeout(timer)
     timer = setTimeout(() => { copied.value = false }, 1800)
@@ -28,6 +31,10 @@ async function copyPrompt() {
     field.value?.select()
   }
 }
+function importBot() {
+  play({ state: 'comet' })
+  reportClick(props.bot.slug, 'import')
+}
 function backdrop(event: MouseEvent) {
   if (event.target !== dialog.value) return
   const bounds = dialog.value.getBoundingClientRect()
@@ -38,7 +45,7 @@ onBeforeUnmount(() => clearTimeout(timer))
 
 <template>
   <div class="bot-actions">
-    <a data-testid="btn-import" class="shelf-button primary" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="reportClick(bot.slug, 'import')">一键导入<ExternalHint /></a>
+    <a data-testid="btn-import" class="shelf-button primary" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot">一键导入<ExternalHint /></a>
     <button v-if="!bot.external" ref="copyButton" data-testid="btn-prompt" type="button" class="shelf-button" :class="{ copied }" @click="copyPrompt">{{ copied ? '已复制 ✓' : '复制安装提示词' }}</button>
   </div>
   <dialog v-if="fallback && !bot.external" ref="dialog" class="prompt-fallback" data-testid="prompt-fallback" :aria-labelledby="`copy-title-${bot.slug}`" :aria-describedby="`copy-help-${bot.slug}`" @click="backdrop" @close="fallback = false; copyButton?.focus()">

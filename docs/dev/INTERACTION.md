@@ -1,166 +1,238 @@
-# 交互与视觉规格（第一期）
+# 交互与视觉规格（v2：会动的真脸 + 活泼彩色）
 
-本文件是 P4「交互实现」的依据。来源：实测旧 Bot 直聘页（只取通用手感，不取品牌元素，不复用代码），加上新站需要补齐的状态。
-所有数值是目标值；实现时以「验收要点」为准，数值可以 ±2px 微调，但不能破坏验收要点。
+这是本轮要实现的规格，不代表代码已经完成。真源为 2026-11-14 已批准计划及 LB1、LB2、LB4 契约；接口和数值以契约为准。验收容差由批次目录 `verify/` 的脚本定义，不再统一允许任意 ±2px 微调。
 
 ## 0. 原则
 
-1. **保留的手感**：卡片顶部的「舞台」+ Bot 自己颜色的光晕；头像压扁拉伸地跳一下；台词气泡从头像上方冒出来；鼠标移入就说、移开就收；全页同时只开一个气泡；同一个 Bot 不连说同一句。
-2. **视觉风格沿用旧站**（2026-11-14 产品定）：黑白墨色体系、黑底胶囊主按钮、漫画式「描边 + 硬投影」台词气泡、舞台光晕。只复刻视觉数值，代码全部自写；在此基础上做下面这些优化。
-3. **修掉的旧缺陷**：两行台词压住头像；气泡末行孤字；焦点环撞气泡；单列卡片过宽；三级文字对比度不够；按钮触摸目标太小；减少动效时连淡入也没了；键盘按 Enter/空格没反应；混合设备（触摸过一次后键盘不再触发）。
-4. **只用 VitePress 自带字体和 CSS 变量为底**，新增 token 统一用 `--bz-` 前缀，写在一个样式文件里，浅色深色各一套。
+1. **活泼彩色**：页面圆润、柔和；舞台、按钮、标签和阴影随 Bot 配色。用户 2026-11-14 推翻旧视觉决定，见决策 19。
+2. **Bot 是活的**：呼吸、眨眼、视线漂移；全卡悬停有反应，Hero 也能互动。变形只作短暂彩蛋，常驻反应优先保留自身轮廓。
+3. **真脸**：读取官方公开的颜色和形状名；复用 MIT bloub 或原创轮廓，不复制 x.ai 路径、眼睛坐标或代码。
+4. **可用性底线不降**：键盘、触摸、读屏、焦点、对比度、减少动效全部保留；全页只开一个气泡，气泡不能压头像。字体不联网，新增 token 统一 `--bz-`。
 
-## 1. 设计 token
+## 1. 设计 token 与配色
 
-整个界面是「墨色 ↔ 纸色」两色，深色模式两者互换；每个 Bot 的颜色是页面上唯一的彩色。
+浅色写在 `:root`，深色写在 `.dark`。颜色混合一律用 `color-mix(in srgb, …)`。
 
-| token | 浅色 | 深色 | 用途 |
-|---|---|---|---|
-| `--bz-ink` | `#0a0a0c` | `#f4f4f5` | 标题、名字、主按钮底色、气泡描边和硬投影、焦点环、卡片悬停边框 |
-| `--bz-ink-hover` | `#2a2a2e` | `#e4e4e7` | 主按钮悬停 |
-| `--bz-paper` | `#ffffff` | `#101014` | 页面和卡片背景、主按钮文字、气泡背景（深色模式下 VitePress 的背景变量也改成这个值） |
-| `--bz-text-2` | `#4a4a52` | `#c2c2ca` | 导语、一句话介绍 |
-| `--bz-text-3` | `#6b6b72` | `#9a9aa4` | 作者、日期、热度等三级文字（旧站浅色 `#929295` 对比度不够，改深） |
-| `--bz-border` | `#ececee` | `#2c2c33` | 卡片和描边按钮的边框 |
-| `--bz-surface-soft` | `#f4f4f5` | `#1a1a1f` | 标签底色、分段控件底色 |
-| `--bz-success` | `#16a34a` | `#4ade80` | 「已复制」 |
-| `--bz-quota-low/mid/high` | `#15803d` / `#b45309` / `#b91c1c` | `#4ade80` / `#fbbf24` / `#f87171` | 额度标签文字（背景用同色 12% 混合） |
-| `--bz-radius-card` | 24px | | 卡片圆角 |
-| `--bz-shadow-hover` | `0 18px 40px -24px rgba(10, 10, 12, .35)` | `0 18px 40px -24px rgba(0, 0, 0, .65)` | 卡片悬停阴影 |
-| `--bz-ease-pop` | `cubic-bezier(.3, 1.5, .5, 1)` | | 气泡弹出、头像跳动 |
+| token | 浅色 | 深色 |
+|---|---|---|
+| `--bz-page` / `--vp-c-bg` | `#f6f5f1` | `#0c0c0f` |
+| `--bz-card` / `--bz-paper` | `#ffffff` | `#16161b` |
+| `--bz-ink` | `#141418` | `#f4f4f5` |
+| `--bz-ink-hover` | `#2c2c33` | `#e4e4e7` |
+| `--bz-text-2` | `#4a4a52` | `#c2c2ca` |
+| `--bz-text-3` | `#62626b` | `#9d9da8` |
+| `--bz-border` | `#ebe8e1` | `#26262d` |
+| `--bz-surface-soft` | `#efede7` | `#1f1f25` |
+| `--bz-flame` | `#f97316` | `#fb923c` |
+| `--bz-success`（保留） | `#16a34a` | `#4ade80` |
+| `--bz-quota-low/mid/high`（保留） | `#15803d` / `#b45309` / `#b91c1c` | `#4ade80` / `#fbbf24` / `#f87171` |
 
-字体用 VitePress 默认（Inter + 系统中文字体）。Bot 颜色：默认头像用 bloub 选出的颜色做舞台光晕和 hero 中心头像的投影；有自定义 avatar.png 的用中性灰 `#8a8a93` 做光晕。
+- `--bz-radius-card: 28px`；`--bz-shadow-card` 为柔和两层阴影，契约未固定两层的偏移数值。
+- `--bz-shadow-hover` 为 Bot 染色阴影，颜色用 `color-mix(in srgb, var(--bz-bot-color) 55%, transparent)`。
+- `--bz-ease-spring: cubic-bezier(.34,1.56,.64,1)`；旧 `--bz-ease-pop` 继续可用。
+- `--bz-font-display: ui-rounded, "SF Pro Rounded", "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif`。用于站名、卡片名字、按钮、标签、气泡、排序控件、详情页标题；正文沿用系统字体。不加载网络字体或外部样式。
+- 兼容 /submit：不得删除或改名 `--bz-ink`、`--bz-ink-hover`、`--bz-paper`、`--bz-border`、`--bz-text-2`、`--bz-text-3`、`--bz-surface-soft`、`--bz-success`、`--bz-quota-*`、`--bz-radius-card`、`--bz-shadow-hover`、`--bz-ease-pop`。额度背景仍用同色 12% 混合。
 
-## 2. 首页布局
+`theme/color.ts` 是纯函数配色层：
 
-- 容器：`max-width: 1120px`（含内边距），左右内边距 24px（≤680px 时 16px），上 32px、下 96px；hero 上 32px、下 40px。
-- **Hero**（居中）：
-  - 一排小头像：取「最新」排序的前 5 个 Bot（不足 5 个有几个放几个），中间最大、两边递减（尺寸系数 1.5 / 1.2 / 1.1，基准 `min(52px, 8vw)`），间距 6px，中间那个两侧再各加 6px，底边对齐，中间那个加 `drop-shadow(0 10px 14px <自身颜色 30%>)`。`aria-hidden="true"`，不响应悬停。
-  - 站名 h1：`clamp(36px, 6vw, 56px)` / 700 / 行高 1.1 / 字距 -0.03em，`--bz-ink`，`text-wrap: balance`。
-  - 一句话介绍：17px / 行高 1.7 / `--vp-c-text-2`，`text-wrap: balance`，最大宽度 34em。
-  - 「我要投稿」：黑底胶囊主按钮（高 40px，左右 20px，14/600，同卡片主按钮样式），前置一个小加号图标，链到 CONTRIBUTE_URL，新标签打开，带外链标记（§6）。
-- **工具条**（网格上方，左右分布）：左边「热门 / 最新」分段控件（§5），右边「共 N 个 Bot」（13px，`--bz-text-3`）。
-- **网格**：≥1100px 三列，680–1099px 两列，<680px 一列且卡片 `max-width: 520px` 居中；间距 20px（<680px 时 16px）；同一行卡片等高，按钮贴底对齐。
+| 接口 | 规则 |
+|---|---|
+| `contrast(a, b)` | WCAG 对比度 |
+| `darkSwap(hex)` | 相对亮度 L < 0.04 时换 `#f1efe9`，否则原色；返回小写 |
+| `buttonColors(hex)` | fg 从 `#ffffff`、`#141418` 选对比度较高者；仍 < 4.5 时，白字的 bg 每次向黑混 4%，深字的 bg 每次向白混 4%，直到 ≥ 4.5；返回小写 hex `{ bg, fg }` |
+| `botPalette(hex)` | 返回 `--bz-bot-light`、`--bz-bot-dark`、`--bz-btn-bg-light`、`--bz-btn-fg-light`、`--bz-btn-bg-dark`、`--bz-btn-fg-dark`；dark 按 darkSwap 后的颜色计算 |
 
-## 3. 卡片
+卡片 article、详情头部、每个 Hero 头像容器均加 `bz-bot-scope` 并绑定 `botPalette`。CSS 将 `--bz-bot-color`、`--bz-btn-bg`、`--bz-btn-fg` 指向 light 或 dark 组，不用 JS 监听主题。颜色来自 `avatarColor(slug)`；自定义头像用中性灰 `#8a8a93`。
 
-自上而下：
+## 2. 首页布局和 Hero
+
+- 容器 max-width 1120px（含内边距），左右 24px（≤680px 时 16px），上 32px、下 96px；Hero 上 32px、下 40px。
+- 网格 ≥1100px 三列，680–1099px 两列，<680px 一列且卡片 max-width 520px 居中；间距 20px，窄屏 16px。同一行等高，按钮贴底。
+- Hero 取「最新」前 7 个，不足则按实际数量；<680px 显示 5 个。推荐 SSR 渲染 7 个再由 CSS 隐藏两端，不能 hydration 不一致。
+- `.hero-portraits` / `.hero-portrait` 保留。按离中心距离 0/1/2/3，盒子宽高为 96/80/68/60px；<680px 乘 0.75，<400px 改乘 0.62（不是叠乘）。底边齐，间距 14px（<680px 为 6px），共用柔和地面阴影。
+- h1 为 `clamp(40px,7vw,64px)` / 800，行高 1.1、字距 -0.03em，balance；介绍 17px / 1.7，最大 34em，balance。装饰光斑不得降低文字对比度。
+- 「我要投稿」仍为墨色胶囊加小加号，高 ≥40px，触摸 ≥44px，左右 20px；圆体 14/700，悬停上浮 2px；链接 CONTRIBUTE_URL。
+- 工具条左侧排序、右侧「共 N 个 Bot」（13px、三级文字色）。Hero 保留 `aria-hidden`，悬停和戳按 §5。
+
+## 3. 卡片、舞台和气泡
 
 | 区域 | 规格 |
 |---|---|
-| 外壳 | 圆角 24px，1px `--bz-border`，背景 `--bz-paper`，无阴影；内边距左右 24px、下 24px |
-| 舞台 | 贴满卡片顶部（抵消左右内边距），高 **220px**（旧站 176，加高是为了两行气泡不压头像、也不顶到卡片上沿），顶部圆角 23px；背景 `radial-gradient(ellipse 120px 72px at 50% 72%, <色> 24%, <色> 8% 55%, transparent)`。头像底边距舞台底 24px，水平居中 |
-| 头像 | 92×92px。默认头像是 SVG；自定义 avatar.png 用圆形裁切（`object-fit: cover`，1px `--bz-border` 描边）。头像本身是一个 `<button>`（§4） |
-| 名字 | h2，21px / 700 / 行高 1.3 / 字距 -0.01em，`--bz-ink`，链到详情页（`detail-link`），无下划线；悬停加下划线 |
-| 标签行 | 分类标签（12px，`--bz-surface-soft` 底，圆角 999px，高 22px，左右 8px）+ 外部收录的再加「外部收录」标签 + 作者「by 名字」（13px，`--bz-text-3`，链到作者主页，新标签） |
-| 一句话介绍 | 15px / 行高 1.65 / `--vp-c-text-2`，最多 2 行（超出省略号），`flex: 1` 把下面的内容推到底 |
-| 热度行 | 小火苗图标（16px，`currentColor`）+「热度 N」，13px，`--bz-text-3`，`font-variant-numeric: tabular-nums`。加载中显示「热度 …」并降低不透明度；接口失败显示「热度 —」，`title="热度暂时获取不到"` |
-| 按钮行 | 「一键导入」主按钮（`--bz-ink` 底、`--bz-paper` 字）+「复制安装提示词」次按钮（1px `--bz-border` 描边、`--bz-ink` 字），间距 10px；高 40px（触摸设备 `@media (pointer: coarse)` 44px），左右 18px，14/600，圆角 999px。宽度不够时两个按钮各占一行、撑满。外部收录只有「一键导入」 |
+| 外壳 `.bot-card` | 纯色 `--bz-card`，1px 边框（深色 `#26262d`），圆角 28px，柔和两层阴影，左右和底部内边距 22px |
+| 悬停 | 仅 `@media (hover:hover)`；全卡上浮 4px，染色阴影；220ms 弹簧过渡，450ms 内稳定在 -4px |
+| 舞台 `.avatar-stage` | 高 236px，左右抵消 22px，顶角 27px；自身 background-image 上放 2–3 层 radial-gradient，不放伪元素；底色为 Bot 色 10% 混卡片色，深色提高混色比例 |
+| 舞台动效 | 光斑 background-position 以 18 秒 ease-in-out infinite alternate 漂移；脚下约 96×14px 椭圆地面阴影不动 |
+| 头像 | `[data-testid=avatar]` 按钮 112×112px，距舞台底 22px，居中；`--bz-eye: var(--bz-card)`，眼睛挖空露卡片底；自定义图圆形裁切、object-fit cover、1px 边框 |
+| 名字 | h2，21px/700/1.3，字距 -0.01em；详情链接 `detail-link`，悬停下划线 |
+| 分类标签 | 圆体 12px/600，Bot 色 14% 混卡片底，`--bz-text-2` 字；高 22px，左右 8px，圆角 999px；外部条目另有「外部收录」 |
+| 作者 | 「by 名字」，13px、三级文字色，作者主页新标签 |
+| 介绍 | `.bot-tagline`，15px/1.65、二级文字色，最多两行省略，flex:1 |
+| 热度 | 16px 火苗 +「热度 N」，13px 三级文字色，tabular-nums；>0 火苗变 `--bz-flame`，文字不变；加载「热度 …」，失败「热度 —」，title 为「热度暂时获取不到」 |
+| 按钮 | `.shelf-button` 圆体 14/700，圆角 999px，高 ≥40px，触摸 ≥44px，左右 18px、间隔 10px；窄时各占一行；外部收录只有导入 |
+| 导入 `.primary` | `--bz-btn-bg` 纯色底、`--bz-btn-fg` 字，不用渐变 |
+| 复制 | 1.5px Bot 色 45% 混边框色的描边，墨色字；悬停染 10% Bot 色；按下两类按钮均 scale(.96) 弹簧回弹 |
 
-卡片状态：
+名字、介绍、作者、热度、标签、按钮背后必须是纯色；浅深主题文字和按钮对比度均 ≥4.5。保留 `.bot-tag` 等现有类名和全部 data-testid。
 
-| 状态 | 视觉 |
+### 气泡几何与跳动
+
+- 气泡底到头像顶净距 **≥34px**：`bottom = 22 + 112 + 34 = 168px`。给上移约 10px、纵向拉伸 5%、尖角留余量；逐帧仍须满足尖角下沿距头像上沿 ≥8px，气泡上沿在舞台内。不能只看静止帧。
+- 底色卡片色，2px 墨色描边、圆角 16px，硬投影 `3px 3px 0 var(--bz-bot-color)`；圆体 14px/700/1.45，内边距 8px 14px。尖角为旋转 45° 的 12px 方块，仅右、下 2px 描边。
+- 水平居中，向上生长；width:max-content，max-width:min(260px, 100% - 32px)；最多两行，line-clamp:2、text-wrap:balance 防孤字。
+- 弹出 opacity 0→1 180ms；位移 +6px→0、scale .92→1 280ms 弹簧缓动，原点底部中心；收起 opacity 120ms，位移和缩放倒放。
+- 跳动原点脚底，560ms、每段弹性缓动；沿用 0/24/54/80/100% 的 translateY 0/2/-12/0/0px 与 scale (1,1)/(1.07,.92)/(.96,1.05)/(1.02,.98)/(1,1)，同时必须通过新尺寸下的逐帧净距验收。悬停和键盘说话重新触发；鼠标/触摸戳只播 Bot 变身、不叠加按钮位移，连续点击保持稳定命中。
+- 每卡 `data-testid=pitch-bubble`，`data-open="true|false"`；全页最多开一个。有 pitch 用 pitch，没有则 DEFAULT_PITCHES 随机且不连续重复；戳时改用 §5 专用台词。
+- 头像按钮 `aria-label="听听{名字}的自荐"`；打开时 aria-describedby 指向独立的 `bz-sr-only` 全文元素。视觉 tooltip 设 aria-hidden、不用 aria-live；气泡 `data-text` 从打开起就是全文，内部唯一一个 span 用于逐字层，`[data-testid=typing]` 用 i 容器及三个 i 点、aria-hidden，避免逐字播报。初次加载不自动开气泡。
+- focus-visible：2px 墨色 outline，offset 2px，头像圆形且 offset 4px；不挡气泡。
+
+## 4. 活体头像与接口
+
+常驻动作由引擎 liveliness 提供：呼吸、自然眨眼、视线漂移。渲染方式参考 jeremy-prt/bloub `BloubBot.vue`（MIT，b4bb3c1），保留 mask 挖眼及粒子、圆环前后层次，不修改 vendor。
+
+### 视线跟随与生命周期
+
+`theme/live/gaze.ts` 的 `lookAt(dx, dy)`：
+
+```text
+nx = clamp(dx / 480, -1, 1)
+ny = clamp(dy / 360, -1, 1)
+yaw = nx * 16°
+pitch = 10° - ny * 13°
+Look = { yaw, pitch, mix: 1, spin: 0, wander: 0 }
+```
+
+16/13/10 来自 bloub `ui/gaze.ts` 的 YAW_MAX/PITCH_MAX/PITCH（MIT），不带上游面板专用 -TURN 或 spin 偏移。非有限输入当 0。全局仅一个 passive pointermove，touch 忽略；可见 Bot 在鼠标更新时以自己的中心计算，宽高为 0 跳过。鼠标 4 秒不动、离开文档（relatedTarget 为空）或窗口失焦时 `setLook(null, t, 0.6)`，0.6 秒回落并恢复漂移。
+
+`theme/live/clock.ts`：`register(client): () => void`，client 含 el 和 tick(t)，t 单位秒。全站一个 rAF、一个 IntersectionObserver。仅可见 client tick；全离屏、document.hidden 或 reduce 时停止调度，不空转，不用 setInterval。离屏 500ms 内 data-running=false，隐藏后立即 false，恢复时 true。
+
+SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂载后接管。mask id 用 Vue useId，不用随机数，不能有 hydration 警告。
+
+### LiveBot DOM 与事件
+
+`components/LiveBot.vue` 根元素就是 svg，不加外包层：class=bz-live、viewBox="-158 -158 316 316"、aria-hidden=true。
+
+| 标记 / props | 含义 |
 |---|---|
-| 默认 | 如上 |
-| 悬停（鼠标在卡片任意位置） | 上浮 3px，边框变 `--bz-ink`，阴影 `--bz-shadow-hover`；200ms ease |
-| 主按钮悬停 / 按下 | 背景 `--bz-ink-hover` / `scale(.97)` |
-| 次按钮悬停 / 按下 | 边框变 `--bz-ink` / `scale(.97)` |
-| 键盘聚焦（按钮、链接、头像） | 统一 `outline: 2px solid var(--bz-ink); outline-offset: 2px`（头像为圆形，offset 4px）；只在 `:focus-visible` 时出现 |
-| 复制成功 | 次按钮文字变「已复制 ✓」，文字和边框 `--bz-success`，1.8 秒后恢复；同时通过页面唯一的读屏播报区播报「已复制安装提示词」 |
-| 复制失败 | 打开「手动复制」对话框（§7） |
+| `data-testid="live-bot"` | 活体根 SVG |
+| `data-state="idle|…"` | 当前引擎状态 |
+| `data-running="true|false"` | 当前是否被 tick |
+| `data-follow="pointer|rest"` | 指针跟随或自身视线 |
+| `data-shape` / shapeId | 原样输出形状 id |
+| `data-part="body"` | 身体垫底 path，带 d，填 `var(--bz-eye, var(--vp-c-bg))` |
+| `data-part="fill"` | mask 内身体填色 rect；DefaultAvatar 传入 `var(--bz-bot-body)` |
+| rest | 基础状态，默认 idle；卡片/Hero 悬停 wide、空货架 sleep、404 thinking |
+| `data-part="eye"` | mask 内两眼 path；transform 直接用引擎 matrix(...)，opacity 用 alpha |
+| `data-part="dot|arc|notif"` | 粒子 / 圆环 / 通知点 |
+| radii / color | number[] 或 null（圆）；color 接受 CSS 变量，身体用 style fill，不用 fill 属性 |
+| outline / size | 可选描边色；有值沿身体画 1.5px、non-scaling-stroke；SVG width/height 默认 96，外层 CSS 决定显示尺寸 |
 
-## 4. 头像、跳动和台词气泡
+在根 SVG 派发 `bz-play` 自定义事件，`detail = { state: StateId, hold?: number }`。不在 STATE_BY_ID 的状态或 reduce 时忽略；否则 setState(state,t)，持续 `hold ?? 状态 duration` 秒（共享时钟）后回 rest；`hold: Infinity` 一直保持，NaN/-Infinity 回退 duration，负数归零。新事件打断旧事件。`live/playback.ts` 管理播放期限，rest 改变不打断有限临时动作；离开可释放 wide/Infinity。减少动效恢复静态 idle，重新启用动效回当前 rest。LB3 通过此接口及组件局部引用接反应，不为每个头像另起时钟。
 
-**触发规则**（按每次事件的 `pointerType` 判断，不留全局「触摸过」标记）：
+## 5. 互动行为
 
-| 输入 | 行为 |
+| 触发 | 反应 |
 |---|---|
-| 鼠标移入头像 | 说一句（跳 + 气泡打开） |
-| 鼠标移出头像 | 气泡关闭 |
-| 键盘 Tab 到头像 | 说一句 |
-| 头像失焦 | 气泡关闭 |
-| 聚焦时按 Enter / 空格 | 再说一句（换一句台词，再跳一次） |
-| 按 Esc | 关闭当前气泡 |
-| 触摸点按头像 | 打开时再点 = 换一句；4 秒后自动关闭；点页面其他地方关闭 |
-| 鼠标点击头像 | 等同再说一句（不依赖浏览器是否给按钮焦点，Safari 和 Chromium 一致） |
+| 鼠标进入整张卡片（不再只限头像） | wide 睁大眼 + 跳一下；气泡先显示「…」打字点 350ms，再按 28ms/字逐字打出（读屏区一开始就有全文） |
+| 离开卡片 | 立即关闭气泡（120ms 淡出），基础状态改 idle；进行中的戳/按钮临时动作不被打断 |
+| Tab 到头像 / Enter / 空格 / Esc / 失焦 | Tab 说一句；Enter/空格换一句并重新跳；Esc 关闭；失焦关闭 |
+| 点击或点按头像（「戳」） | 从 wink, burst, orbit, play, comet, egg, hexagon, thinking 随机选一个，不与上次重复；按引擎 duration 播完回 rest，换戳台词且不连续重复；滚动 3 秒内第 5 次触发 alert，说「别戳啦！」并清零计数。Hero/卡片/详情按 slug 共享历史 |
+| 点「一键导入」 | 该卡 Bot 播 comet（「嗖」一下） |
+| 复制成功 | wink |
+| 30 秒没有任何输入（减少动效时不触发） | data-running=true 的 Bot 依次进入 sleep，整波次错开 0–800ms；一个全局超时器管理整波 |
+| 睡着后有任何输入 | 取消待睡队列，所有 sleep Bot 立即 exclaim，按 2 秒 duration 回 rest |
+| 第一次进站（每个会话一次） | Hero Bot 依次 swirl 入场，间隔 120ms |
+| Hero 里的 Bot | 悬停跳一下 + wide，点击 = 戳；仍然 aria-hidden |
+| 空货架 | 一只 160px Bot，rest=sleep，无灰度滤镜 |
+| 404 页 | not-found Layout 插槽；200px Bot 先 exclaim、再常驻 rest=thinking；「这一页走丢了」+「这个 Bot 可能已经下架了，或者链接写错了。」+ href=/「回货架看看」 |
+| 触摸 | 点按 = 戳 + 气泡显示 4 秒；点别处关闭；不跟随视线 |
 
-- 全页同一时刻只开一个气泡；打开 B 时 A 立即关闭。
-- 台词：有 `pitch` 用 pitch（每次都是同一句）；没有就从 `DEFAULT_PITCHES` 随机抽，同一个 Bot 连续两次不抽同一句。
-- 头像按钮 `aria-label="听听{名字}的自荐"`；气泡打开时头像加 `aria-describedby` 指向气泡；气泡 `role="tooltip"`，**不用** aria-live（避免悬停时读屏一直播报）。
-- 初次加载没有任何气泡，也不跳。
+戳台词：「哎，痒！」「再戳我就变形了」「好啦好啦，我在呢」「你找我呀？」。全部新增文案在 meta.mjs。
 
-**气泡**：
+`live/reactions.ts` 仅挂一组 capture/passive 全局输入监听：pointermove、pointerdown、keydown、wheel、scroll、touchstart。URL 的 `?bz-idle=<毫秒>` 仅在客户端首次注册时读取一次，只接受 200–600000 的整数；默认代码值 `30_000`。若演示短阈值遇到未播完的戳/惊醒/入场，整波睡眠每秒检查一次、等临时动作完成后再睡，避免打断反馈；不增加每只 Bot 的计时循环。最后一个 Bot 卸载清理监听和计时器。
 
-| 项 | 值 |
+Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的头像依次入场，间隔 120ms；存储不可用则退化为当前文档一次。卸载取消待入场计时器，减少动效不记标记、不播放。悬停在 `.hero-portrait` 上跳一次，离开释放 wide；戳不弹气泡、不进入 Tab 顺序。
+
+气泡打字消费共享时钟，完成、关闭或失去全页唯一所有权时注销；减少动效时立即显示全文（包括中途切换）。卡片/详情以 provide/inject 把动作按钮接到自身头像，复制失败不 wink。
+
+输入按每次事件 pointerType 判断，不存全局「触摸过」标记；鼠标点击不依赖浏览器是否赋焦点。全页单气泡、触摸再次点按换一句保留；鼠标转触摸时释放旧视线，后续鼠标仍能跟随。导入仍正常新标签打开、点击正常上报，动画不阻塞业务；复制成功仍显示「已复制 ✓」，文字和边框 success 色，1.8 秒恢复，唯一读屏播报区播报「已复制安装提示词」。失败按 §8。
+
+## 6. 官方真脸
+
+维护者用 `scripts/sync-faces.mjs` 读取 bots/*/bot.yaml 的 templateUrl，从 x.ai 模板 HTML 的 Next.js 转义数据中，在 addHref 后提取 color、shape。只取公开颜色和形状名，不复制形状路径、眼睛坐标或代码。构建不联网；`faces.json` 静态 import，不在运行时 fetch。
+
+`site/.vitepress/data/faces.json` 格式（键字母排序、两空格缩进、结尾换行）：
+
+```json
+{
+  "memory-keeper": { "color": "#777777", "shape": "hex", "fetchedAt": "2026-11-14" }
+}
+```
+
+每条恰好 color（小写 #rrggbb）、shape（非空字符串）、fetchedAt（YYYY-MM-DD）。抓取失败保留旧条目，没有旧条目则不写，给带 slug 的中文警告。UA 为 Mozilla/5.0，单页超时 25 秒；跳过 _template、无 templateUrl 和 REPLACE-ME。`--check [--file 路径]` 离线校验，失败退出 1，报文件/位置/问题/改法。
+
+### 25 个形状
+
+固定顺序：blob, pebble, bean, egg, squircle, tablet, capsule, cylinder, hex, gem, crystal, wedge, shield, dome, arch, cloud, teardrop, leaf, square, sparkle, clover, flower, heart, house, star。
+
+| 官方 id | 轮廓来源 |
 |---|---|
-| 定位 | 相对舞台绝对定位，**底边锚定在头像上方**：气泡底到头像顶 22px（尖角占 6px，留 16px 给跳动），向上生长，水平居中 |
-| 尺寸 | `width: max-content; max-width: min(260px, 100% - 32px)`；**最多 2 行**（`-webkit-line-clamp: 2`），`text-wrap: balance` 防孤字 |
-| 样式 | 漫画风：背景 `--bz-paper`，**2px** `--bz-ink` 描边（旧站 1.5px 在 Chromium 会被取整成 1px，改 2px），圆角 16px，内边距 8px 14px，14px / 600 / 行高 1.45，文字 `--bz-ink`，硬投影 `3px 3px 0 var(--bz-ink)`；尖角 12px 方块旋转 45°，只画右边和下边的 2px 描边，背景同气泡 |
-| 弹出 | 不透明度 0→1，180ms；位移 +6px→0 和缩放 .92→1，280ms `--bz-ease-pop`；变形原点底边中点 |
-| 收起 | 不透明度 120ms，位移和缩放倒放 |
-| 测试约定 | 每张卡一个 `data-testid=pitch-bubble`，打开时 `data-open="true"`，否则 `"false"` |
+| blob | bloub cercle |
+| pebble | galet |
+| squircle、square | squircle |
+| tablet、capsule | capsule |
+| hex | hexagone |
+| cloud | nuage |
+| teardrop | goutte |
+| egg | PROFILES.egg，转普通数组并缓存 |
+| bean、cylinder、gem、crystal、wedge、shield、dome、arch、leaf、sparkle、clover、flower、heart、house、star | theme/shapes-extra.ts 的 15 种原创径向轮廓 |
 
-**跳动**（与气泡同时开始；原点在脚底）：
+`shapeRadii` 未知 id 返回 null，同 id 返回同数组；SHAPES 映射必须返回原 radii 对象（眼位修正按对象查表），不能复制。原创轮廓用 shape.ts 工具模块加载时计算缓存；64 点、全有限数、最大半径 0.95–1.2、最小 >0.3；除两对别名外，任意两形状逐点最大差 >0.02。心形有凹口、星形五角、四瓣草、花六瓣、房子有屋顶，拱门和穹顶可区分。
 
-| 进度 | transform |
-|---|---|
-| 0% | `translateY(0) scale(1, 1)` |
-| 24% | `translateY(2px) scale(1.07, .92)` |
-| 54% | `translateY(-12px) scale(.96, 1.05)` |
-| 80% | `translateY(0) scale(1.02, .98)` |
-| 100% | `translateY(0) scale(1, 1)` |
+`theme/face.ts`：`botFace(slug)` 委托 `resolveFace(slug, entry)`，返回 `{slug, shape, radii, color, source}`。已知官方形状 source=official；未知形状用 seed 轮廓 + 官方色，source=seed；无数据时原 avatarSeed 算法、SHAPES/COLORS 选择不变，shape 为 seed:<id>，fixtures 不变。
 
-时长 560ms，每段 `--bz-ease-pop`。每次「说一句」都从头播（重新触发动画）。
+`DefaultAvatar` 使用 botFace(slug) 的 radii/shape/color。`faceColors(hex)` 返回 light/dark/outline：light 原色小写；dark 委托 color.ts 的 darkSwap（仅一份深色换奶白规则）；L>0.85 时 outline='rgba(0,0,0,.12)'，否则 null。根属性与动画帧更新隔离，不逐帧覆盖主题变量。根 SVG 内联 `--bz-bot-light` / `--bz-bot-dark`，有描边再内联 `--bz-bot-outline`；`--bz-bot-body` 由 CSS 切换，描边仅浅色显示。**待集成确认的差异**：计划写浅色描边 1px，LB1 明定 outline 渲染 1.5px；本文接口按 LB1 记录，不将两者声称一致。
 
-## 5. 排序控件
+## 7. 排序与外链
 
-- 两个按钮组成的分段控件：「热门」「最新」，`aria-pressed` 表示当前选中；容器 `role="group" aria-label="排序"`。
-- 高 36px，外框圆角 999px、`--bz-surface-soft` 底、内边距 3px；选中项 `--bz-ink` 底 `--bz-paper` 字，未选中项 `--bz-text-2`。
-- 默认「热门」。`/api/stats` 失败且用户没手动选过时，自动切到「最新」。不记住选择（刷新回到默认）。
-- 首次拿到热度后如果顺序变化，网格做一次 200ms 淡入；之后点击按钮**只改数字、不重排**，切换排序或刷新时才重排。
+- 分段控件「热门 / 最新」，role=group、aria-label=排序，按钮 aria-pressed；高 36px、圆角 999px、soft 底、内边距 3px；选中墨底纸色字，未选二级字。单个指示块用 spring 在 300ms 内滑动，data-testid 不变。
+- 默认热门；stats 失败且用户未手选时改最新。不记住选择。热门按 heat、addedAt 降序，再按 name；最新按 addedAt 降序，再按 name。
+- 首次热度改变顺序时网格淡入 200ms；之后点击只改数字，不重排，切换排序或刷新才重排。热度不是导入成功数。
+- 新标签链接（导入、作者、投稿、技能源码、定时任务）有 12px「↗」（aria-hidden）、读屏「（在新标签页打开）」及 rel="noopener noreferrer"。
 
-## 6. 外链
+## 8. 手动复制对话框
 
-所有新标签打开的链接（一键导入、作者、我要投稿、技能源码、定时任务）：文字后跟一个 12px 的「↗」图标（`aria-hidden`），再加一段读屏文字「（在新标签页打开）」。`rel="noopener noreferrer"`。
+原生 dialog，data-testid=prompt-fallback。标题「复制没成功，请手动复制」，说明「全选下面的文字，复制后发给你的 Grok Bot」。只读 textarea 内容等于安装提示词，打开自动全选聚焦；「关闭」按钮、Esc、点遮罩均可关，关闭后焦点回复制按钮。
 
-## 7. 手动复制对话框（复制失败时）
+## 9. 详情页
 
-- 用原生 `<dialog>`，`data-testid=prompt-fallback`。标题「复制没成功，请手动复制」，说明「全选下面的文字，复制后发给你的 Grok Bot」，只读 `<textarea>`（内容就是安装提示词，打开时自动全选并聚焦），一个「关闭」按钮。
-- Esc 和点遮罩都能关闭；关闭后焦点回到「复制安装提示词」按钮。
+- 顶部「← 返回货架」。≥768px 头部左右布局，窄屏上下布局。舞台 280×280、圆角 28px、同卡片渐变；头像 160px、底距约 26px。名字圆体 36px/800，介绍 17px。
+- 信息保留分类、外部收录、作者、上架日期、热度、两个按钮；「改编自 <原 Bot 名>」链原详情页，data-testid=forked-from。头像也支持说话和跳动。
+- 区块间距 40px：导入前准备列表 → 额度（彩色低/中/高 + 说明）→ 权限（名称标签 + 说明；无则「不需要额外权限」）→ 截图（≥768px 两列，lazy，圆角 12px、1px 边框，新标签原图）→ 技能（等宽技能名、description、查看源码）→ 定时任务（有 routines.md 才显示）→ 设计说明（vp-doc、最大宽度 720px）。
+- 小标题圆体，技能卡圆角 18px，描边 Bot 色 30% 混 border。
+- 外部收录显示「这个 Bot 由原作者在 x.ai 发布，本站只收录链接。」，只显示准备、额度、权限三个内容区块。
 
-## 8. 详情页
-
-- 顶部「← 返回货架」文字链接。
-- **头部**：≥768px 左右排布（左边 200×200 舞台 + 112px 头像，右边信息），<768px 上下排布。信息：名字 h1（32px/700）、一句话介绍（17px）、标签行（分类、外部收录、作者、上架日期、热度）、改编自（「改编自 <原 Bot 名>」链到原详情页，`data-testid=forked-from`）、两个按钮。详情页头像同样支持悬停说话和跳动。
-- **区块**（每块一个 h2 + 内容，块间距 40px）：导入前准备（列表）→ 额度消耗（低/中/高彩色标签 + 一句说明）→ 会用到的权限（每项一行：权限名标签 + 说明文字；没有权限时显示「不需要额外权限」）→ 截图（网格，≥768px 两列，点击在新标签打开原图，图片 `loading="lazy"`，圆角 12px，1px 边框）→ 技能（每个技能一张小卡：等宽字体技能名 + description + 「查看源码 ↗」）→ 定时任务（有 routines.md 时：一句说明 + 「查看定时任务 ↗」）→ 设计说明（用 VitePress 正文样式 `vp-doc`，最大宽度 720px）。
-- 外部收录：头部下方一条提示条「这个 Bot 由原作者在 x.ai 发布，本站只收录链接。」，只显示导入前准备、额度、权限三个区块。
-
-## 9. 空状态与出错
+## 10. 空状态与出错
 
 | 情况 | 表现 |
 |---|---|
-| 货架上没有 Bot | 网格位置显示一个灰色默认头像 + 「货架上还没有 Bot」+「做第一个投稿的人 ↗」按钮（`data-testid=empty-state`） |
-| 热度接口失败 | 热度显示「热度 —」，排序自动切「最新」，不弹错误提示 |
-| 自定义头像加载失败 | 换成该 slug 的默认头像 |
-| 截图加载失败 | 显示同尺寸的浅灰占位块和「图片加载失败」 |
+| 无 Bot | 大号 sleep Bot +「货架上还没有 Bot」+「做第一个投稿的人 ↗」；data-testid=empty-state |
+| 404 | exclaim 后循环 thinking，「这一页走丢了」及「回货架看看」 |
+| 热度失败 | 热度 —；未手选时切最新，不弹错误 |
+| 自定义头像失败 | 回退该 slug 默认头像 |
+| 截图失败 | 同尺寸浅灰占位块和「图片加载失败」 |
 
-## 10. 减少动效（`prefers-reduced-motion: reduce`）
+## 11. 减少动效与深色模式
 
-- 不跳、不上浮、不做网格淡入、气泡没有位移和缩放。
-- 气泡保留 120ms 的透明度淡入淡出（要用足够高的优先级盖过 VitePress 全局把过渡改成 0s 的规则）。
+`prefers-reduced-motion: reduce` 下保持 SSR 静态帧；无 rAF、跟随、变身、睡醒、入场、跳动、上浮、网格淡入、光斑漂移；气泡仍能开关，去位移缩放，只保留 120ms 透明度淡入淡出（覆盖 VitePress 全局 0s 规则）。
 
-## 11. 深色模式
+深色按 §1 token 切换；Bot 颜色、按钮色与舞台色也按 darkSwap 规则适配，不再要求所有 Bot 颜色主题不变。浅深主题都验对比度，切换不用 JS 监听。
 
-中性色跟随 VitePress 变量自动反转；`--bz-*` token 按 §1 的深色列切换；Bot 颜色和舞台光晕不变。
+## 12. 验收要点
 
-## 12. 验收要点（P4 必须全部满足）
+验收脚本在批次目录 `/Users/Admin/Documents/pi-prompts/2026-11-14-bot-zhipin-living/verify/`，不是仓库内目录。LB0 纯文档只跑 LB0-check.sh；实现线跑 npm run check、隔离端口全部 e2e，vendor diff 为空、不越 scope、产物无 _worker.js。
 
-1. 在 1280、1100、1024、900、680、390、320 宽度下，用 30 字的台词打开气泡：气泡最多 2 行，气泡（含尖角）的下沿始终在头像上沿之上至少 8px；页面不横向滚动。
-2. 鼠标移入打开、移出关闭；Tab 聚焦打开、失焦关闭；Enter 换一句；Esc 关闭；触摸点按打开、点别处关闭、4 秒自动关闭；全页同时最多 1 个打开。
-3. 打开气泡时头像有跳动动画（`getAnimations()` 非空）；减少动效下没有跳动，但气泡仍能打开。
-4. 所有按钮、链接、头像在键盘聚焦时有可见的焦点样式；按钮高度 ≥40px，触摸设备 ≥44px。
-5. 三级文字（作者、日期、热度）与背景对比度 ≥ 4.5:1（浅色、深色都测）。
-9. 视觉沿用旧站：主按钮黑底（深色模式浅底）；气泡是描边 + 右下硬投影；卡片圆角 24、悬停边框变墨色。
-6. 复制成功显示「已复制」并在约 2 秒后恢复；剪贴板被拒绝时弹出手动复制对话框，内容等于安装提示词，Esc 能关。
-7. 外部链接都有「↗」和读屏提示。
-8. 保留 P2 定下的全部 `data-testid`。
+1. **LB1**：idle 眼睛隔 1.5 秒不同；左右 ±300px 的眼睛平均 x 差 ≥10、上下 y 差 ≥6；≥6 Bot 时 rAF ≤75 次/秒；离屏 500ms 内暂停，隐藏停钟；reduce 首帧不变；SSR 有 body path、无 hydration 警告。burst 300ms 内生效、有粒子，2.6±0.6 秒回 idle 且双眼存在；14 状态 0–3 秒每 0.1 秒采样无 NaN/Infinity。
+2. **LB2**：真实四条为 feishu-app-keeper / memory-keeper 的 #777777 hex、media-downloader 的 #936439 pebble、quota-saver 的 #ff9800 tablet（存储小写）；离线校验通过、损坏时报中文错误；25 轮廓合法、fixtures 不变；暗色换色对卡片底 ≥3:1；真实构建带官方色。25 形状接触表人工看名字和眼位。
+3. **LB4**：两主题 token、236/112 与详情 280/160 尺寸正确（舞台高容差 ±2）；按钮与全部文字对比度 ≥4.5；1280/1100/1024/900/680/390/320 七宽无横滚，足量数据验证 Hero 7/5 个和中心最大。30 字气泡最多两行、上沿在舞台内、尖角净距 ≥8；按钮 ≥40/44、焦点可见，无 Google 字体请求。浅深 ×1280/390 首页、悬停、详情截图人工目视。
+4. **LB3**：全卡进入 300ms 内 wide，typing 先出现，350+28×字数+300ms 内全文；离开 200ms 内关气泡、600ms 内 idle。键盘、触摸、单开回归通过；戳 200ms 内进集合、状态时长+0.6 秒内回 idle，连戳 alert；导入 200ms 内 comet 且正常上报/开页；复制 wink；30 秒睡眠、输入 300ms 内 exclaim、2.5 秒内 idle；会话首次 1 秒内有 swirl、刷新不重播。Hero、空货架、404 与真实脸接线通过，录屏人工看流畅、眼位、闪跳。
+5. **总验收**：LM1/LB3 后在 feat/living-bots 跑全量检查、真实 bots 构建与本地 preview，复跑 lb1/lb3/lb4，录 1280/390 整体演示。用户看过点头才执行 LB5 推送开 PR；本轮文档不声称这些实现验收已通过。

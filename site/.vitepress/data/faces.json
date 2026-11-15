@@ -1,0 +1,22 @@
+{
+  "feishu-app-keeper": {
+    "color": "#777777",
+    "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
+  "media-downloader": {
+    "color": "#936439",
+    "shape": "pebble",
+    "fetchedAt": "2026-11-15"
+  },
+  "memory-keeper": {
+    "color": "#777777",
+    "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
+  "quota-saver": {
+    "color": "#ff9800",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  }
+}

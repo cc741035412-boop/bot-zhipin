@@ -25,3 +25,9 @@
 16. **Issue 作者就是投稿作者**。`author.github` 必须与 Issue login 一致（忽略大小写）；已有 slug 只允许原作者更新，addedAt 不变。每个 Issue 独占一个 `submission/issue-<号>` 分支，从默认分支重建单提交；提交作者为 Issue 用户的 noreply 身份，提交者是 Actions bot。通过前不创建分支/PR；错误沿用中文四项诊断，只更新本工作流带隐藏标记的 bot 评论。
 17. **对第 7 条 CI 触发方式增加手动派发补充，不提高 CI 权限**。GITHUB_TOKEN 写入不会自动触发 PR CI，所以投稿工作流持有 `actions: write`，推分支/建 PR 后显式派发 `ci.yml`。CI 增加无输入的 `workflow_dispatch`，非 PR 事件按 CONTRIBUTOR 严格检查，job 名仍为 `validate-and-build`，仍需保护分支的一人批准和必需检查。保留现有 concurrency 配置，多个手动运行可能互相取消，作为真实联调已知边界单独跟进。
 18. **机器校验不替代公开内容审核**。自动检查能证明格式、权限字段存在、密钥规则与图片头等，不保证截图真实、无隐私或模板链接匿名可访问。PR 只勾选已证实的校验/授权检查项，其余由维护者核验；不自动合并。不创建真实标签/Issue、不使用真实网络做测试，GitHub 权限、Issue 原生长度限制及附件跳转行为留给维护者联调。细节见 `ARCHITECTURE.md` 的 Issue 投稿一节。
+
+## 2026-11-14 改版：会动的真脸 + 活泼彩色
+
+19. **视觉改为活泼彩色，推翻第 11 条**（用户 2026-11-14 定）。页面用暖底、圆润卡片、Bot 色舞台和按钮、圆体字；因为用户认为现页「好丑好笨」，需要更有生气。放弃沿用旧站的整体墨色视觉，不放弃键盘、读屏、触摸目标、对比度、减少动效等可用性底线。第 11 条保留作历史记录，不再指导实现；新规格见 `INTERACTION.md` v2。
+20. **头像用官方真脸，bloub 实时渲染**。从 x.ai 模板页读取颜色和形状名，维护者抓取后存入 `site/.vitepress/data/faces.json`，构建不联网；因为 slug 随机脸与官方 Bot 对不上，静态首帧也丢了生命感。**不复制** x.ai 的形状路径和眼睛坐标，能对应的用 bloub 轮廓，缺的自己画；渲染方式参考上游 `BloubBot.vue`（MIT，b4bb3c1）。放弃联网构建、照搬官方前端和只渲染静态帧；没有官方数据时保留原 seed 回退。
+21. **不引入 openbot 的代码**。nightly-labs/openbot 的许可证是 **PolyForm Noncommercial**，非商业限制与本仓库 MIT 不兼容；CopilotKit/OpenBot 虽为 MIT，但光球与 boring-avatars 风格不符。放弃直接搬这两套实现，只借鉴「保留轮廓的状态才用于常驻反应」这个思路；变形状态仅用于短暂彩蛋，可复用代码来源仍是 MIT bloub。

@@ -1,4 +1,4 @@
-import { SHAPES, COLORS } from './vendor/bloub/skins'
+import { botFace } from './face'
 
 // 与默认头像共用确定性种子，舞台和 Hero 的颜色不会在 hydration 时变化。
 export function avatarSeed(slug: string) {
@@ -7,5 +7,5 @@ export function avatarSeed(slug: string) {
   return value >>> 0
 }
 export function avatarColor(slug: string) {
-  return COLORS[Math.floor(avatarSeed(slug) / SHAPES.length) % COLORS.length].hex
+  return botFace(slug).color
 }

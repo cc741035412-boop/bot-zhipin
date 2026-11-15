@@ -1,0 +1,115 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+let reduced = false
+vi.mock('../../site/.vitepress/theme/live/clock', () => ({ isReducedMotion: () => reduced }))
+let reactions, doc, disposers
+beforeEach(async () => {
+  vi.resetModules()
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout', 'performance'] })
+  reduced = false
+  doc = new EventTarget()
+  disposers = []
+  vi.stubGlobal('document', doc)
+  vi.stubGlobal('window', { location: { search: '?bz-idle=500' } })
+  vi.stubGlobal('sessionStorage', { getItem: vi.fn(), setItem: vi.fn() })
+  reactions = await import('../../site/.vitepress/theme/live/reactions')
+})
+afterEach(() => {
+  disposers.forEach((fn) => fn())
+  expect(vi.getTimerCount()).toBe(0)
+  vi.useRealTimers()
+  vi.unstubAllGlobals()
+})
+function bot(running = true) {
+  let state = 'idle'
+  const client = {
+    el: { getAttribute: () => String(running) },
+    state: () => state,
+    busy: () => false,
+    play: vi.fn((detail) => { state = detail.state }),
+  }
+  const release = reactions.registerReactions(client)
+  disposers.push(release)
+  return client
+}
+
+describe('发呆与入场（浏览器接口全 mock）', () => {
+  it('阈值只允许范围内整数，否则 30_000', () => {
+    for (const value of ['199', '600001', '2.5', '-1', 'Infinity', '1e3', '']) expect(reactions.idleDelay(`?bz-idle=${value}`)).toBe(30_000)
+    for (const value of [200, 500, 600000]) expect(reactions.idleDelay(`?bz-idle=${value}`)).toBe(value)
+  })
+  it('只有一组输入监听；可见 Bot 在 0–800ms 错开睡，离屏不睡', () => {
+    const add = vi.spyOn(doc, 'addEventListener'), remove = vi.spyOn(doc, 'removeEventListener')
+    const a = bot(), b = bot(), offscreen = bot(false)
+    expect(add).toHaveBeenCalledTimes(6)
+    vi.advanceTimersByTime(499)
+    expect(a.play).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1)
+    expect(a.state()).toBe('sleep')
+    expect(b.state()).toBe('idle')
+    vi.advanceTimersByTime(800)
+    expect(b.state()).toBe('sleep')
+    expect(offscreen.play).not.toHaveBeenCalled()
+    for (const release of disposers.splice(0)) release()
+    expect(remove).toHaveBeenCalledTimes(6)
+  })
+  it.each(['pointermove', 'pointerdown', 'keydown', 'wheel', 'scroll', 'touchstart'])('%s 立即惊醒并取消待睡队列', (event) => {
+    const a = bot(), b = bot()
+    vi.advanceTimersByTime(500)
+    doc.dispatchEvent(new Event(event))
+    expect(a.state()).toBe('exclaim')
+    expect(b.state()).toBe('idle')
+    expect(a.play).toHaveBeenLastCalledWith({ state: 'exclaim' })
+    vi.advanceTimersByTime(499)
+    expect(b.state()).toBe('idle')
+  })
+  it('短演示阈值不能打断正在播的临时动作；新输入重置阈值', () => {
+    const a = bot()
+    a.busy = () => true
+    vi.advanceTimersByTime(500)
+    expect(a.play).not.toHaveBeenCalled()
+    a.busy = () => false
+    vi.advanceTimersByTime(999)
+    expect(a.play).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1)
+    expect(a.state()).toBe('sleep')
+    doc.dispatchEvent(new Event('pointermove'))
+    vi.advanceTimersByTime(400)
+    doc.dispatchEvent(new Event('wheel'))
+    vi.advanceTimersByTime(400)
+    expect(a.state()).toBe('exclaim')
+  })
+  it('减少动效不睡、不入场；队列最后卸载清理且 URL 只读一次', () => {
+    reduced = true
+    const a = bot()
+    vi.advanceTimersByTime(2000)
+    expect(a.play).not.toHaveBeenCalled()
+    const svg = new EventTarget(), play = vi.fn()
+    svg.addEventListener('bz-play', play)
+    disposers.push(reactions.enterHero([svg]))
+    expect(play).not.toHaveBeenCalled()
+    disposers.splice(0).forEach((release) => release())
+    reduced = false
+    window.location.search = '?bz-idle=200'
+    const b = bot()
+    vi.advanceTimersByTime(499)
+    expect(b.play).not.toHaveBeenCalled()
+    vi.advanceTimersByTime(1)
+    expect(b.state()).toBe('sleep')
+  })
+  it('Hero 间隔 120ms，一会话一次，卸载清理剩余入场', () => {
+    const portraits = [new EventTarget(), new EventTarget(), new EventTarget()]
+    const play = vi.fn()
+    portraits.forEach((el) => el.addEventListener('bz-play', play))
+    const release = reactions.enterHero(portraits)
+    vi.advanceTimersByTime(0)
+    expect(play).toHaveBeenCalledTimes(1)
+    vi.advanceTimersByTime(120)
+    expect(play).toHaveBeenCalledTimes(2)
+    expect(play.mock.lastCall[0].detail.state).toBe('swirl')
+    release()
+    reactions.enterHero(portraits)()
+    vi.advanceTimersByTime(1000)
+    expect(play).toHaveBeenCalledTimes(2)
+  })
+})
