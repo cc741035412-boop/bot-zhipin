@@ -6,11 +6,13 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vitepress'
 import { data as bots } from '../../data/bots.data.mjs'
-import { SHELF_COPY } from '../../meta.mjs'
-import { searchBots } from '../search'
+import { data as squadData } from '../../data/squads.data.mjs'
+import { SHELF_COPY, SQUAD_COPY } from '../../meta.mjs'
+import { searchBots, searchSquads } from '../search'
 import { avatarColor } from '../avatar'
 import { faceColors } from '../face'
 import BotPortrait from './BotPortrait.vue'
+import SquadStill from './SquadStill.vue'
 
 interface PaletteBot {
   slug: string
@@ -22,10 +24,29 @@ interface PaletteBot {
   detailUrl: string
 }
 
-// 一次最多列 8 条：再多就该接着输入，而不是往下翻。
+interface PaletteSquad {
+  slug: string
+  name: string
+  tagline: string
+  formation: string
+  detailUrl: string
+  author: { name: string }
+  members: { bot: string; name: string; title: string | null; avatar: string | null; lead: boolean }[]
+}
+
+// 一次最多列 8 条：再多就该接着输入，而不是往下翻。小队单独一组，排在 Bot 后面，最多 3 支。
 const LIMIT = 8
+const SQUAD_LIMIT = 3
 const LIST_ID = 'bz-search-list'
 const optionId = (slug: string) => `bz-search-option-${slug}`
+const squadOptionId = (slug: string) => `bz-search-squad-${slug}`
+const squads = squadData as PaletteSquad[]
+/** 小队条目前面的小合影：队长在前，再带两个队员。 */
+function faces(squad: PaletteSquad) {
+  const lead = squad.members.find((member) => member.lead)
+  const rest = squad.members.filter((member) => member !== lead)
+  return [...(lead ? [lead] : []), ...rest].slice(0, 3).map((member) => ({ slug: member.bot, name: member.name, avatar: member.avatar }))
+}
 // 空状态里睡着的那只：固定 slug，种子配色算出来是蓝色（货架空状态的 empty-shelf 是红色，放在这里像报错）。
 const SLEEPER = { slug: 'search-empty', name: '', avatar: null }
 
@@ -58,17 +79,25 @@ const scroller = ref<HTMLElement>()
 const matches = computed(() => searchBots(shelf, query.value, Infinity))
 const results = computed(() => matches.value.slice(0, LIMIT))
 const more = computed(() => matches.value.length - results.value.length)
+const squadResults = computed(() => searchSquads(squads, query.value, SQUAD_LIMIT))
 const typed = computed(() => query.value.trim() !== '')
-const activeId = computed(() => {
-  const bot = results.value[active.value]
-  return bot ? optionId(bot.slug) : undefined
-})
+// 键盘上下键走的是同一串：先 Bot，后小队。
+const options = computed(() => [
+  ...results.value.map((bot) => ({ id: optionId(bot.slug), url: bot.detailUrl })),
+  ...squadResults.value.map((squad) => ({ id: squadOptionId(squad.slug), url: squad.detailUrl })),
+])
+const activeId = computed(() => options.value[active.value]?.id)
 const emptyText = computed(() => typed.value ? '没找到，换个词试试' : '货架上还没有 Bot')
 /** 念给读屏用户听的结果数。这个节点一直在，只换文字，读屏才会稳定播报。 */
 const status = computed(() => {
   const total = matches.value.length
-  if (!total) return emptyText.value
-  return `${typed.value ? '找到' : '共'} ${total} 个 Bot${more.value > 0 ? `，列出前 ${LIMIT} 个` : ''}`
+  const teams = squadResults.value.length
+  if (!total && !teams) return emptyText.value
+  const parts = [
+    ...(total ? [`${total} 个 Bot${more.value > 0 ? `（列出前 ${LIMIT} 个）` : ''}`] : []),
+    ...(teams ? [`${teams} 支小队`] : []),
+  ]
+  return `${typed.value ? '找到' : '共'} ${parts.join('，')}`
 })
 
 /** 分类标签染上 Bot 自己的颜色；自定义头像没有 Bot 色，用中性灰（CSS 里的回退值）。 */
@@ -115,14 +144,14 @@ function hide() {
 }
 
 function choose(index: number) {
-  const bot = results.value[index]
-  if (!bot) return
+  const option = options.value[index]
+  if (!option) return
   hide()
-  void router.go(bot.detailUrl)
+  void router.go(option.url)
 }
 
 function move(step: number) {
-  const count = results.value.length
+  const count = options.value.length
   if (!count) return
   active.value = (active.value + step + count) % count
   void nextTick(() => {
@@ -252,9 +281,9 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- 小标题在滚动区外面：列表滚动时它不会被切掉半行。 -->
-        <div v-if="results.length" class="sp-heading">{{ typed ? '结果' : '全部 Bot' }}</div>
+        <div v-if="results.length" class="sp-heading">{{ typed ? 'Bot' : '全部 Bot' }}</div>
         <div ref="scroller" class="sp-scroll">
-          <div :id="LIST_ID" class="sp-list" role="listbox" :aria-label="typed ? '结果' : '全部 Bot'">
+          <div :id="LIST_ID" class="sp-list" role="listbox" :aria-label="typed ? '结果' : '全部 Bot 和小队'">
             <div
               v-for="(bot, index) in results" :id="optionId(bot.slug)" :key="bot.slug"
               class="sp-item" data-testid="search-item" :data-slug="bot.slug" :style="tint(bot)"
@@ -273,9 +302,31 @@ onBeforeUnmount(() => {
                 <kbd class="sp-key"><svg class="sp-glyph" viewBox="0 0 16 16"><path :d="GLYPHS.enter" /></svg></kbd>
               </span>
             </div>
+            <p v-if="more > 0" class="sp-more" role="presentation">还有 {{ more }} 个</p>
+            <!-- 小队单独一组，排在 Bot 后面；条目前面是一小张合影。 -->
+            <div v-if="squadResults.length" class="sp-group" role="group" :aria-label="SQUAD_COPY.title">
+              <div class="sp-heading" aria-hidden="true">{{ SQUAD_COPY.title }}</div>
+              <div
+                v-for="(squad, index) in squadResults" :id="squadOptionId(squad.slug)" :key="squad.slug"
+                class="sp-item" data-testid="search-squad" :data-slug="squad.slug"
+                role="option" :aria-selected="results.length + index === active"
+                @pointermove="onHover($event, results.length + index)" @click="choose(results.length + index)"
+              >
+                <span class="sp-face sp-team" aria-hidden="true">
+                  <SquadStill v-for="face in faces(squad)" :key="face.slug" :bot="face" />
+                </span>
+                <span class="sp-text">
+                  <span data-part="name">{{ squad.name }}</span>
+                  <span data-part="tagline">{{ squad.tagline }}</span>
+                </span>
+                <span class="sp-tag">{{ SQUAD_COPY.tag }}</span>
+                <span class="sp-enter" aria-hidden="true">
+                  <kbd class="sp-key"><svg class="sp-glyph" viewBox="0 0 16 16"><path :d="GLYPHS.enter" /></svg></kbd>
+                </span>
+              </div>
+            </div>
           </div>
-          <p v-if="more > 0" class="sp-more">还有 {{ more }} 个</p>
-          <div v-if="!results.length" class="sp-empty" data-testid="search-empty">
+          <div v-if="!options.length" class="sp-empty" data-testid="search-empty">
             <span class="sp-sleeper" aria-hidden="true"><BotPortrait :bot="SLEEPER" rest="sleep" /></span>
             <span>{{ emptyText }}</span>
           </div>
@@ -433,7 +484,16 @@ onBeforeUnmount(() => {
 .sp-enter { flex: none; display: grid; visibility: hidden; }
 .sp-item[aria-selected="true"] .sp-enter { visibility: visible; }
 
-.sp-more { margin: 0; padding: 0 18px 12px; font-size: 12px; line-height: 16px; color: var(--bz-text-3); }
+.sp-more { margin: 0; padding: 6px 10px 4px; font-size: 12px; line-height: 16px; color: var(--bz-text-3); }
+/* 小队那一组：小标题在列表里面，和上面那组隔开一点 */
+.sp-group > .sp-heading { padding: 10px 10px 6px; }
+.sp-list > .sp-group:first-child > .sp-heading { padding-top: 14px; }
+/* 小合影：32px 的头像位里放三只小 Bot，队长在前面正中，两个队员在后面左右 */
+.sp-team :deep(.bz-still) { position: absolute; width: 18px; height: 18px; pointer-events: none; }
+.sp-team :deep(.bz-still:nth-child(1)) { z-index: 1; left: 5px; top: 12px; width: 22px; height: 22px; }
+.sp-team :deep(.bz-still:nth-child(2)) { left: -2px; top: 0; }
+.sp-team :deep(.bz-still:nth-child(3)) { left: 16px; top: 0; }
+.sp-team :deep(.bz-still:nth-child(1):last-child) { left: 2px; top: 2px; width: 28px; height: 28px; }
 .sp-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 16px 36px; color: var(--bz-text-2); }
 /*
   睡着的 Bot 是一颗上下弹的小球，一有输入会惊醒成「!」再睡回去。
@@ -487,7 +547,8 @@ onBeforeUnmount(() => {
 @media (max-width: 480px) {
   .sp-field { padding: 0 8px 0 14px; gap: 10px; }
   .sp-heading, .sp-foot { padding-inline: 14px; }
-  .sp-more { padding-inline: 14px; }
+  .sp-more { padding-inline: 8px; }
+  .sp-group > .sp-heading { padding-inline: 8px; }
   .sp-list { padding-inline: 6px; }
   .sp-item { gap: 10px; padding-inline: 8px; }
 }

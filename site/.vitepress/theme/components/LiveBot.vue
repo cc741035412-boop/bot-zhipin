@@ -3,7 +3,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useAttrs, useId, watch } from 'vue'
 
 defineOptions({ inheritAttrs: false })
-import { BotEngine, type BotFrame } from '../vendor/bloub/engine'
+import { BotEngine, type BotFrame, type Look } from '../vendor/bloub/engine'
 import { EXPRESSION_BY_ID } from '../vendor/bloub/expressions'
 import { NOTIF_BLUE } from '../vendor/bloub/decor'
 import { RAYON, DEMI_VIEWBOX } from '../vendor/bloub/repere'
@@ -20,7 +20,9 @@ const props = withDefaults(defineProps<{
   shapeId?: string
   size?: number
   rest?: StateId
-}>(), { size: 96, rest: 'idle' })
+  /** 没有鼠标可跟时看向哪里（度）。不传就是正脸；传了也照常眨眼、漂移，鼠标一动仍然先跟鼠标。小队合影里用它让队员看向队长。 */
+  look?: { yaw: number; pitch: number } | null
+}>(), { size: 96, rest: 'idle', look: null })
 
 const svg = ref<SVGSVGElement>()
 const uid = `bz-${useId()}`
@@ -31,7 +33,15 @@ const PAINT = DEMI_VIEWBOX
 const eyeColor = 'var(--bz-eye, #16161b)'
 const fogColor = 'var(--bz-card, var(--vp-c-bg))'
 const expression = EXPRESSION_BY_ID.get('attentif')!
-let engine = new BotEngine(RAYON, props.rest, props.radii, expression)
+// 常驻视线：mix=1 顶替状态自带的朝向，wander=1 保留自然漂移。时间戳早于 0、过渡极短，t=0 的首帧（SSR 也是）就已经看过去了。
+const homeLook = (): Look | null => props.look ? { yaw: props.look.yaw, pitch: props.look.pitch, mix: 1, spin: 0, wander: 1 } : null
+function createEngine(rest: StateId) {
+  const next = new BotEngine(RAYON, rest, props.radii, expression)
+  const look = homeLook()
+  if (look) next.setLook(look, -1, .001)
+  return next
+}
+let engine = createEngine(props.rest)
 // SSR 和首次客户端渲染都只取 t=0；注册时钟放在 onMounted 里。
 const frame = shallowRef<BotFrame>(engine.sample(0))
 const state = ref<StateId>(props.rest)
@@ -46,7 +56,7 @@ let gaze: ReturnType<typeof createGaze> | undefined
 function staticFrame() {
   gaze?.reset(now())
   playback.reset(now(), true)
-  engine = new BotEngine(RAYON, 'idle', props.radii, expression)
+  engine = createEngine('idle')
   frame.value = engine.sample(0)
 }
 
@@ -87,6 +97,10 @@ watch(() => props.rest, (rest) => {
   playback.setRest(rest, now())
   if (isReducedMotion()) staticFrame()
 }, { flush: 'sync' })
+watch(() => props.look, () => {
+  if (isReducedMotion()) staticFrame()
+  else if (svg.value?.getAttribute('data-follow') !== 'pointer') engine.setLook(homeLook(), now(), .6)
+})
 watch(() => props.radii, (radii) => {
   if (isReducedMotion()) staticFrame()
   else engine.setShape(radii, now())
@@ -94,7 +108,8 @@ watch(() => props.radii, (radii) => {
 
 onMounted(() => {
   if (!svg.value) return
-  gaze = createGaze(svg.value, (look, t, morph) => engine.setLook(look, t, morph))
+  // 鼠标不再可跟时（gaze 传 null）回到常驻视线，而不是一律回正脸。
+  gaze = createGaze(svg.value, (look, t, morph) => engine.setLook(look ?? homeLook(), t, morph))
   unregister = register({
     el: svg.value,
     tick,

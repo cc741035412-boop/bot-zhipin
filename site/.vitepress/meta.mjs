@@ -111,3 +111,31 @@ export const DEFAULT_PITCHES = [
   '额度花在刀刃上，这事我在行。',
   '别急着走，点开看看我会什么。',
 ]
+
+// 小队：首页区块、小队页、搜索面板里的固定文字。界面上不放解释性的句子，这里只有标题、标签、按钮和状态反馈。
+export const SQUAD_COPY = {
+  title: '小队',
+  tag: '小队',
+  count: (n) => `${n} 个 Bot`,
+  recruit: '投稿小队',
+  start: '开始组队',
+  roster: '阵容',
+  flow: '怎么配合',
+  setup: '组队步骤',
+  cost: '整队的代价',
+  notes: '要知道的事',
+  optional: '可选',
+  missing: '未收录',
+  import: '导入',
+  imported: (done, total) => `已导入 ${done} / ${total}`,
+  // 只给读屏：每个成员前面那个打勾按钮的名字
+  importedLabel: '已导入',
+  copy: '复制',
+  copied: '已复制',
+  quota: '额度',
+  permissions: '权限',
+  prerequisites: '导入前准备',
+  you: '你',
+}
+/** 招募卡上「投稿小队」链到仓库里的投稿说明。 */
+export const SQUAD_CONTRIBUTE_URL = `${SITE.repo}/blob/${SITE.branch}/CONTRIBUTING.md#${encodeURIComponent('投稿小队')}`

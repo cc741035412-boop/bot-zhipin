@@ -1,0 +1,364 @@
+/* squad.css：小队。静态小 Bot、合影、首页的小队区块（小队卡、招募卡）、小队详情页、流程图。
+   规格见 docs/dev/INTERACTION.md §14。只用 tokens.css 里的阶梯；界面是中性的，颜色只来自 Bot。 */
+
+:root {
+  /* 只在本文件里用的派生量 */
+  --bz-photo-bg: rgba(20, 20, 24, .025);
+  --bz-photo-glow: .42;
+  --bz-photo-floor: rgba(20, 20, 24, .07);
+  --bz-photo-shadow: rgba(20, 20, 24, .26);
+  --bz-photo-ring: #f7f6f3;
+  --bz-flow-line: color-mix(in srgb, var(--bz-text-3) 62%, transparent);
+}
+.dark {
+  --bz-photo-bg: rgba(255, 255, 255, .025);
+  --bz-photo-glow: .5;
+  --bz-photo-floor: rgba(255, 255, 255, .07);
+  --bz-photo-shadow: rgba(0, 0, 0, .7);
+  --bz-photo-ring: #0a0b0d;
+}
+
+/* ---------- 0. 静态小 Bot（BotStill） ---------- */
+.bz-still { display: block; flex: none; width: 24px; height: 24px; overflow: visible; }
+/* 图片要自己裁成圆：overflow 留着 visible 的话，圆角裁不到图片内容 */
+img.bz-still { overflow: clip; border: 1px solid var(--bz-hairline); border-radius: 50%; object-fit: cover; }
+.bz-still .still-body { fill: var(--bz-bot-body, #8a8a93); }
+.bz-still .still-eye { fill: var(--bz-eye); }
+/* 空位：只有一圈虚线轮廓和两只淡淡的眼睛 */
+.bz-still.is-ghost .still-body { fill: none; stroke: var(--bz-border-hover); stroke-width: 1.5; stroke-dasharray: 4 4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.bz-still.is-ghost .still-eye { fill: var(--bz-border-strong); }
+
+/* ---------- 1. 合影（SquadLineup） ----------
+   面板是尺寸容器：里面的人按「设计稿宽高」（--lu-w、--lu-h）等比缩到面板里，最大 1:1。
+   光单独一层、裁在面板里；Bot 在另一层，戳出来的粒子可以画到面板外面。 */
+.squad-photo {
+  --photo-pad: var(--bz-sp-2);
+  --photo-drop: -2px;
+  position: relative; isolation: isolate; container-type: size; min-width: 0; min-height: 0;
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background-color: var(--bz-photo-bg); box-shadow: var(--bz-highlight);
+}
+.photo-glow, .photo-cast {
+  --u: min(1px, calc((100cqw - 2 * var(--photo-pad)) / var(--lu-w)), calc((100cqh - 2 * var(--photo-pad)) / var(--lu-h)));
+  /* 地面线：整队上下居中，再往下沉一点 */
+  --floor: calc((100cqh - var(--u) * var(--lu-h)) / 2 - var(--photo-drop));
+}
+.photo-glow { position: absolute; inset: 0; z-index: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
+/* 地面：一道很淡的椭圆光，人都站在它上面 */
+.photo-glow::before {
+  content: ''; position: absolute; left: 50%; bottom: calc(var(--floor) - var(--u) * 24); width: min(92cqw, calc(var(--u) * var(--lu-w) * 1.7)); height: calc(var(--u) * 56);
+  transform: translateX(-50%); border-radius: 50%; background: radial-gradient(closest-side, var(--bz-photo-floor), transparent);
+}
+/* 每只脚下一团自己颜色的光，混在一起就是这支队的颜色 */
+.photo-pool {
+  position: absolute; left: calc(50% + var(--u) * var(--x)); bottom: calc(var(--floor) - var(--u) * var(--s) * .7);
+  width: calc(var(--u) * var(--s) * 2.8); height: calc(var(--u) * var(--s) * 1.5); margin-left: calc(var(--u) * var(--s) * -1.4);
+  border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--bz-bot-color) 72%, transparent), transparent);
+  opacity: var(--bz-photo-glow); filter: blur(calc(var(--u) * 12)); transition: opacity var(--bz-dur) var(--bz-ease);
+}
+.photo-cast { position: absolute; left: 0; right: 0; bottom: var(--floor); z-index: 1; height: 0; }
+.photo-member {
+  position: absolute; left: calc(50% + var(--u) * var(--x)); bottom: calc(var(--u) * var(--lift));
+  width: calc(var(--u) * var(--s)); height: calc(var(--u) * var(--s)); margin-left: calc(var(--u) * var(--s) * -.5);
+}
+.photo-shadow {
+  position: absolute; left: 12%; right: 12%; bottom: -4%; height: 14%; border-radius: 50%;
+  background: radial-gradient(closest-side, var(--bz-photo-shadow), transparent);
+}
+.photo-hop { position: relative; display: block; width: 100%; height: 100%; transform-origin: center bottom; }
+.photo-hop.is-hopping { animation: bz-bounce 560ms var(--bz-ease-pop) both; }
+.photo-hop img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2.5px var(--bz-photo-ring); }
+/* 活体画布四周留着放动效的余量（身体约占 89%）：放大到 112%，身体正好撑满这个成员的格子 */
+.photo-hop svg { display: block; width: 112%; height: 112%; margin: -6%; }
+/* 互相压住的地方留一圈面板底色的细边，像一叠贴纸，前后分得开。画在身体垫底那层上，不用滤镜 */
+.squad-photo [data-part="body"] { stroke: var(--bz-photo-ring); stroke-width: 5px; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+/* 小队页的大合影：点谁戳谁，脚下有名牌 */
+.squad-photo.stage { --photo-pad: var(--bz-sp-5); --photo-drop: -14px; }
+.squad-photo.stage .photo-pool { opacity: calc(var(--bz-photo-glow) * 1.25); }
+.squad-photo.stage .photo-member { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+/* 名牌写的是它在队里的岗位；队长那块是实心的，和阵容表里的「队长」标签同一种画法 */
+.photo-plate {
+  position: absolute; top: calc(100% + var(--bz-sp-3)); left: 50%; transform: translateX(-50%);
+  max-width: 96px; height: 22px; padding: 0 var(--bz-sp-2); overflow: hidden; border-radius: var(--bz-r-control);
+  background: color-mix(in srgb, var(--bz-card) 86%, var(--bz-ink)); color: var(--bz-text-2);
+  font-size: var(--bz-fs-xs); font-weight: 600; line-height: 22px; white-space: nowrap; text-overflow: ellipsis;
+}
+.photo-member.lead .photo-plate { background: var(--bz-ink); color: var(--bz-page); }
+
+/* ---------- 2. 首页的小队区块 ---------- */
+.squad-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--bz-sp-4); }
+.squad-card {
+  position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 250px) minmax(0, 1fr); gap: var(--bz-sp-5); min-width: 0; min-height: 208px;
+  padding: var(--bz-sp-3); border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-panel); background: var(--bz-surface-1);
+  box-shadow: var(--bz-highlight); transition: border-color 150ms ease-in-out;
+}
+.squad-card-body { display: flex; flex-direction: column; justify-content: center; min-width: 0; padding: var(--bz-sp-2) var(--bz-sp-3) var(--bz-sp-2) 0; }
+.squad-tags { display: flex; flex-wrap: wrap; align-items: center; gap: var(--bz-sp-2); min-width: 0; }
+.squad-tag > svg { margin-left: -1px; }
+.squad-count { font-size: var(--bz-fs-xs); line-height: 22px; font-weight: 600; color: var(--bz-text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* .shelf-page 把标题和段落的外边距清零了：下面几条带上父类名，权重才盖得过去 */
+.squad-card .squad-card-name { margin-top: var(--bz-sp-3); font-family: var(--bz-font-display); font-size: var(--bz-fs-h3); line-height: var(--bz-lh-h3); font-weight: 600; letter-spacing: -.01em; color: var(--bz-ink); }
+.squad-card-name a { color: inherit; text-decoration: none; }
+/* 整张卡可点：名字那个链接铺满整卡，合影在它下面（点合影等于点卡片） */
+.squad-card-name a::after { content: ''; position: absolute; inset: 0; z-index: 2; border-radius: calc(var(--bz-r-panel) - 1px); }
+.squad-card .squad-card-tagline {
+  margin-top: var(--bz-sp-1); font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); color: var(--bz-text-2); text-wrap: pretty;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+.squad-card .squad-card-roster { margin-top: var(--bz-sp-3); overflow: hidden; font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-3); white-space: nowrap; text-overflow: ellipsis; }
+@media (hover: hover) {
+  .squad-card:hover { border-color: var(--bz-border-strong); }
+  .squad-card:hover .photo-pool { opacity: calc(var(--bz-photo-glow) * 1.5); }
+}
+/* 招募卡：虚线边，三只空位，一个按钮；按钮的可点范围铺满整卡 */
+.squad-recruit { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--bz-sp-5); border-style: dashed; border-color: var(--bz-border-strong); background: transparent; box-shadow: none; }
+.recruit-seats { display: flex; align-items: flex-end; justify-content: center; }
+.recruit-seats .bz-still { width: 60px; height: 60px; transition: opacity var(--bz-dur) var(--bz-ease); opacity: .8; }
+.recruit-seats .bz-still.lead { position: relative; z-index: 1; width: 80px; height: 80px; margin: 0 -10px; }
+.squad-recruit .bz-btn::after { content: ''; position: absolute; inset: 0; border-radius: calc(var(--bz-r-panel) - 1px); }
+@media (hover: hover) {
+  .squad-recruit:hover { border-color: var(--bz-border-hover); }
+  .squad-recruit:hover .recruit-seats .bz-still { opacity: 1; }
+}
+
+/* ---------- 3. 小队详情页：头部 ---------- */
+/* 返回：幽灵按钮没有底，往左收一个内边距，让箭头和正文左边缘对齐 */
+.squad-detail > .back-link { margin-left: calc(-1 * var(--bz-sp-3)); }
+.squad-header { margin-top: var(--bz-sp-4); }
+.squad-stage { height: 280px; border-radius: var(--bz-r-panel); }
+.squad-intro { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--bz-sp-6); margin-top: var(--bz-sp-6); }
+.squad-intro-text { min-width: 0; }
+.squad-byline { margin-left: var(--bz-sp-2); font-size: var(--bz-fs-sm); line-height: 22px; color: var(--bz-text-3); }
+.squad-byline a { color: inherit; text-decoration: none; }
+.squad-byline a:hover { color: var(--bz-ink); }
+.squad-intro h1 { margin-top: var(--bz-sp-3); font-family: var(--bz-font-display); font-size: var(--bz-fs-h1); line-height: var(--bz-lh-h1); font-weight: 700; letter-spacing: -.01em; text-wrap: balance; }
+.squad-intro .squad-tagline { margin-top: var(--bz-sp-2); font-size: var(--bz-fs-title); line-height: 1.5; color: var(--bz-text-2); text-wrap: pretty; }
+.squad-start { flex: none; height: 44px; padding-inline: 20px; }
+
+/* ---------- 4. 区块：标题 + 内容，不套大卡片；块与块之间 64（手机 48），正中一条细线 ---------- */
+.squad-section { margin-top: var(--bz-sp-6); padding-top: var(--bz-sp-6); border-top: 1px solid var(--bz-hairline); scroll-margin-top: var(--vp-nav-height); }
+/* 「开始组队」把焦点移到组队步骤这一块：它不是控件，不画焦点框 */
+.squad-section:focus, .shelf-page .squad-section:focus-visible { outline: none; }
+.squad-section-head { display: flex; align-items: center; justify-content: space-between; gap: var(--bz-sp-4); margin-bottom: var(--bz-sp-5); }
+.squad-section-head h2 { font-family: var(--bz-font-display); font-size: var(--bz-fs-h3); line-height: var(--bz-lh-h3); font-weight: 600; letter-spacing: -.01em; }
+
+/* ---------- 5. 阵容：一张编制表 ---------- */
+.roster { margin: 0; padding: 0; list-style: none; border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-1); box-shadow: var(--bz-highlight); }
+.roster-row {
+  position: relative; isolation: isolate; display: grid; grid-template-columns: 48px minmax(0, 340px) minmax(0, 1fr) auto; align-items: center;
+  column-gap: var(--bz-sp-4); min-height: 72px; padding: var(--bz-sp-3) var(--bz-sp-4);
+}
+.roster-row + .roster-row { border-top: 1px solid var(--bz-hairline); }
+.roster-row:first-child { border-radius: 11px 11px 0 0; }
+.roster-row:last-child { border-radius: 0 0 11px 11px; }
+.roster-row:only-child { border-radius: 11px; }
+/* 悬停：从头像那一侧漫出一点这只 Bot 的颜色；行本身不位移 */
+.roster-row::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: 0;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--bz-bot-color, transparent) 12%, transparent), transparent 46%), var(--bz-surface-2);
+  transition: opacity 150ms ease-in-out;
+}
+.roster-tile { --bz-tile-size: 48px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.roster-who { display: flex; flex-wrap: wrap; align-items: center; gap: var(--bz-sp-1) var(--bz-sp-2); min-width: 0; }
+.roster-name { min-width: 0; margin-right: var(--bz-sp-1); font-family: var(--bz-font-display); font-size: var(--bz-fs-title); line-height: var(--bz-lh-title); font-weight: 600; letter-spacing: -.01em; color: var(--bz-ink); }
+.roster-name a { color: inherit; text-decoration: none; }
+/* 整行可点进这个成员的详情页：名字的链接铺满整行，头像（戳）和「导入」在它上面 */
+.roster-name a::after { content: ''; position: absolute; inset: 0; z-index: 0; border-radius: inherit; }
+.roster-row :is(.roster-tile, .roster-import) { position: relative; z-index: 1; }
+.roster-does { min-width: 0; font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); color: var(--bz-text-2); text-wrap: pretty; }
+.roster-import[data-done="true"] > svg { color: var(--bz-success); }
+.roster-row.is-missing .roster-name, .roster-row.is-missing .roster-does { color: var(--bz-text-3); }
+.roster-row.is-missing .roster-tile { border-style: dashed; border-color: var(--bz-border-strong); background: transparent; box-shadow: none; cursor: default; }
+.roster-row.is-missing .roster-tile::before { display: none; }
+.roster-row.is-missing .bz-still { width: 68%; height: 68%; }
+@media (hover: hover) {
+  .roster-row:not(.is-missing):hover::before { opacity: 1; }
+  .roster-row:hover .bz-tile::before { opacity: 1; }
+}
+
+/* ---------- 6. 怎么配合：流程图 ---------- */
+.squad-flow { position: relative; display: flex; justify-content: center; min-width: 0; }
+.flow-canvas { position: relative; flex: none; }
+.flow-lines { position: absolute; inset: 0; display: block; overflow: visible; pointer-events: none; }
+.flow-edge { transition: opacity var(--bz-dur) var(--bz-ease); }
+.flow-line, .flow-head { stroke: var(--bz-flow-line); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: stroke var(--bz-dur) var(--bz-ease); }
+/* 小光点：从交出的一方走向接手的一方，6 秒一趟，颜色是交出那只 Bot 的颜色（「你」是墨色） */
+.flow-dot { fill: var(--bz-bot-color, var(--bz-ink)); offset-rotate: 0deg; offset-distance: 0%; opacity: 0; animation: bz-flow-run 6s linear infinite; }
+@keyframes bz-flow-run {
+  0% { offset-distance: 0%; opacity: 0; }
+  6%, 92% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+.flow-edge[data-state="on"] :is(.flow-line, .flow-head) { stroke: var(--bz-bot-color, var(--bz-ink)); }
+.squad-flow.hot-you .flow-edge[data-state="on"] :is(.flow-line, .flow-head) { stroke: var(--bz-ink); }
+.squad-flow.hot-you .flow-edge[data-state="on"] .flow-dot { fill: var(--bz-ink); }
+.flow-edge[data-state="dim"] { opacity: .22; }
+.flow-edge[data-state="dim"] .flow-dot { visibility: hidden; }
+/* 线上的小标签：实底盖住线，写的是交接的东西 */
+.flow-label {
+  position: absolute; z-index: 1; width: max-content; padding: 2px var(--bz-sp-2); transform: translate(-50%, -50%);
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-control); background: var(--bz-card); color: var(--bz-text-2);
+  font-size: var(--bz-fs-xs); line-height: 16px; font-weight: 600; text-align: center; text-wrap: balance; pointer-events: none;
+  transition: opacity var(--bz-dur) var(--bz-ease), color var(--bz-dur) var(--bz-ease), border-color var(--bz-dur) var(--bz-ease);
+}
+.flow-label > span { display: block; }
+.flow-label[data-anchor="left"] { transform: translate(0, -50%); text-align: left; }
+.flow-label[data-anchor="right"] { transform: translate(-100%, -50%); text-align: right; }
+.flow-label[data-state="on"] { border-color: var(--bz-border-strong); color: var(--bz-ink); }
+.flow-label[data-state="dim"] { opacity: .28; }
+.flow-node { position: absolute; z-index: 2; width: 56px; height: 56px; margin: -28px 0 0 -28px; transition: opacity var(--bz-dur) var(--bz-ease); }
+.flow-node.member { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.flow-node[data-state="dim"] { opacity: .4; }
+.flow-tile { --bz-tile-size: 56px; }
+.flow-caption { position: absolute; top: calc(100% + 6px); left: 50%; display: flex; flex-direction: column; width: max-content; max-width: 150px; transform: translateX(-50%); text-align: center; }
+.flow-caption b { font-size: var(--bz-fs-sm); line-height: 18px; font-weight: 600; color: var(--bz-ink); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.flow-caption i { font-size: var(--bz-fs-xs); line-height: 16px; font-style: normal; font-weight: 500; color: var(--bz-text-3); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.flow-node.caption-right .flow-caption { top: 50%; left: calc(100% + var(--bz-sp-3)); max-width: 220px; transform: translateY(-50%); text-align: left; }
+.flow-node.caption-above .flow-caption { top: auto; bottom: calc(100% + 6px); }
+/* 「你」：一个中性的圆 */
+.flow-you {
+  display: grid; place-items: center; width: 56px; height: 56px; border: 1px solid var(--bz-border-strong); border-radius: 50%;
+  background: var(--bz-surface-2); box-shadow: var(--bz-highlight); color: var(--bz-ink);
+  font-family: var(--bz-font-display); font-size: var(--bz-fs-title); font-weight: 600; line-height: 1;
+}
+/* 文字版：有图的时候只给读屏；窄屏不画图，直接显示它 */
+.flow-list { margin: 0; padding: 0; list-style: none; }
+.flow-list > li { display: flex; flex-direction: column; gap: var(--bz-sp-1); padding: var(--bz-sp-3) 0; }
+.flow-list > li + li { border-top: 1px solid var(--bz-hairline); }
+.flow-list > li:first-child { padding-top: 0; }
+.flow-list > li:last-child { padding-bottom: 0; }
+.flow-what { font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); font-weight: 600; color: var(--bz-ink); }
+.flow-route { display: flex; flex-wrap: wrap; align-items: center; gap: var(--bz-sp-1) var(--bz-sp-2); font-size: var(--bz-fs-sm); line-height: 24px; color: var(--bz-text-2); }
+.flow-route > .bz-icon { color: var(--bz-text-3); }
+.flow-who { display: inline-flex; align-items: center; gap: 6px; min-width: 0; }
+.flow-who .bz-still { width: 20px; height: 20px; }
+.flow-you-dot { flex: none; width: 16px; height: 16px; margin: 0 2px; border: 1.5px solid var(--bz-text-3); border-radius: 50%; }
+@media (min-width: 680px) {
+  .flow-list { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+}
+@media (max-width: 679px) {
+  .squad-flow { display: none; }
+}
+/* 服务端按 1140 宽排好；比这窄的桌面要等脚本量过宽度重排，量好之前先不露出来 */
+@media (min-width: 680px) and (max-width: 1203px) {
+  .squad-flow:not(.is-ready) { visibility: hidden; }
+}
+
+/* ---------- 7. 组队步骤：编号一路往下 ---------- */
+.setup-steps { max-width: 760px; margin: 0; padding: 0; list-style: none; }
+.setup-step { position: relative; display: grid; grid-template-columns: 28px minmax(0, 1fr); column-gap: var(--bz-sp-4); padding-bottom: var(--bz-sp-6); }
+.setup-step:last-child { padding-bottom: 0; }
+/* 编号之间的连线 */
+.setup-step:not(:last-child)::before { content: ''; position: absolute; left: 13.5px; top: 36px; bottom: 8px; width: 1px; background: var(--bz-hairline); }
+.step-no {
+  display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--bz-border-strong); border-radius: 50%; background: var(--bz-surface-2);
+  color: var(--bz-text-2); font-size: var(--bz-fs-xs); font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums;
+  transition: background-color var(--bz-dur) var(--bz-ease), color var(--bz-dur) var(--bz-ease), border-color var(--bz-dur) var(--bz-ease);
+}
+.setup-step.is-complete .step-no { border-color: transparent; background: var(--bz-ink); color: var(--bz-page); }
+.step-body { min-width: 0; }
+.step-title { font-family: var(--bz-font-display); font-size: var(--bz-fs-title); line-height: 28px; font-weight: 600; letter-spacing: -.01em; color: var(--bz-ink); }
+.step-body .step-detail { margin-top: var(--bz-sp-1); font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); color: var(--bz-text-2); text-wrap: pretty; }
+/* 进度：一句「已导入 2 / 5」+ 一格一个成员的进度条，导入了就亮成它的颜色 */
+.setup-progress { display: flex; align-items: center; gap: var(--bz-sp-4); }
+.setup-progress .step-title { font-variant-numeric: tabular-nums; }
+.progress-track { display: flex; gap: var(--bz-sp-1); }
+.progress-track > i { width: 24px; height: 6px; border-radius: 3px; background: var(--bz-border-strong); transition: background-color var(--bz-dur-slow) var(--bz-ease); }
+.progress-track > i.on { background: var(--bz-bot-color); }
+.setup-members { margin: var(--bz-sp-3) 0 0; padding: 0; list-style: none; border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-1); box-shadow: var(--bz-highlight); }
+.setup-member { display: flex; align-items: center; gap: var(--bz-sp-3); min-height: 48px; padding: var(--bz-sp-1) var(--bz-sp-2) var(--bz-sp-1) var(--bz-sp-3); }
+.setup-member + .setup-member { border-top: 1px solid var(--bz-hairline); }
+.setup-member-name { flex: 1; min-width: 0; overflow: hidden; font-size: var(--bz-fs-btn); line-height: 20px; font-weight: 600; color: var(--bz-ink); white-space: nowrap; text-overflow: ellipsis; transition: color var(--bz-dur) var(--bz-ease); }
+.setup-member.is-done .setup-member-name { color: var(--bz-text-3); }
+/* 打勾的圆：点「导入」自动勾上，也可以自己点它勾掉或补勾 */
+.member-check {
+  position: relative; display: grid; place-items: center; flex: none; width: 20px; height: 20px; padding: 0; border: 1.5px solid var(--bz-border-hover); border-radius: 50%;
+  background: transparent; color: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background-color var(--bz-dur) var(--bz-ease), border-color var(--bz-dur) var(--bz-ease), color var(--bz-dur) var(--bz-ease);
+}
+.member-check::after { content: ''; position: absolute; inset: -12px; }
+.member-check:hover { border-color: var(--bz-ink); }
+/* 勾上以后是这只 Bot 的颜色；底和勾用 botPalette 算好的那一对，什么颜色的 Bot 上面的勾都看得清 */
+.member-check[aria-pressed="true"] { border-color: transparent; background: var(--bz-btn-bg, var(--bz-ink)); color: var(--bz-btn-fg, var(--bz-page)); }
+.member-check > svg { stroke-width: 2.5; }
+/* 发给队长的消息：上面一行是收件人和「复制」，下面是正文 */
+.squad-message { border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-2); box-shadow: var(--bz-highlight); }
+.squad-message > header { display: flex; align-items: center; justify-content: space-between; gap: var(--bz-sp-3); min-height: 48px; padding: var(--bz-sp-2) var(--bz-sp-2) var(--bz-sp-2) var(--bz-sp-4); border-bottom: 1px solid var(--bz-hairline); }
+.squad-message > header > .bz-btn { margin-left: auto; }
+.message-to { display: inline-flex; align-items: center; gap: var(--bz-sp-2); min-width: 0; font-size: var(--bz-fs-sm); line-height: 20px; color: var(--bz-ink); }
+.message-to > .bz-icon { color: var(--bz-text-3); }
+.message-to b { overflow: hidden; font-weight: 600; white-space: nowrap; text-overflow: ellipsis; }
+.shelf-page .message-text { margin: 0; padding: var(--bz-sp-4); font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); color: color-mix(in srgb, var(--bz-ink) 88%, transparent); white-space: pre-wrap; }
+
+/* ---------- 8. 整队的代价：三栏 ---------- */
+.cost-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--bz-sp-4); align-items: start; }
+/* 左边额度、权限上下叠；右边导入前准备按成员分两栏。三块一样是卡片，高度大致拉平 */
+.cost-side { display: grid; gap: var(--bz-sp-4); min-width: 0; }
+.cost-col { min-width: 0; padding: 20px var(--bz-sp-5); border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card); background: var(--bz-surface-1); box-shadow: var(--bz-highlight); }
+.cost-col > h3 { margin-bottom: var(--bz-sp-3); font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); font-weight: 600; color: var(--bz-text-3); }
+.cost-list, .prereq-list, .prereq-list ul { margin: 0; padding: 0; list-style: none; }
+.cost-row { display: flex; align-items: center; gap: var(--bz-sp-2); min-height: 36px; cursor: default; }
+.cost-row + .cost-row { border-top: 1px solid var(--bz-hairline); }
+.cost-name { flex: 1; min-width: 0; overflow: hidden; font-size: var(--bz-fs-sm); line-height: 20px; font-weight: 500; color: var(--bz-ink); white-space: nowrap; text-overflow: ellipsis; }
+/* 额度：三格强度条 + 一个字，和 Bot 详情页同一种画法 */
+.squad-quota { --lit: var(--bz-ink); display: inline-flex; align-items: center; gap: var(--bz-sp-2); flex: none; font-size: var(--bz-fs-sm); line-height: 20px; font-weight: 600; color: var(--bz-ink); }
+.squad-quota[data-quota="高"] { --lit: var(--bz-quota-high); color: var(--bz-quota-high); }
+.squad-quota-bars { display: inline-flex; gap: 3px; }
+.squad-quota-bars > i { width: 14px; height: 6px; border-radius: 2px; background: var(--bz-border-strong); }
+.squad-quota:is([data-quota="低"], [data-quota="中"], [data-quota="高"]) .squad-quota-bars > i:first-child,
+.squad-quota:is([data-quota="中"], [data-quota="高"]) .squad-quota-bars > i:nth-child(2),
+.squad-quota[data-quota="高"] .squad-quota-bars > i:nth-child(3) { background: var(--lit); }
+/* 权限：后面跟着用到它的成员 */
+.cost-bots { display: inline-flex; flex: none; gap: 2px; }
+.cost-bots > span { display: block; }
+.cost-bots .bz-still { width: 22px; height: 22px; }
+.prereq-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--bz-sp-5) var(--bz-sp-6); }
+.prereq-who { display: flex; align-items: center; gap: var(--bz-sp-2); font-size: var(--bz-fs-sm); line-height: 24px; font-weight: 600; color: var(--bz-ink); }
+.prereq-list ul { margin-top: var(--bz-sp-1); }
+.prereq-list ul > li { position: relative; padding-left: var(--bz-sp-4); font-size: var(--bz-fs-sm); line-height: var(--bz-lh-sm); color: var(--bz-text-2); }
+.prereq-list ul > li + li { margin-top: var(--bz-sp-1); }
+.prereq-list ul > li::before { content: ''; position: absolute; left: 4px; top: calc(.75em - 2px); width: 4px; height: 4px; border-radius: 50%; background: var(--bz-text-3); }
+
+/* ---------- 9. 要知道的事：两栏，每条的第一句是要点 ---------- */
+.squad-notes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--bz-sp-5) var(--bz-sp-7); margin: 0; padding: 0; list-style: none; }
+.squad-notes > li { font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); color: var(--bz-text-2); text-wrap: pretty; }
+.squad-notes strong { font-weight: 500; color: var(--bz-ink); }
+
+/* ---------- 10. 响应式 ---------- */
+@media (max-width: 899px) {
+  .squad-grid { grid-template-columns: minmax(0, 1fr); }
+  .cost-grid, .squad-notes { grid-template-columns: minmax(0, 1fr); }
+  .prereq-list { grid-template-columns: minmax(0, 1fr); row-gap: var(--bz-sp-4); }
+  .squad-notes { row-gap: var(--bz-sp-4); }
+  /* 编制表：介绍换到名字下面 */
+  .roster-row { grid-template-columns: 48px minmax(0, 1fr) auto; grid-template-areas: "tile who import" "tile does import"; row-gap: 2px; align-items: start; }
+  .roster-tile { grid-area: tile; }
+  .roster-who { grid-area: who; align-self: end; min-height: 24px; }
+  .roster-does { grid-area: does; }
+  .roster-import { grid-area: import; align-self: center; }
+}
+@media (max-width: 679px) {
+  .squad-card { grid-template-columns: minmax(0, 1fr); gap: var(--bz-sp-4); }
+  .squad-card-photo { height: 168px; }
+  .squad-card-body { padding: 0 var(--bz-sp-1) var(--bz-sp-1); }
+  .squad-recruit { min-height: 176px; }
+  .squad-stage { height: 200px; }
+  .squad-photo.stage { --photo-pad: var(--bz-sp-3); --photo-drop: 6px; }
+  .photo-plate { display: none; }
+  .squad-intro { flex-direction: column; align-items: stretch; gap: var(--bz-sp-5); margin-top: var(--bz-sp-5); }
+  .squad-byline { flex-basis: 100%; margin-left: 0; }
+  .squad-section { margin-top: var(--bz-sp-5); padding-top: var(--bz-sp-5); }
+  .roster-row { grid-template-areas: "tile who" "tile does" ". import"; grid-template-columns: 48px minmax(0, 1fr); column-gap: var(--bz-sp-3); padding: var(--bz-sp-4) var(--bz-sp-3); }
+  .roster-import { justify-self: start; margin-top: var(--bz-sp-3); }
+  .setup-step { column-gap: var(--bz-sp-3); }
+  .setup-progress { flex-wrap: wrap; row-gap: var(--bz-sp-1); }
+  .cost-col { padding: var(--bz-sp-4); }
+}
+@media (pointer: coarse) {
+  .squad-start { height: 48px; }
+  .member-check { width: 24px; height: 24px; }
+  .setup-member { min-height: 52px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .photo-hop.is-hopping { animation: none !important; }
+  .flow-dot { animation: none !important; visibility: hidden; }
+}

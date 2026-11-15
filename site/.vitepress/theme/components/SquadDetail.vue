@@ -1,115 +1,319 @@
-<script setup>
-// 占位组件：把小队摘要里的数据都渲染出来，不做版式和样式，等小队详情车道重写。
-// squad 的字段见 scripts/lib/squad-summary.mjs；copy 是权限和额度的说明文案（和 Bot 详情页同一份）。
-import { computed } from 'vue'
+<!--
+  小队详情页：合影舞台 → 阵容 → 怎么配合 → 组队步骤 → 整队的代价 → 要知道的事。
+  squad 的字段见 scripts/lib/squad-summary.mjs；copy 是权限和额度的说明（和 Bot 详情页同一份），只放在 title 和读屏文本里。
+  Grok Bot 没有批量导入：成员逐个导入，页面记住哪些已经点过（localStorage，键 bz-squad-<slug>）。
+-->
+<script setup lang="ts">
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import SquadLineup from './SquadLineup.vue'
+import SquadFlow from './SquadFlow.vue'
+import BotPortrait from './BotPortrait.vue'
+import SquadStill from './SquadStill.vue'
+import BzIcon from './BzIcon.vue'
+import ExternalHint from './ExternalHint.vue'
+import LiveAnnouncer from './LiveAnnouncer.vue'
+import { SQUAD_COPY } from '../../meta.mjs'
+import { avatarColor } from '../avatar'
+import { botPalette } from '../color'
+import { reportClick } from '../heat'
+import { announce } from '../announce'
+import { nextPoke } from '../pitch'
+import { isReducedMotion } from '../live/clock'
+import { parseImported, squadStorageKey } from '../squad'
 
-const props = defineProps({
-  squad: { type: Object, required: true },
-  copy: { type: Object, default: () => ({ permissions: {}, quota: {} }) },
+interface Member {
+  bot: string; name: string; title: string | null; does: string | null; lead: boolean; optional: boolean
+  avatar: string | null; detailUrl: string; templateUrl: string; quotaCost: string
+}
+interface Squad {
+  slug: string; name: string; tagline: string; formation: string; origin: string; addedAt: string
+  author: { name: string; link: string | null }
+  members: Member[]; leader: string | null
+  flow: { from: string; to: string; what: string | null }[]
+  setup: { title: string | null; detail: string | null }[]
+  kickoff: string | null; tryout: string | null; notes: string[]
+  missing: { name: string | null; does: string | null }[]
+  quota: { max: string | null; perMember: { bot: string; quotaCost: string }[] }
+  permissions: { permission: string; bots: string[] }[]
+  prerequisites: { bot: string; items: string[] }[]
+}
+const props = withDefaults(defineProps<{ squad: Squad; copy?: { permissions: Record<string, string>; quota: Record<string, string> } }>(), {
+  copy: () => ({ permissions: {}, quota: {} }),
 })
-const names = computed(() => new Map(props.squad.members.map((member) => [member.bot, member.name])))
-// flow 里的 you 代表用户本人。
-const who = (slug) => slug === 'you' ? '你' : names.value.get(slug) || slug
+
+const bySlug = computed(() => new Map(props.squad.members.map((member) => [member.bot, member])))
+const member = (slug: string) => bySlug.value.get(slug)!
+const leader = computed(() => props.squad.leader ? bySlug.value.get(props.squad.leader) ?? null : null)
+const palette = (item: Member) => botPalette(item.avatar ? '#8a8a93' : avatarColor(item.bot))
+const portrait = (item: Member) => ({ slug: item.bot, name: item.name, avatar: item.avatar })
+const hasFlow = computed(() => props.squad.flow.some((step) => step.what))
+
+/* ---------- 已导入的成员：只在本机记住 ---------- */
+const imported = ref<string[]>([])
+const done = (slug: string) => imported.value.includes(slug)
+const slugs = computed(() => props.squad.members.map((item) => item.bot))
+function save() {
+  try { localStorage.setItem(squadStorageKey(props.squad.slug), JSON.stringify(imported.value)) } catch { /* 隐私模式存不了：这次访问里照常打勾 */ }
+}
+function mark(slug: string, value: boolean) {
+  if (done(slug) === value) return
+  imported.value = slugs.value.filter((item) => item === slug ? value : done(item))
+  save()
+}
+function toggle(slug: string) {
+  mark(slug, !done(slug))
+  void announce(SQUAD_COPY.imported(imported.value.length, slugs.value.length))
+}
+function sync(event: StorageEvent) {
+  if (event.key === squadStorageKey(props.squad.slug)) imported.value = parseImported(event.newValue, slugs.value)
+}
+
+/* ---------- 活的：点谁戳谁，导入的那只「嗖」一下 ---------- */
+const photo = ref<InstanceType<typeof SquadLineup>>()
+const rowPortraits = new Map<string, InstanceType<typeof BotPortrait>>()
+const keep = (slug: string) => (el: unknown) => { if (el) rowPortraits.set(slug, el as InstanceType<typeof BotPortrait>); else rowPortraits.delete(slug) }
+const hoveredRow = ref<string | null>(null)
+function enterRow(event: PointerEvent, slug: string) { if (event.pointerType === 'mouse') hoveredRow.value = slug }
+function leaveRow(event: PointerEvent) { if (event.pointerType === 'mouse') hoveredRow.value = null }
+function poke(slug: string) { rowPortraits.get(slug)?.play({ state: nextPoke(slug).state }) }
+function importMember(slug: string) {
+  // 和货架上的「导入」一样：照常上报这个 Bot 的导入，新标签页由链接自己打开。
+  reportClick(slug, 'import')
+  photo.value?.play(slug, { state: 'comet' })
+  rowPortraits.get(slug)?.play({ state: 'comet' })
+  mark(slug, true)
+}
+
+/* ---------- 开始组队：滚到组队步骤 ---------- */
+const setup = ref<HTMLElement>()
+function start() {
+  setup.value?.scrollIntoView({ behavior: isReducedMotion() ? 'auto' : 'smooth', block: 'start' })
+  setup.value?.focus({ preventScroll: true })
+  history.replaceState(history.state, '', '#setup')
+}
+
+/* ---------- 复制口令 ---------- */
+const copied = ref<string | null>(null)
+const blocks = new Map<string, HTMLElement>()
+const keepBlock = (key: string) => (el: unknown) => { if (el) blocks.set(key, el as HTMLElement); else blocks.delete(key) }
+let timer: ReturnType<typeof setTimeout> | undefined
+async function copyText(key: 'kickoff' | 'tryout') {
+  const text = props.squad[key]
+  if (!text) return
+  try {
+    await navigator.clipboard.writeText(text)
+    copied.value = key
+    if (leader.value) photo.value?.play(leader.value.bot, { state: 'wink' })
+    void announce(SQUAD_COPY.copied)
+    clearTimeout(timer)
+    timer = setTimeout(() => { copied.value = null }, 1800)
+  } catch {
+    // 复制不了（权限、旧浏览器）：把这段文字选中，按 ⌘C / Ctrl+C 就能带走。
+    const block = blocks.get(key)
+    if (!block) return
+    const range = document.createRange()
+    range.selectNodeContents(block)
+    const selection = window.getSelection()
+    selection?.removeAllRanges()
+    selection?.addRange(range)
+  }
+}
+
+/* ---------- 步骤编号：导入 → 接线 → 口令 → 试一句 ---------- */
+const steps = computed(() => {
+  const list: ({ kind: 'import' } | { kind: 'setup'; title: string | null; detail: string | null } | { kind: 'kickoff' | 'tryout'; text: string })[] = [{ kind: 'import' }]
+  for (const step of props.squad.setup) list.push({ kind: 'setup', ...step })
+  if (props.squad.kickoff) list.push({ kind: 'kickoff', text: props.squad.kickoff })
+  if (props.squad.tryout) list.push({ kind: 'tryout', text: props.squad.tryout })
+  return list
+})
+
+/* ---------- 要知道的事：第一句是要点，单独提出来 ---------- */
+const notes = computed(() => props.squad.notes.map((note) => {
+  const cut = note.indexOf('。')
+  return cut > 0 && cut < note.length - 1 ? { lead: note.slice(0, cut + 1), rest: note.slice(cut + 1) } : { lead: note, rest: '' }
+}))
+
+onMounted(() => {
+  try { imported.value = parseImported(localStorage.getItem(squadStorageKey(props.squad.slug)), slugs.value) } catch { /* 读不了就当都没导入 */ }
+  window.addEventListener('storage', sync)
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('storage', sync)
+  clearTimeout(timer)
+})
 </script>
 
 <template>
   <main class="shelf-page squad-detail" data-testid="squad-detail" :data-slug="squad.slug">
-    <a class="back-link" href="/">← 返回货架</a>
-    <header data-testid="squad-header">
-      <h1>{{ squad.name }}</h1>
-      <p data-testid="squad-tagline">{{ squad.tagline }}</p>
-      <p data-testid="squad-meta">
-        <span data-testid="squad-formation">队形：{{ squad.formation }}</span>
-        <span data-testid="squad-origin">来源：{{ squad.origin }}</span>
-        <span>设计者：<a v-if="squad.author.link" data-testid="squad-author" :href="squad.author.link" target="_blank" rel="noopener noreferrer">{{ squad.author.name }}</a><span v-else data-testid="squad-author">{{ squad.author.name }}</span></span>
-        <span>上架日期：<time :datetime="squad.addedAt">{{ squad.addedAt }}</time></span>
-      </p>
+    <LiveAnnouncer />
+    <a class="bz-btn ghost sm back-link" href="/"><BzIcon name="arrow-left" />返回货架</a>
+
+    <header class="squad-header" data-testid="squad-header">
+      <SquadLineup ref="photo" class="squad-stage" data-testid="squad-stage" variant="stage" :members="squad.members" :formation="squad.formation" />
+      <div class="squad-intro">
+        <div class="squad-intro-text">
+          <p class="squad-tags" data-testid="squad-meta">
+            <span class="bz-tag squad-tag"><BzIcon name="users" :size="12" />{{ SQUAD_COPY.tag }}</span>
+            <span class="bz-tag" data-testid="squad-formation">{{ squad.formation }}</span>
+            <span class="squad-count" data-testid="squad-count">{{ SQUAD_COPY.count(squad.members.length) }}</span>
+            <span class="squad-byline">
+              <a v-if="squad.author.link" data-testid="squad-author" :href="squad.author.link" target="_blank" rel="noopener noreferrer">by {{ squad.author.name }}<ExternalHint /></a>
+              <span v-else data-testid="squad-author">by {{ squad.author.name }}</span>
+              <span data-testid="squad-origin"> · {{ squad.origin }}</span>
+            </span>
+          </p>
+          <h1>{{ squad.name }}</h1>
+          <p class="squad-tagline" data-testid="squad-tagline">{{ squad.tagline }}</p>
+        </div>
+        <a class="bz-btn primary squad-start" data-testid="squad-start" href="#setup" @click.prevent="start"><BzIcon name="arrow-down" />{{ SQUAD_COPY.start }}</a>
+      </div>
     </header>
 
-    <section data-testid="squad-members">
-      <h2>成员（{{ squad.members.length }}）</h2>
-      <ul>
-        <li v-for="member in squad.members" :key="member.bot" data-testid="squad-member" :data-slug="member.bot" :data-lead="String(member.lead)">
-          <h3><a :href="member.detailUrl">{{ member.name }}</a></h3>
-          <p>
-            <span data-testid="member-title">{{ member.title }}</span>
-            <span v-if="member.lead">（队长）</span>
-            <span v-if="member.optional">（可选）</span>
-          </p>
-          <p data-testid="member-does">{{ member.does }}</p>
-          <p>{{ member.tagline }}</p>
-          <p>
-            <span>分组：{{ member.category }}</span>
-            <span>额度 {{ member.quotaCost }}</span>
-            <span v-if="member.needsAccount">要连账号</span>
-            <span v-if="member.selfRunning">会自己定时跑</span>
-          </p>
-          <a :href="member.templateUrl" target="_blank" rel="noopener noreferrer">一键导入</a>
+    <!-- 阵容：一张编制表，一行一个成员。整行点进它自己的详情页；每行一个「导入」。 -->
+    <section class="squad-section" data-testid="squad-roster" aria-labelledby="squad-roster-title">
+      <header class="squad-section-head">
+        <h2 id="squad-roster-title">{{ SQUAD_COPY.roster }}</h2>
+      </header>
+      <ul class="roster">
+        <li
+          v-for="item in squad.members" :key="item.bot" class="roster-row bz-bot-scope" :class="{ 'is-done': done(item.bot) }" :style="palette(item)"
+          data-testid="squad-member" :data-slug="item.bot" :data-lead="String(item.lead)"
+          @pointerenter="enterRow($event, item.bot)" @pointerleave="leaveRow"
+        >
+          <div class="roster-tile bz-tile" aria-hidden="true" @click="poke(item.bot)">
+            <BotPortrait :ref="keep(item.bot)" :bot="portrait(item)" :rest="hoveredRow === item.bot ? 'wide' : 'idle'" />
+          </div>
+          <div class="roster-who">
+            <h3 class="roster-name"><a data-testid="member-link" :href="item.detailUrl">{{ item.name }}</a></h3>
+            <span v-if="item.title" class="bz-tag" :class="{ solid: item.lead }" data-testid="member-title">{{ item.title }}</span>
+            <span v-if="item.optional" class="bz-tag" data-testid="member-optional">{{ SQUAD_COPY.optional }}</span>
+          </div>
+          <p class="roster-does" data-testid="member-does">{{ item.does }}</p>
+          <a
+            class="bz-btn sm roster-import" data-testid="member-import" :data-done="String(done(item.bot))"
+            :href="item.templateUrl" target="_blank" rel="noopener noreferrer" @click="importMember(item.bot)"
+          ><BzIcon :name="done(item.bot) ? 'check' : 'arrow-up-right'" />{{ SQUAD_COPY.import }}<span class="bz-sr-only">{{ item.name }}（在新标签页打开）</span></a>
+        </li>
+        <li v-for="item in squad.missing" :key="`missing-${item.name}`" class="roster-row is-missing" data-testid="squad-missing">
+          <div class="roster-tile bz-tile" aria-hidden="true"><SquadStill ghost shape="pebble" /></div>
+          <div class="roster-who">
+            <h3 class="roster-name">{{ item.name }}</h3>
+            <span class="bz-tag">{{ SQUAD_COPY.missing }}</span>
+          </div>
+          <p class="roster-does">{{ item.does }}</p>
         </li>
       </ul>
     </section>
 
-    <section v-if="squad.flow.length" data-testid="squad-flow">
-      <h2>怎么配合</h2>
-      <ol>
-        <li v-for="(step, index) in squad.flow" :key="index">{{ who(step.from) }} → {{ who(step.to) }}：{{ step.what }}</li>
+    <!-- 怎么配合：一张图 + 一份同样内容的文字版（窄屏和读屏读文字版）。 -->
+    <section v-if="hasFlow" class="squad-section" data-testid="squad-flow" aria-labelledby="squad-flow-title">
+      <header class="squad-section-head">
+        <h2 id="squad-flow-title">{{ SQUAD_COPY.flow }}</h2>
+      </header>
+      <SquadFlow :squad="squad" />
+    </section>
+
+    <!-- 组队步骤：编号往下走。第一步是把成员逐个导入，带进度；后面是数据里的接线步骤、发给队长的口令、组好以后的第一句。 -->
+    <section id="setup" ref="setup" class="squad-section" data-testid="squad-setup" aria-labelledby="squad-setup-title" tabindex="-1">
+      <header class="squad-section-head">
+        <h2 id="squad-setup-title">{{ SQUAD_COPY.setup }}</h2>
+      </header>
+      <ol class="setup-steps">
+        <li v-for="(step, index) in steps" :key="index" class="setup-step" :class="[`is-${step.kind}`, { 'is-complete': step.kind === 'import' && imported.length === slugs.length }]" :data-step="step.kind">
+          <span class="step-no" aria-hidden="true"><BzIcon v-if="step.kind === 'import' && imported.length === slugs.length" name="check" /><template v-else>{{ index + 1 }}</template></span>
+          <div v-if="step.kind === 'import'" class="step-body">
+            <div class="setup-progress">
+              <p class="step-title" data-testid="setup-progress">{{ SQUAD_COPY.imported(imported.length, slugs.length) }}</p>
+              <div class="progress-track" aria-hidden="true">
+                <i v-for="item in squad.members" :key="item.bot" class="bz-bot-scope" :class="{ on: done(item.bot) }" :style="palette(item)" />
+              </div>
+            </div>
+            <ul class="setup-members">
+              <li v-for="item in squad.members" :key="item.bot" class="setup-member bz-bot-scope" :class="{ 'is-done': done(item.bot) }" :style="palette(item)" data-testid="setup-member" :data-slug="item.bot">
+                <button
+                  type="button" class="member-check" data-testid="member-check" :aria-pressed="done(item.bot)"
+                  :aria-label="`${item.name} ${SQUAD_COPY.importedLabel}`" @click="toggle(item.bot)"
+                ><BzIcon name="check" :size="12" /></button>
+                <SquadStill :bot="portrait(item)" />
+                <span class="setup-member-name">{{ item.name }}</span>
+                <a
+                  class="bz-btn sm ghost" data-testid="setup-import" :href="item.templateUrl" target="_blank" rel="noopener noreferrer" @click="importMember(item.bot)"
+                ><BzIcon name="arrow-up-right" />{{ SQUAD_COPY.import }}<span class="bz-sr-only">{{ item.name }}（在新标签页打开）</span></a>
+              </li>
+            </ul>
+          </div>
+          <div v-else-if="step.kind === 'setup'" class="step-body">
+            <h3 class="step-title">{{ step.title }}</h3>
+            <p class="step-detail">{{ step.detail }}</p>
+          </div>
+          <!-- 口令和试一句：做成一条「发给队长」的消息，收件人就是队长的头像和名字，不另写说明。 -->
+          <div v-else class="step-body">
+            <div class="squad-message" :data-testid="`squad-${step.kind}`">
+              <header>
+                <span v-if="leader" class="message-to bz-bot-scope" :style="palette(leader)"><BzIcon name="send" /><SquadStill :bot="portrait(leader)" /><b>{{ leader.name }}</b></span>
+                <button type="button" class="bz-btn sm ghost" :class="{ copied: copied === step.kind }" :data-testid="`copy-${step.kind}`" @click="copyText(step.kind)">
+                  <BzIcon :name="copied === step.kind ? 'check' : 'copy'" />{{ copied === step.kind ? SQUAD_COPY.copied : SQUAD_COPY.copy }}
+                </button>
+              </header>
+              <p :ref="keepBlock(step.kind)" class="message-text">{{ step.text }}</p>
+            </div>
+          </div>
+        </li>
       </ol>
     </section>
 
-    <section v-if="squad.setup.length" data-testid="squad-setup">
-      <h2>导入之后</h2>
-      <ol>
-        <li v-for="(step, index) in squad.setup" :key="index"><strong>{{ step.title }}</strong>：{{ step.detail }}</li>
-      </ol>
+    <!-- 整队的代价：额度、权限并集、导入前准备。档位和权限的含义在 title 和读屏文本里。 -->
+    <section class="squad-section" data-testid="squad-cost" aria-labelledby="squad-cost-title">
+      <header class="squad-section-head">
+        <h2 id="squad-cost-title">{{ SQUAD_COPY.cost }}</h2>
+      </header>
+      <div class="cost-grid">
+        <div class="cost-side">
+        <div class="cost-col" data-testid="squad-quota">
+          <h3>{{ SQUAD_COPY.quota }}</h3>
+          <ul class="cost-list">
+            <li v-for="item in squad.quota.perMember" :key="item.bot" class="cost-row" :title="copy.quota[item.quotaCost]">
+              <SquadStill :bot="portrait(member(item.bot))" />
+              <span class="cost-name">{{ member(item.bot).name }}</span>
+              <span class="squad-quota" :data-quota="item.quotaCost">
+                <span class="squad-quota-bars" aria-hidden="true"><i /><i /><i /></span>{{ item.quotaCost }}
+                <span v-if="copy.quota[item.quotaCost]" class="bz-sr-only">：{{ copy.quota[item.quotaCost] }}</span>
+              </span>
+            </li>
+          </ul>
+        </div>
+        <div class="cost-col" data-testid="squad-permissions">
+          <h3>{{ SQUAD_COPY.permissions }}</h3>
+          <ul class="cost-list">
+            <li v-for="item in squad.permissions" :key="item.permission" class="cost-row" :title="copy.permissions[item.permission]">
+              <span class="cost-name">{{ item.permission }}<span v-if="copy.permissions[item.permission]" class="bz-sr-only">：{{ copy.permissions[item.permission] }}</span></span>
+              <span class="cost-bots">
+                <span v-for="slug in item.bots" :key="slug" :title="member(slug).name"><SquadStill :bot="portrait(member(slug))" /><span class="bz-sr-only">{{ member(slug).name }}</span></span>
+              </span>
+            </li>
+          </ul>
+        </div>
+        </div>
+        <div v-if="squad.prerequisites.length" class="cost-col" data-testid="squad-prereq">
+          <h3>{{ SQUAD_COPY.prerequisites }}</h3>
+          <ul class="prereq-list">
+            <li v-for="entry in squad.prerequisites" :key="entry.bot">
+              <p class="prereq-who"><SquadStill :bot="portrait(member(entry.bot))" />{{ member(entry.bot).name }}</p>
+              <ul><li v-for="(item, index) in entry.items" :key="index">{{ item }}</li></ul>
+            </li>
+          </ul>
+        </div>
+      </div>
     </section>
 
-    <section v-if="squad.kickoff" data-testid="squad-kickoff">
-      <h2>组队口令</h2>
-      <p>发给队长：</p>
-      <pre>{{ squad.kickoff }}</pre>
-    </section>
-
-    <section v-if="squad.tryout" data-testid="squad-tryout">
-      <h2>组好以后先试这一句</h2>
-      <p>{{ squad.tryout }}</p>
-    </section>
-
-    <section data-testid="squad-quota">
-      <h2>额度消耗</h2>
-      <p v-if="squad.quota.max">整队最高：{{ squad.quota.max }}　{{ copy.quota[squad.quota.max] }}</p>
-      <ul>
-        <li v-for="item in squad.quota.perMember" :key="item.bot">{{ who(item.bot) }}：{{ item.quotaCost }}</li>
+    <section v-if="notes.length" class="squad-section" data-testid="squad-notes" aria-labelledby="squad-notes-title">
+      <header class="squad-section-head">
+        <h2 id="squad-notes-title">{{ SQUAD_COPY.notes }}</h2>
+      </header>
+      <ul class="squad-notes">
+        <li v-for="(note, index) in notes" :key="index"><strong>{{ note.lead }}</strong>{{ note.rest }}</li>
       </ul>
-    </section>
-
-    <section data-testid="squad-permissions">
-      <h2>会用到的权限</h2>
-      <ul v-if="squad.permissions.length">
-        <li v-for="item in squad.permissions" :key="item.permission">
-          <strong>{{ item.permission }}</strong>：{{ copy.permissions[item.permission] }}（{{ item.bots.map(who).join('、') }}）
-        </li>
-      </ul>
-      <p v-else>不需要额外权限</p>
-    </section>
-
-    <section v-if="squad.prerequisites.length" data-testid="squad-prereq">
-      <h2>导入前准备</h2>
-      <ul>
-        <li v-for="entry in squad.prerequisites" :key="entry.bot">
-          {{ who(entry.bot) }}
-          <ul><li v-for="(item, index) in entry.items" :key="index">{{ item }}</li></ul>
-        </li>
-      </ul>
-    </section>
-
-    <section v-if="squad.notes.length" data-testid="squad-notes">
-      <h2>要知道的事</h2>
-      <ul><li v-for="(note, index) in squad.notes" :key="index">{{ note }}</li></ul>
-    </section>
-
-    <section v-if="squad.missing.length" data-testid="squad-missing">
-      <h2>原套装里还有，本站没收</h2>
-      <ul><li v-for="item in squad.missing" :key="item.name">{{ item.name }}：{{ item.does }}</li></ul>
     </section>
   </main>
 </template>

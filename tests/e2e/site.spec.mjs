@@ -220,6 +220,7 @@ test('界面上没有解释性的句子：首屏、区块、页尾、404、搜�
   // 区块只有标题；列表区右侧保留计数。
   await expect(page.locator('.bz-section-head p')).toHaveCount(0)
   await expect(page.locator('#featured-title')).toHaveText('本周主推')
+  await expect(page.locator('#squads-title')).toHaveText('小队')
   await expect(page.locator('#collections-title')).toHaveText('专题')
   await expect(page.locator('#all-title')).toHaveText('全部 Bot')
   await expect(page.locator('.bot-count')).toHaveText('共 3 个')
