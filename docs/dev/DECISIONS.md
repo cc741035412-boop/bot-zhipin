@@ -25,3 +25,16 @@
 16. **Issue 作者就是投稿作者**。`author.github` 必须与 Issue login 一致（忽略大小写）；已有 slug 只允许原作者更新，addedAt 不变。每个 Issue 独占一个 `submission/issue-<号>` 分支，从默认分支重建单提交；提交作者为 Issue 用户的 noreply 身份，提交者是 Actions bot。通过前不创建分支/PR；错误沿用中文四项诊断，只更新本工作流带隐藏标记的 bot 评论。
 17. **对第 7 条 CI 触发方式增加手动派发补充，不提高 CI 权限**。GITHUB_TOKEN 写入不会自动触发 PR CI，所以投稿工作流持有 `actions: write`，推分支/建 PR 后显式派发 `ci.yml`。CI 增加无输入的 `workflow_dispatch`，非 PR 事件按 CONTRIBUTOR 严格检查，job 名仍为 `validate-and-build`，仍需保护分支的一人批准和必需检查。保留现有 concurrency 配置，多个手动运行可能互相取消，作为真实联调已知边界单独跟进。
 18. **机器校验不替代公开内容审核**。自动检查能证明格式、权限字段存在、密钥规则与图片头等，不保证截图真实、无隐私或模板链接匿名可访问。PR 只勾选已证实的校验/授权检查项，其余由维护者核验；不自动合并。不创建真实标签/Issue、不使用真实网络做测试，GitHub 权限、Issue 原生长度限制及附件跳转行为留给维护者联调。细节见 `ARCHITECTURE.md` 的 Issue 投稿一节。
+
+## 2026-11-14 S3：网站直投
+
+（第 19–21 条留给同期进行的「会动的真脸 + 活泼彩色」改版。）
+
+22. **网站投稿页 `/submit` 取代 Issue 表单成为主入口**，Issue 表单保留作备用（第 14 条降为备用入口）。学员在中文页面上预览、即时看到中文报错、拖截图、提交，进度也在本站显示。放弃：只用 Issue 表单（英文页面，提交后 1–2 分钟才知道对错）；不登录也能投（失去「贡献者」署名和防冒名）。
+23. **登录用零 scope 的 OAuth App，写仓库用只装本仓库的 GitHub App。** 登录拿到 `/user` 后立即撤销用户令牌，会话 cookie 只存数字 id 和 login。GitHub App 只开 Contents、Pull requests 写和 Metadata 读，每次换令牌都降到这几项。放弃：GitHub App 的用户授权（授权页显示「Act on your behalf」，吓到学员）；OAuth `public_repo`（能写学员所有公开仓库）。
+24. **推翻第一期「不做登录系统，以及除点击计数以外的任何后端」**，新增后端只限投稿：Pages Functions + D1 限流表。密钥只放 Cloudflare 加密变量，GitHub 里仍不放任何密钥（第 7 条不变）。
+25. **推翻第 18 条「不自动合并」**：网站投稿 PR 一创建就开启自动合并（普通合并），维护者批准且 `validate-and-build` 通过后自动合入。前提：保留「推送新提交后旧批准作废」；要求代码所有者批准（`.github/CODEOWNERS`）；App 不在规则集绕过名单里。人工审核内容的要求不变。
+26. **按 Cloudflare 免费版限额设计**（每请求 10ms CPU、50 个子请求、128MB 内存）：截图一张一个请求、传原始字节、用原生 base64；文本单独提交。超了先拆「校验」和「写入」两个接口，再考虑 Workers Paid。
+27. **校验器拆成纯内核 + fs 适配器**，CLI、浏览器、Function 共用同一套规则和中文报错。Ajv 改为 standalone 预编译，生成文件提交进仓库，由测试保证和 schema 同步；它是派生物，不算第二份枚举。
+28. **服务端统一改写 `author.github` 和 `addedAt`**：作者就是登录账号，学员不用再报 GitHub 用户名；新投稿取北京时间当天，更新沿用 main 上的原值。slug 归属以 main HEAD 上的 `bot.yaml` 为准，不信构建时的索引。校验和密钥扫描必须在推送之前完成（推送到公开仓库即公开）。
+29. **上线通知以部署到的提交为准**：构建写 `/api-data/build.json`，`announce-live` 工作流等到它包含本次合并的提交、且详情页可访问，才在 PR（和来源 Issue）里评论「已上线」，然后删投稿分支。不以详情页返回 200 为准（更新已有 Bot 时它本来就是 200）。

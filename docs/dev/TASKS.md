@@ -27,3 +27,22 @@
 ## 第一期不做
 
 AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论、作者主页、贡献者榜、需求板、分类筛选、多语言、登录系统，以及除点击计数以外的任何后端。
+
+# 第二期 S3：网站直投
+
+目标：学员在本站中文页面完成投稿（预览 → GitHub 登录 → 拖截图 → 提交），维护者只点一次 Approve，上线后自动通知投稿人。契约 `SUBMIT.md`，交互 `INTERACTION-SUBMIT.md`。
+
+| # | 任务 | 执行 | 前置 | 写入范围 | 状态 |
+|---|---|---|---|---|---|
+| M1 | 接口契约 `SUBMIT.md`、ARCHITECTURE、DECISIONS 22–29 | 维护者 | — | `docs/dev/` | ✅ |
+| M2 | 交互规格与文案 `INTERACTION-SUBMIT.md` | 维护者 | — | `docs/dev/` | ✅ |
+| L1 | 校验内核可移植：纯内核 + fs 适配器、Ajv 预编译、浏览器解包、投稿上下文 | 编码 agent | M1 | `scripts/` | ✅ |
+| L2a | GitHub 登录、会话、限流、GitHub 客户端 | 编码 agent | M1 | `functions/`、`migrations/0002` | ✅ |
+| L2b | 截图上传、提交、状态接口 | 编码 agent | L1、L2a | `functions/api/submit/` | ✅ |
+| L3 | 投稿页浏览器端逻辑 | 编码 agent | L1 | `site/.vitepress/theme/submit/`、`scripts/lib/` | ✅ |
+| L4 | 投稿页界面（独立交互任务，真浏览器截图验收） | 编码 agent | M2、L3、界面改版合入 | `site/submit.md`、`Submit*.vue` | 🟡 |
+| L5 | 命令行改出网站链接、Issue 链路自动补作者、站点配置 | 编码 agent | L1 | `scripts/make-submission-link.mjs`、`meta.mjs` | ✅ |
+| L6 | 上线通知工作流、范围检查禁止改作者、CODEOWNERS | 编码 agent | M1 | `.github/`、`scripts/announce-live.mjs` | ✅ |
+| M3 | GitHub App、OAuth App、Cloudflare 加密变量 | 维护者 | — | 后台 | ✅ |
+| M4 | 投稿文档：AGENTS、README、CONTRIBUTING；MAINTAINING 待联调后改 | 维护者 | L5 | 根目录文档 | 🟡 |
+| M5 | 联调：仓库设置（自动合并、规则集）、真实全程、CPU 实测、真实 Grok Bot | 维护者 | 全部 | — | ⬜ |

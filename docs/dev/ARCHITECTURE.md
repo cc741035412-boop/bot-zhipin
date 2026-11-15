@@ -2,7 +2,7 @@
 
 ## 一句话
 
-`bots/` 里一个 Bot 一个文件夹 → 构建时读成静态网站（VitePress）→ 线上只有一个点击计数后端（Pages Functions + D1）。
+`bots/` 里一个 Bot 一个文件夹 → 构建时读成静态网站（VitePress）→ 线上后端只有两块：点击计数，和网站投稿（Pages Functions + D1）。
 
 ## 目录
 
@@ -90,3 +90,40 @@ GITHUB_TOKEN 创建的 PR 不会触发普通 PR 事件，因此显式执行 `gh 
 - 校验失败不更新已有 PR，所以旧 PR 可能仍存在；维护者合并前要核对 Issue 最新评论与最新 head 的检查。并发不同 Issue 使用同一 slug 也需在审核/合并阶段复核，默认分支上已被他人占用时下一次处理会拒绝覆盖。
 
 验证：`tests/unit/submission.test.mjs` 在临时目录测试完整链路，网络和 git/gh 都是假适配器；真实 GitHub 的预填、附件 CDN、令牌权限和保护分支检查关联仍需维护者联调。
+
+## 网站直投（S3）
+
+接口、cookie、回执、限流、错误码以 [`SUBMIT.md`](SUBMIT.md) 为准；页面状态和文案以 [`INTERACTION-SUBMIT.md`](INTERACTION-SUBMIT.md) 为准。
+
+```text
+AI：make-submission-link → https://bot-zhipin.pages.dev/submit#BZB1:…
+ /submit（浏览器）：解包 → 预览卡片和详情页 → 校验内核即时报错
+   → 用 GitHub 登录（/api/auth/*，零 scope OAuth App，取完身份即撤销令牌）
+   → 截图逐张上传（/api/submit/screenshot → GitHub blob，返回签名回执）
+   → 提交（/api/submit：服务端重新校验和密钥扫描 → 改写 author.github、addedAt
+        → GitHub App 在 submission/web-<id>-<slug> 建单提交 → 建或更新 PR → 开启自动合并）
+ pull_request CI（validate-and-build）→ 维护者 Approve → 自动合并
+ push main → announce-live：等 build.json 到达本次合并提交 → 评论「已上线」→ 删投稿分支
+```
+
+### 代码分层
+
+| 位置 | 职责 |
+|---|---|
+| `scripts/lib/bot-model.mjs`、`scripts/lib/validate/core.mjs` 等纯内核 | 不读盘、不依赖 node，CLI、浏览器、Function 共用；`load-bots.mjs` 和 `validate/index.mjs` 是 Node 适配器 |
+| `scripts/lib/validate/generated/bot-schema.mjs` | Ajv standalone 预编译结果（`npm run gen:schema` 生成，提交进仓库） |
+| `scripts/lib/submit-fields.mjs` | `applyServerFields`：只改写 author 和 addedAt 两段原文 |
+| `scripts/sync-assets.mjs` | 构建时另生成 `/api-data/submit-context.json`（已上架索引、模板原文、说明文案、限额）和 `/api-data/build.json` |
+| `site/.vitepress/theme/submit/` | 投稿页的浏览器端逻辑；`site/submit.md` 和 `Submit*.vue` 是界面 |
+| `functions/api/auth/*` | 登录、回调、me、退出 |
+| `functions/api/submit/*` | 截图上传、提交、状态 |
+| `functions/_lib/github.ts` | 只暴露固定的几个 GitHub 操作，内部检查 URL 白名单和分支名，不导出通用请求方法 |
+| `.github/workflows/announce-live.yml` | 上线通知 |
+
+### 安全边界
+
+- 投稿始终是数据：Markdown 用 `html:false` 渲染，外链图片只显示成链接，预览里没通过 schema 的字段不进任何链接。
+- 校验和密钥扫描在任何 GitHub 写操作之前完成；tree 只放 `bots/<slug>/`，mode 只有 100644 和 040000。
+- 会话 cookie `__Host-bz_s`：HttpOnly、Secure、SameSite=Strict，2 小时；写接口校验同源，只收 JSON 或图片类型，不发 CORS 头。
+- D1 限流：按人、按 IP、全站三层；每人同时最多 3 个未合并的网站投稿 PR。
+- 规则集：保留推送后旧批准作废、要求代码所有者批准；App 不在绕过名单。
