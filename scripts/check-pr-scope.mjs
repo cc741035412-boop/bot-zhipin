@@ -18,6 +18,16 @@ function addedAt(commit, file) {
   return data.addedAt
 }
 
+function authorGithub(commit, file) {
+  const doc = YAML.parseDocument(git('show', `${commit}:${file}`))
+  const data = doc.errors.length ? null : doc.toJS()
+  if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('无法比较 author.github')
+  const author = data.author?.github
+  if (author == null) return null
+  if (typeof author !== 'string') throw new Error('无法比较 author.github')
+  return author.toLowerCase()
+}
+
 export function checkPrScope({ base, head, association }) {
   if (trusted.has(association)) return []
   // 先解析为提交哈希，拒绝选项注入；只接受提交而非工作区或任意 diff 参数。
@@ -41,6 +51,13 @@ export function checkPrScope({ base, head, association }) {
       } catch {
         errors.push(`${file}：无法比较 addedAt；addedAt 是上架日期，不能修改，请保持合法 YAML 和原日期。`)
       }
+      try {
+        if (authorGithub(baseCommit, file) !== authorGithub(headCommit, file)) {
+          errors.push(`${file}：author.github 是投稿人的 GitHub 账号，不能修改；请保留 base 中的账号。`)
+        }
+      } catch {
+        errors.push(`${file}：无法比较 author.github；author.github 是投稿人的 GitHub 账号，不能修改，请保持合法 YAML 和原账号。`)
+      }
     }
   }
   return errors
@@ -55,7 +72,7 @@ function main() {
       console.error(`✗ PR 范围检查未通过：\n${errors.join('\n')}`)
       process.exitCode = 1
     } else {
-      console.log(`✓ PR 范围检查通过：${trusted.has(values.association) ? '维护者不受投稿范围限制' : '改动均在允许的 Bot 目录内，已有 addedAt 未改动'}。`)
+      console.log(`✓ PR 范围检查通过：${trusted.has(values.association) ? '维护者不受投稿范围限制' : '改动均在允许的 Bot 目录内，已有 addedAt 未改动，作者未改动'}。`)
     }
   } catch {
     console.error('✗ 无法检查 PR 范围。请在 git 仓库中运行，确保两个提交可读。\n用法：node scripts/check-pr-scope.mjs --base <ref> --head <ref> --association <GitHub author_association>')
