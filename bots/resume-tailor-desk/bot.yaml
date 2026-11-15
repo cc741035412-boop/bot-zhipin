@@ -1,0 +1,20 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: resume-tailor-desk
+name: "Resume Tailor Desk"
+tagline: "逐条对照岗位要求标出差距，改出一份不编造的定制简历"
+category: 求职
+author:
+  name: "Cypher Monkey"
+  url: https://x.com/Cypher0x9
+templateUrl: https://x.ai/bot/xhEs67Kz7pQ_SizfIIRTb
+addedAt: 2026-11-15
+prerequisites:
+  - "你的真实简历和目标岗位的 JD"
+  - "默认按海外简历习惯排版，要国内格式先说清楚"
+  - "它只出稿不投递；要发邮件得单独打一行英文固定口令"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 联网
+pitch: "JD 每条要求，我都对着你的简历过一遍。"
+external: true

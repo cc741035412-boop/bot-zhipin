@@ -1,0 +1,20 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: flashcard-forge
+name: "Flashcard Forge Desk"
+tagline: "把笔记和资料做成能导入 Anki 的记忆卡，每张标出处"
+category: 学习
+author:
+  name: "Cypher Monkey"
+  url: https://x.com/Cypher0x9
+templateUrl: https://x.ai/bot/-BGZTvUVjO6KWPTrLnS2Q
+addedAt: 2026-11-15
+prerequisites:
+  - "粘贴笔记、上传文件或给公开网页就能开始"
+  - "卡片要自己导入 Anki 等软件，它不排复习"
+  - "要发邮件得单独打一行英文固定口令"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 联网
+pitch: "笔记丢给我，我做成能导进 Anki 的卡。"
+external: true

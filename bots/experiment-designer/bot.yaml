@@ -1,0 +1,17 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: experiment-designer
+name: "Experiment Designer"
+tagline: "把增长想法写成严谨的 A/B 实验方案，样本不够就劝你别上"
+category: 定义
+author:
+  name: "Jay Sahnan"
+  url: https://x.com/JaySahnan
+templateUrl: https://x.ai/bot/Dd6URqnf4w5hiVEs_vbRL
+addedAt: 2026-11-15
+prerequisites:
+  - "你的基线数据和流量；可选连 PostHog 读数据"
+  - "它默认你有数据同事和实验登记表，单独用时这些信息要你自己补"
+quotaCost: 低
+permissions: []
+pitch: "这个实验样本不够，我劝你先别上。"
+external: true

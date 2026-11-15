@@ -1,0 +1,20 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: campushire
+name: "CampusHire"
+tagline: "帮计算机学生找实习校招岗，对着 JD 改简历、记进度"
+category: 求职
+author:
+  name: "Gin"
+  url: https://x.com/kale243222
+templateUrl: https://x.ai/bot/pH5o2mSNpN7tJm_Jurj9Q
+addedAt: 2026-11-15
+prerequisites:
+  - "你的简历，中英文都行"
+  - "没有上手引导，第一次直接告诉它学校、年级和目标岗位"
+  - "默认面向技术岗，找产品岗要说明；简历会存在共享云电脑上"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 联网
+pitch: "实习和校招岗我帮你盯，投了哪些也帮你记。"
+external: true

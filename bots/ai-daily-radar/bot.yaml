@@ -1,0 +1,20 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: ai-daily-radar
+name: "AI Daily Radar"
+tagline: "每天早上一份 AI 新动态简报，标明厂商自称还是独立测过"
+category: 调研
+author:
+  name: "Michael Gannotti"
+  url: https://x.com/MichaelGannotti
+templateUrl: https://x.ai/bot/EZ8RChmm9gSGmK3SXv-3M
+addedAt: 2026-11-15
+prerequisites:
+  - "说清你用哪些 AI 工具、关心哪些模型，国产模型要点名"
+  - "定时任务按美东时间写，上手时告诉它北京时间几点发"
+  - "每天都会发一份，没新闻也发一句"
+quotaCost: 中
+permissions:
+  - 联网
+  - 定时自动运行
+pitch: "每天早上一份 AI 动态，谁自称、谁测过，我标清楚。"
+external: true

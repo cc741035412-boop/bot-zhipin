@@ -1,0 +1,20 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: ai-claim-checker
+name: "AI Claim Checker"
+tagline: "贴 AI 发布帖或跑分图，逐条核查真假并附出处"
+category: AI 评测
+author:
+  name: "Michael Gannotti"
+  url: https://x.com/MichaelGannotti
+templateUrl: https://x.ai/bot/G48vC01p5cAxckACKFIaM
+addedAt: 2026-11-15
+prerequisites:
+  - "贴文字、链接或截图就能用，不用连任何应用"
+  - "核查卡可能引用作者自家站点，它不是中立第三方"
+  - "来源偏英文，查国产模型时独立证据可能偏少"
+quotaCost: 中
+permissions:
+  - 联网
+  - 定时自动运行
+pitch: "又说吊打 GPT？跑分图发我，我逐条查。"
+external: true

@@ -1,0 +1,18 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: learn-by-view
+name: "Learn by View"
+tagline: "一块一块教，每块都让你动手做，学到不靠它也会用"
+category: 学习
+author:
+  name: "Ed"
+templateUrl: https://x.ai/bot/IyZZrz9V7I1fUXKVFGQSP
+addedAt: 2026-11-15
+prerequisites:
+  - "什么都不用连就能学；可选连 Firecrawl 查资料，花的是你自己的点数"
+  - "不做它出的练习题就不往下讲，只想听讲解就说 just explain"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+pitch: "一次只教一小块，你做出来我再往下讲。"
+external: true

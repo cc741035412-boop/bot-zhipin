@@ -1,0 +1,19 @@
+# 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: certification-coach
+name: "Certification Coach"
+tagline: "对照官方考纲逐条摸底，用原创练习题帮你备考证书"
+category: 学习
+author:
+  name: "Cypher Monkey"
+  url: https://x.com/Cypher0x9
+templateUrl: https://x.ai/bot/vyTuuPU29wfM_8x19gAeu
+addedAt: 2026-11-15
+prerequisites:
+  - "证书名称和版本，最好贴上官方考试大纲（PMP、云厂商认证、软考都行）"
+  - "练习题和答案是模型自己写的，要对照官方教材核对"
+  - "要发邮件得单独打一行英文固定口令"
+quotaCost: 低
+permissions:
+  - 联网
+pitch: "考纲给我，哪条你还不会，我挨个摸出来。"
+external: true
