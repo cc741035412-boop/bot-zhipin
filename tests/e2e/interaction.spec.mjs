@@ -138,6 +138,7 @@ test('减少动效保留 120ms 淡入、没有跳动/上浮/网格动画', async
   expect(motion.duration).toContain('0.12s')
   expect(await card(page).evaluate((el) => getComputedStyle(el).transform)).toBe('none')
   expect(await page.locator('.bot-grid').evaluate((el) => getComputedStyle(el).animationName)).toBe('none')
+  expect(await card(page).locator('.avatar-stage').evaluate((el) => el.getAnimations().length)).toBe(0)
 })
 
 async function contrast(locator) {
@@ -182,31 +183,48 @@ for (const dark of [false, true]) {
 }
 
 for (const dark of [false, true]) {
-  test(`${dark ? '深' : '浅'}色：墨纸 token、胶囊主按钮、漫画气泡和卡片悬停`, async ({ page }) => {
+  test(`${dark ? '深' : '浅'}色：彩色 token、Bot 色按钮、漫画气泡和卡片悬停`, async ({ page }) => {
     await page.goto('/')
     await page.evaluate((dark) => document.documentElement.classList.toggle('dark', dark), dark)
-    const ink = dark ? 'rgb(244, 244, 245)' : 'rgb(10, 10, 12)'
-    const paper = dark ? 'rgb(16, 16, 20)' : 'rgb(255, 255, 255)'
-    const inkHover = dark ? 'rgb(228, 228, 231)' : 'rgb(42, 42, 46)'
-    await expect(page.locator('body')).toHaveCSS('background-color', paper)
+    const ink = dark ? 'rgb(244, 244, 245)' : 'rgb(20, 20, 24)'
+    const paper = dark ? 'rgb(22, 22, 27)' : 'rgb(255, 255, 255)'
+    const background = dark ? 'rgb(12, 12, 15)' : 'rgb(246, 245, 241)'
+    const border = dark ? 'rgb(38, 38, 45)' : 'rgb(235, 232, 225)'
+    await expect(page.locator('body')).toHaveCSS('background-color', background)
+    await expect(page.getByTestId('contribute-link')).toHaveCSS('background-color', ink)
     for (const button of await page.locator('.shelf-button.primary').all()) {
-      await expect(button).toHaveCSS('background-color', ink)
-      await expect(button).toHaveCSS('color', paper)
       await expect(button).toHaveCSS('border-radius', '999px')
     }
-    const selected = await page.getByTestId('sort-hot').evaluate((el) => ({ color: getComputedStyle(el).color, background: getComputedStyle(el, '::before').backgroundColor }))
+    for (const button of await page.getByTestId('btn-import').all()) {
+      const colors = await button.evaluate((el) => {
+        const css = getComputedStyle(el)
+        const rgb = (name) => {
+          const hex = css.getPropertyValue(name).trim()
+          return `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`
+        }
+        return { bg: css.backgroundColor, fg: css.color, expectedBg: rgb('--bz-btn-bg'), expectedFg: rgb('--bz-btn-fg') }
+      })
+      expect(colors.bg).toBe(colors.expectedBg)
+      expect(colors.fg).toBe(colors.expectedFg)
+    }
+    const selected = await page.getByTestId('sort-hot').evaluate((el) => ({ color: getComputedStyle(el).color, background: getComputedStyle(el.parentElement, '::after').backgroundColor }))
     expect(selected).toEqual({ color: paper, background: ink })
     const bot = card(page)
-    await expect(bot).toHaveCSS('border-radius', '24px')
-    await expect(bot).toHaveCSS('box-shadow', 'none')
+    await expect(bot).toHaveCSS('border-radius', '28px')
+    await expect(bot).toHaveCSS('background-color', paper)
+    await expect(bot).toHaveCSS('background-image', 'none')
+    const restingShadow = await bot.evaluate((el) => getComputedStyle(el).boxShadow)
+    expect(restingShadow).not.toBe('none')
+    expect(restingShadow.match(/(?:rgba?|color)\(/g)).toHaveLength(2)
     await bot.getByTestId('avatar').hover()
-    await expect(bot).toHaveCSS('border-top-color', ink)
-    await expect(bot).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -3)')
+    await expect(bot).toHaveCSS('border-top-color', border)
+    await expect(bot).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -4)')
+    expect(await bot.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe(restingShadow)
     const bubble = bot.getByTestId('pitch-bubble')
     await expect(bubble).toHaveCSS('background-color', paper)
     await expect(bubble).toHaveCSS('border-top-width', '2px')
     await expect(bubble).toHaveCSS('border-top-color', ink)
-    await expect(bubble).toHaveCSS('box-shadow', `${ink} 3px 3px 0px 0px`)
+    await expect(bubble).toHaveCSS('box-shadow', 'rgb(138, 138, 147) 3px 3px 0px 0px')
     const tip = await bubble.evaluate((el) => {
       const css = getComputedStyle(el, '::after')
       return { width: css.width, height: css.height, border: css.borderBottomWidth, color: css.borderBottomColor, background: css.backgroundColor }
@@ -214,9 +232,32 @@ for (const dark of [false, true]) {
     expect(tip).toEqual({ width: '12px', height: '12px', border: '2px', color: ink, background: paper })
     await expect(bot.locator('.avatar-stage')).toHaveCSS('--bz-bot-color', '#8a8a93')
     await bot.getByTestId('btn-import').hover()
-    await expect(bot.getByTestId('btn-import')).toHaveCSS('background-color', inkHover)
+    await expect(bot.getByTestId('btn-import')).toHaveCSS('background-color', 'rgb(138, 138, 147)')
+    await expect(bot.getByTestId('btn-import')).toHaveCSS('color', 'rgb(20, 20, 24)')
   })
 }
+
+test('同一个排序指示块滑动、舞台漂移与静止地影、正热度火苗', async ({ page }) => {
+  await page.goto('/')
+  const controls = page.locator('.sort-controls')
+  const indicator = () => controls.evaluate((el) => {
+    const css = getComputedStyle(el, '::after')
+    return { x: new DOMMatrix(css.transform).m41, width: parseFloat(css.width), duration: css.transitionDuration }
+  })
+  expect((await indicator()).x).toBe(0)
+  expect((await indicator()).duration).toBe('0.28s')
+  await page.getByTestId('sort-new').click()
+  await page.waitForTimeout(300)
+  const moved = await indicator()
+  expect(moved.x).toBeCloseTo(moved.width, 1)
+  const stage = card(page).locator('.avatar-stage')
+  expect(await stage.evaluate((el) => {
+    const css = getComputedStyle(el), shadow = getComputedStyle(el, '::before')
+    return [css.animationDuration, css.animationTimingFunction, css.animationIterationCount, css.animationDirection, shadow.animationName]
+  })).toEqual(['18s', 'ease-in-out', 'infinite', 'alternate', 'none'])
+  await expect(card(page).getByTestId('heat').locator('svg')).toHaveClass('is-hot')
+  await expect(card(page, weekly).getByTestId('heat').locator('svg')).not.toHaveClass('is-hot')
+})
 
 test('复制成功单一播报区、1.8 秒恢复；失败 dialog 全选/焦点/遮罩/Esc', async ({ page }) => {
   await page.addInitScript(() => {

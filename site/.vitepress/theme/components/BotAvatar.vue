@@ -60,7 +60,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="root" class="avatar-stage" :style="{ '--bz-bot-color': color }">
+  <div ref="root" class="avatar-stage">
     <button
       ref="button" type="button" class="bot-avatar" data-testid="avatar"
       :aria-label="`听听${bot.name}的自荐`" :aria-describedby="open ? bubbleId : undefined"
