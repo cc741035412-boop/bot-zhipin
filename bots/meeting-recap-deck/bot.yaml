@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: meeting-recap-deck
+name: "Meeting Recap Deck"
+tagline: "贴会议笔记，按你的 PPT 模板出一份会后回顾"
+category: 日常
+author:
+  name: "Krista Letz"
+  url: https://x.ai/bot/marketplace/bots/echo
+templateUrl: https://x.ai/bot/YklttiPpAHweKbOLV1TSF
+addedAt: 2026-11-15
+prerequisites:
+  - "会议笔记或转写，粘贴或上传都行"
+  - "可选：一份你常用的 PPT 模板"
+  - "会后自动起草要连日历和笔记来源，开了以后工作时段每小时检查一次"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

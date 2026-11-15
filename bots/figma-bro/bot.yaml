@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: figma-bro
+name: "figma bro"
+tagline: "把 Figma 画板变成开发能照着做的规格说明"
+category: 定义
+author:
+  name: "John Bai"
+  url: https://x.ai/bot/marketplace/bots/figma-bro
+templateUrl: https://x.ai/bot/pXNvc_U2cGyZmheYrUuF_
+addedAt: 2026-11-15
+prerequisites:
+  - "Figma 账号；不连也能看截图，但数值是估的"
+  - "告诉它你们的技术栈和命名习惯，规格会更贴"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+  - 外部账号
+external: true

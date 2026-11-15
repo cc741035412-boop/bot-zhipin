@@ -1,0 +1,18 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: stills-clips-desk
+name: "Stills & Clips Desk"
+tagline: "从视频里截封面、剪短片，按平台尺寸导出"
+category: 日常
+author:
+  name: "Matt Palmer"
+  url: https://x.ai/bot/marketplace/bots/image-gen-bot
+templateUrl: https://x.ai/bot/V8XugyLxzbQXLM9o5b3B-
+addedAt: 2026-11-15
+prerequisites:
+  - "要处理的视频或截图"
+  - "默认尺寸是 YouTube、Instagram 这些海外规格，做小红书或视频号要告诉它尺寸"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

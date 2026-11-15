@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: overheard
+name: "Overheard"
+tagline: "工作日早上汇总外网上谁提到了你和你的品牌"
+category: 调研
+author:
+  name: "Lenny Rachitsky"
+  url: https://x.ai/bot/marketplace/bots/overheard
+templateUrl: https://x.ai/bot/NIEguoGUjA648fUPle8F5
+addedAt: 2026-11-15
+prerequisites:
+  - "想盯的名字、品牌别名和你自己的网址"
+  - "默认只盯 Reddit、Hacker News、英文新闻和 X，中文平台要自己加，不保证搜得到"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true

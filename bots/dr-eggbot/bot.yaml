@@ -1,10 +1,11 @@
-# 外部收录：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: dr-eggbot
 name: dr eggbot
 tagline: Grok Bot 团队出品的 Bot 设计师，问几个问题就帮你造好 Bot
 category: 基础设施
 author:
   name: Lauren Tan
+  url: https://x.ai/bot/marketplace/bots/dr-eggbot-v2
 templateUrl: https://x.ai/bot/_jOdbfkB16zxu7MRcmReE
 addedAt: 2026-11-15
 prerequisites:

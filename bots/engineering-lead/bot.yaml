@@ -1,0 +1,20 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: engineering-lead
+name: "Engineering Lead"
+tagline: "把开发需求拆给云端编码 agent，盯到 PR 能合并再叫你"
+category: 基础设施
+author:
+  name: "Lauren Tan"
+  url: https://x.ai/bot/marketplace/bots/engineering-lead
+templateUrl: https://x.ai/bot/Ks3X7JpD-6I86s3zkJFRh
+addedAt: 2026-11-15
+prerequisites:
+  - "要连 GitHub，并且有能用的云端编码 agent，没有就用不起来"
+  - "拆好任务后不先问你就派 agent，可能产生编码服务费用"
+  - "会自动建一个工作日每 30 分钟的巡检，很烧额度，可以调慢或暂停"
+quotaCost: 高
+permissions:
+  - 联网
+  - 定时自动运行
+  - 外部账号
+external: true

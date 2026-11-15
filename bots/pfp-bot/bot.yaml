@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: pfp-bot
+name: "Pfp Bot"
+tagline: "把你或宠物的照片画成 Grok Bot 风格的小头像"
+category: 日常
+author:
+  name: "Shub Gaur"
+  url: https://x.ai/bot/marketplace/bots/pfp-bot
+templateUrl: https://x.ai/bot/eFnHzlDcKdoA406SzZbNZ
+addedAt: 2026-11-15
+prerequisites:
+  - "一到三张看得清脸的照片，或者你的 X 账号名"
+  - "照片会留在共享云电脑上，介意的话做完让它删掉"
+  - "画风来自第三方作者，只能非商业使用"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 联网
+external: true

@@ -1,0 +1,16 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: writing-bot
+name: "Writing Bot"
+tagline: "帮你改邮件、文章和文档，更清楚但不改原意"
+category: 日常
+author:
+  name: "Matt Palmer"
+  url: https://x.ai/bot/marketplace/bots/writing-bot
+templateUrl: https://x.ai/bot/wtq-j01kD7o8gQFx7E9zv
+addedAt: 2026-11-15
+prerequisites:
+  - "无，直接贴稿子"
+  - "规则偏英文写作，改中文时先说清你的标点和语气偏好"
+quotaCost: 低
+permissions: []
+external: true

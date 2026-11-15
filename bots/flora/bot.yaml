@@ -1,0 +1,20 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: flora
+name: "Flora"
+tagline: "给养绿植的人记养护手账，每周提醒浇水施肥"
+category: 日常
+author:
+  name: "Rich Silver"
+  url: https://x.ai/bot/marketplace/bots/flora
+templateUrl: https://x.ai/bot/dGYdqS9vLSXpxoNCPBHys
+addedAt: 2026-11-15
+prerequisites:
+  - "告诉它你养了哪些植物就行，照片可发可不发"
+  - "第一次对话要先花几分钟建手账；手账是英文界面"
+  - "它会换掉共享云电脑的桌面壁纸"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true

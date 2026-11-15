@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: account-research
+name: "Account Research"
+tagline: "见客户前帮你把这家公司查清楚，写好简报和客户计划"
+category: 调研
+author:
+  name: "Anoop Baliga"
+  url: https://x.ai/bot/marketplace/bots/account-book
+templateUrl: https://x.ai/bot/O3iqVd_ZrdRtrDJpxcKss
+addedAt: 2026-11-15
+prerequisites:
+  - "要跟的公司名单，再说清你卖什么、卖给谁"
+  - "想自动备会要连 Google 日历，或者每天贴日程"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true

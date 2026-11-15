@@ -1,0 +1,18 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: last30days
+name: "last30days"
+tagline: "查任何话题最近 30 天大家真实在说什么，按来源汇总"
+category: 调研
+author:
+  name: "Matt Van Horn"
+  url: https://x.ai/bot/marketplace/bots/last30days
+templateUrl: https://x.ai/bot/TxB-fy1KryaYJLYWBcGtT
+addedAt: 2026-11-15
+prerequisites:
+  - "导入后会从 GitHub 安装一个第三方开源技能，装的是最新版，会自动更新"
+  - "搜 X 那一步建议跳过：不要在共享云电脑上登录 X，配了 xAI 密钥会按用量计费"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+external: true

@@ -1,0 +1,20 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: clip-bot
+name: "Clip Bot"
+tagline: "把长视频里最值得看的片段剪成带字幕的短片"
+category: 日常
+author:
+  name: "This Week in AI"
+  url: https://x.ai/bot/marketplace/bots/clip-bot
+templateUrl: https://x.ai/bot/-L1yFJ5mtwPgn3O_iYUo_
+addedAt: 2026-11-15
+prerequisites:
+  - "要剪的录音或视频，上传最稳，公开链接也行"
+  - "剪别人的视频先确认版权"
+  - "长视频的转写和渲染比较费额度"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true

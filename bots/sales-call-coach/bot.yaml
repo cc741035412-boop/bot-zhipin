@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: sales-call-coach
+name: "Sales Call Coach"
+tagline: "贴一段销售通话转写，逐项打分，告诉你下次改哪里"
+category: 评审
+author:
+  name: "Daniel Brill"
+  url: https://x.ai/bot/marketplace/bots/sales-call-coach
+templateUrl: https://x.ai/bot/yZ5MFQFdl32vHt6fcIJAc
+addedAt: 2026-11-15
+prerequisites:
+  - "一通通话的转写文字或录音文件"
+  - "打分方法按英文销售习惯写的，中文通话能评，口头禅清单要自己补"
+  - "通话内容会存在共享云电脑上，涉及客户报价时留意"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

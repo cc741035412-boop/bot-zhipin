@@ -1,0 +1,18 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: ad-spend-watch
+name: "Ad Spend Watch"
+tagline: "盯广告花费和效果，超线就提醒并给出改法，不碰账户"
+category: 日常
+author:
+  name: "Miguel Cruz"
+  url: https://x.ai/bot/marketplace/bots/fuse
+templateUrl: https://x.ai/bot/MK5zStpj_As8CsRwg3r6w
+addedAt: 2026-11-15
+prerequisites:
+  - "广告平台导出表和月预算，告诉它什么算超线"
+  - "只靠粘贴数据的话别开午间检查；每日检查要你定期给新数据"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true
