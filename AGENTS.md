@@ -2,7 +2,9 @@
 
 > 如果你是来修改网站代码的维护者 agent，而不是来投稿 Bot 的，请改读 `CLAUDE.md` 和 `docs/dev/`，忽略本文件。
 
-你的任务：帮用户把他们做的一个 Grok Bot 投稿到「Bot 直聘」。投稿就是往这个仓库提一个 PR，内容是 `bots/<slug>/` 这一个文件夹。合并后网站会自动更新，用户成为项目贡献者。
+你的任务：帮用户把他们做的一个 Grok Bot 投稿到「Bot 直聘」。投稿内容是 `bots/<slug>/` 这一个文件夹。
+
+**默认的提交方式只要用户做三下**：你准备好文件、跑完校验，生成一个链接发给用户；用户点开链接 → 拖一张截图 → 勾授权点提交。之后系统会自动校验、开 PR，维护者合并后网站自动更新，用户成为项目贡献者。不需要 fork、不需要令牌、不需要用户上传文件夹。
 
 - 仓库：`https://github.com/jakob52123/bot-zhipin`（下文叫「主仓库」）
 - 你只能新增或修改 `bots/<slug>/` 这一个文件夹。**不要改仓库里的任何其他文件。**
@@ -13,8 +15,8 @@
 ## 第 0 步：安全规则（先读，全程遵守）
 
 1. **不要让用户把 GitHub 令牌、密码发给你。** 需要登录 GitHub 时，让用户自己在浏览器或终端里完成登录（比如 `gh auth login` 走浏览器授权）。
-2. **如果你是 Grok Bot（运行在 Grok Bot 的云电脑里）：不要在云电脑里使用任何 GitHub 令牌。** 第三方模板能读到那台电脑上的所有文件。你只负责准备文件和自检，提交交给用户在自己电脑上完成，见第 7 步的「方式 C」。
-3. 如果用户坚持要用令牌：只用 fine-grained 令牌，只授权用户自己的 fork 仓库，有效期设最短，提交完立刻到 GitHub 设置里撤销。
+2. **如果你是 Grok Bot（运行在 Grok Bot 的云电脑里）：不要在云电脑里使用任何 GitHub 令牌。** 第三方模板能读到那台电脑上的所有文件。按第 6 步生成提交链接就行，用不到令牌。
+3. 只有用户自己选择「备选：自己 fork 提 PR」并坚持用令牌时：只用 fine-grained 令牌，只授权用户自己的 fork 仓库，有效期设最短，提交完立刻到 GitHub 设置里撤销。
 4. 投稿文件里**不能有任何密钥**（API Key、令牌、密码、Cookie）、公司内部链接、个人隐私数据（手机号、身份证、住址、别人的聊天记录）。截图里出现的也要打码或换一张。
 5. **不要编造内容。** 设计说明、实际效果、截图都必须来自用户的真实情况；信息不够就问用户，不要自己写一个「看起来合理」的。
 
@@ -49,35 +51,17 @@
 
 ## 第 2 步：准备环境
 
-需要 `git` 和 Node.js 22 或更高版本（`node -v` 查看）。推荐装 GitHub 官方命令行 `gh`。
-
-有 `gh`（推荐）：
+需要 `git` 和 Node.js 22 或更高版本（`node -v` 查看）。**不用 fork，不用登录 GitHub**，直接克隆主仓库（公开仓库，克隆不需要任何账号）：
 
 ```bash
-gh auth status || gh auth login          # 没登录就让用户自己完成浏览器授权
-gh repo fork jakob52123/bot-zhipin --clone --remote
+git clone --depth 1 https://github.com/jakob52123/bot-zhipin.git
 cd bot-zhipin
+npm ci --omit=dev        # 只装校验需要的两个小依赖，几秒钟
 ```
 
-这样 `origin` 是用户自己的 fork，`upstream` 是主仓库。
+已经克隆过的，进到仓库目录执行 `git pull` 拿最新代码就行。
 
-没有 `gh` 时，让用户在浏览器打开主仓库，点右上角 **Fork**，然后：
-
-```bash
-git clone https://github.com/<用户的 GitHub 用户名>/bot-zhipin.git
-cd bot-zhipin
-git remote add upstream https://github.com/jakob52123/bot-zhipin.git
-```
-
-如果用户之前已经 fork 并 clone 过这个仓库，跳过上面这些，直接进到仓库目录执行下面的命令。
-
-然后：
-
-```bash
-git fetch upstream
-git checkout -b add-<slug> upstream/main   # 从主仓库最新代码拉一个新分支
-npm ci --omit=dev                           # 只装校验需要的两个小依赖，几秒钟
-```
+如果你的环境装不了 Node，也可以继续往下做，第 5 步和第 6 步里有不用 Node 的替代做法。
 
 ---
 
@@ -153,6 +137,7 @@ bots/<slug>/
 ### screenshots/ 和 avatar.png
 
 - 把用户提供的截图复制进 `screenshots/`，文件名用英文。**不要生成或伪造截图。**
+- 拿不到原图文件也没关系（比如用户只是发了图给你看）：在 DESIGN.md 里用 `![说明](screenshots/文件名.png)` 约定好文件名，第 6 步提交时用户会把原图拖进表单，系统按这个文件名保存。
 - 单张超过 2MB 要先压缩。macOS：`sips -Z 1600 图片.png`；其他系统可以转成 jpg 或用任意图片工具缩小。
 - 删掉 `screenshots/.gitkeep` 也可以，留着也不影响。
 
@@ -174,57 +159,78 @@ npm run validate
 
 ---
 
-## 第 6 步：提交
+## 第 6 步：生成提交链接（默认）
+
+在仓库根目录运行：
 
 ```bash
+node scripts/make-submission-link.mjs bots/<slug>
+```
+
+它会再校验一遍，然后输出一个以 `https://github.com/jakob52123/bot-zhipin/issues/new?` 开头的链接。把链接原样发给用户，并告诉他：
+
+1. 点开这个链接（需要登录 GitHub，没有账号就先免费注册一个）。
+2. 把这个 Bot 真实输出的截图拖进「截图」那一栏，有几张拖几张，按 `screenshots/` 里的顺序。
+3. 勾上授权那一项，点页面底部的 **Create** / **Submit new issue**。
+
+如果脚本提示投稿太长、改为输出一整段「投稿包」：让用户打开脚本给出的那个短链接，把投稿包整段粘贴到「投稿包」一栏，再做上面的第 2、3 步。
+
+没有 Node 时：按下面的格式手写投稿包（每个文件一段，`screenshots` 段只写截图文件名），让用户打开 `https://github.com/jakob52123/bot-zhipin/issues/new?template=submit-bot.yml`，把投稿包粘进「投稿包」一栏：
+
+```text
+BOT-ZHIPIN-BUNDLE v1
+=== bots/<slug>/bot.yaml ===
+（bot.yaml 全文）
+=== bots/<slug>/ROLE.md ===
+（ROLE.md 全文）
+=== bots/<slug>/DESIGN.md ===
+（DESIGN.md 全文）
+=== bots/<slug>/skills/<技能名>/SKILL.md ===
+（SKILL.md 全文）
+=== bots/<slug>/screenshots ===
+demo-output.png
+=== end ===
+```
+
+**提交之后会自动发生什么**：一两分钟内，这个 Issue 下面会出现一条自动回复。
+
+- 通过了：回复里有自动创建的 PR 链接，接下来等维护者审核合并。
+- 没通过：回复里列出了每个错误的「文件 / 位置 / 问题 / 改法」。让用户把这条回复整段发给你，你改好文件，重新运行第 6 步的脚本，把新的投稿包或新链接给用户。用户点开原来那个 Issue 右上角的 **···** → **Edit**，把「投稿包」一栏换成新的，保存后会自动重新检查（也可以直接用新链接再提交一次）。
+
+注意：`bot.yaml` 里的 `author.github` 必须是**提交这个 Issue 的 GitHub 账号**，否则会被拒绝（防止冒名）。
+
+## 备选：自己 fork 提 PR（熟悉 git 的用户）
+
+用户的电脑上装了 `gh` 并且愿意自己操作 git 时，也可以走传统方式：
+
+```bash
+gh auth status || gh auth login                       # 让用户自己完成浏览器授权
+gh repo fork jakob52123/bot-zhipin --remote           # 在仓库目录里执行，origin 变成用户的 fork
+git checkout -b add-<slug>
 git add bots/<slug>
-git status                                  # 确认只有 bots/<slug>/ 下的文件
+git status                                            # 确认只有 bots/<slug>/ 下的文件
 git commit -m "bot: 新增 <Bot 名字>"
 git push -u origin add-<slug>
+gh pr create --repo jakob52123/bot-zhipin --base main --head <用户的 GitHub 用户名>:add-<slug> \
+  --title "新增 Bot：<Bot 名字>" --body-file .github/pull_request_template.md
 ```
 
-只提交 `bots/<slug>/`。如果 `git status` 里出现了别的文件，不要提交它们。
+**一定要带 `--repo jakob52123/bot-zhipin`**。只提交 `bots/<slug>/`，PR 描述里的勾选项按真实情况改成 `[x]`。
 
 ---
 
-## 第 7 步：提 PR
-
-### 方式 A：用 `gh`（推荐）
-
-```bash
-gh pr create --repo jakob52123/bot-zhipin --base main \
-  --head <用户的 GitHub 用户名>:add-<slug> \
-  --title "新增 Bot：<Bot 名字>" \
-  --body-file .github/pull_request_template.md
-```
-
-然后用 `gh pr edit` 或在网页上把 PR 描述里的勾选项按真实情况改成 `[x]`。**一定要带 `--repo jakob52123/bot-zhipin`**，否则可能提到别的仓库。
-
-### 方式 B：网页
-
-推送后打开用户 fork 的 GitHub 页面，点 **Compare & pull request**，目标选 `jakob52123/bot-zhipin` 的 `main`，按模板填写勾选项。
-
-### 方式 C：用户不装任何开发工具（Grok Bot 用这个）
-
-1. 你在云电脑里完成第 3 到第 5 步（云电脑能用 `git clone` 公开仓库、能装 Node 就跑校验；不能就仔细对照本文件人工检查）。
-2. 把 `bots/<slug>/` 整个文件夹打包成 zip 发给用户。
-3. 教用户在自己电脑上：打开主仓库 → 点 **Fork** → 在自己的 fork 里进入 `bots` 目录 → **Add file → Upload files** → 把解压后的 `<slug>` 文件夹整个拖进去 → 选「Create a new branch」→ **Propose changes** → **Create pull request**。
-4. PR 页面下方会自动跑检查。如果显示失败，让用户点进去把报错复制给你，你改好再发新的文件给他上传覆盖。
-
----
-
-## 第 8 步：交付给用户
+## 第 7 步：交付给用户
 
 告诉用户：
 
-- PR 链接。
-- 接下来会发生什么：自动检查会跑校验和构建（第一次投稿的人，要等维护者点批准后检查才开始跑）；维护者审核通过并合并后，网站会自动更新，他会成为项目贡献者。
-- 维护者如果在 PR 里留言要求修改，把留言发给你，你在同一个分支上改完再 push，PR 会自动更新。
+- 他要做的三下（点链接、拖截图、提交），以及提交后去哪里看结果（Issue 下的自动回复）。
+- 维护者审核合并后网站会自动更新，他会成为项目贡献者。
+- 维护者如果在 PR 里留言要求修改，把留言发给你，你改好后生成新的投稿包，让他按上面的方法更新 Issue。
 
 ---
 
 ## 其他情况
 
-- **修改自己已经上架的 Bot**：同样的流程，只改 `bots/<slug>/`，PR 标题写「更新 Bot：<名字>」。不要改 `addedAt`。
+- **修改自己已经上架的 Bot**：同样的流程，用同一个 slug 改好文件后再生成链接提交，系统会识别为更新（必须是同一个 GitHub 账号）。不要改 `addedAt`。
 - **改编站上别人的 Bot**：新建自己的 slug，在 `bot.yaml` 里写 `forkedFrom: <原 Bot 的 slug>`，DESIGN.md 里说明改了什么、为什么。原 Bot 的内容按 CC BY 4.0 授权，必须保留署名。
 - **授权**：提交即表示用户同意以 CC BY 4.0 授权 `bots/<slug>/` 的内容（见 `bots/LICENSE`）：任何人都可以在署名的前提下复制、改编、商用。提 PR 前要向用户说明这一点，并得到他明确同意，同时确认内容和截图是他有权公开的。
