@@ -1,0 +1,15 @@
+# 外部收录：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: dr-eggbot
+name: dr eggbot
+tagline: Grok Bot 团队出品的 Bot 设计师，问几个问题就帮你造好 Bot
+category: 基础设施
+author:
+  name: Lauren Tan
+templateUrl: https://x.ai/bot/_jOdbfkB16zxu7MRcmReE
+addedAt: 2026-11-15
+prerequisites:
+  - 自带两个定时体检，其中每个工作日读全部 Bot 对话的那个比较烧额度，用不上可以暂停
+quotaCost: 高
+permissions:
+  - 定时自动运行
+external: true

@@ -4,7 +4,12 @@
 import { copyFileSync, lstatSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, join, relative, resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { ROOT, BOTS_DIR, loadAllBots } from './lib/load-bots.mjs'
+import { execFileSync } from 'node:child_process'
+import { ROOT, BOTS_DIR, loadAllBots, loadBot } from './lib/load-bots.mjs'
+import { SCHEMA_SHA256 } from './lib/validate/generated/bot-schema.mjs'
+import { MAX_IMAGE_BYTES } from './lib/validate/images.mjs'
+import { LIMITS } from './submission/bundle-core.mjs'
+import { explanations } from '../site/.vitepress/data/bots.mjs'
 import { isPublicBot } from './lib/public-bot.mjs'
 
 const OUT = join(ROOT, 'site', 'public', 'bot-assets')
@@ -25,6 +30,25 @@ export function syncAssets({ botsDir = BOTS_DIR, out = OUT, apiData = API_DATA }
   const bots = loadAllBots(botsDir).filter(isPublicBot)
   mkdirSync(apiData, { recursive: true })
   writeFileSync(join(apiData, 'slugs.json'), JSON.stringify(bots.map((b) => b.slug)) + '\n')
+  let commit = process.env.CF_PAGES_COMMIT_SHA
+  if (!commit) {
+    try { commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() } catch { /* 仓库导出包没有 git 元数据 */ }
+  }
+  commit ||= 'local'
+  const template = loadBot('_template', join(ROOT, 'bots'))
+  const context = {
+    v: 1, commit, schemaSha256: SCHEMA_SHA256,
+    index: bots.map(({ slug, data }) => ({
+      slug, name: data.name, templateUrl: data.templateUrl, authorGithub: data.author?.github || null,
+      addedAt: data.addedAt, external: data.external === true,
+    })).sort((a, b) => a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0),
+    template: { files: Object.fromEntries(template.files.filter((file) => file.text !== null && /\.(?:yaml|md)$/.test(file.path))
+      .map((file) => [relative(template.dir, file.path).split('\\').join('/'), file.text])) },
+    copy: explanations(),
+    limits: { files: LIMITS.files, fileBytes: LIMITS.fileBytes, totalBytes: LIMITS.totalBytes, imageBytes: MAX_IMAGE_BYTES },
+  }
+  writeFileSync(join(apiData, 'submit-context.json'), JSON.stringify(context) + '\n')
+  writeFileSync(join(apiData, 'build.json'), JSON.stringify({ commit, builtAt: new Date().toISOString() }) + '\n')
   let n = 0
   for (const bot of bots) {
     const dest = join(out, bot.slug)

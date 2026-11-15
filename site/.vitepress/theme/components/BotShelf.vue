@@ -7,7 +7,6 @@ import BotCard from './BotCard.vue'
 import HeroPortrait from './HeroPortrait.vue'
 import { enterHero } from '../live/reactions'
 import DefaultAvatar from './DefaultAvatar.vue'
-import ExternalHint from './ExternalHint.vue'
 import LiveAnnouncer from './LiveAnnouncer.vue'
 
 const hero = ref()
@@ -56,7 +55,7 @@ onBeforeUnmount(() => { alive = false; releaseEntry?.() })
       </div>
       <h1>{{ SITE.name }}</h1>
       <p>{{ SITE.tagline }}</p>
-      <a data-testid="contribute-link" class="shelf-button primary contribute" :href="CONTRIBUTE_URL" target="_blank" rel="noopener noreferrer"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v12M2 8h12" /></svg>我要投稿<ExternalHint /></a>
+      <a data-testid="contribute-link" class="shelf-button primary contribute" :href="CONTRIBUTE_URL"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v12M2 8h12" /></svg>我要投稿</a>
     </header>
     <div class="shelf-toolbar">
     <div class="sort-controls" :data-sort="sort" role="group" aria-label="排序">
@@ -71,7 +70,7 @@ onBeforeUnmount(() => { alive = false; releaseEntry?.() })
     <div v-else data-testid="empty-state" class="empty-state">
       <DefaultAvatar slug="empty-shelf" rest="sleep" :size="160" />
       <p>货架上还没有 Bot</p>
-      <a class="shelf-button" :href="CONTRIBUTE_URL" target="_blank" rel="noopener noreferrer">做第一个投稿的人<ExternalHint /></a>
+      <a class="shelf-button" :href="CONTRIBUTE_URL">做第一个投稿的人</a>
     </div>
   </main>
 </template>

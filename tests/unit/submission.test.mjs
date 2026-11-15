@@ -550,9 +550,12 @@ describe('本地生成链接', () => {
   it('CLI 的位置参数与 --dir 都生成同一条有效链接', () => {
     const cli = join(ROOT, 'scripts/make-submission-link.mjs')
     for (const args of [[fixture], ['--dir', fixture]]) {
-      const output = execFileSync(process.execPath, [cli, ...args], { encoding: 'utf8', timeout: 15_000, stdio: ['ignore', 'pipe', 'pipe'] })
-      const token = new URL(output.split('\n')[0]).searchParams.get('bundle')
-      expect(unpack(decode(token))).toEqual(source.bundle)
+      for (const issue of [false, true]) {
+        const output = execFileSync(process.execPath, [cli, ...args, ...(issue ? ['--issue'] : [])], { encoding: 'utf8', timeout: 15_000, stdio: ['ignore', 'pipe', 'pipe'] })
+        const url = new URL(output.split('\n')[0])
+        const token = issue ? url.searchParams.get('bundle') : url.hash.slice(1)
+        expect(unpack(decode(token))).toEqual(source.bundle)
+      }
     }
   })
   it('模板 .gitkeep 忽略，不误打进投稿包', () => {

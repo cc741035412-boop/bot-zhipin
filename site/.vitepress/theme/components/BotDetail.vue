@@ -1,5 +1,7 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, inject, onMounted } from 'vue'
+import { previewMode } from '../submit/preview-mode'
+const preview = inject(previewMode, false)
 import { provideBotAction } from '../live/scope'
 const avatar = provideBotAction()
 import { avatarColor } from '../avatar'
@@ -17,26 +19,27 @@ const props = defineProps({
   designHtml: { type: String, default: '' },
 })
 const palette = computed(() => botPalette(props.bot.avatar ? '#8a8a93' : avatarColor(props.bot.slug)))
-onMounted(loadHeat)
+onMounted(() => { if (!preview) loadHeat() })
 </script>
 
 <template>
-  <main class="shelf-page bot-detail bz-bot-scope" :style="palette" data-testid="bot-detail">
-    <LiveAnnouncer />
-    <a class="back-link" href="/">← 返回货架</a>
+  <component :is="preview ? 'div' : 'main'" class="shelf-page bot-detail bz-bot-scope" :style="palette" data-testid="bot-detail">
+    <LiveAnnouncer v-if="!preview" />
+    <a v-if="!preview" class="back-link" href="/">← 返回货架</a>
     <header class="detail-header bz-bot-scope" :style="palette">
       <BotAvatar ref="avatar" :bot="bot" />
       <div class="detail-info">
-      <h1>{{ bot.name }}</h1>
+      <component :is="preview ? 'h2' : 'h1'">{{ bot.name }}</component>
       <p>{{ bot.tagline }}</p>
       <p class="bot-meta">
         <span class="bot-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
         <span v-if="bot.external" class="bot-tag external-tag">外部收录</span>
-        <a data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
+        <span v-if="preview">by {{ bot.author.name }}</span>
+        <a v-else data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
         <span>上架日期：<time :datetime="bot.addedAt">{{ bot.addedAt }}</time></span>
         <BotHeat :slug="bot.slug" />
       </p>
-      <p v-if="bot.forkedFrom" data-testid="forked-from">改编自 <a :href="`/bots/${bot.forkedFrom}`">{{ bot.forkedFromName }}</a></p>
+      <p v-if="bot.forkedFrom" data-testid="forked-from">改编自 <a :href="`/bots/${bot.forkedFrom}`" :target="preview ? '_blank' : undefined" :rel="preview ? 'noopener noreferrer' : undefined">{{ bot.forkedFromName }}<ExternalHint v-if="preview" /></a></p>
       <BotActions :bot="bot" />
       </div>
     </header>
@@ -59,7 +62,10 @@ onMounted(loadHeat)
     <section v-if="!bot.external" data-testid="section-screenshots">
       <h2>截图</h2>
       <div class="bot-screenshots">
-        <BotScreenshot v-for="(url, index) in bot.screenshots" :key="url" :url="url" :alt="`${bot.name}截图 ${index + 1}`" />
+        <template v-for="(url, index) in bot.screenshots" :key="index">
+          <span v-if="preview && !url" class="screenshot-error">截图 {{ index + 1 }}（待放入）</span>
+          <BotScreenshot v-else :url="url" :alt="`${bot.name}截图 ${index + 1}`" />
+        </template>
       </div>
       <p v-if="!bot.screenshots.length">暂无截图。</p>
     </section>
@@ -69,7 +75,8 @@ onMounted(loadHeat)
         <li v-for="skill in bot.skills" :key="skill.sourceUrl">
           <code>{{ skill.name }}</code>
           <p>{{ skill.description }}</p>
-          <a :href="skill.sourceUrl" target="_blank" rel="noopener noreferrer">查看源码<ExternalHint /></a>
+          <span v-if="preview">上架后可查看源码</span>
+          <a v-else :href="skill.sourceUrl" target="_blank" rel="noopener noreferrer">查看源码<ExternalHint /></a>
         </li>
       </ul>
       <p v-else>暂无技能说明。</p>
@@ -77,7 +84,8 @@ onMounted(loadHeat)
     <section v-if="!bot.external && bot.hasRoutines" data-testid="section-routines">
       <h2>定时任务</h2>
       <p>这个 Bot 配有定时任务，安装前请查看运行时间与输出位置。</p>
-      <a :href="bot.routinesUrl" target="_blank" rel="noopener noreferrer">查看定时任务<ExternalHint /></a>
+      <span v-if="preview">上架后可查看</span>
+      <a v-else :href="bot.routinesUrl" target="_blank" rel="noopener noreferrer">查看定时任务<ExternalHint /></a>
     </section>
     <section v-if="!bot.external" data-testid="section-design">
       <h2>设计说明</h2>
@@ -85,5 +93,5 @@ onMounted(loadHeat)
       <div v-if="designHtml" class="vp-doc design-body" v-html="designHtml" />
       <p v-else>暂无设计说明。</p>
     </section>
-  </main>
+  </component>
 </template>
