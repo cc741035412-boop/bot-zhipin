@@ -45,10 +45,17 @@ describe('合法的策展', () => {
   it('仓库里的策展文件和 fixtures 的策展文件都能读出来，内容符合约定', () => {
     const real = loadCuration(join(ROOT, 'curation/shelf.yaml'))
     expect(real).toMatchObject({ exists: true, yamlError: null, rel: 'curation/shelf.yaml' })
-    expect(real.data.featured.map((item) => item.bot)).toEqual(['idea-stress-test', 'quota-saver', 'copy-humanizer'])
-    expect(real.data.picks).toHaveLength(23)
-    expect(real.data.collections.map((item) => item.slug)).toEqual(['zero-setup', 'pm-kit', 'solo-video', 'daily-brief', 'community'])
-    expect(real.data.collections.map((item) => item.bots.length)).toEqual([8, 8, 8, 7, 5])
+    // 主推、置顶名单、专题都是编辑随时会改的内容，这里不写死是哪几个、有多少个，只查形状：
+    // 主推 3 个；置顶名单不空、不重复；每个专题 2–12 个 Bot、不重复。
+    expect(real.data.featured).toHaveLength(3)
+    expect(real.data.picks.length).toBeGreaterThan(0)
+    expect(new Set(real.data.picks).size).toBe(real.data.picks.length)
+    expect(real.data.collections.length).toBeGreaterThan(0)
+    for (const item of real.data.collections) {
+      expect(item.bots.length, item.slug).toBeGreaterThanOrEqual(2)
+      expect(item.bots.length, item.slug).toBeLessThanOrEqual(12)
+      expect(new Set(item.bots).size, item.slug).toBe(item.bots.length)
+    }
     // 编辑点评写给的都是货架上的 Bot。不要求每个 Bot 都有：新投稿进来时还没人写点评。
     const shelfSlugs = new Set(loadAllBots(join(ROOT, 'bots')).map((bot) => bot.slug))
     const noted = Object.keys(real.data.editorNotes)
