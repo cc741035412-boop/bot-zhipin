@@ -1,9 +1,9 @@
 /**
- * 标签页小图标（favicon）：一只随机的 Bot，隔几秒变成另一只。
+ * 标签页小图标（favicon）：一只随机的 Bot，隔几秒变成另一只，眼睛跟着鼠标看。
  * 规格见 docs/dev/INTERACTION.md「标签页图标」。
  * 上半部分是纯函数（Node 里可测，生成静态图标也用它）；startFavicon 只在浏览器里跑。
  */
-import { BotEngine, type BotFrame } from '../vendor/bloub/engine'
+import { BotEngine, type BotFrame, type Look } from '../vendor/bloub/engine'
 import { EXPRESSION_BY_ID, type BotExpression } from '../vendor/bloub/expressions'
 import { blinkScale, liveliness } from '../vendor/bloub/face'
 import { clamp, lerp } from '../vendor/bloub/math'
@@ -80,6 +80,7 @@ const PADDING = 0.06
  * 把引擎的一帧画成一张正方形 SVG：镜头贴着身体的外框，身体尽量填满图标。
  * 坐标取整（图标最多显示到 32 个设备像素，小数没有意义），字符串短一半。
  * lid 是额外的眼皮开合度（1 睁开，0 闭上），眨眼时用。
+ * 眼睛按身体轮廓裁切：看向边缘时，出了身体的那部分不画（页面里的 Bot 用 mask 做同一件事）。
  */
 export function faviconSvg(frame: BotFrame, color: string, lid = 1): string {
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity, index = 0
@@ -96,7 +97,8 @@ export function faviconSvg(frame: BotFrame, color: string, lid = 1): string {
     return `<path d="${eye.d}" transform="${squash(eye.matrix, lid)}"${opacity}/>`
   }).join('')
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${left} ${top} ${side} ${side}">`
-    + `<path fill="${color}" d="${body}"/><g fill="${FAVICON_EYE}">${eyes}</g></svg>`
+    + `<defs><clipPath id="b"><path id="p" d="${body}"/></clipPath></defs>`
+    + `<use href="#p" fill="${color}"/><g fill="${FAVICON_EYE}" clip-path="url(#b)">${eyes}</g></svg>`
 }
 
 /** 和引擎自己的眨眼同一种压法：只压屏幕上的竖直方向。 */
@@ -127,6 +129,23 @@ export function morphAt(start: number, k: number): { at: number; progress: numbe
   }
 }
 
+/** 视线能转多远（度）：左右各 24，往上 10，往下 16。再大，靠边那只眼睛会被身体边缘裁掉大半。 */
+export const FAVICON_GAZE = { yaw: 24, up: 10, down: 16 } as const
+/**
+ * 鼠标在视口里的位置 → 小图标的视线。
+ * 页面不知道标签页图标在屏幕上的位置，所以不算真实夹角：左右以视口中线为界，上下以视口中线为平视。
+ * 位置分成 9 × 5 格，同一格里挪动得到同一个视线（图不变就不用换）。
+ */
+export function faviconLook(x: number, y: number, width: number, height: number): Look {
+  const step = (value: number, levels: number) => (Number.isFinite(value) ? Math.round(clamp(value, -1, 1) * levels) / levels : 0)
+  const across = step((x / width) * 2 - 1, 4), up = step(1 - (y / height) * 2, 2)
+  return {
+    yaw: across * FAVICON_GAZE.yaw || 0,
+    pitch: up * (up > 0 ? FAVICON_GAZE.up : FAVICON_GAZE.down) || 0,
+    mix: 1, spin: 0, wander: 0,
+  }
+}
+
 /** 引擎自带眨眼日程；停留的那一帧必须是睁着眼的，碰上了就往后挪一点。 */
 function eyesOpenAt(t: number): number {
   while (liveliness(t).lid < 1) t += 0.02
@@ -147,6 +166,10 @@ export function faviconStill(bot: FaviconBot): string {
 export const FAVICON_SWAP_MS: readonly [number, number] = [4000, 7000]
 /** 变身动画的帧间隔。标签页图标每换一帧浏览器都要重新解码，不需要更密。 */
 const FRAME_MS = 60
+/** 鼠标停住多久后视线回正（毫秒），和页面里的 Bot 一致。 */
+const GAZE_IDLE_MS = 4000
+/** 视线一步到位：引擎的视线过渡压到 1 毫秒，图标上的「动」来自一格一格地换。 */
+const LOOK_SNAP = 0.001
 /** 眨一次眼：眼皮开合度和每帧停留的毫秒数。 */
 const BLINK: ReadonlyArray<readonly [number, number]> = [[0.4, 45], [0, 70], [0.5, 50]]
 
@@ -156,6 +179,7 @@ let stopRunning: (() => void) | undefined
 /**
  * 接管标签页图标。返回停止函数。
  * - 一进来就换成一只随机 Bot；之后每隔几秒变成另一只，页面看得见时带变形过渡，中间偶尔眨眼。
+ * - 鼠标在页面里动，眼睛跟着看；停住 4 秒或移出窗口，视线回正。
  * - 标签页在后台时浏览器不给动画帧，直接切到下一只。
  * - 系统设了「减少动效」：只随机一次，不再变。
  */
@@ -245,18 +269,52 @@ export function startFavicon(options: { random?: () => number } = {}): () => voi
     landTimer = window.setTimeout(() => land?.(), FAVICON_MORPH * 1000 + 400)
   }
 
+  // ---- 视线跟随 ----
+  let cell = '', wanted: Look | null = null, aimedAt = -Infinity
+  let aimTimer: number | undefined, idleTimer: number | undefined
+  function aim() {
+    aimTimer = undefined
+    aimedAt = performance.now()
+    engine.setLook(wanted, t, LOOK_SNAP)
+    link.setAttribute('data-follow', wanted ? 'pointer' : 'rest')
+    if (land) return // 变身中：后面的过渡帧自然带上新视线
+    t = eyesOpenAt(t + LOOK_SNAP * 2)
+    frame = engine.sample(t)
+    rest()
+  }
+  /** 换图不比变身动画更密：扫过好几格时只画最后停下的那一格。 */
+  function look(next: Look | null) {
+    const key = next ? `${next.yaw},${next.pitch}` : ''
+    if (key === cell) return
+    cell = key
+    wanted = next
+    if (aimTimer === undefined) aimTimer = window.setTimeout(aim, Math.max(0, aimedAt + FRAME_MS - performance.now()))
+  }
+  const release = () => { window.clearTimeout(idleTimer); look(null) }
+  const pointerMoved = (event: PointerEvent) => {
+    if (event.pointerType === 'touch' || motion.matches) return
+    window.clearTimeout(idleTimer)
+    idleTimer = window.setTimeout(release, GAZE_IDLE_MS)
+    look(faviconLook(event.clientX, event.clientY, window.innerWidth, window.innerHeight))
+  }
+  const pointerLeft = (event: PointerEvent) => { if (event.relatedTarget === null) release() }
+
   /** 转到后台或切到减少动效：过渡和眨眼立刻收尾，不留半截画面。 */
   const settle = () => {
     if (land) land()
     else if (document.hidden || motion.matches) { window.clearTimeout(blinkTimer); rest() }
   }
-  const motionChanged = () => { settle(); plan() }
+  const motionChanged = () => { if (motion.matches) release(); settle(); plan() }
 
   label()
+  link.setAttribute('data-follow', 'rest')
   rest()
   tidy()
   observer.observe(document.head, { childList: true })
   document.addEventListener('visibilitychange', settle)
+  document.addEventListener('pointermove', pointerMoved, { passive: true })
+  document.addEventListener('pointerout', pointerLeft)
+  window.addEventListener('blur', release)
   motion.addEventListener('change', motionChanged)
   plan()
 
@@ -264,9 +322,14 @@ export function startFavicon(options: { random?: () => number } = {}): () => voi
     window.clearTimeout(swapTimer)
     window.clearTimeout(blinkTimer)
     window.clearTimeout(landTimer)
+    window.clearTimeout(aimTimer)
+    window.clearTimeout(idleTimer)
     if (raf !== undefined) window.cancelAnimationFrame(raf)
     observer.disconnect()
     document.removeEventListener('visibilitychange', settle)
+    document.removeEventListener('pointermove', pointerMoved)
+    document.removeEventListener('pointerout', pointerLeft)
+    window.removeEventListener('blur', release)
     motion.removeEventListener('change', motionChanged)
     if (stopRunning === stop) stopRunning = undefined
   }

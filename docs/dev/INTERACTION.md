@@ -246,7 +246,7 @@ Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的�
 
 ## 13. 标签页图标（favicon）
 
-浏览器标签页上的小图标是一只 Bot：每次打开随机一只，开着的时候隔几秒变成另一只。代码在 `theme/live/favicon.ts`，决策见 DECISIONS 第 33 条。
+浏览器标签页上的小图标是一只 Bot：每次打开随机一只，开着的时候隔几秒变成另一只，眼睛跟着鼠标看。代码在 `theme/live/favicon.ts`，决策见 DECISIONS 第 33 条。
 
 **长相**
 
@@ -256,6 +256,7 @@ Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的�
 - 颜色 7 种，就是招牌吉祥物那一套（`meta.mjs` 的 `HERO_MASCOTS`）。不取货架 Bot 的官方色，灰、黑、白在标签栏上看不清。
 - 形状 18 种：blob、pebble、bean、egg、squircle、tablet、hex、gem、shield、dome、arch、cloud、leaf、clover、flower、heart、house、star。其余 7 种缩到 16px 后和别的撞脸或眼睛挤在一起，不用。
 - 每次变化，形状和颜色都必须和上一只不同。
+- 眼睛按身体轮廓裁切：看向边缘时，出了身体的部分不画。
 
 **节奏**
 
@@ -264,16 +265,18 @@ Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的�
 | 脚本加载完 | 立刻换成一只随机 Bot（不带过渡）。页面自带的静态图标 `<link>` 被移走，只留一个带 `data-bz-favicon` 的 |
 | 之后每隔 4–7 秒（随机） | 变成另一只。过渡 520ms，约 60ms 一帧：形状渐变，颜色沿色相环走近的一边过渡（不经过灰色），正中间闭一下眼 |
 | 两次变身之间 | 眨一次眼（3 帧，共约 165ms），时间点在这段停留的 35%–65% 处随机 |
+| 鼠标在页面里移动 | 眼睛跟着看。页面不知道图标在屏幕上的位置，所以按视口算：以视口中线为界，鼠标在左看左、在右看右（各 24°）；在上半看上（10°）、下半看下（16°）。视口分成 9 × 5 格，一格一档，同一格里挪动不换图；换图间隔不小于 60ms。变身和眨眼时视线保持 |
+| 鼠标停住 4 秒、移出窗口、窗口失焦 | 视线回正。触摸不触发跟随 |
 | 标签页在后台 | 照样换，但一步到位，不放过渡帧，不眨眼。浏览器会给后台定时器降频（Chrome 在后台 5 分钟后降到每分钟一次），变化会随之变慢 |
 | 过渡中途切到后台 | 立刻落到新 Bot 的静止帧 |
 | 站内跳转 | 图标元素不换，节奏不重置；中途冒出来的静态图标 `<link>` 会被再次移走 |
-| `prefers-reduced-motion: reduce` | 打开时随机一只，之后不再变、不眨眼；关掉这个系统设置后恢复 |
+| `prefers-reduced-motion: reduce` | 打开时随机一只，之后不再变、不眨眼、不跟鼠标；关掉这个系统设置后恢复 |
 
 停留期间图标是一张静止的图，不写 DOM；图没变就不重复赋值。
 
 **DOM 约定**
 
-`head > link[rel="icon"][data-bz-favicon]`：`href` 是 `data:image/svg+xml,` 开头的地址，`data-shape`、`data-color` 标注当前（过渡中则是目标）这只 Bot。
+`head > link[rel="icon"][data-bz-favicon]`：`href` 是 `data:image/svg+xml,` 开头的地址，`data-shape`、`data-color` 标注当前（过渡中则是目标）这只 Bot，`data-follow` 是 `pointer`（正跟着鼠标）或 `rest`。
 
 **静态兜底**
 
@@ -281,7 +284,7 @@ Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的�
 
 **验收**
 
-- `tests/unit/favicon.test.mjs`：名单、随机、每种形状的取景和眼睛位置、眨眼、过渡节奏、静态文件。
-- `tests/e2e/favicon.spec.mjs`：真浏览器里随机、定时变化、过渡帧、后台、减少动效、站内跳转。
+- `tests/unit/favicon.test.mjs`：名单、随机、每种形状的取景和眼睛位置、视线映射和上限、眨眼、过渡节奏、静态文件。
+- `tests/e2e/favicon.spec.mjs`：真浏览器里随机、定时变化、过渡帧、视线跟随与回正、后台、减少动效、站内跳转。
 - 无头浏览器没有标签栏。改了长相后要把图标按 16px（1 倍和 2 倍像素）画出来，放在浅色、深色标签栏底色上目视；还要在真实浏览器里开着页面看一眼标签页。
 - 没在 Safari 上实测。Safari 对 SVG 图标和运行时换图的支持历来不完整，预期它显示静态图标。

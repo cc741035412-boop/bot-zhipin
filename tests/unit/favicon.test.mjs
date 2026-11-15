@@ -9,18 +9,19 @@ import { contrast } from '../../site/.vitepress/theme/color'
 import { BotEngine } from '../../site/.vitepress/theme/vendor/bloub/engine'
 import { RAYON } from '../../site/.vitepress/theme/vendor/bloub/repere'
 import {
-  FAVICON_COLORS, FAVICON_DEFAULT, FAVICON_EYE, FAVICON_FACE, FAVICON_MORPH, FAVICON_SHAPES, FAVICON_SWAP_MS,
-  faviconHref, faviconStill, faviconSvg, mixColor, morphAt, pickFaviconBot, startFavicon,
+  FAVICON_COLORS, FAVICON_DEFAULT, FAVICON_EYE, FAVICON_FACE, FAVICON_GAZE, FAVICON_MORPH, FAVICON_SHAPES, FAVICON_SWAP_MS,
+  faviconHref, faviconLook, faviconStill, faviconSvg, mixColor, morphAt, pickFaviconBot, startFavicon,
 } from '../../site/.vitepress/theme/live/favicon'
 
 /** 把一张图标 SVG 拆开：镜头、身体外框、眼睛的变换矩阵。 */
 function parse(svg) {
   const [, viewBox] = svg.match(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" viewBox="([^"]+)">/)
   const [left, top, width, height] = viewBox.split(' ').map(Number)
-  const [, fill, d] = svg.match(/<path fill="([^"]+)" d="([^"]+)"\/>/)
+  const [, d] = svg.match(/<defs><clipPath id="b"><path id="p" d="([^"]+)"\/><\/clipPath><\/defs>/)
+  const [, fill] = svg.match(/<use href="#p" fill="([^"]+)"\/>/)
   const numbers = d.match(/-?\d+(?:\.\d+)?/g).map(Number)
   const xs = numbers.filter((_, i) => i % 2 === 0), ys = numbers.filter((_, i) => i % 2 === 1)
-  const [, eyeFill, eyeMarkup] = svg.match(/<g fill="([^"]+)">(.*)<\/g><\/svg>$/)
+  const [, eyeFill, eyeMarkup] = svg.match(/<g fill="([^"]+)" clip-path="url\(#b\)">(.*)<\/g><\/svg>$/)
   const eyes = [...eyeMarkup.matchAll(/<path d="[^"]+" transform="matrix\(([^)]+)\)"( opacity="[^"]+")?\/>/g)]
     .map((match) => ({ matrix: match[1].split(',').map(Number), faded: Boolean(match[2]) }))
   return {
@@ -146,6 +147,49 @@ describe('画一帧', () => {
     expect(href.startsWith('data:image/svg+xml,')).toBe(true)
     expect(decodeURIComponent(href.slice('data:image/svg+xml,'.length))).toBe(svg)
     expect(href).not.toMatch(/[#<>" ]/)
+  })
+})
+
+describe('视线跟随', () => {
+  const W = 1280, H = 800
+  it('视口正中平视；左右、上下到边时转到各自的上限', () => {
+    expect(faviconLook(W / 2, H / 2, W, H)).toEqual({ yaw: 0, pitch: 0, mix: 1, spin: 0, wander: 0 })
+    expect(faviconLook(0, H / 2, W, H).yaw).toBe(-FAVICON_GAZE.yaw)
+    expect(faviconLook(W, H / 2, W, H).yaw).toBe(FAVICON_GAZE.yaw)
+    expect(faviconLook(W / 2, 0, W, H).pitch).toBe(FAVICON_GAZE.up)
+    expect(faviconLook(W / 2, H, W, H).pitch).toBe(-FAVICON_GAZE.down)
+  })
+  it('分成 9 × 5 格：同一格里挪动视线不变，越界的位置按边缘算，尺寸为 0 时平视', () => {
+    const yaws = new Set(), pitches = new Set()
+    for (let x = 0; x <= W; x += 8) yaws.add(faviconLook(x, H / 2, W, H).yaw)
+    for (let y = 0; y <= H; y += 8) pitches.add(faviconLook(W / 2, y, W, H).pitch)
+    expect(yaws.size).toBe(9)
+    expect(pitches.size).toBe(5)
+    expect(faviconLook(W * 0.51, H * 0.52, W, H)).toEqual(faviconLook(W / 2, H / 2, W, H))
+    expect(faviconLook(-500, -500, W, H)).toEqual(faviconLook(0, 0, W, H))
+    expect(faviconLook(9999, 9999, W, H)).toEqual(faviconLook(W, H, W, H))
+    for (const look of [faviconLook(10, 10, 0, 0), faviconLook(NaN, NaN, W, H)]) {
+      expect(look).toEqual({ yaw: 0, pitch: 0, mix: 1, spin: 0, wander: 0 })
+    }
+  })
+  it.each(FAVICON_SHAPES)('%s：往右看眼睛在右、往左看在左、往下看更低，转到上限两只眼睛的中心仍在身体外框里', (shape) => {
+    const eyesAt = (x, y) => {
+      const engine = new BotEngine(RAYON, 'idle', shapeRadii(shape), FAVICON_FACE)
+      engine.setLook(faviconLook(x, y, W, H), 0, 0.001)
+      const { eyes, box } = parse(faviconSvg(engine.sample(0.01), '#14b8a6'))
+      expect(eyes).toHaveLength(2)
+      for (const eye of eyes) {
+        expect(eye.matrix[4]).toBeGreaterThan(box.minX)
+        expect(eye.matrix[4]).toBeLessThan(box.maxX)
+        expect(eye.matrix[5]).toBeGreaterThan(box.minY)
+        expect(eye.matrix[5]).toBeLessThan(box.maxY)
+      }
+      return { x: (eyes[0].matrix[4] + eyes[1].matrix[4]) / 2, y: (eyes[0].matrix[5] + eyes[1].matrix[5]) / 2 }
+    }
+    const left = eyesAt(0, H / 2), right = eyesAt(W, H / 2), top = eyesAt(W / 2, 0), bottom = eyesAt(W / 2, H)
+    expect(right.x - left.x).toBeGreaterThan(30) // 228 单位宽的图标上至少挪 30，16px 下约 2px
+    expect(bottom.y - top.y).toBeGreaterThan(20)
+    for (const corner of [[0, 0], [W, 0], [0, H], [W, H]]) eyesAt(...corner)
   })
 })
 

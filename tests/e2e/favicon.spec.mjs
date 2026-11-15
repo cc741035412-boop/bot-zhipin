@@ -14,7 +14,16 @@ const read = (page) => icon(page).evaluate((link) => ({
   href: link.getAttribute('href'),
   svg: decodeURIComponent(link.getAttribute('href').replace('data:image/svg+xml,', '')),
 }))
-const bodyFill = (svg) => svg.match(/<path fill="([^"]+)"/)[1]
+const bodyFill = (svg) => svg.match(/<use href="#p" fill="([^"]+)"/)[1]
+/** 两只眼睛的中心相对图标中心的偏移（图标坐标，整张图约 230 宽）。 */
+const eyeOffset = (svg) => {
+  const [left, top, side] = svg.match(/viewBox="([^"]+)"/)[1].split(' ').map(Number)
+  const eyes = [...svg.matchAll(/transform="matrix\(([^)]+)\)"/g)].map((match) => match[1].split(',').map(Number))
+  return {
+    x: (eyes[0][4] + eyes[1][4]) / 2 - (left + side / 2),
+    y: (eyes[0][5] + eyes[1][5]) / 2 - (top + side / 2),
+  }
+}
 /** 眼睛的竖向开合度：变换矩阵里竖直方向那一项的绝对值（睁开约 1，闭上约 0.06）。 */
 const lidOf = (svg) => Math.abs(Number(svg.match(/transform="matrix\(([^)]+)\)"/)[1].split(',')[3]))
 
@@ -194,4 +203,55 @@ test('减少动效：打开时随机一只，之后不再变；关掉减少动�
   expect(await page.evaluate(() => window.__favicon.length)).toBe(0)
   await page.emulateMedia({ reducedMotion: 'no-preference' })
   await expect(icon(page)).not.toHaveAttribute('data-shape', first.shape, { timeout: SWAP_MAX + 2000 })
+})
+
+test('眼睛跟着鼠标看：左右上下都跟，同一片区域里挪动不换图，停住 4 秒后回正', async ({ page }) => {
+  test.setTimeout(40_000)
+  await page.setViewportSize({ width: 1200, height: 800 })
+  await page.goto('/')
+  await expect(icon(page)).toHaveCount(1)
+  await expect(icon(page)).toHaveAttribute('data-follow', 'rest')
+  const offsetAfterMove = async (x, y, check) => {
+    await page.mouse.move(x, y, { steps: 4 })
+    await expect(icon(page)).toHaveAttribute('data-follow', 'pointer')
+    // 变身过渡中视线由下一帧带上，所以等到条件成立为止。
+    await expect.poll(async () => check(eyeOffset((await read(page)).svg)), { timeout: 3000 }).toBe(true)
+    return eyeOffset((await read(page)).svg)
+  }
+  const right = await offsetAfterMove(1190, 400, (o) => o.x > 15)
+  const left = await offsetAfterMove(10, 400, (o) => o.x < -15)
+  expect(right.x - left.x).toBeGreaterThan(40)
+  const bottom = await offsetAfterMove(600, 790, (o) => o.y > 5)
+  const top = await offsetAfterMove(600, 10, (o) => o.y < bottom.y - 15)
+  expect(bottom.y - top.y).toBeGreaterThan(15)
+  // 同一格里小幅挪动：不换图。
+  await page.waitForTimeout(300)
+  const before = await page.evaluate(() => window.__favicon.length)
+  const shape = (await read(page)).shape
+  for (let i = 0; i < 10; i++) await page.mouse.move(600 + i * 3, 10 + i)
+  await page.waitForTimeout(200)
+  const frames = await page.evaluate(() => window.__favicon)
+  // 这 200 多毫秒里如果正好赶上变身或眨眼就不比了；否则应当一张都没换。
+  if ((await read(page)).shape === shape && frames.slice(before).every((frame) => frame.shape === shape)) {
+    expect(frames.length - before).toBeLessThanOrEqual(3) // 最多一次眨眼的 3 帧
+  }
+  // 鼠标不动 4 秒：视线回正。
+  await expect(icon(page)).toHaveAttribute('data-follow', 'rest', { timeout: 6000 })
+  await expect.poll(async () => Math.abs(eyeOffset((await read(page)).svg).x), { timeout: 3000 }).toBeLessThan(12)
+})
+
+test('鼠标移出窗口，视线马上回正；减少动效时不跟', async ({ page }) => {
+  await page.setViewportSize({ width: 1200, height: 800 })
+  await page.goto('/')
+  await expect(icon(page)).toHaveCount(1)
+  await page.mouse.move(1190, 400, { steps: 3 })
+  await expect(icon(page)).toHaveAttribute('data-follow', 'pointer')
+  await page.evaluate(() => document.dispatchEvent(new PointerEvent('pointerout', { bubbles: true, relatedTarget: null })))
+  await expect(icon(page)).toHaveAttribute('data-follow', 'rest')
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  const still = await read(page)
+  await page.mouse.move(10, 400, { steps: 3 })
+  await page.waitForTimeout(400)
+  await expect(icon(page)).toHaveAttribute('data-follow', 'rest')
+  expect((await read(page)).href).toBe(still.href)
 })
