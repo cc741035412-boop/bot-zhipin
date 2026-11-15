@@ -37,7 +37,7 @@ onBeforeUnmount(() => { media?.removeEventListener('change', resize); observer?.
     <header class="submit-preview-heading"><h2>{{ !expanded && !desktop ? '预览上架后的样子' : '上架后的样子' }}</h2><button type="button" class="submit-text-button" data-testid="preview-toggle" :aria-expanded="expanded" aria-controls="submit-preview-body" @click="expanded = !expanded">{{ expanded ? '收起预览' : '展开预览' }}</button></header>
     <div v-show="desktop || expanded" id="submit-preview-body">
       <p data-testid="preview-note" class="submit-muted">上线后效果以实际页面为准。</p>
-      <div class="sort-controls" role="group" aria-label="预览方式"><button type="button" class="shelf-button" data-testid="preview-tab-card" :aria-pressed="tab === 'card'" @click="tab = 'card'">卡片</button><button type="button" class="shelf-button" data-testid="preview-tab-detail" :aria-pressed="tab === 'detail'" @click="tab = 'detail'">详情页</button></div>
+      <div class="sort-controls" :data-sort="tab === 'detail' ? 'new' : 'hot'" role="group" aria-label="预览方式"><button type="button" class="shelf-button" data-testid="preview-tab-card" :aria-pressed="tab === 'card'" @click="tab = 'card'">卡片</button><button type="button" class="shelf-button" data-testid="preview-tab-detail" :aria-pressed="tab === 'detail'" @click="tab = 'detail'">详情页</button></div>
       <div v-show="tab === 'card'" data-testid="preview-card" :inert="tab !== 'card'"><BotCard :bot="preview.summary" /></div>
       <div v-if="tab === 'detail'" id="submit-preview-detail" data-testid="preview-detail"><BotDetail :bot="preview.summary" :copy="copy || { quota: {}, permissions: {} }" :design-html="preview.designHtml" /></div>
     </div>
@@ -46,3 +46,8 @@ onBeforeUnmount(() => { media?.removeEventListener('change', resize); observer?.
     <p v-if="showScrollHint" class="submit-preview-scroll-hint" data-testid="preview-scroll-hint">向下滚动查看更多</p>
   </aside>
 </template>
+<style scoped>
+/* 复用货架的滑块位置规则；预览选中项在两种主题下均保持白字黑底。 */
+.sort-controls::after { background: #141418; }
+.sort-controls .shelf-button[aria-pressed="true"] { color: #fff; }
+</style>

@@ -120,6 +120,46 @@ test('07 详情预览不嵌套 main/h1、源码不链接、未放图有占位', 
   await mock(page); await open(page); await page.getByTestId('preview-tab-detail').click(); const detail = page.getByTestId('preview-detail')
   await expect(detail).toBeVisible(); await expect(detail.locator('main, h1')).toHaveCount(0); await expect(detail.getByTestId('section-skills').locator('a')).toHaveCount(0); await expect(detail).toContainText('上架后可查看源码'); await expect(detail).toContainText('截图 1（待放入）'); await expect(page.locator('.submit-page [aria-live]')).toHaveCount(1)
 })
+for (const dark of [false, true]) test(`预览切换：${dark ? '深' : '浅'}色选中块跟随标签且文字对比度达标`, async ({ page }) => {
+  await mock(page); await page.setViewportSize({ width: 1280, height: 900 }); await open(page)
+  await page.evaluate((dark) => document.documentElement.classList.toggle('dark', dark), dark)
+  for (const tab of ['detail', 'card']) {
+    const button = page.getByTestId(`preview-tab-${tab}`)
+    const other = page.getByTestId(`preview-tab-${tab === 'detail' ? 'card' : 'detail'}`)
+    await button.click()
+    await expect(button).toHaveAttribute('aria-pressed', 'true')
+    await expect(other).toHaveAttribute('aria-pressed', 'false')
+    // ::after 是真实选中块，不能只断言 aria-pressed 或 data-sort。
+    // 用计算样式推算滑块中心，并等待滑动和文字颜色过渡完成。
+    await expect(async () => {
+      const metrics = await button.evaluate((el) => {
+        const track = el.closest('.sort-controls'), block = getComputedStyle(track, '::after')
+        const trackRect = track.getBoundingClientRect(), buttonRect = el.getBoundingClientRect()
+        const transform = new DOMMatrixReadOnly(block.transform === 'none' ? undefined : block.transform)
+        const center = trackRect.left + track.clientLeft + parseFloat(block.left) + parseFloat(block.width) / 2 + transform.m41
+        const canvas = document.createElement('canvas'), ctx = canvas.getContext('2d')
+        const lum = (color) => {
+          ctx.clearRect(0, 0, 1, 1); ctx.fillStyle = color; ctx.fillRect(0, 0, 1, 1)
+          const c = [...ctx.getImageData(0, 0, 1, 1).data].slice(0, 3).map((x) => { x /= 255; return x <= .04045 ? x / 12.92 : ((x + .055) / 1.055) ** 2.4 })
+          return c[0] * .2126 + c[1] * .7152 + c[2] * .0722
+        }
+        const color = getComputedStyle(el).color, background = block.backgroundColor
+        const foregroundLum = lum(color), backgroundLum = lum(background)
+        return {
+          offset: Math.abs(center - (buttonRect.left + buttonRect.width / 2)),
+          contrast: (Math.max(foregroundLum, backgroundLum) + .05) / (Math.min(foregroundLum, backgroundLum) + .05),
+          color, background, content: block.content,
+        }
+      })
+      expect(metrics.content).not.toBe('none')
+      expect(metrics.offset).toBeLessThanOrEqual(4)
+      expect(metrics.contrast).toBeGreaterThanOrEqual(4.5)
+      expect(metrics.color).toBe('rgb(255, 255, 255)')
+      expect(metrics.background).toBe('rgb(20, 20, 24)')
+    }).toPass({ timeout: 5000 })
+    await expect(page.getByTestId(`preview-${tab}`)).toBeVisible()
+  }
+})
 test('详情预览桌面溢出显示滚动提示，滚到底隐藏', async ({ page }) => {
   await mock(page); await page.setViewportSize({ width: 1280, height: 900 }); await open(page)
   await page.getByTestId('preview-tab-detail').click()
