@@ -271,8 +271,8 @@ describe('全量校验（Bot + 小队 + 策展）', () => {
     const dir = sandbox()
     writeFileSync(join(dir, 'bots/demo-external/bot.yaml'), 'name: [坏掉\n')
     const output = formatResult(validateAll({ botsDir: join(dir, 'bots'), now }))
-    // bot.yaml 坏掉的 Bot 自己有 5 条，小队 1 条，策展 3 条。
-    expect(output).toContain('校验未通过：1 个 Bot、1 支小队、策展文件 共 9 处错误')
+    // bot.yaml 坏掉的 Bot 自己有 4 条（截图已不是必填，DECISIONS 第 43 条），小队 1 条，策展 3 条。
+    expect(output).toContain('校验未通过：1 个 Bot、1 支小队、策展文件 共 8 处错误')
   })
   it('bot.yaml 解析不了的 Bot 不算在货架上（和网站口径一致）', () => {
     const dir = sandbox()

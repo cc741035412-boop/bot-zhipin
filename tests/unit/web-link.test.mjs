@@ -40,7 +40,8 @@ function runCli(args) {
 function issueInput(text = readBundleDirectory(dir).plaintext) {
   return {
     login: 'actual-author', id: '12345', number: '42',
-    body: `### ${FORM_LABELS.bundle}\n\n${text}\n\n### ${FORM_LABELS.screenshots}\n\n![截图](https://github.com/user-attachments/assets/test-image)\n\n### ${FORM_LABELS.license}\n\n- [x] ${LICENSE_TEXT}`,
+    // 新表单（第 43 条）：没有截图栏。
+    body: `### ${FORM_LABELS.bundle}\n\n${text}\n\n### ${FORM_LABELS.license}\n\n- [x] ${LICENSE_TEXT}`,
   }
 }
 function fakeAdapters() {
@@ -161,25 +162,28 @@ describe('网站投稿链接', () => {
     setYaml(originalYaml.replace('example-user', 'invalid_user'))
     expect(() => makeWebSubmissionLink(dir)).toThrow('author.github')
   })
-  it('步骤按实际截图张数和投稿包顺序显示，并提示省略头像', () => {
+  it('步骤只有三步、没有拖截图（第 43 条）；本地有图时提示不上传，并提示省略头像', () => {
     cpSync(join(dir, 'screenshots/review-result.png'), join(dir, 'screenshots/a-first.png'))
-    const output = makeWebSubmissionLink(dir).output
-    expect(output).toContain('1. 点开链接，先看一眼你的 Bot 在网站上长什么样。\n2. 点「用 GitHub 登录」。\n3. 把 2 张截图拖进去（按顺序：a-first.png、review-result.png）。\n4. 勾选授权，点提交。')
-    expect(output).toContain('投稿包不传头像，将使用网站默认头像。')
+    const result = makeWebSubmissionLink(dir)
+    expect(result.output).toContain('1. 点开链接，先看一眼你的 Bot 在网站上长什么样。\n2. 点「用 GitHub 登录」。\n3. 勾选授权，点提交。')
+    expect(result.output).not.toContain('4. ')
+    expect(result.output).not.toContain('拖进去')
+    expect(result.output).toContain('提示：投稿不收截图，screenshots/ 里的图片不会上传。')
+    expect(result.output).toContain('投稿包不传头像，将使用网站默认头像。')
+    expect(unpack(result.bundle).screenshots).toEqual([])
   })
-  it('无图片时沿用 DESIGN 引用顺序，而不是按文件名排序', () => {
+  it('DESIGN 引用本地截图时不生成链接，报「图片引用」改法', () => {
     rmSync(join(dir, 'screenshots'), { recursive: true })
     const design = readFileSync(join(dir, 'DESIGN.md'), 'utf8')
     writeFileSync(join(dir, 'DESIGN.md'), design + '\n![先](screenshots/z.png)\n![后](screenshots/a.jpg)')
-    expect(makeWebSubmissionLink(dir).output).toContain('把 2 张截图拖进去（按顺序：z.png、a.jpg）')
+    expect(() => makeWebSubmissionLink(dir)).toThrow('引用了 screenshots/z.png，但没有这张图；引用了 screenshots/a.jpg，但没有这张图')
   })
-  it('无截图声明提示至少 1 张，没有头像则不提示省略', () => {
+  it('没有截图也没有头像时不提截图、不提头像', () => {
     rmSync(join(dir, 'screenshots'), { recursive: true })
     rmSync(join(dir, 'avatar.png'))
     const result = makeWebSubmissionLink(dir)
     expect(unpack(result.bundle).screenshots).toEqual([])
-    expect(result.output).toContain('至少 1 张截图拖进去')
-    expect(result.output).not.toContain('按顺序')
+    expect(result.output).not.toContain('截图')
     expect(result.output).not.toContain('头像')
   })
 })
@@ -252,7 +256,7 @@ describe('站点配置', () => {
     expect(submitPrompt()).toBe([
       '请帮我把我做的 Grok Bot 投稿到「Bot 直聘」：https://github.com/jakob52123/bot-zhipin',
       '1. 先完整读一遍仓库根目录的 AGENTS.md，严格按它的步骤做。',
-      '2. 能从你自己（或我的 Bot 配置）里查到的信息直接用，查不到的再一次问清我；不要编造效果和截图。',
+      '2. 能从你自己（或我的 Bot 配置）里查到的信息直接用，查不到的再一次问清我；不要编造效果。',
       '3. 不要向我要 GitHub 令牌或密码。',
       '4. 最后给我一个 https://bot.jiachengbo.com/submit 开头的投稿链接。',
     ].join('\n'))

@@ -8,10 +8,8 @@ import { encodeToken, decodeToken } from '../../scripts/lib/bundle-web.mjs'
 import { readBundleInput, readLocationBundle } from '../../site/.vitepress/theme/submit/bundle.ts'
 import { previewModel } from '../../site/.vitepress/theme/submit/preview.ts'
 import { checkBundle } from '../../site/.vitepress/theme/submit/validate.ts'
-import { screenshotNames } from '../../site/.vitepress/theme/submit/model.ts'
 import { createStore } from '../../site/.vitepress/theme/submit/store.ts'
-import { me, logout, startLogin, submit, status, uploadScreenshot } from '../../site/.vitepress/theme/submit/api.ts'
-import { planCompression, compressImage, makeThumb } from '../../site/.vitepress/theme/submit/compress.ts'
+import { me, logout, startLogin, submit, status } from '../../site/.vitepress/theme/submit/api.ts'
 import { issueFallbackUrl } from '../../site/.vitepress/theme/submit/issue-fallback.ts'
 import { errorCopy, explainError, copyForAi } from '../../site/.vitepress/theme/submit/errors.ts'
 
@@ -88,12 +86,14 @@ it.each([() => new Response('', { status: 503 }), () => new Response('{}'), () =
   await expect(loadContext()).rejects.toThrow()
   expect((await loadContext()).index).toEqual([])
 })
-it('校验用占位作者、北京时间日期、截图占位，不改原文', () => {
+it('校验用占位作者、北京时间日期，不放截图占位（第 43 条），不改原文', () => {
   const input = bundle({ author: { name: '作者' } })
   expect(checkBundle(input, { context, now })).toMatchObject({ errors: [], slug, update: false })
   const result = previewModel(input, { now })
   expect(result.model.data.author.github).toBe('submitter')
   expect(result.summary.addedAt).toBe('2026-11-15')
+  expect(result.model.screenshots).toEqual([])
+  expect(result.summary.screenshots).toEqual([])
   expect(YAML.parse(unpack(input).files[yamlPath]).author.github).toBeUndefined()
 })
 it('同 slug 同账号忽略大小写判更新，保留旧日期，别人的不是更新', () => {
@@ -124,25 +124,30 @@ it('缺 bot.yaml 交给内核诊断；坏包直接抛中文四项', () => {
   expect(checkBundle(input, { context, now }).errors.some((error) => error.file.endsWith('/bot.yaml'))).toBe(true)
   expect(() => checkBundle('bad', { context })).toThrow()
 })
-it('槽位声明优先；缺声明按设计说明推导去重，完全没有则一个槽', () => {
-  expect(screenshotNames(unpack(plaintext))).toEqual(['output.png'])
-  const input = unpack(bundle({}, []))
-  input.files[`bots/${slug}/DESIGN.md`] = '![甲](screenshots/a.jpg) ![乙](./screenshots/b.png) ![甲](screenshots/a.jpg)'
-  expect(screenshotNames(input)).toEqual(['a.jpg', 'b.png'])
-  expect(checkBundle(pack(input), { context, now }).errors.filter((error) => error.where === '文件头')).toEqual([])
-  input.files[`bots/${slug}/DESIGN.md`] = ''
-  expect(screenshotNames(input)).toEqual(['screenshot-1.png'])
+it('投稿包里残留的截图文件名被忽略：不报错、不出截图槽，也没有「截图数量」检查', () => {
+  const many = bundle({}, Array.from({ length: 20 }, (_, i) => `shot-${i}.png`))
+  expect(checkBundle(many, { context, now }).errors).toEqual([])
+  expect(checkBundle(plaintext, { context, now }).errors.some((error) => /截图/.test(error.where))).toBe(false)
+  expect(previewModel(many).model.screenshots).toEqual([])
 })
-it('预览按槽位改扩展名和引用，用 blob/缩略图，不用外部图地址', () => {
+it('设计说明引用本地截图：校验报「图片引用」去重，注释里的不算', () => {
+  const input = unpack(bundle({}, []))
+  const design = input.files[`bots/${slug}/DESIGN.md`]
+  input.files[`bots/${slug}/DESIGN.md`] = design + '\n![甲](screenshots/a.jpg) ![乙](./screenshots/b.png) ![甲](screenshots/a.jpg)'
+  const errors = checkBundle(pack(input), { context, now }).errors.filter((error) => error.where === '图片引用')
+  expect(errors).toEqual([expect.objectContaining({ file: `bots/${slug}/DESIGN.md`, problem: '引用了 screenshots/a.jpg，但没有这张图；引用了 screenshots/b.png，但没有这张图' })])
+  input.files[`bots/${slug}/DESIGN.md`] = design + '\n<!-- ![示例](screenshots/screenshot-1.png) -->'
+  expect(checkBundle(pack(input), { context, now }).errors).toEqual([])
+})
+it('预览不显示截图：本地截图引用只留说明文字，不出 img；外链图仍是新标签页链接', () => {
   const input = unpack(plaintext)
-  input.files[`bots/${slug}/DESIGN.md`] += '\n![结果](screenshots/output.png)'
-  const result = previewModel(pack(input), { images: [{ format: 'jpeg', size: 100, url: 'blob:trusted' }], login: 'my-user' })
+  input.files[`bots/${slug}/DESIGN.md`] += '\n![结果](screenshots/output.png)\n![外链](https://tracker.example/a.png)'
+  const result = previewModel(pack(input), { login: 'my-user' })
   expect(result.summary.author.link).toBe('https://github.com/my-user')
-  expect(result.designHtml).toContain('src="blob:trusted"')
-  expect(result.model.screenshots[0].file).toBe('output.jpg')
-  expect(result.summary.screenshots).toEqual(['blob:trusted'])
-  expect(previewModel(plaintext, { images: [{ thumb: 'data:image/jpeg;base64,YQ==' }] }).summary.screenshots).toEqual(['data:image/jpeg;base64,YQ=='])
-  expect(previewModel(plaintext, { images: [{ url: 'https://tracker.example/a.png' }] }).summary.screenshots).toEqual([null])
+  expect(result.summary.screenshots).toEqual([])
+  expect(result.designHtml).toContain('结果'); expect(result.designHtml).not.toContain('待放入'); expect(result.designHtml).not.toContain('screenshot-error')
+  expect(result.designHtml).not.toContain('<img')
+  expect(result.designHtml).not.toContain('src="https://tracker.example/a.png"')
 })
 it.each(['javascript:alert(1)', 'data:text/html,a', 'https://x.ai/bot/a?b=c', { url: 'https://x.ai/bot/a' }])('非法模板链接不会进入 summary（%#）', (value) => {
   expect(previewModel(bundle({ templateUrl: value })).summary.templateUrl).toBeNull()
@@ -159,8 +164,8 @@ it('合法链接保留，非法登录名和改编 slug 不进入链接', () => {
   expect(previewModel(plaintext, { login: '../../escape' }).summary.author.link).toBeNull()
   expect(previewModel(bundle({ forkedFrom: 'javascript:evil' })).summary.forkedFrom).toBeNull()
 })
-it('草稿和提交结果同一 session 键；清理不影响回执', () => {
-  const session = storage(), local = storage(), store = createStore({ session, local })
+it('草稿和提交结果同一 session 键', () => {
+  const session = storage(), store = createStore({ session })
   expect(store.loadDraft()).toBeNull()
   store.saveDraft({ plaintext, license: true })
   store.saveResult({ pr: { number: 1 }, slug, update: false })
@@ -170,47 +175,30 @@ it('草稿和提交结果同一 session 键；清理不影响回执', () => {
   session.setItem('bz-submit', '[]')
   expect(store.loadDraft()).toBeNull()
 })
-it('回执按 uid/slug 隔离，到期剔除但不移动槽位', () => {
-  const local = storage(), store = createStore({ session: storage(), local })
-  store.saveShot(1, slug, 0, { receipt: 'old', exp: 100 })
-  store.saveShot(1, slug, 2, { receipt: 'valid', exp: 200 })
-  expect(store.loadShots(1, slug, 100)).toEqual([null, null, { receipt: 'valid', exp: 200 }])
-  expect(store.loadShots(2, slug, 100)).toEqual([])
-  expect(store.loadShots(1, 'other', 100)).toEqual([])
-  expect(JSON.parse(local.getItem(`bz-submit-shots:1:${slug}`))[0]).toBeNull()
-  store.clearShots(1, slug)
-  expect(store.loadShots(1, slug)).toEqual([])
-})
-it('换账号清所有旧账号，不误删 1/10 的共同前缀或其他业务数据', () => {
-  const local = storage(), store = createStore({ local, session: storage() })
-  local.setItem('unrelated', 'keep')
-  for (const uid of [1, 10, 2]) for (const name of [slug, 'another']) store.saveShot(uid, name, 0, { receipt: 'r', exp: 999 })
-  store.clearShotsExcept(1)
-  expect(local.length).toBe(3)
-  expect(store.loadShots(1, slug, 1)).toHaveLength(1)
-  expect(store.loadShots(10, slug, 1)).toEqual([])
-  expect(local.getItem('unrelated')).toBe('keep')
-})
-it('损坏 JSON、坏结构和非法 slot 安全兜底', () => {
-  const session = storage(), local = storage(), store = createStore({ session, local })
+it('损坏 JSON 安全兜底', () => {
+  const session = storage(), store = createStore({ session })
   session.setItem('bz-submit', '{bad')
-  local.setItem(`bz-submit-shots:1:${slug}`, '{}')
   expect(store.loadDraft()).toBeNull()
-  expect(store.loadShots(1, slug)).toEqual([])
-  store.saveShot(1, slug, -1, {})
-  store.saveShot(1, slug, 1.5, {})
-  store.saveShot(1, slug, 30, {})
-  expect(store.loadShots(1, slug)).toEqual([])
+})
+it('只用 sessionStorage：草稿、结果、应用内提示都不碰 localStorage（截图回执存储已删除）', () => {
+  const session = storage(), local = storage()
+  vi.stubGlobal('window', { sessionStorage: session, localStorage: local })
+  const store = createStore()
+  store.saveDraft({ plaintext }); store.saveResult({ pr: { number: 1 } }); store.dismissInapp()
+  expect(store.inappDismissed()).toBe(true)
+  expect(store.loadDraft()).toMatchObject({ plaintext, result: { pr: { number: 1 } } })
+  store.clearDraft()
+  expect(local.length).toBe(0)
+  expect(Object.keys(store).sort()).toEqual(['clearDraft', 'dismissInapp', 'inappDismissed', 'loadDraft', 'saveDraft', 'saveResult'])
 })
 it('所有存储方法抛错也不崩，默认 window 存储 getter 抛错也安全', () => {
   const throwing = new Proxy({}, { get() { throw new Error('blocked') } })
   vi.stubGlobal('window', throwing)
-  for (const store of [createStore(), createStore({ local: throwing, session: throwing }), createStore({ local: null, session: null })]) {
+  for (const store of [createStore(), createStore({ session: throwing }), createStore({ session: null })]) {
     expect(store.loadDraft()).toBeNull()
-    expect(store.loadShots(1, slug)).toEqual([])
+    expect(store.inappDismissed()).toBe(false)
     expect(() => {
-      store.saveDraft({ plaintext }); store.saveResult({}); store.clearDraft()
-      store.saveShot(1, slug, 0, { receipt: 'r', exp: 1 }); store.clearShots(1, slug); store.clearShotsExcept(1)
+      store.saveDraft({ plaintext }); store.saveResult({}); store.clearDraft(); store.dismissInapp()
     }).not.toThrow()
   }
 })
@@ -232,22 +220,23 @@ it('登录整页跳转；me/logout/status 的路径、同源 cookie 和 204', as
   expect(fetch.mock.calls.map(([url]) => url)).toEqual(['/api/auth/me', '/api/auth/logout', '/api/submit/status?pr=1%26x%3Dy'])
   for (const [, init] of fetch.mock.calls) expect(init.credentials).toBe('same-origin')
 })
-it('submit 发送明文，未传 dryRun 时正文无该键；显式 false/true 保留', async () => {
+it('submit 只发明文和授权（不再带 screenshots），未传 dryRun 时正文无该键；显式 false/true 保留', async () => {
   vi.stubGlobal('fetch', vi.fn(async () => new Response('{"ok":true}')))
   for (const dryRun of [undefined, false, true]) {
-    await submit({ plaintext, receipts: ['receipt'], license: true, dryRun })
+    await submit({ plaintext, license: true, dryRun })
     const [url, init] = fetch.mock.calls.at(-1)
     expect(url).toBe('/api/submit')
     expect(init.method).toBe('POST')
     expect(init.headers).toEqual({ 'Content-Type': 'application/json' })
     const body = JSON.parse(init.body)
-    expect(body).toMatchObject({ bundle: plaintext, screenshots: ['receipt'], license: true })
-    expect(Object.hasOwn(body, 'dryRun')).toBe(dryRun !== undefined)
+    expect(body).toEqual({ bundle: plaintext, license: true, ...(dryRun === undefined ? {} : { dryRun }) })
+    expect(Object.hasOwn(body, 'screenshots')).toBe(false)
   }
 })
-it('API 非 2xx 保留错误、slots、requestId，Retry-After 头兜底', async () => {
-  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: 'receipt_invalid', message: '需要重传', slots: [1], requestId: '12345678' }), { status: 400, headers: { 'Retry-After': '90' } })))
-  await expect(me()).rejects.toMatchObject({ status: 400, error: 'receipt_invalid', slots: [1], retryAfter: 90, requestId: '12345678' })
+it('API 非 2xx 保留错误码、附加字段和 requestId，Retry-After 头兜底', async () => {
+  const pulls = [{ number: 1, url: 'https://github.test/pull/1', slug }]
+  vi.stubGlobal('fetch', vi.fn(async () => new Response(JSON.stringify({ error: 'pr_limit', message: '太多', pulls, requestId: '12345678' }), { status: 429, headers: { 'Retry-After': '90' } })))
+  await expect(me()).rejects.toMatchObject({ status: 429, error: 'pr_limit', pulls, retryAfter: 90, requestId: '12345678' })
 })
 it('API 网络/非 JSON/坏成功响应都 reject 结构化对象', async () => {
   vi.stubGlobal('fetch', vi.fn().mockRejectedValueOnce(new Error('offline'))
@@ -264,122 +253,6 @@ it('API 超时中断请求', async () => {
   await result
 })
 
-class FakeXHR {
-  static last
-  constructor() { FakeXHR.last = this; this.upload = {}; this.headers = {}; this.status = 200; this.responseText = '{"ok":true,"receipt":"r","exp":999}' }
-  open(...args) { this.opened = args }
-  setRequestHeader(name, value) { this.headers[name] = value }
-  getResponseHeader() { return '60' }
-  send(body) { this.body = body }
-  abort() { this.onabort() }
-}
-it('上传只发原始字节和 Content-Type，进度 0–100，成功返回 JSON', async () => {
-  vi.stubGlobal('XMLHttpRequest', FakeXHR)
-  const file = new Blob(['png'], { type: 'image/png' }), onProgress = vi.fn()
-  const result = uploadScreenshot(file, { onProgress }), xhr = FakeXHR.last
-  expect(xhr.opened).toEqual(['POST', '/api/submit/screenshot'])
-  expect(xhr.headers).toEqual({ 'Content-Type': 'image/png' })
-  expect(xhr.body).toBe(file)
-  xhr.upload.onprogress({ lengthComputable: true, loaded: 2, total: 4 })
-  xhr.upload.onprogress({ lengthComputable: true, loaded: 6, total: 4 })
-  xhr.onload()
-  expect(await result).toMatchObject({ receipt: 'r', exp: 999 })
-  expect(onProgress.mock.calls.flat()).toEqual([0, 50, 100, 100])
-})
-it('上传非 2xx 返回完整结构化错误', async () => {
-  vi.stubGlobal('XMLHttpRequest', FakeXHR)
-  const result = uploadScreenshot(new Blob()), xhr = FakeXHR.last
-  xhr.status = 429; xhr.responseText = '{"error":"rate_limited","message":"慢一点","slots":[0],"retryAfter":120}'
-  xhr.onload()
-  await expect(result).rejects.toMatchObject({ status: 429, error: 'rate_limited', message: '慢一点', slots: [0], retryAfter: 120 })
-})
-it.each([['onerror', 'network_error'], ['ontimeout', 'timeout'], ['onabort', 'aborted']])('上传 %s 会 reject 且移除 signal listener', async (event, error) => {
-  vi.stubGlobal('XMLHttpRequest', FakeXHR)
-  const controller = new AbortController(), spy = vi.spyOn(controller.signal, 'removeEventListener')
-  const result = uploadScreenshot(new Blob(), { signal: controller.signal })
-  FakeXHR.last[event]()
-  await expect(result).rejects.toMatchObject({ error })
-  expect(spy).toHaveBeenCalled()
-})
-it('上传支持预先取消与上传中取消', async () => {
-  vi.stubGlobal('XMLHttpRequest', FakeXHR)
-  const controller = new AbortController()
-  const pending = uploadScreenshot(new Blob(), { signal: controller.signal })
-  controller.abort()
-  await expect(pending).rejects.toMatchObject({ error: 'aborted' })
-  await expect(uploadScreenshot(new Blob(), { signal: controller.signal })).rejects.toMatchObject({ error: 'aborted' })
-})
-it('上传非 JSON 错误页与坏成功响应都可处理', async () => {
-  vi.stubGlobal('XMLHttpRequest', FakeXHR)
-  const a = uploadScreenshot(new Blob())
-  FakeXHR.last.status = 503; FakeXHR.last.responseText = 'bad'; FakeXHR.last.onload()
-  await expect(a).rejects.toMatchObject({ status: 503, retryAfter: 60 })
-  const b = uploadScreenshot(new Blob())
-  FakeXHR.last.responseText = 'bad'; FakeXHR.last.onload()
-  await expect(b).rejects.toMatchObject({ error: 'bad_response' })
-})
-it('压缩计划严格大于 2MB，GIF 不自动压缩', () => {
-  expect(planCompression(2_097_152, 'image/png')).toBe('none')
-  expect(planCompression(2_097_152, 'image/gif')).toBe('none')
-  expect(planCompression(2_097_153, 'image/png')).toBe('compress')
-  expect(planCompression(2_097_153, 'image/gif')).toBe('gif-too-large')
-})
-function mockCanvas({ sizes = [100], thumbSizes = [100], badImage = false, nullBlob = false, nullContext = false } = {}) {
-  const qualities = [], thumbQualities = []
-  const canvas = { width: 0, height: 0,
-    getContext: () => nullContext ? null : { fillRect() {}, drawImage() {} },
-    toBlob(callback, type, quality) { qualities.push(quality); callback(nullBlob ? null : new Blob([new Uint8Array(sizes[Math.min(qualities.length - 1, sizes.length - 1)])], { type })) },
-    toDataURL(_type, quality) { thumbQualities.push(quality); return 'data:image/jpeg;base64,' + 'a'.repeat(thumbSizes[Math.min(thumbQualities.length - 1, thumbSizes.length - 1)]) },
-  }
-  vi.stubGlobal('document', { createElement: () => canvas })
-  vi.stubGlobal('Image', class {
-    naturalWidth = 4000; naturalHeight = 2000
-    set src(_value) { queueMicrotask(() => badImage ? this.onerror() : this.onload()) }
-  })
-  vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test')
-  const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
-  return { canvas, qualities, thumbQualities, revoke }
-}
-const largeFile = (type = 'image/png') => new File([new Uint8Array(2_097_153)], 'output.png', { type })
-it('小图返回原文件，大 GIF reject 不启动 canvas', async () => {
-  const file = new File(['small'], 'output.png', { type: 'image/png' })
-  expect(await compressImage(file)).toBe(file)
-  await expect(compressImage(largeFile('image/gif'))).rejects.toMatchObject({ error: 'gif-too-large' })
-})
-it('压缩长边 ≤2560，按质量逐级尝试，达到边界立即停', async () => {
-  const { canvas, qualities, revoke } = mockCanvas({ sizes: [2_097_153, 2_097_153, 2_097_152] })
-  const file = await compressImage(largeFile())
-  expect(file.type).toBe('image/jpeg')
-  expect(file.name).toBe('output.jpg')
-  expect(file.size).toBe(2_097_152)
-  expect([canvas.width, canvas.height]).toEqual([2560, 1280])
-  expect(qualities).toEqual([0.9, 0.8, 0.7])
-  expect(revoke).toHaveBeenCalledWith('blob:test')
-})
-it('四档都太大 reject too-large 并回收 blob URL', async () => {
-  const { qualities, revoke } = mockCanvas({ sizes: [2_097_153] })
-  await expect(compressImage(largeFile())).rejects.toEqual({ error: 'too-large' })
-  expect(qualities).toEqual([0.9, 0.8, 0.7, 0.6])
-  expect(revoke).toHaveBeenCalledOnce()
-})
-it.each([{ badImage: true }, { nullBlob: true }, { nullContext: true }])('解码/canvas 失败也回收资源（%#）', async (options) => {
-  const { revoke } = mockCanvas(options)
-  await expect(compressImage(largeFile())).rejects.toMatchObject({ error: 'unsupported_type' })
-  expect(revoke).toHaveBeenCalledOnce()
-})
-it('缩略图宽 320，JPEG dataURL 总量 ≤30KB，超限降低质量', async () => {
-  const { canvas, thumbQualities, revoke } = mockCanvas({ thumbSizes: [31_000, 500] })
-  const data = await makeThumb(new Blob())
-  expect(canvas.width).toBe(320)
-  expect(canvas.height).toBe(160)
-  expect(data.length).toBeLessThanOrEqual(30 * 1024)
-  expect(thumbQualities).toEqual([0.9, 0.8])
-  expect(revoke).toHaveBeenCalledOnce()
-})
-it('任何质量都过大的缩略图不返回超限内容', async () => {
-  mockCanvas({ thumbSizes: [31_000] })
-  await expect(makeThumb(new Blob())).rejects.toEqual({ error: 'thumb-too-large' })
-})
 it('Issue 备用链接令牌可解回明文，标题正确编码', async () => {
   const result = await issueFallbackUrl(plaintext, { name: '测试 & 名字' })
   const url = new URL(result.url)
@@ -397,22 +270,24 @@ it('Issue 链接超限只保留表单和标题；坏包拒绝', async () => {
   await expect(issueFallbackUrl('bad', { name: '测试' })).rejects.toHaveProperty('errors')
 })
 it('所有 §11 服务端码都有文案和下一步，不直接显示服务端 message', () => {
-  for (const code of ['bad_request', 'unauthenticated', 'session_expired', 'forbidden_origin', 'license_required', 'not_found', 'slug_taken', 'pr_limit', 'too_large', 'unsupported_type', 'invalid', 'rate_limited', 'github_error', 'submit_disabled', 'receipt_invalid']) {
+  // unsupported_type、receipt_invalid 只来自截图上传，新投稿页不会再收到（第 43 条），走通用兜底。
+  for (const code of ['bad_request', 'unauthenticated', 'session_expired', 'forbidden_origin', 'license_required', 'not_found', 'slug_taken', 'pr_limit', 'too_large', 'invalid', 'rate_limited', 'github_error', 'submit_disabled']) {
     expect(errorCopy[code].message).toBeTruthy()
     expect(explainError(code, { message: '不该显示' }).next).toBeTruthy()
     expect(explainError(code, { message: '不该显示' }).message).not.toBe('不该显示')
   }
   expect(explainError('unknown', { message: '兼容新码' }).message).toBe('兼容新码')
+  for (const code of ['unsupported_type', 'receipt_invalid', 'gif-too-large', 'too-large']) expect(errorCopy[code]).toBeUndefined()
+  for (const copy of Object.values(errorCopy)) expect(`${copy.message}${copy.aiText || ''}`).not.toContain('截图')
 })
-it('动态错误插值、上传/提交差异、倒计时及网络备用入口', () => {
+it('动态错误插值、登录/提交差异、倒计时及网络备用入口', () => {
   expect(explainError('slug_taken', { slug }).aiText).toContain(`slug「${slug}」`)
   expect(explainError('pr_limit', { pulls: [1, 2, 3] }).message).toContain('3 个投稿')
-  expect(explainError('receipt_invalid', { slots: [0, 2] }).message).toContain('2 张截图')
   expect(explainError('rate_limited', { stage: 'login', retryAfter: 90 }).message).toBe('登录太频繁了，约 2 分钟后再试。')
-  expect(explainError('rate_limited', { stage: 'upload', retryAfter: 30 }).message).toBe('传得太快了，30 秒后再试。')
+  expect(explainError('rate_limited', { stage: 'submit', retryAfter: 30 }).message).toBe('提交太频繁了，30 秒后再试。')
   expect(explainError('rate_limited', { retryAfter: 3600 }).message).toContain('约 1 小时')
-  expect(explainError('too_large', { stage: 'upload', gif: true }).message).toContain('动图超过')
-  expect(explainError('too_large', { stage: 'upload' }).message).toContain('压缩后还是')
+  expect(explainError('too_large').message).toContain('投稿包太大')
+  expect(explainError('session_expired').message).toBe('登录过期了，请重新登录。')
   expect(explainError('network_error', { failures: 1 }).fallback).toBe(false)
   expect(explainError('timeout', { failures: 2 }).fallback).toBe(true)
 })

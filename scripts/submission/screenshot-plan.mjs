@@ -4,12 +4,13 @@ import { fail } from './errors.mjs'
 
 const bad = (problem, fix = '请拖入真实的 PNG/JPG/WEBP/GIF 截图，每张不超过 2MB；不要粘贴外站图片地址。') => fail('Issue', 'screenshots', problem, fix)
 
-/** images: [{ size, format, ...回执字段 }]，顺序与上传顺序一致。
+/** images: [{ size, format, ...回执字段 }]，顺序与上传顺序一致；可以为空。
  * 返回 { slug, files: 改写后的文本映射, screenshots: 最终文件名[], images: 带最终 name 的描述符[] }。
  * 不修改输入、不接触图片字节；回执的验签由调用方负责。
  */
 export function planScreenshots(bundle, images) {
-  if (!images.length) bad('至少需要一张截图。')
+  // 截图可选（DECISIONS 第 43 条）：没有图片时忽略投稿包里残留的文件名声明；设计说明里的坏图引用由校验内核报错。
+  if (!images.length) return { slug: bundle.slug, files: { ...bundle.files }, screenshots: [], images: [] }
   if (images.length < bundle.screenshots.length) bad('截图数量少于投稿包里的文件名数量。', '按投稿包里的顺序补齐截图，或让 AI 删除不再需要的文件名和引用。')
   const files = { ...bundle.files }, renames = [], planned = [], paths = new Set(Object.keys(files))
   for (let i = 0; i < images.length; i++) {

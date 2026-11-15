@@ -98,7 +98,7 @@ export function unpack(input) {
       screenshots = value.split(/\r?\n/).filter(Boolean)
       screenshots.forEach(assertFilename)
     } else {
-      if (!TEXT_EXTS.has(path.slice(path.lastIndexOf('.')).toLowerCase())) bad('只允许 .yaml .yml .md .txt .json 文本文件；图片请在提交页拖入。')
+      if (!TEXT_EXTS.has(path.slice(path.lastIndexOf('.')).toLowerCase())) bad('只允许 .yaml .yml .md .txt .json 文本文件；投稿不收图片。')
       if (Object.hasOwn(files, path)) bad('文件路径重复。')
       const bytes = byteLength(value)
       if (bytes > LIMITS.fileBytes) bad('单个文本文件不能超过 100KB。')
@@ -108,7 +108,9 @@ export function unpack(input) {
       files[path] = value
     }
   }
-  if (!slug || !Object.keys(files).length || !screenshots) bad('必须包含文本文件和 screenshots 段（尚无文件名时可留空）。')
+  if (!slug || !Object.keys(files).length) bad('必须包含文本文件。')
+  // screenshots 段可省略（DECISIONS 第 43 条：投稿不收截图，手写投稿包不用再写这一段）。
+  screenshots ||= []
   assertFileSet([...Object.keys(files), ...screenshots.map((name) => `bots/${slug}/screenshots/${name}`)])
   return { slug, files, screenshots }
 }

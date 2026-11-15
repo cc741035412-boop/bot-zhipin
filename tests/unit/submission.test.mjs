@@ -41,9 +41,12 @@ afterEach(() => {
   rmSync(temp, { recursive: true, force: true })
 })
 const rawBundle = (paths, contents = '测试内容') => `BOT-ZHIPIN-BUNDLE v1\n${paths.map((path) => `=== ${path} ===\n${contents}\n`).join('')}=== ${prefix}screenshots ===\nreview-result.png\n=== end ===\n`
-function form(bundle = encode(source.plaintext), screenshots = `![真实截图](${attachment})`, license = `- [x] ${LICENSE_TEXT}`) {
-  return `### ${FORM_LABELS.bundle}\n\n\`\`\`text\n${bundle}\n\`\`\`\n\n### ${FORM_LABELS.screenshots}\n\n${screenshots}\n\n### ${FORM_LABELS.license}\n\n${license}`
+// 新表单没有截图栏（第 43 条）；传入 screenshots 字符串时生成旧表单的截图栏，用来测兼容。
+function form(bundle = encode(source.plaintext), screenshots = null, license = `- [x] ${LICENSE_TEXT}`) {
+  const shots = screenshots === null ? '' : `### ${FORM_LABELS.screenshots}\n\n${screenshots}\n\n`
+  return `### ${FORM_LABELS.bundle}\n\n\`\`\`text\n${bundle}\n\`\`\`\n\n${shots}### ${FORM_LABELS.license}\n\n${license}`
 }
+const LEGACY_LICENSE_TEXT = '我同意以 CC BY 4.0 授权这次投稿，并确认内容和截图都是我有权公开的'
 const input = (body = form(), other = {}) => ({ body, login: 'example-user', id: '12345', number: '42', ...other })
 function changedBundle(change) {
   const bundle = unpack(source.plaintext)
@@ -95,11 +98,13 @@ describe('投稿包格式与资源边界', () => {
     const bundle = { slug, files, screenshots: ['a.png', 'b.jpg'] }
     expect(unpack(pack(bundle))).toEqual(bundle)
   })
-  it('真实示例全部文本逐字往返，截图只收文件名，不包含头像和二进制', () => {
+  it('真实示例全部文本逐字往返，不带截图（第 43 条）、头像和二进制', () => {
     expect(unpack(source.plaintext)).toEqual(source.bundle)
-    expect(source.bundle.screenshots).toEqual(['review-result.png'])
+    expect(source.bundle.screenshots).toEqual([])
+    expect(source.screenshotsOmitted).toBe(true)
     expect(Object.keys(source.bundle.files)).toHaveLength(6)
     expect(source.plaintext).not.toContain('avatar.png')
+    expect(source.plaintext).not.toContain('review-result.png')
   })
   it('压缩令牌一行 base64url 往返', () => {
     const token = encode(source.plaintext)
@@ -187,6 +192,17 @@ describe('Issue 表单与身份', () => {
     const unwrapped = form(text).replace('```text\nBOT-ZHIPIN', 'BOT-ZHIPIN').replace('=== end ===\n\n```', '=== end ===')
     expect(parseSubmission(input(unwrapped)).bundle).toEqual(bundle)
   })
+  it('新表单没有截图栏，解析出空字符串；旧表单截图栏仍按字段识别，不并进投稿包', () => {
+    expect(parseForm(form()).screenshots).toBe('')
+    const legacy = parseForm(form(undefined, `![真实截图](${attachment})`))
+    expect(legacy.screenshots).toBe(`![真实截图](${attachment})`)
+    expect(legacy.bundle).not.toContain(attachment)
+  })
+  it('授权勾选认新文字，也认第 43 条之前的旧文字；新文字不提截图', () => {
+    expect(LICENSE_TEXT).not.toContain('截图')
+    for (const text of [LICENSE_TEXT, LEGACY_LICENSE_TEXT]) expect(parseSubmission(input(form(undefined, null, `- [x] ${text}`))).slug).toBe(slug)
+    expect(() => parseSubmission(input(form(undefined, null, `- [ ] ${LEGACY_LICENSE_TEXT}`)))).toThrow('授权')
+  })
   it('_No response_ 转为空字段', () => {
     const parsed = parseForm(form('_No response_', '_No response_', '_No response_'))
     expect(parsed.bundle).toBe('')
@@ -250,8 +266,8 @@ describe('截图来源、大小、类型', () => {
   ])('初始地址拒绝 %s', (url) => {
     expect(() => extractImageUrls(`![图](${url})`)).toThrow('白名单')
   })
-  it('不允许只有普通链接、空值或裸文本', () => {
-    for (const text of ['', '_No response_', attachment, `[链接](${attachment})`]) expect(() => extractImageUrls(text)).toThrow('至少')
+  it('截图可选（第 43 条）：空值、缺省、普通链接、裸文本都返回空列表', () => {
+    for (const text of ['', undefined, '_No response_', attachment, `[链接](${attachment})`]) expect(extractImageUrls(text)).toEqual([])
   })
   it('跟随白名单重定向；请求不携带凭据，且带 20 秒取消信号', async () => {
     const target = 'https://private-user-images.githubusercontent.com/demo/one.png'
@@ -333,7 +349,7 @@ describe('处理流程与可替换适配器（网络/git/gh 全假）', () => {
     const { adapters, run } = setup()
     const result = await submitIssue(input(), adapters)
     expect(result.ok).toBe(true)
-    expect(listFiles(join(root, 'bots', slug))).toEqual([...Object.keys(source.bundle.files).map((file) => file.slice(prefix.length)), 'screenshots/review-result.png'].sort())
+    expect(listFiles(join(root, 'bots', slug))).toEqual(Object.keys(source.bundle.files).map((file) => file.slice(prefix.length)).sort())
     for (const [file, text] of Object.entries(source.bundle.files)) expect(readFileSync(join(root, file), 'utf8')).toBe(text)
     expect(result.details.author).toEqual({ name: 'example-user', email: '12345+example-user@users.noreply.github.com' })
     const commits = run.mock.calls.filter(([file, args]) => file === 'git' && args.includes('commit'))
@@ -350,10 +366,32 @@ describe('处理流程与可替换适配器（网络/git/gh 全假）', () => {
     expect(run.mock.calls).toContainEqual(['gh', ['workflow', 'run', 'ci.yml', '--repo', repo, '--ref', 'submission/issue-42'], expect.any(Object)])
     expect(commentsWritten(run)).toHaveLength(1)
     expect(commentsWritten(run)[0].body).toContain(`✓ 检查通过，已自动创建 PR：${prUrl}`)
+    expect(result.details.body).toContain('并确认内容有权公开')
+    expect(result.details.body).toContain('设计说明与权限已做机器校验')
+    expect(result.details.body).not.toMatch(/内容和截图|截图与权限|截图是这个 Bot/)
+  })
+  it('新表单不下载任何图片，也不写 screenshots/', async () => {
+    const { adapters, fetchImpl } = setup()
+    expect((await submitIssue(input(), adapters)).ok).toBe(true)
+    expect(fetchImpl).not.toHaveBeenCalled()
+    expect(existsSync(join(root, prefix, 'screenshots'))).toBe(false)
+  })
+  it('旧表单截图栏带图仍兼容：下载并按投稿包声明命名，没声明按序号命名', async () => {
+    const legacy = form(undefined, `![真实截图](${attachment})`, `- [x] ${LEGACY_LICENSE_TEXT}`)
+    let { adapters, fetchImpl } = setup()
+    expect((await submitIssue(input(legacy), adapters)).ok).toBe(true)
+    expect(fetchImpl).toHaveBeenCalledOnce()
+    expect(readFileSync(join(root, prefix, 'screenshots/screenshot-1.png'))).toEqual(png)
+    rmSync(join(root, 'bots', slug), { recursive: true })
+    const declared = changedBundle((_data, bundle) => { bundle.screenshots = ['review-result.png'] });
+    ({ adapters } = setup())
+    expect((await submitIssue(input(form(declared, `![真实截图](${attachment})`)), adapters)).ok).toBe(true)
+    expect(listFiles(join(root, prefix, 'screenshots'))).toEqual(['review-result.png'])
   })
   it('作者不一致：无网络、无写盘、无分支/PR，给中文四项诊断', async () => {
     const { adapters, run, fetchImpl } = setup()
-    const result = await submitIssue(input(form(), { login: 'another-user' }), adapters)
+    // 用带图的旧表单：证明身份检查在任何下载之前。
+    const result = await submitIssue(input(form(undefined, `![真实截图](${attachment})`), { login: 'another-user' }), adapters)
     expect(result.ok).toBe(false)
     expect(result.internal).toBe(false) // 投稿本身的问题：工作流按成功结束，不给投稿人发失败邮件
     expect(fetchImpl).not.toHaveBeenCalled()
@@ -375,7 +413,7 @@ describe('处理流程与可替换适配器（网络/git/gh 全假）', () => {
     const original = readFileSync(file, 'utf8').replace('example-user', 'different-user')
     writeFileSync(file, original)
     const { adapters, run, fetchImpl } = setup()
-    expect((await submitIssue(input(), adapters)).ok).toBe(false)
+    expect((await submitIssue(input(form(undefined, `![真实截图](${attachment})`)), adapters)).ok).toBe(false)
     expect(readFileSync(file, 'utf8')).toBe(original)
     expect(fetchImpl).not.toHaveBeenCalled()
     expect(didPublish(run)).toBe(false)
@@ -503,7 +541,9 @@ describe('本地生成链接', () => {
     const url = new URL(result.url)
     expect(url.searchParams.get('title')).toBe('投稿：示例·PRD 评审员')
     expect(unpack(decode(url.searchParams.get('bundle')))).toEqual(source.bundle)
-    expect(result.output).toContain('截图要在提交页里拖进去')
+    expect(result.output.split('\n').slice(1, 3)).toEqual(['1. 点开链接（先登录 GitHub）。', '2. 确认有权公开这些内容，勾选 CC BY 4.0 授权，点 Submit new issue（提交）。'])
+    expect(result.output).not.toContain('拖进去')
+    expect(result.output).toContain('提示：投稿不收截图，screenshots/ 里的图片不会上传。')
   })
   it('长且不可压缩的投稿输出完整明文，首行 URL 不带 bundle', () => {
     const dir = copySource()
@@ -516,19 +556,24 @@ describe('本地生成链接', () => {
     expect(result.output).toContain(readFileSync(join(dir, 'notes.txt'), 'utf8'))
     expect(unpack(result.bundle).files[`${prefix}notes.txt`]).toBe(readFileSync(join(dir, 'notes.txt'), 'utf8'))
   })
-  it('没有图片时从 DESIGN 推导顺序；占位图不写入原目录或投稿包', () => {
+  it('DESIGN 引用本地截图时本地校验报「图片引用」，不再放占位图，原目录不动', () => {
     const dir = copySource()
     rmSync(join(dir, 'screenshots'), { recursive: true })
     writeFileSync(join(dir, 'DESIGN.md'), readFileSync(join(dir, 'DESIGN.md'), 'utf8') + '\n![图一](screenshots/first.png)\n![图二](screenshots/second.jpg)\n![重复](screenshots/first.png)')
-    const result = makeSubmissionLink(dir)
-    expect(unpack(result.bundle).screenshots).toEqual(['first.png', 'second.jpg'])
-    expect(result.bundle).not.toContain('submission-placeholder')
+    expect(() => makeSubmissionLink(dir)).toThrow('引用了 screenshots/first.png，但没有这张图；引用了 screenshots/second.jpg，但没有这张图')
     expect(existsSync(join(dir, 'screenshots'))).toBe(false)
   })
-  it('没图片也没引用能生成链接；提交时按真实图片自动命名', () => {
+  it('本地 screenshots/ 里有图也不进投稿包，所以 DESIGN 引用它同样报错（和网站看到的一致）', () => {
+    const dir = copySource()
+    writeFileSync(join(dir, 'DESIGN.md'), readFileSync(join(dir, 'DESIGN.md'), 'utf8') + '\n![结果](screenshots/review-result.png)')
+    expect(() => makeSubmissionLink(dir)).toThrow('引用了 screenshots/review-result.png，但没有这张图')
+  })
+  it('没图片也没引用能生成链接，输出里不提截图', () => {
     const dir = copySource()
     rmSync(join(dir, 'screenshots'), { recursive: true })
-    expect(unpack(makeSubmissionLink(dir).bundle).screenshots).toEqual([])
+    const result = makeSubmissionLink(dir)
+    expect(unpack(result.bundle).screenshots).toEqual([])
+    expect(result.output).not.toContain('截图')
   })
   it('本地必填校验失败，CLI 中文报错并退出 1，不输出链接', () => {
     const dir = copySource()
@@ -539,13 +584,16 @@ describe('本地生成链接', () => {
     for (const word of ['文件：', '位置：', '问题：', '改法：', '至少要 200 字']) expect(result.stderr).toContain(word)
     expect(result.stdout).not.toContain('https://github.com/')
   })
-  it('本地符号链接拒绝，不读目标；截图超过 2MB 也拒绝', () => {
+  it('本地符号链接拒绝，不读目标；本地超过 2MB 的图片不读也不进投稿包', () => {
     const dir = copySource()
     symlinkSync(join(temp, 'missing'), join(dir, 'linked.md'))
     expect(() => makeSubmissionLink(dir)).toThrow('符号链接')
     rmSync(join(dir, 'linked.md'))
     writeFileSync(join(dir, 'screenshots/large.png'), Buffer.alloc(MAX_IMAGE_BYTES + 1))
-    expect(() => makeSubmissionLink(dir)).toThrow('2MB')
+    const result = makeSubmissionLink(dir)
+    expect(unpack(result.bundle).screenshots).toEqual([])
+    expect(result.bundle).not.toContain('large.png')
+    expect(result.output).toContain('提示：投稿不收截图')
   })
   it('CLI 的位置参数与 --dir 都生成同一条有效链接', () => {
     const cli = join(ROOT, 'scripts/make-submission-link.mjs')
@@ -571,10 +619,11 @@ describe('工作流和表单静态约束', () => {
     expect(template.name).toBe('投稿 Bot')
     expect(template.labels).toEqual(['投稿'])
     for (const field of template.body) expect(field.attributes.label).toBe(FORM_LABELS[field.id])
-    expect(template.body.map((field) => field.id)).toEqual(['bundle', 'screenshots', 'license'])
+    // 第 43 条：表单不再有截图栏，说明和授权文字也不提截图。
+    expect(template.body.map((field) => field.id)).toEqual(['bundle', 'license'])
     expect(template.body[0]).toMatchObject({ validations: { required: true }, attributes: { render: 'text' } })
-    expect(template.body[1].validations.required).toBe(true)
-    expect(template.body[2].attributes.options).toEqual([{ label: LICENSE_TEXT, required: true }])
+    expect(template.body[1].attributes.options).toEqual([{ label: LICENSE_TEXT, required: true }])
+    expect(JSON.stringify(template)).not.toContain('截图')
     expect(YAML.parse(readFileSync(join(ROOT, '.github/ISSUE_TEMPLATE/config.yml'), 'utf8')).blank_issues_enabled).toBe(true)
   })
   it('只签出默认分支，所有 Issue 数据走 env，权限及取消策略符合约定', () => {

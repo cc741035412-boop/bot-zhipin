@@ -209,12 +209,30 @@ it('frontmatter.name 和文件夹不同只提醒', () => {
   expect(result.errors).toEqual([])
   expect(result.warnings[0].where).toBe('frontmatter.name')
 })
-it('非外部至少一张截图，点开头文件忽略', () => {
+it('截图可选（第 43 条）：非外部 Bot 没有截图也通过，点开头文件忽略', () => {
   remove('screenshots')
+  expect(run().errors).toEqual([])
   put('screenshots/.gitkeep', '不是图片')
-  const result = run()
-  expect(issues(result)).toContain('至少需要一张截图')
-  expect(result.errors.some((e) => e.file.includes('.gitkeep'))).toBe(false)
+  expect(run().errors).toEqual([])
+})
+const designRefErrors = (result = run()) => result.errors.filter((e) => e.where === '图片引用')
+it('DESIGN.md 引用了不存在的本地截图报「图片引用」，去重并给出改法', () => {
+  const design = readFileSync(path('DESIGN.md'), 'utf8')
+  put('DESIGN.md', `${design}\n![甲](screenshots/missing.png)\n![乙](<./screenshots/other.jpg>)\n[链接](screenshots/missing.png)\n`)
+  const errors = designRefErrors()
+  // 同一文件同一位置的问题由内核合并成一条，按出现顺序、去重。
+  expect(errors.map((e) => e.problem)).toEqual(['引用了 screenshots/missing.png，但没有这张图；引用了 screenshots/other.jpg，但没有这张图'])
+  expect(errors[0].file).toBe(`bots/${reviewer}/DESIGN.md`)
+  expect(errors[0].fix).toContain('删掉这行图片引用')
+  expect(errors[0].fix).toContain('实际效果')
+  expect(issues()).not.toContain('至少需要一张截图')
+})
+it('DESIGN.md 引用存在的截图（含 URL 编码）、注释里的引用、外链图片都不报', () => {
+  const design = readFileSync(path('DESIGN.md'), 'utf8')
+  put('DESIGN.md', `${design}\n![结果](screenshots/review-result.png)\n![编码](./screenshots/review%2Dresult.png)\n<!-- ![示例](screenshots/screenshot-1.png) -->\n![外链](https://example.com/a.png)\n`)
+  expect(designRefErrors()).toEqual([])
+  remove('screenshots')
+  expect(designRefErrors().map((e) => e.problem)).toEqual(['引用了 screenshots/review-result.png，但没有这张图'])
 })
 it.each(['screenshots/big.png', 'avatar.png'])('%s 超过 2MB 显示实际字节数，恰好 2MB 通过', (file) => {
   const bytes = Buffer.alloc(MAX_IMAGE_BYTES + 1)

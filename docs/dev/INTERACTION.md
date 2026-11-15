@@ -302,7 +302,7 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 
 ### 2.6 全站页脚
 
-用户要求加（2026-11-15，决策 43）：每页底部写创建人、开源仓库和鸣谢。文字都在 `meta.mjs` 的 `FOOTER`，改字只改那里。
+用户要求加（2026-11-15，决策 44）：每页底部写创建人、开源仓库和鸣谢。文字都在 `meta.mjs` 的 `FOOTER`，改字只改那里。
 
 `SiteFooter.vue`，`[data-testid="site-footer"]`：顶上一条 `--bz-hairline` 细线，上下内边距 48 / 64，和内容区同宽（1140，左右留白 32，<680px 16）。左边：20px 橙色站标 + 站名（16px/600 圆体，墨色），下一行「创建人：贾程博 · 深圳且曼学院」`[data-testid="footer-creator"]`；右边两行（窄屏落到左边下面）：「开源项目」+ 仓库链接 `[data-testid="footer-repo"]`（新标签页打开，`arrow-up-right` 小图标）+「· MIT 许可」；「鸣谢」+「且曼学院」`[data-testid="footer-thanks"]`。13px，标签三级灰、内容二级灰，链接悬停变墨色。
 
@@ -563,7 +563,7 @@ DOM 顺序：「返回货架」→ `.detail-layout`（头部 `header.detail-head
 |---|---|---|
 | 能做什么 | `section-about` | `about.intro` 一段（16px/1.75，最宽 44em）；下面 `about.does` 一列，每条前面一个 6px 的 **Bot 色圆点** |
 | 开场白 | `section-starters` | `about.starters` 每条一个聊天气泡样子的按钮（`data-testid="starter"`），见下 |
-| 截图 | `section-screenshots` | 作者投稿的 Bot 才有。≥768px 两列，16:10，圆角 12、细边，lazy，点开是新标签里的原图 |
+| 截图 | `section-screenshots` | 只有仓库里放了截图的作者投稿 Bot 才有（投稿不收截图，DECISIONS 第 43 条）。≥768px 两列，16:10，圆角 12、细边，lazy，点开是新标签里的原图 |
 | 技能 | `section-skills` | 平铺的两列（列宽不小于 320，放不下就一列），每项（`skill-item`）是名字（15px/600）+ 一句话（13px）。外部收录用 `about.skills`；作者投稿的用 `skills/` 目录里的（等宽的技能名，多一个「查看源码 ↗」） |
 | 定时任务 | `section-routines` | `about.routines` 一条一行（`routine-item`），行间细线：上面小字是时间 `when`（13px，`--bz-text-3`），下面是做什么 `what`（15px）；右边是小字标记「默认开」（墨色，前面一个实心小圆点）或「默认关」（三级灰，空心小圆点），`quiet` 是「不打扰」的再加「没事不打扰」。「未说明」「照发」不出标记。标记不套标签的底：十个任务就是二十个标记，只留小字整列才安静。窄屏标记换到下一行。作者投稿的有 `routines.md` 时，下面一个链接「查看定时任务 ↗」 |
 | 导入前准备 | `section-prereq` | `prerequisites` 列表，每条前面一个 4px 的小圆点。有 `about.cnNote` 时最后单独一行（`prereq-cn`）：前面一个 `globe` 图标，`title` 和读屏文本是「国内使用」 |
