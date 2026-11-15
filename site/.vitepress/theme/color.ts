@@ -1,3 +1,18 @@
+// 分类色只在这里映射；展示的分类名仍来自 Bot 数据，合法枚举由 schema 校验。
+export const CATEGORY_COLORS: Readonly<Record<string, string>> = Object.freeze({
+  '调研': '#8b5cf6',
+  '定义': '#ff6a13',
+  '评审': '#ff2e93',
+  'AI 评测': '#14b8a6',
+  '学习': '#f5a623',
+  '求职': '#9a6a3a',
+  '日常': '#34d399',
+  '基础设施': '#3b82f6',
+})
+export function categoryStyle(category: string): Record<string, string> {
+  return { '--bz-category-color': Object.hasOwn(CATEGORY_COLORS, category) ? CATEGORY_COLORS[category] : '#8a8a93' }
+}
+
 // 纯 sRGB 配色函数；服务端与客户端使用同一结果，主题切换只交给 CSS。
 function channels(hex: string): number[] {
   const value = hex.toLowerCase()

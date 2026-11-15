@@ -1,6 +1,7 @@
 :root {
   --bz-page: #f6f5f1;
   --bz-card: #ffffff;
+  --bz-eye: #16161b;
   --bz-ink: #141418;
   --bz-ink-hover: #2c2c33;
   --bz-paper: var(--bz-card);
@@ -56,7 +57,7 @@
   --bz-btn-bg: var(--bz-btn-bg-dark);
   --bz-btn-fg: var(--bz-btn-fg-dark);
 }
-.bz-live { --bz-bot-body: var(--bz-bot-light); }
+.bz-live { --bz-bot-body: var(--bz-bot-light); overflow: visible; }
 .dark .bz-live { --bz-bot-body: var(--bz-bot-dark); }
 .dark .bz-live [data-part="outline"] { display: none; }
 .VPNavBarTitle .title, .shelf-intro h1, .bot-card h2, .shelf-button,
@@ -77,7 +78,17 @@
 .shelf-page a { text-underline-offset: 3px; }
 .shelf-page a:hover { color: var(--bz-ink); }
 .shelf-page :focus-visible { outline: 2px solid var(--bz-ink); outline-offset: 2px; }
-.shelf-intro { text-align: center; padding-top: 32px; margin-bottom: 40px; }
+.shelf-intro { --bz-hero-glow: 14%; position: relative; isolation: isolate; text-align: center; padding-top: 32px; margin-bottom: 40px; }
+/* 光晕限定在招牌上半部，不铺到正文或按钮后；不扩大页面滚动范围。 */
+.shelf-intro::before {
+  content: ''; position: absolute; z-index: -1; pointer-events: none; top: -16px; left: 0; width: 100%; height: 156px;
+  mask-image: radial-gradient(ellipse 50% 50% at center, #000 35%, transparent 100%);
+  background: radial-gradient(ellipse at 48% 50%, color-mix(in srgb, #ff6a13 var(--bz-hero-glow), transparent), transparent 44%),
+    radial-gradient(ellipse at 22% 35%, color-mix(in srgb, #8b5cf6 var(--bz-hero-glow), transparent), transparent 36%),
+    radial-gradient(ellipse at 76% 35%, color-mix(in srgb, #14b8a6 var(--bz-hero-glow), transparent), transparent 36%),
+    radial-gradient(ellipse at 64% 55%, color-mix(in srgb, #ff2e93 var(--bz-hero-glow), transparent), transparent 32%);
+}
+.dark .shelf-intro { --bz-hero-glow: 20%; }
 .hero-portraits { position: relative; isolation: isolate; display: flex; justify-content: center; align-items: flex-end; gap: 14px; width: fit-content; max-width: 100%; margin: 0 auto 28px; }
 .hero-portraits::before { content: ''; position: absolute; z-index: -1; bottom: -9px; left: -4%; width: 108%; height: 22px; border-radius: 50%; background: radial-gradient(ellipse, color-mix(in srgb, var(--bz-ink) 13%, transparent), transparent 70%); }
 .hero-portrait { --bz-hero-factor: 1; flex: none; width: calc(var(--bz-hero-size) * var(--bz-hero-factor)); height: calc(var(--bz-hero-size) * var(--bz-hero-factor)); }
@@ -127,6 +138,8 @@
 .bot-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--bz-text-3); line-height: 1.6; }
 .bot-meta a { color: var(--bz-text-3); }
 .bot-tag { display: inline-flex; align-items: center; min-height: 22px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, var(--bz-bot-color, #8a8a93) 14%, var(--bz-card)); color: var(--bz-text-2); font-size: 12px; font-weight: 600; line-height: 20px; }
+.category-tag { background: color-mix(in srgb, var(--bz-category-color) 16%, var(--bz-card)); color: color-mix(in srgb, var(--bz-category-color) 40%, var(--bz-ink)); }
+.external-tag { background: var(--bz-surface-soft); }
 .bot-card .bot-tagline { margin: 14px 0 18px; font-size: 15px; line-height: 1.65; color: var(--vp-c-text-2); text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .bot-heat { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; line-height: 22px; color: var(--bz-text-3); font-variant-numeric: tabular-nums; }
 .bot-card > .bot-heat { margin-top: auto; }
@@ -138,7 +151,6 @@
 .avatar-stage {
   --bz-avatar-size: 112px;
   --bz-avatar-bottom: 22px;
-  --bz-eye: var(--bz-card);
   --bz-glow-strong: 32%;
   --bz-glow-soft: 18%;
   position: relative; height: 236px; flex: none; margin: 0 -22px 18px; border-radius: 27px 27px 0 0;
@@ -250,7 +262,7 @@
 @media (max-width: 680px) { .shelf-page { padding-inline: 16px; } }
 @media (max-width: 679px) {
   .hero-portraits { gap: 6px; }
-  .hero-portrait { --bz-hero-factor: .75; width: calc(var(--bz-hero-size-compact) * var(--bz-hero-factor)); height: calc(var(--bz-hero-size-compact) * var(--bz-hero-factor)); }
+  .hero-portrait { --bz-hero-factor: .75; }
   .hero-portrait.hero-edge { display: none; }
   .bot-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
   .bot-card { width: 100%; max-width: 520px; justify-self: center; }

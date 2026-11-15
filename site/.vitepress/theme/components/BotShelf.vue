@@ -1,15 +1,13 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { data as bots } from '../../data/bots.data.mjs'
-import { SITE, CONTRIBUTE_URL } from '../../meta.mjs'
+import { SITE, CONTRIBUTE_URL, HERO_MASCOTS } from '../../meta.mjs'
 import { heatState, loadHeat } from '../heat'
 import BotCard from './BotCard.vue'
 import HeroPortrait from './HeroPortrait.vue'
 import { enterHero } from '../live/reactions'
 import DefaultAvatar from './DefaultAvatar.vue'
 import LiveAnnouncer from './LiveAnnouncer.vue'
-import { avatarColor } from '../avatar'
-import { botPalette } from '../color'
 
 const hero = ref()
 let releaseEntry
@@ -18,16 +16,10 @@ let manual = false
 let alive = true
 const ordered = shallowRef([])
 const byName = new Intl.Collator('zh-CN')
-const heroBots = computed(() => [...bots].sort((a, b) => b.addedAt.localeCompare(a.addedAt) || byName.compare(a.name, b.name)).slice(0, 7))
 const entering = ref(false)
-function heroStyle(bot, index) {
-  const distance = Math.abs(index - (heroBots.value.length - 1) / 2)
-  const compactDistance = Math.abs(index - Math.floor(heroBots.value.length / 2))
-  return {
-    '--bz-hero-size': `${distance < 0.6 ? 96 : distance < 1.6 ? 80 : distance < 2.6 ? 68 : 60}px`,
-    '--bz-hero-size-compact': `${compactDistance === 0 ? 96 : compactDistance === 1 ? 80 : 68}px`,
-    ...botPalette(bot.avatar ? '#8a8a93' : avatarColor(bot.slug)),
-  }
+function heroStyle(index) {
+  const distance = Math.abs(index - (HERO_MASCOTS.length - 1) / 2)
+  return { '--bz-hero-size': `${[96, 80, 68, 60][distance]}px` }
 }
 function reorder() {
   // 只在进入页面、首次 stats 返回、主动切换排序或开发数据更新时拍快照。
@@ -59,7 +51,7 @@ onBeforeUnmount(() => { alive = false; releaseEntry?.() })
     <LiveAnnouncer />
     <header class="shelf-intro">
       <div ref="hero" class="hero-portraits" aria-hidden="true">
-        <HeroPortrait v-for="(bot, index) in heroBots" :key="bot.slug" :bot="bot" :class="{ central: Math.abs(index - (heroBots.length - 1) / 2) < 0.6, 'hero-edge': (heroBots.length > 5 && index === 0) || (heroBots.length === 7 && index === 6) }" :style="heroStyle(bot, index)" />
+        <HeroPortrait v-for="(mascot, index) in HERO_MASCOTS" :key="mascot.key" :mascot="mascot" :class="{ central: index === 3, 'hero-edge': index === 0 || index === 6 }" :style="heroStyle(index)" />
       </div>
       <h1>{{ SITE.name }}</h1>
       <p>{{ SITE.tagline }}</p>

@@ -5,7 +5,7 @@ const preview = inject(previewMode, false)
 import { provideBotAction } from '../live/scope'
 const avatar = provideBotAction()
 import { avatarColor } from '../avatar'
-import { botPalette } from '../color'
+import { botPalette, categoryStyle } from '../color'
 import BotAvatar from './BotAvatar.vue'
 import BotActions from './BotActions.vue'
 import { loadHeat } from '../heat'
@@ -32,8 +32,8 @@ onMounted(() => { if (!preview) loadHeat() })
       <component :is="preview ? 'h2' : 'h1'">{{ bot.name }}</component>
       <p>{{ bot.tagline }}</p>
       <p class="bot-meta">
-        <span class="bot-tag">{{ bot.category }}</span>
-        <span v-if="bot.external" class="bot-tag">外部收录</span>
+        <span class="bot-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
+        <span v-if="bot.external" class="bot-tag external-tag">外部收录</span>
         <span v-if="preview">by {{ bot.author.name }}</span>
         <a v-else data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
         <span>上架日期：<time :datetime="bot.addedAt">{{ bot.addedAt }}</time></span>

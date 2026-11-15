@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import BotPortrait from './BotPortrait.vue'
+import { computed, ref } from 'vue'
+import LiveBot from './LiveBot.vue'
+import { shapeRadii } from '../face'
+import { botPalette } from '../color'
 import { nextPoke } from '../pitch'
 import { isReducedMotion } from '../live/clock'
 
-const props = defineProps<{ bot: { slug: string; name: string; avatar: string | null } }>()
+const props = defineProps<{ mascot: { key: string; shape: string; color: string } }>()
+const radii = computed(() => shapeRadii(props.mascot.shape))
 const root = ref<HTMLElement>()
-const portrait = ref<InstanceType<typeof BotPortrait>>()
+const portrait = ref<InstanceType<typeof LiveBot>>()
 const hovered = ref(false)
 function enter(event: PointerEvent) {
   if (event.pointerType !== 'mouse') return
@@ -19,11 +22,11 @@ function enter(event: PointerEvent) {
   }
 }
 function leave(event: PointerEvent) { if (event.pointerType === 'mouse') hovered.value = false }
-function poke() { portrait.value?.play({ state: nextPoke(props.bot.slug).state }) }
+function poke() { portrait.value?.play({ state: nextPoke(`mascot:${props.mascot.key}`).state }) }
 </script>
 
 <template>
-  <div ref="root" class="hero-portrait bz-bot-scope" @pointerenter="enter" @pointerleave="leave" @click="poke">
-    <BotPortrait ref="portrait" :bot="bot" :rest="hovered ? 'wide' : 'idle'" />
+  <div ref="root" class="hero-portrait bz-bot-scope" :style="botPalette(mascot.color)" @pointerenter="enter" @pointerleave="leave" @click="poke">
+    <LiveBot ref="portrait" :radii="radii" :color="mascot.color" :shape-id="mascot.shape" :rest="hovered ? 'wide' : 'idle'" />
   </div>
 </template>
