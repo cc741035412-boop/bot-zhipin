@@ -1,5 +1,7 @@
 <script setup>
 import { computed, onMounted } from 'vue'
+import { provideBotAction } from '../live/scope'
+const avatar = provideBotAction()
 import { avatarColor } from '../avatar'
 import { botPalette } from '../color'
 import BotAvatar from './BotAvatar.vue'
@@ -23,7 +25,7 @@ onMounted(loadHeat)
     <LiveAnnouncer />
     <a class="back-link" href="/">← 返回货架</a>
     <header class="detail-header bz-bot-scope" :style="palette">
-      <BotAvatar :bot="bot" />
+      <BotAvatar ref="avatar" :bot="bot" />
       <div class="detail-info">
       <h1>{{ bot.name }}</h1>
       <p>{{ bot.tagline }}</p>

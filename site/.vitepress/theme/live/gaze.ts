@@ -20,10 +20,11 @@ let version = 0
 let pointer: { x: number; y: number; at: number; version: number } | null = null
 
 function moved(event: PointerEvent) {
-  if (event.pointerType === 'touch') return
+  if (event.pointerType === 'touch') { clear(); return }
   pointer = { x: event.clientX, y: event.clientY, at: performance.now(), version: ++version }
 }
 function clear() { pointer = null }
+function pressed(event: PointerEvent) { if (event.pointerType === 'touch') clear() }
 function left(event: PointerEvent) {
   if (event.relatedTarget === null) clear()
 }
@@ -31,6 +32,7 @@ function left(event: PointerEvent) {
 function retainPointer() {
   if (users++ === 0) {
     document.addEventListener('pointermove', moved, { passive: true })
+    document.addEventListener('pointerdown', pressed, { passive: true })
     document.addEventListener('pointerleave', left)
     document.addEventListener('pointerout', left)
     window.addEventListener('blur', clear)
@@ -38,6 +40,7 @@ function retainPointer() {
   return () => {
     if (--users !== 0) return
     document.removeEventListener('pointermove', moved)
+    document.removeEventListener('pointerdown', pressed)
     document.removeEventListener('pointerleave', left)
     document.removeEventListener('pointerout', left)
     window.removeEventListener('blur', clear)

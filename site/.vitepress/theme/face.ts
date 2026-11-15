@@ -3,6 +3,7 @@ import { avatarSeed } from './avatar'
 import { SHAPES, COLORS } from './vendor/bloub/skins'
 import { PROFILES } from './vendor/bloub/profiles'
 import { EXTRA_SHAPES } from './shapes-extra'
+import { darkSwap } from './color'
 
 export const XAI_SHAPE_IDS: readonly string[] = [
   'blob', 'pebble', 'bean', 'egg', 'squircle', 'tablet', 'capsule', 'cylinder',
@@ -62,5 +63,5 @@ export function faceColors(hex: string): { light: string; dark: string; outline:
     return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
   })
   const luminance = 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]
-  return { light, dark: luminance < 0.04 ? '#f1efe9' : light, outline: luminance > 0.85 ? 'rgba(0,0,0,.12)' : null }
+  return { light, dark: darkSwap(light), outline: luminance > 0.85 ? 'rgba(0,0,0,.12)' : null }
 }

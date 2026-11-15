@@ -82,7 +82,7 @@
 - 弹出 opacity 0→1 180ms；位移 +6px→0、scale .92→1 280ms 弹簧缓动，原点底部中心；收起 opacity 120ms，位移和缩放倒放。
 - 跳动原点脚底，560ms、每段弹性缓动；沿用 0/24/54/80/100% 的 translateY 0/2/-12/0/0px 与 scale (1,1)/(1.07,.92)/(.96,1.05)/(1.02,.98)/(1,1)，同时必须通过新尺寸下的逐帧净距验收。每次说话重新触发。
 - 每卡 `data-testid=pitch-bubble`，`data-open="true|false"`；全页最多开一个。有 pitch 用 pitch，没有则 DEFAULT_PITCHES 随机且不连续重复；戳时改用 §5 专用台词。
-- 头像按钮 `aria-label="听听{名字}的自荐"`；打开时 aria-describedby 指向 tooltip。tooltip 不用 aria-live；视觉逐字层与一开始就完整的读屏文本分离，避免逐字播报。初次加载不自动开气泡。
+- 头像按钮 `aria-label="听听{名字}的自荐"`；打开时 aria-describedby 指向独立的 `bz-sr-only` 全文元素。视觉 tooltip 设 aria-hidden、不用 aria-live；气泡 `data-text` 从打开起就是全文，内部唯一一个 span 用于逐字层，`[data-testid=typing]` 用 i 容器及三个 i 点、aria-hidden，避免逐字播报。初次加载不自动开气泡。
 - focus-visible：2px 墨色 outline，offset 2px，头像圆形且 offset 4px；不挡气泡。
 
 ## 4. 活体头像与接口
@@ -119,34 +119,42 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 | `data-follow="pointer|rest"` | 指针跟随或自身视线 |
 | `data-shape` / shapeId | 原样输出形状 id |
 | `data-part="body"` | 身体垫底 path，带 d，填 `var(--bz-eye, var(--vp-c-bg))` |
+| `data-part="fill"` | mask 内身体填色 rect；DefaultAvatar 传入 `var(--bz-bot-body)` |
+| rest | 基础状态，默认 idle；卡片/Hero 悬停 wide、空货架 sleep、404 thinking |
 | `data-part="eye"` | mask 内两眼 path；transform 直接用引擎 matrix(...)，opacity 用 alpha |
 | `data-part="dot|arc|notif"` | 粒子 / 圆环 / 通知点 |
 | radii / color | number[] 或 null（圆）；color 接受 CSS 变量，身体用 style fill，不用 fill 属性 |
 | outline / size | 可选描边色；有值沿身体画 1.5px、non-scaling-stroke；SVG width/height 默认 96，外层 CSS 决定显示尺寸 |
 
-在根 SVG 派发 `bz-play` 自定义事件，`detail = { state: StateId, hold?: number }`。不在 STATE_BY_ID 的状态或 reduce 时忽略；否则 setState(state,t)，持续 `hold ?? 状态 duration` 秒（共享时钟）后回 idle；新事件打断旧事件。LB3 通过此接口接反应，不为每个头像另起时钟。
+在根 SVG 派发 `bz-play` 自定义事件，`detail = { state: StateId, hold?: number }`。不在 STATE_BY_ID 的状态或 reduce 时忽略；否则 setState(state,t)，持续 `hold ?? 状态 duration` 秒（共享时钟）后回 rest；`hold: Infinity` 一直保持，NaN/-Infinity 回退 duration，负数归零。新事件打断旧事件。`live/playback.ts` 管理播放期限，rest 改变不打断有限临时动作；离开可释放 wide/Infinity。减少动效恢复静态 idle，重新启用动效回当前 rest。LB3 通过此接口及组件局部引用接反应，不为每个头像另起时钟。
 
 ## 5. 互动行为
 
 | 触发 | 反应 |
 |---|---|
 | 鼠标进入整张卡片（不再只限头像） | wide 睁大眼 + 跳一下；气泡先显示「…」打字点 350ms，再按 28ms/字逐字打出（读屏区一开始就有全文） |
-| 离开卡片 | 气泡收起，回到 idle |
+| 离开卡片 | 立即关闭气泡（120ms 淡出），基础状态改 idle；进行中的戳/按钮临时动作不被打断 |
 | Tab 到头像 / Enter / 空格 / Esc / 失焦 | Tab 说一句；Enter/空格换一句并重新跳；Esc 关闭；失焦关闭 |
-| 点击或点按头像（「戳」） | 从 wink, burst, orbit, play, comet, egg, hexagon, thinking 随机选一个，不与上次重复；播完回 idle，换戳台词；3 秒内连戳 5 次触发 alert，说「别戳啦！」 |
+| 点击或点按头像（「戳」） | 从 wink, burst, orbit, play, comet, egg, hexagon, thinking 随机选一个，不与上次重复；按引擎 duration 播完回 rest，换戳台词且不连续重复；滚动 3 秒内第 5 次触发 alert，说「别戳啦！」并清零计数。Hero/卡片/详情按 slug 共享历史 |
 | 点「一键导入」 | 该卡 Bot 播 comet（「嗖」一下） |
 | 复制成功 | wink |
-| 30 秒没有任何输入（减少动效时不触发） | 可见 Bot 依次进入 sleep，错开 ≤800ms |
-| 睡着后有任何输入 | exclaim 惊醒，2.5 秒内回 idle |
+| 30 秒没有任何输入（减少动效时不触发） | data-running=true 的 Bot 依次进入 sleep，整波次错开 0–800ms；一个全局超时器管理整波 |
+| 睡着后有任何输入 | 取消待睡队列，所有 sleep Bot 立即 exclaim，按 2 秒 duration 回 rest |
 | 第一次进站（每个会话一次） | Hero Bot 依次 swirl 入场，间隔 120ms |
 | Hero 里的 Bot | 悬停跳一下 + wide，点击 = 戳；仍然 aria-hidden |
-| 空货架 | 一只大号 Bot 循环 sleep |
-| 404 页 | Bot 先 exclaim，再循环 thinking；「这一页走丢了」+「回货架看看」 |
+| 空货架 | 一只 160px Bot，rest=sleep，无灰度滤镜 |
+| 404 页 | not-found Layout 插槽；200px Bot 先 exclaim、再常驻 rest=thinking；「这一页走丢了」+「这个 Bot 可能已经下架了，或者链接写错了。」+ href=/「回货架看看」 |
 | 触摸 | 点按 = 戳 + 气泡显示 4 秒；点别处关闭；不跟随视线 |
 
-戳台词：「哎，痒！」「再戳我就变形了」「好啦好啦，我在呢」「你找我呀？」。
+戳台词：「哎，痒！」「再戳我就变形了」「好啦好啦，我在呢」「你找我呀？」。全部新增文案在 meta.mjs。
 
-输入按每次事件 pointerType 判断，不存全局「触摸过」标记；鼠标点击不依赖浏览器是否赋焦点。全页单气泡、触摸再次点按换一句保留。导入仍正常新标签打开、点击正常上报，动画不阻塞业务；复制成功仍显示「已复制 ✓」，文字和边框 success 色，1.8 秒恢复，唯一读屏播报区播报「已复制安装提示词」。失败按 §8。
+`live/reactions.ts` 仅挂一组 capture/passive 全局输入监听：pointermove、pointerdown、keydown、wheel、scroll、touchstart。URL 的 `?bz-idle=<毫秒>` 仅在客户端首次注册时读取一次，只接受 200–600000 的整数；默认代码值 `30_000`。若演示短阈值遇到未播完的戳/惊醒/入场，整波睡眠每秒检查一次、等临时动作完成后再睡，避免打断反馈；不增加每只 Bot 的计时循环。最后一个 Bot 卸载清理监听和计时器。
+
+Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的头像依次入场，间隔 120ms；存储不可用则退化为当前文档一次。卸载取消待入场计时器，减少动效不记标记、不播放。悬停在 `.hero-portrait` 上跳一次，离开释放 wide；戳不弹气泡、不进入 Tab 顺序。
+
+气泡打字消费共享时钟，完成、关闭或失去全页唯一所有权时注销；减少动效时立即显示全文（包括中途切换）。卡片/详情以 provide/inject 把动作按钮接到自身头像，复制失败不 wink。
+
+输入按每次事件 pointerType 判断，不存全局「触摸过」标记；鼠标点击不依赖浏览器是否赋焦点。全页单气泡、触摸再次点按换一句保留；鼠标转触摸时释放旧视线，后续鼠标仍能跟随。导入仍正常新标签打开、点击正常上报，动画不阻塞业务；复制成功仍显示「已复制 ✓」，文字和边框 success 色，1.8 秒恢复，唯一读屏播报区播报「已复制安装提示词」。失败按 §8。
 
 ## 6. 官方真脸
 
@@ -182,7 +190,7 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 
 `theme/face.ts`：`botFace(slug)` 委托 `resolveFace(slug, entry)`，返回 `{slug, shape, radii, color, source}`。已知官方形状 source=official；未知形状用 seed 轮廓 + 官方色，source=seed；无数据时原 avatarSeed 算法、SHAPES/COLORS 选择不变，shape 为 seed:<id>，fixtures 不变。
 
-`faceColors(hex)` 返回 light/dark/outline：light 原色小写；L<0.04 时 dark=#f1efe9，否则原色；L>0.85 时 outline='rgba(0,0,0,.12)'，否则 null。`--bz-bot-light` / `--bz-bot-dark` → `--bz-bot-body` 由 CSS 切换。**待集成确认的差异**：计划写浅色描边 1px，LB1 明定 outline 渲染 1.5px；本文接口按 LB1 记录，不将两者声称一致。
+`DefaultAvatar` 使用 botFace(slug) 的 radii/shape/color。`faceColors(hex)` 返回 light/dark/outline：light 原色小写；dark 委托 color.ts 的 darkSwap（仅一份深色换奶白规则）；L>0.85 时 outline='rgba(0,0,0,.12)'，否则 null。根 SVG 内联 `--bz-bot-light` / `--bz-bot-dark`，有描边再内联 `--bz-bot-outline`；`--bz-bot-body` 由 CSS 切换，描边仅浅色显示。**待集成确认的差异**：计划写浅色描边 1px，LB1 明定 outline 渲染 1.5px；本文接口按 LB1 记录，不将两者声称一致。
 
 ## 7. 排序与外链
 

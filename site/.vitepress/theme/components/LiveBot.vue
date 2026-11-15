@@ -4,7 +4,9 @@ import { onBeforeUnmount, onMounted, ref, shallowRef, useId, watch } from 'vue'
 import { BotEngine, type BotFrame } from '../vendor/bloub/engine'
 import { NOTIF_BLUE } from '../vendor/bloub/decor'
 import { RAYON, DEMI_VIEWBOX } from '../vendor/bloub/repere'
-import { STATE_BY_ID, type StateId } from '../vendor/bloub/states'
+import { type StateId } from '../vendor/bloub/states'
+import { createPlayback, type Play } from '../live/playback'
+import { registerReactions } from '../live/reactions'
 import { isReducedMotion, now, register } from '../live/clock'
 import { createGaze } from '../live/gaze'
 
@@ -14,51 +16,49 @@ const props = withDefaults(defineProps<{
   outline?: string | null
   shapeId?: string
   size?: number
-}>(), { size: 96 })
+  rest?: StateId
+}>(), { size: 96, rest: 'idle' })
 
 const svg = ref<SVGSVGElement>()
 const uid = `bz-${useId()}`
 const maskId = `${uid}-mask`
 const VB = DEMI_VIEWBOX
 const paper = 'var(--bz-eye, var(--vp-c-bg))'
-let engine = new BotEngine(RAYON, 'idle', props.radii)
+let engine = new BotEngine(RAYON, props.rest, props.radii)
 // SSR 和首次客户端渲染都只取 t=0；注册时钟放在 onMounted 里。
 const frame = shallowRef<BotFrame>(engine.sample(0))
-const state = ref<StateId>('idle')
-let until = Infinity
+const state = ref<StateId>(props.rest)
+const playback = createPlayback(props.rest, (next, t) => {
+  engine.setState(next, t)
+  state.value = next
+})
 let unregister: (() => void) | undefined
+let releaseReactions: (() => void) | undefined
 let gaze: ReturnType<typeof createGaze> | undefined
 
 function staticFrame() {
   gaze?.reset(now())
-  until = Infinity
-  state.value = 'idle'
+  playback.reset(now(), true)
   engine = new BotEngine(RAYON, 'idle', props.radii)
   frame.value = engine.sample(0)
 }
 
-function play(event: Event) {
-  if (isReducedMotion()) return
-  const detail = (event as CustomEvent<{ state?: StateId; hold?: number }>).detail
-  const def = detail && STATE_BY_ID.get(detail.state as StateId)
-  if (!def) return
-  const t = now()
-  engine.setState(def.id, t)
-  state.value = def.id
-  const hold = detail.hold ?? def.duration
-  until = t + (Number.isFinite(hold) ? Math.max(0, hold) : def.duration)
+function play(detail: Play) {
+  if (!isReducedMotion()) playback.play(detail, now())
 }
+function eventPlay(event: Event) { play((event as CustomEvent<Play>).detail) }
+defineExpose({ play })
 
 function tick(t: number) {
-  if (t >= until) {
-    engine.setState('idle', t)
-    state.value = 'idle'
-    until = Infinity
-  }
+  playback.tick(t)
   gaze?.tick(t)
   frame.value = engine.sample(t)
 }
 
+watch(() => props.rest, (rest) => {
+  playback.setRest(rest, now())
+  if (isReducedMotion()) staticFrame()
+}, { flush: 'sync' })
 watch(() => props.radii, (radii) => {
   if (isReducedMotion()) staticFrame()
   else engine.setShape(radii, now())
@@ -70,11 +70,18 @@ onMounted(() => {
   unregister = register({
     el: svg.value,
     tick,
-    motionChange: (reduced) => { if (reduced) staticFrame() },
+    motionChange: (reduced) => { if (reduced) staticFrame(); else playback.reset(now()) },
+  })
+  releaseReactions = registerReactions({
+    el: svg.value,
+    state: () => state.value,
+    busy: () => playback.busy,
+    play,
   })
 })
 onBeforeUnmount(() => {
   unregister?.()
+  releaseReactions?.()
   gaze?.dispose()
 })
 
@@ -103,7 +110,7 @@ function dotAttrs(dot: BotFrame['dots'][number]) {
     :height="size"
     :viewBox="`${-VB} ${-VB} ${VB * 2} ${VB * 2}`"
     aria-hidden="true"
-    @bz-play="play"
+    @bz-play="eventPlay"
   >
     <defs>
       <!-- 眼睛是 mask 中的洞，移动到身体边缘时自然裁切。 -->
@@ -152,9 +159,9 @@ function dotAttrs(dot: BotFrame['dots'][number]) {
     <g :opacity="frame.bodyAlpha">
       <path data-part="body" :d="frame.bodyPath" :style="{ fill: paper }" />
       <g :mask="`url(#${maskId})`">
-        <rect :x="-VB" :y="-VB" :width="VB * 2" :height="VB * 2" :style="{ fill: color }" />
+        <rect data-part="fill" :x="-VB" :y="-VB" :width="VB * 2" :height="VB * 2" :style="{ fill: color }" />
       </g>
-      <path v-if="outline" :d="frame.bodyPath" fill="none" :style="{ stroke: outline }" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+      <path v-if="outline" data-part="outline" :d="frame.bodyPath" fill="none" :style="{ stroke: outline }" stroke-width="1.5" vector-effect="non-scaling-stroke" />
     </g>
     <g v-if="!frame.dotsBehind">
       <component :is="dot.d ? 'path' : 'circle'" v-for="(dot, i) in frame.dots" :key="i" data-part="dot" v-bind="dotAttrs(dot)" />

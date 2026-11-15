@@ -4,13 +4,16 @@ import { data as bots } from '../../data/bots.data.mjs'
 import { SITE, CONTRIBUTE_URL } from '../../meta.mjs'
 import { heatState, loadHeat } from '../heat'
 import BotCard from './BotCard.vue'
-import BotPortrait from './BotPortrait.vue'
+import HeroPortrait from './HeroPortrait.vue'
+import { enterHero } from '../live/reactions'
 import DefaultAvatar from './DefaultAvatar.vue'
 import ExternalHint from './ExternalHint.vue'
 import LiveAnnouncer from './LiveAnnouncer.vue'
 import { avatarColor } from '../avatar'
 import { botPalette } from '../color'
 
+const hero = ref()
+let releaseEntry
 const sort = ref('hot')
 let manual = false
 let alive = true
@@ -41,6 +44,7 @@ function select(value) {
 }
 watch(() => bots, reorder, { immediate: true })
 onMounted(async () => {
+  releaseEntry = enterHero([...hero.value.querySelectorAll('[data-testid="live-bot"]')])
   const success = await loadHeat()
   if (!alive) return
   if (!success && !manual) sort.value = 'new'
@@ -48,15 +52,15 @@ onMounted(async () => {
   reorder()
   entering.value = success && previous !== ordered.value.map((bot) => bot.slug).join(',')
 })
-onBeforeUnmount(() => { alive = false })
+onBeforeUnmount(() => { alive = false; releaseEntry?.() })
 </script>
 
 <template>
   <main class="shelf-page">
     <LiveAnnouncer />
     <header class="shelf-intro">
-      <div class="hero-portraits" aria-hidden="true">
-        <div v-for="(bot, index) in heroBots" :key="bot.slug" class="hero-portrait bz-bot-scope" :class="{ central: Math.abs(index - (heroBots.length - 1) / 2) < 0.6, 'hero-edge': (heroBots.length > 5 && index === 0) || (heroBots.length === 7 && index === 6) }" :style="heroStyle(bot, index)"><BotPortrait :bot="bot" /></div>
+      <div ref="hero" class="hero-portraits" aria-hidden="true">
+        <HeroPortrait v-for="(bot, index) in heroBots" :key="bot.slug" :bot="bot" :class="{ central: Math.abs(index - (heroBots.length - 1) / 2) < 0.6, 'hero-edge': (heroBots.length > 5 && index === 0) || (heroBots.length === 7 && index === 6) }" :style="heroStyle(bot, index)" />
       </div>
       <h1>{{ SITE.name }}</h1>
       <p>{{ SITE.tagline }}</p>
@@ -73,7 +77,7 @@ onBeforeUnmount(() => { alive = false })
       <BotCard v-for="bot in ordered" :key="bot.slug" :bot="bot" />
     </div>
     <div v-else data-testid="empty-state" class="empty-state">
-      <DefaultAvatar slug="empty-shelf" />
+      <DefaultAvatar slug="empty-shelf" rest="sleep" :size="160" />
       <p>货架上还没有 Bot</p>
       <a class="shelf-button" :href="CONTRIBUTE_URL" target="_blank" rel="noopener noreferrer">做第一个投稿的人<ExternalHint /></a>
     </div>

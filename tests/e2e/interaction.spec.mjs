@@ -19,8 +19,10 @@ for (const width of [1280, 1100, 1024, 900, 680, 390, 320]) {
     const bot = card(page)
     await bot.getByTestId('avatar').hover()
     await expect(opened(page)).toHaveCount(1)
-    // 只替换用于排版测量的文本，不改只读 fixtures；真实 30 字 pitch 由 P4-live 的隔离数据回归。
-    await bot.getByTestId('pitch-bubble').locator('span').evaluate((el, text) => { el.textContent = text }, longPitch)
+    // 等打字完成后再替换排版样本，避免活体打字覆盖测试文本。
+    const bubble = bot.getByTestId('pitch-bubble')
+    await expect(bubble.locator('span')).toHaveText(await bubble.getAttribute('data-text'))
+    await bubble.locator('span').evaluate((el, text) => { el.textContent = text }, longPitch)
     await page.waitForTimeout(650)
     const geometry = await bot.evaluate((el) => {
       const bubble = el.querySelector('[role="tooltip"]'), avatar = el.querySelector('[data-testid="avatar"]')
@@ -34,7 +36,9 @@ for (const width of [1280, 1100, 1024, 900, 680, 390, 320]) {
     // 气泡稳定后重播同一句，逐帧检查跳起、拉伸与弹性超调，而非只看动画结束。
     const minimumGap = await bot.evaluate((el) => {
       const avatar = el.querySelector('[data-testid="avatar"]'), bubble = el.querySelector('[role="tooltip"]')
-      avatar.click()
+      avatar.classList.remove('is-speaking')
+      void avatar.offsetWidth
+      avatar.classList.add('is-speaking')
       const animation = avatar.getAnimations()[0]
       animation.pause()
       let minimum = Infinity
@@ -77,12 +81,12 @@ test('鼠标、Tab、Enter、空格、Esc、失焦、单开和跳动重播', asy
   await expect(a).toBeFocused()
   await expect(opened(page)).toHaveCount(1)
   await b.focus()
-  let previous = await card(page, weekly).getByTestId('pitch-bubble').innerText()
+  let previous = await card(page, weekly).getByTestId('pitch-bubble').getAttribute('data-text')
   for (const key of ['Enter', 'Space']) {
     await page.waitForTimeout(600)
     await page.keyboard.press(key)
-    expect(await card(page, weekly).getByTestId('pitch-bubble').innerText()).not.toBe(previous)
-    previous = await card(page, weekly).getByTestId('pitch-bubble').innerText()
+    expect(await card(page, weekly).getByTestId('pitch-bubble').getAttribute('data-text')).not.toBe(previous)
+    previous = await card(page, weekly).getByTestId('pitch-bubble').getAttribute('data-text')
     expect(await b.evaluate((el) => el.getAnimations().length)).toBeGreaterThan(0)
   }
   await page.keyboard.press('Escape')
@@ -92,9 +96,9 @@ test('鼠标、Tab、Enter、空格、Esc、失焦、单开和跳动重播', asy
   await page.keyboard.press('Tab')
   await expect(opened(page)).toHaveCount(0)
   await b.click()
-  const beforeClick = await card(page, weekly).getByTestId('pitch-bubble').innerText()
+  const beforeClick = await card(page, weekly).getByTestId('pitch-bubble').getAttribute('data-text')
   await b.click()
-  expect(await card(page, weekly).getByTestId('pitch-bubble').innerText()).not.toBe(beforeClick)
+  expect(await card(page, weekly).getByTestId('pitch-bubble').getAttribute('data-text')).not.toBe(beforeClick)
 })
 
 test('触摸重说与 4 秒计时、点外部关闭、触摸后键盘仍工作', async ({ browser, baseURL }) => {
@@ -106,9 +110,9 @@ test('触摸重说与 4 秒计时、点外部关闭、触摸后键盘仍工作',
     const avatar = card(page, weekly).getByTestId('avatar')
     await avatar.tap()
     await expect(opened(page)).toHaveCount(1)
-    const previous = await opened(page).innerText()
+    const previous = await opened(page).getAttribute('data-text')
     await avatar.tap()
-    expect(await opened(page).innerText()).not.toBe(previous)
+    expect(await opened(page).getAttribute('data-text')).not.toBe(previous)
     await page.waitForTimeout(3300)
     await expect(opened(page)).toHaveCount(1)
     await expect(opened(page)).toHaveCount(0, { timeout: 1800 })

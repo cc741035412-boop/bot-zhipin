@@ -1,49 +1,100 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BotPortrait from './BotPortrait.vue'
-import { avatarColor } from '../avatar'
-import { activePitch, nextPitch } from '../pitch'
+import { activePitch, nextPitch, nextPoke } from '../pitch'
+import { isReducedMotion, now, register } from '../live/clock'
+import type { Play } from '../live/playback'
 
-const props = defineProps<{ bot: { slug: string; name: string; avatar: string | null; pitch?: string | null } }>()
+const props = defineProps<{ bot: { slug: string; name: string; avatar: string | null; pitch?: string | null }; wholeCard?: boolean }>()
 const owner = Symbol('头像台词')
 const root = ref<HTMLElement>()
 const button = ref<HTMLButtonElement>()
+const bubble = ref<HTMLElement>()
 const portrait = ref<InstanceType<typeof BotPortrait>>()
-const color = computed(() => portrait.value?.color || (props.bot.avatar ? '#8a8a93' : avatarColor(props.bot.slug)))
+const hovered = ref(false)
 const text = ref('')
+const visibleText = ref('')
+const typing = ref(false)
 const open = computed(() => activePitch.value === owner)
 const bubbleId = computed(() => `pitch-${props.bot.slug}`)
 let timer: ReturnType<typeof setTimeout> | undefined
+let stopTyping: (() => void) | undefined
 let pointerFocus = false
-function show(touch = false) {
+
+function play(detail: Play) { portrait.value?.play(detail) }
+function finishTyping() {
+  typing.value = false
+  visibleText.value = text.value
+  stopTyping?.()
+  stopTyping = undefined
+}
+function show(line: string, touch = false) {
   clearTimeout(timer)
-  text.value = nextPitch(props.bot.slug, props.bot.pitch)
+  stopTyping?.()
+  text.value = line
   activePitch.value = owner
+  visibleText.value = ''
+  typing.value = !isReducedMotion()
+  // 打字也消费共享时钟；只有当前气泡注册，完成/关闭立即释放，不开逐字定时循环。
+  if (typing.value && bubble.value) {
+    const start = now(), letters = [...line]
+    stopTyping = register({
+      el: bubble.value,
+      motionChange: (reduced) => { if (reduced) finishTyping() },
+      tick(t) {
+        if (t - start < .35) return
+        typing.value = false
+        const count = Math.min(letters.length, Math.floor((t - start - .35) / .028) + 1)
+        visibleText.value = letters.slice(0, count).join('')
+        if (count === letters.length) finishTyping()
+      },
+    })
+    if (!typing.value) finishTyping()
+  } else finishTyping()
   // 重启 CSS 动画，不替换按钮 DOM，保留键盘焦点。
   button.value?.classList.remove('is-speaking')
-  void button.value?.offsetWidth
-  button.value?.classList.add('is-speaking')
+  if (!isReducedMotion()) {
+    void button.value?.offsetWidth
+    button.value?.classList.add('is-speaking')
+  }
   if (touch) timer = setTimeout(close, 4000)
 }
 function close() {
   clearTimeout(timer)
+  stopTyping?.()
+  stopTyping = undefined
   if (open.value) activePitch.value = null
 }
+function enter(event: PointerEvent) {
+  if (event.pointerType !== 'mouse') return
+  hovered.value = true
+  play({ state: 'wide', hold: Infinity })
+  show(nextPitch(props.bot.slug, props.bot.pitch))
+}
+function leave(event: PointerEvent) {
+  if (event.pointerType !== 'mouse') return
+  hovered.value = false // rest prop 释放 wide，但不会打断临时动作。
+  close()
+}
 function focus() {
-  if (!pointerFocus) show()
+  if (!pointerFocus) show(nextPitch(props.bot.slug, props.bot.pitch))
 }
 function click(event: MouseEvent) {
-  show('pointerType' in event && event.pointerType === 'touch')
+  const pointer = 'pointerType' in event && event.pointerType
+  if (!pointer && event.detail === 0) show(nextPitch(props.bot.slug, props.bot.pitch))
+  else {
+    const poke = nextPoke(props.bot.slug)
+    play({ state: poke.state })
+    show(poke.text, pointer === 'touch')
+  }
   pointerFocus = false
 }
 function outside(event: Event) {
   if (!root.value?.contains(event.target as Node)) close()
 }
-function escape(event: KeyboardEvent) {
-  if (event.key === 'Escape') close()
-}
+function escape(event: KeyboardEvent) { if (event.key === 'Escape') close() }
 function releasePointer() { pointerFocus = false }
-watch(open, (value) => { if (!value) clearTimeout(timer) })
+watch(open, (value) => { if (!value) close() }, { flush: 'sync' })
 onMounted(() => {
   document.addEventListener('pointerdown', outside)
   document.addEventListener('pointerup', releasePointer)
@@ -57,20 +108,23 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', escape)
   close()
 })
+defineExpose({ enter, leave, play })
 </script>
 
 <template>
-  <div ref="root" class="avatar-stage">
+  <div ref="root" class="avatar-stage" @pointerenter="!wholeCard && enter($event)" @pointerleave="!wholeCard && leave($event)">
     <button
       ref="button" type="button" class="bot-avatar" data-testid="avatar"
       :aria-label="`听听${bot.name}的自荐`" :aria-describedby="open ? bubbleId : undefined"
-      @pointerenter="($event.pointerType === 'mouse') && show()"
-      @pointerleave="($event.pointerType === 'mouse') && close()"
       @pointerdown="pointerFocus = true"
       @focus="focus" @blur="close" @click="click"
     >
-      <BotPortrait ref="portrait" :bot="bot" />
+      <BotPortrait ref="portrait" :bot="bot" :rest="hovered ? 'wide' : 'idle'" />
     </button>
-    <p :id="bubbleId" data-testid="pitch-bubble" :data-open="String(open)" :aria-hidden="!open" class="pitch-bubble" role="tooltip"><span>{{ text }}</span></p>
+    <p ref="bubble" data-testid="pitch-bubble" :data-open="String(open)" :data-text="text" aria-hidden="true" class="pitch-bubble" role="tooltip">
+      <i v-if="typing" data-testid="typing" class="typing" aria-hidden="true"><i /><i /><i /></i>
+      <span>{{ visibleText }}</span>
+    </p>
+    <p :id="bubbleId" class="bz-sr-only">{{ text }}</p>
   </div>
 </template>

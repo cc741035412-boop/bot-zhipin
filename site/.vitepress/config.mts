@@ -42,6 +42,5 @@ export default defineConfig({
     returnToTopLabel: '回到顶部',
     sidebarMenuLabel: '菜单',
     skipToContentLabel: '跳到主要内容',
-    notFound: { title: '页面不存在', quote: '这个 Bot 可能已经下架了。', linkText: '回到首页' },
   },
 })

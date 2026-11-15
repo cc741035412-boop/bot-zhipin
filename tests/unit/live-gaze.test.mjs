@@ -85,6 +85,18 @@ describe('共享指针采样', () => {
     a.gaze.tick(2)
     expect(a.setLook).not.toHaveBeenCalled()
   })
+  it('混合输入：鼠标跟随后触摸立即释放，后续鼠标仍可跟随', () => {
+    const b = browser(), a = b.bot()
+    b.emit('pointermove', { pointerType: 'mouse', clientX: 390, clientY: 420 })
+    a.gaze.tick(1)
+    b.emit('pointerdown', { pointerType: 'touch' })
+    a.gaze.tick(2)
+    expect(a.attrs.get('data-follow')).toBe('rest')
+    expect(a.setLook).toHaveBeenLastCalledWith(null, 2, 0.6)
+    b.emit('pointermove', { pointerType: 'mouse', clientX: 390, clientY: 420 })
+    a.gaze.tick(3)
+    expect(a.attrs.get('data-follow')).toBe('pointer')
+  })
   it('4 秒无输入只释放一次，以 0.6 秒恢复漂移', () => {
     const b = browser(), a = b.bot()
     b.emit('pointermove', { pointerType: 'pen', clientX: 390, clientY: 420 })

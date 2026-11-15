@@ -7,6 +7,14 @@ export const SITE = {
   branch: 'main',
 }
 
+export const POKE_PITCHES = ['哎，痒！', '再戳我就变形了', '好啦好啦，我在呢', '你找我呀？']
+export const ANGRY_PITCH = '别戳啦！'
+export const NOT_FOUND = {
+  title: '这一页走丢了',
+  description: '这个 Bot 可能已经下架了，或者链接写错了。',
+  back: '回货架看看',
+}
+
 export const CONTRIBUTE_URL = `${SITE.repo}/blob/${SITE.branch}/CONTRIBUTING.md`
 
 /** 某个 Bot 在仓库里的地址，安装提示词里用 */
