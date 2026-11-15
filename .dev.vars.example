@@ -3,3 +3,11 @@
 IP_SALT=local-dev-salt-not-secret
 # 允许本地测试用 X-Test-IP 请求头模拟不同 IP。线上绝不能设置这个变量。
 ALLOW_TEST_IP=1
+
+# 仅限本地假 GitHub；线上绝不能设置 ALLOW_TEST_ENDPOINTS（会放开测试地址、IP 和非 Secure cookie）。
+ALLOW_TEST_ENDPOINTS=1
+# 以下都是本地假值，不能用于线上；真实密钥只放 Cloudflare 加密变量。
+SESSION_SECRET=0123456789012345678901234567890123456789
+OAUTH_CLIENT_SECRET=local-fake
+GITHUB_API_BASE=http://127.0.0.1:8799
+GITHUB_OAUTH_BASE=http://127.0.0.1:8799
