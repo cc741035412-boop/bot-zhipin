@@ -94,7 +94,7 @@
 .bot-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 13px; color: var(--bz-text-3); line-height: 1.6; }
 .bot-meta a { color: var(--bz-text-3); }
 .bot-tag { display: inline-flex; align-items: center; min-height: 22px; padding: 1px 8px; border-radius: 999px; background: var(--bz-surface-soft); color: var(--vp-c-text-2); font-size: 12px; line-height: 20px; }
-.bot-card .bot-tagline { margin: 14px 0 18px; font-size: 15px; line-height: 1.65; color: var(--vp-c-text-2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.bot-card .bot-tagline { margin: 14px 0 18px; font-size: 15px; line-height: 1.65; color: var(--vp-c-text-2); text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .bot-heat { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; line-height: 22px; color: var(--bz-text-3); font-variant-numeric: tabular-nums; }
 .bot-card > .bot-heat { margin-top: auto; }
 .bot-heat.is-loading { opacity: .65; }
