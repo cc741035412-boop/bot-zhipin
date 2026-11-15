@@ -23,6 +23,9 @@
    头像砖（戳、气泡）、作者链接、按钮抬到它上面，各管各的，互不误触。悬停的反馈是整张卡的光晕，名字不再加下划线。 */
 :is(.bot-card, .featured-card) .bot-name a::after { content: ''; position: absolute; inset: 0; z-index: 0; border-radius: calc(var(--bz-r-card) - 1px); }
 :is(.bot-card, .featured-card) :is(.avatar-stage, .featured-tile, a.bot-author, .bz-btn) { position: relative; z-index: 1; }
+/* 卡里的介绍不接鼠标事件：气泡打开时介绍淡到透明，透明度一变它就自成一层、盖到整卡链接上面，
+   会把落在介绍和气泡位置的点击吃掉（鼠标悬停时整张卡最大的一块点不进详情）。 */
+:is(.bot-card, .featured-card) .bot-tagline { pointer-events: none; }
 .bot-byline { font-size: var(--bz-fs-sm); line-height: 1.5; color: var(--bz-text-3); }
 /* 卡片里的作者行只占一行：作者名太长就省略，后面的「· 官方市场」始终留着 */
 .bot-head .bot-byline { display: flex; min-width: 0; margin-top: 2px; }
