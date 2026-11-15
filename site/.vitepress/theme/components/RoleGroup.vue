@@ -12,7 +12,7 @@ import { CATEGORY_MASCOTS, botPalette } from '../color'
 import { shapeRadii } from '../face'
 import { nextPoke } from '../pitch'
 import { isReducedMotion } from '../live/clock'
-import { SHELF_COPY } from '../../meta.mjs'
+import { CATEGORY_COPY, SHELF_COPY } from '../../meta.mjs'
 
 const props = defineProps<{ category: string; bots: { slug: string }[]; expanded: boolean; collapsible: boolean; preview: number }>()
 const emit = defineEmits<{ toggle: [] }>()
@@ -26,6 +26,8 @@ const hovered = ref(false)
 // 刚展开出来的那几张淡入一下；收起、切换筛选都不播。
 const revealing = ref(false)
 const mascot = computed(() => Object.hasOwn(CATEGORY_MASCOTS, props.category) ? CATEGORY_MASCOTS[props.category] : null)
+// 分组说明不直接显示，放在分组名的悬停提示里。
+const hint = computed(() => Object.hasOwn(CATEGORY_COPY, props.category) ? (CATEGORY_COPY as Record<string, string>)[props.category] : undefined)
 // 两行是 preview 张，所以一行是 preview / 2 张；比两行多出一整行以上才值得折起来。
 const foldable = computed(() => props.collapsible && props.bots.length > props.preview + props.preview / 2)
 const folded = computed(() => foldable.value && !props.expanded)
@@ -70,7 +72,7 @@ async function toggle() {
           <LiveBot ref="portrait" :radii="shapeRadii(mascot.shape)" :color="mascot.color" :shape-id="mascot.shape" :rest="hovered ? 'wide' : 'idle'" />
         </span>
       </span>
-      <h3 :id="`${id}-title`">{{ category }}</h3>
+      <h3 :id="`${id}-title`" :title="hint">{{ category }}</h3>
       <span class="bz-count">{{ SHELF_COPY.groupCount(bots.length) }}</span>
     </header>
     <div :id="`${id}-grid`" class="bot-grid" @animationend="revealing = false">

@@ -135,6 +135,10 @@ test('分组切换：带数量；选中一个只显示这一组并全部展开�
     await expect(head.locator('.bz-count')).toHaveText(`${item.count} 个`)
     await expect(head.getByTestId('live-bot')).toHaveCount(1)
     await expect(tab(page, item.role).getByTestId('still-bot')).toHaveCount(1)
+    // 分组说明不显示在界面上，只在悬停提示里。
+    await expect(head.locator('p')).toHaveCount(0)
+    expect((await head.locator('h3').getAttribute('title'))?.length).toBeGreaterThan(3)
+    expect(await tab(page, item.role).getAttribute('title')).toBe(await head.locator('h3').getAttribute('title'))
   }
   // 分组显示时卡片不带分组标签。
   await expect(cards(page).locator('.category-tag')).toHaveCount(0)

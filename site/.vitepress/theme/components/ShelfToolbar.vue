@@ -6,7 +6,7 @@
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BzIcon from './BzIcon.vue'
 import RoleMascot from './RoleMascot.vue'
-import { SHELF_COPY } from '../../meta.mjs'
+import { CATEGORY_COPY, SHELF_COPY } from '../../meta.mjs'
 import { ALL_ROLES, type ShelfSort } from '../shelf'
 
 const props = defineProps<{
@@ -17,6 +17,8 @@ const props = defineProps<{
 }>()
 defineEmits<{ role: [value: string]; sort: [value: ShelfSort] }>()
 
+// 每个分组那句说明不直接显示（界面上不放解释性的句子），放在悬停提示里：「管家」「生活」这类名字光看猜不出装的是什么。
+const hint = (category: string) => Object.hasOwn(CATEGORY_COPY, category) ? (CATEGORY_COPY as Record<string, string>)[category] : undefined
 const SORTS: { value: ShelfSort; label: string }[] = [
   { value: 'rec', label: SHELF_COPY.sortRec },
   { value: 'new', label: SHELF_COPY.sortNew },
@@ -77,7 +79,7 @@ onBeforeUnmount(() => {
       <button type="button" data-testid="role-tab" :data-role="ALL_ROLES" :aria-pressed="role === ALL_ROLES" @click="$emit('role', ALL_ROLES)">
         <BzIcon name="grid" /><span>{{ SHELF_COPY.allRoles }}</span><span class="tab-count">{{ total }}</span>
       </button>
-      <button v-for="tab in tabs" :key="tab.category" type="button" data-testid="role-tab" :data-role="tab.category" :aria-pressed="role === tab.category" @click="$emit('role', tab.category)">
+      <button v-for="tab in tabs" :key="tab.category" type="button" data-testid="role-tab" :data-role="tab.category" :aria-pressed="role === tab.category" :title="hint(tab.category)" @click="$emit('role', tab.category)">
         <RoleMascot :category="tab.category" :size="16" /><span>{{ tab.category }}</span><span class="tab-count">{{ tab.count }}</span>
       </button>
     </div>
