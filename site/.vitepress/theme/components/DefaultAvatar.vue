@@ -1,27 +1,22 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { BotEngine } from '../vendor/bloub/engine'
-import { SHAPES, COLORS } from '../vendor/bloub/skins'
-import { RAYON, DEMI_VIEWBOX } from '../vendor/bloub/repere'
+import { computed, ref } from 'vue'
+import { botFace, faceColors } from '../face'
+import type { StateId } from '../vendor/bloub/states'
+import type { Play } from '../live/playback'
+import LiveBot from './LiveBot.vue'
 
-import { avatarSeed } from '../avatar'
-
-const props = defineProps<{ slug: string }>()
-const portrait = computed(() => {
-  const seed = avatarSeed(props.slug)
-  const shape = SHAPES[seed % SHAPES.length]
-  const color = COLORS[Math.floor(seed / SHAPES.length) % COLORS.length].hex
-  // idle 的 t=0 尚未进入自然眨眼区间，两只眼睛睁开；只取一次静态帧。
-  const frame = new BotEngine(RAYON, 'idle', shape.radii).sample(0)
-  return { color, frame }
-})
-const box = `${-DEMI_VIEWBOX} ${-DEMI_VIEWBOX} ${DEMI_VIEWBOX * 2} ${DEMI_VIEWBOX * 2}`
+const props = defineProps<{ slug: string; rest?: StateId; size?: number }>()
+const live = ref<InstanceType<typeof LiveBot>>()
+const face = computed(() => botFace(props.slug))
+const colors = computed(() => faceColors(face.value.color))
+const style = computed(() => ({
+  '--bz-bot-light': colors.value.light,
+  '--bz-bot-dark': colors.value.dark,
+  ...(colors.value.outline ? { '--bz-bot-outline': colors.value.outline } : {}),
+}))
+defineExpose({ play: (detail: Play) => live.value?.play(detail) })
 </script>
 
 <template>
-  <svg :viewBox="box" width="96" height="96" aria-hidden="true">
-    <path :d="portrait.frame.bodyPath" :fill="portrait.color" :opacity="portrait.frame.bodyAlpha" />
-    <path :d="portrait.frame.eyes[0].d" :transform="portrait.frame.eyes[0].matrix" :opacity="portrait.frame.eyes[0].alpha" fill="var(--vp-c-bg)" />
-    <path :d="portrait.frame.eyes[1].d" :transform="portrait.frame.eyes[1].matrix" :opacity="portrait.frame.eyes[1].alpha" fill="var(--vp-c-bg)" />
-  </svg>
+  <LiveBot ref="live" :radii="face.radii" color="var(--bz-bot-body)" :shape-id="face.shape" :style="style" :outline="colors.outline ? 'var(--bz-bot-outline)' : null" :rest="rest" :size="size" />
 </template>

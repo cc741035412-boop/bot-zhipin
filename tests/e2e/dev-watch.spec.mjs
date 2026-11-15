@@ -45,7 +45,8 @@ test('工作区外 BOTS_DIR：首页及动态详情自动刷新，坏 YAML 跳�
     }
     await expect(page.getByTestId('empty-state')).toContainText('货架上还没有 Bot', { timeout: 15_000 })
     await expect(page.getByTestId('bot-card')).toHaveCount(0)
-    await expect(page.getByTestId('empty-state').locator('svg')).toBeVisible()
+    await expect(page.getByTestId('empty-state').getByTestId('live-bot')).toBeVisible()
+    await expect(page.getByTestId('empty-state').getByTestId('live-bot')).toHaveAttribute('data-state', 'sleep')
     await expect(page.getByTestId('empty-state').locator('a')).toContainText('做第一个投稿的人')
   } finally {
     if (server.exitCode === null) {
