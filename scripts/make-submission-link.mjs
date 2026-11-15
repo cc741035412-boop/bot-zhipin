@@ -5,6 +5,8 @@ import { pathToFileURL } from 'node:url'
 import { SITE } from '../site/.vitepress/meta.mjs'
 import { ROOT, IMAGE_EXTS } from './lib/load-bots.mjs'
 import { validateBots } from './lib/validate/index.mjs'
+import { applyServerFields } from './lib/submit-fields.mjs'
+import { URL_LIMITS } from './submission/bundle-core.mjs'
 import { MAX_IMAGE_BYTES } from './lib/validate/images.mjs'
 import { assertFilename, assertPath, assertSlug, encode, LIMITS, pack, TEXT_EXTS } from './submission/bundle.mjs'
 import { SubmissionError, fail, formatErrors } from './submission/errors.mjs'
@@ -71,6 +73,12 @@ function validateLocally({ bundle, images }, directory) {
       mkdirSync(dirname(target), { recursive: true })
       writeFileSync(target, contents)
     }
+    if (data.author?.github === undefined) {
+      const addedAt = data.addedAt === undefined
+        ? new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 10)
+        : data.addedAt
+      writeFileSync(join(dir, 'bot.yaml'), applyServerFields(sourceText, { login: 'submitter', addedAt }))
+    }
     mkdirSync(join(dir, 'screenshots'), { recursive: true })
     if (Object.keys(images).length) {
       for (const [name, bytes] of Object.entries(images)) writeFileSync(join(dir, 'screenshots', name), bytes)
@@ -88,7 +96,7 @@ export function makeSubmissionLink(directory, { validate = validateLocally } = {
   const baseUrl = `${SITE.repo}/issues/new?template=submit-bot.yml&title=${encodeURIComponent(`投稿：${data.name}`)}`
   const token = encode(source.plaintext)
   const fullUrl = `${baseUrl}&bundle=${encodeURIComponent(token)}`
-  const plain = fullUrl.length > 7500
+  const plain = fullUrl.length > URL_LIMITS.issueUrl
   const url = plain ? baseUrl : fullUrl
   const steps = [
     url,
@@ -101,14 +109,41 @@ export function makeSubmissionLink(directory, { validate = validateLocally } = {
   return { url, fullUrlLength: fullUrl.length, plain, token, bundle: source.plaintext, output: steps.join('\n') }
 }
 
+/** 网站链接只在片段里携带投稿包；过长时给完整的单行令牌。 */
+export function makeWebSubmissionLink(directory, { validate = validateLocally } = {}) {
+  const source = readBundleDirectory(directory)
+  const result = validate(source, directory)
+  if (result.errors.length) throw new SubmissionError(result.errors)
+  const token = encode(source.plaintext)
+  const baseUrl = `${SITE.url}/submit`
+  const fullUrl = `${baseUrl}#${token}`
+  const long = fullUrl.length > URL_LIMITS.submitUrl
+  const url = long ? baseUrl : fullUrl
+  const steps = [url]
+  if (long) steps.push('打开后把下面这一行粘进『已有投稿包』', token)
+  const { screenshots } = source.bundle
+  steps.push(
+    '1. 点开链接，先看一眼你的 Bot 在网站上长什么样。',
+    '2. 点「用 GitHub 登录」。',
+    `3. 把${screenshots.length ? ` ${screenshots.length} 张` : '至少 1 张'}截图拖进去${screenshots.length ? `（按顺序：${screenshots.join('、')}）` : ''}。`,
+    '4. 勾选授权，点提交。',
+  )
+  if (source.avatarOmitted) steps.push('提示：投稿包不传头像，将使用网站默认头像。')
+  return { url, token, bundle: source.plaintext, long, output: steps.join('\n') }
+}
+
 function main(args) {
-  const directory = args.length === 1 && !args[0].startsWith('--') ? args[0] : args.length === 2 && args[0] === '--dir' ? args[1] : null
+  const issue = args.includes('--issue')
+  const positional = args.filter((arg) => arg !== '--issue')
+  const directory = args.filter((arg) => arg === '--issue').length > 1 ? null
+    : positional.length === 1 && !positional[0].startsWith('--') ? positional[0]
+      : positional.length === 2 && positional[0] === '--dir' ? positional[1] : null
   if (!directory || directory.startsWith('--')) {
-    console.error('用法：node scripts/make-submission-link.mjs bots/<slug>（或 --dir <Bot 文件夹>）')
+    console.error('用法：node scripts/make-submission-link.mjs <Bot 文件夹>（或 --dir <Bot 文件夹>）[--issue]；默认生成网站链接，--issue 可放任意位置，生成备用 Issue 链接。')
     process.exitCode = 1
     return
   }
-  try { console.log(makeSubmissionLink(directory).output) } catch (error) {
+  try { console.log((issue ? makeSubmissionLink : makeWebSubmissionLink)(directory).output) } catch (error) {
     const errors = error instanceof SubmissionError ? error.errors : [{
       file: '投稿目录', where: '读取文件', problem: '无法读取 Bot 文件夹或文本不是有效 UTF-8。',
       fix: '检查 --dir 路径、文件权限和 UTF-8 编码，确保目录及文件没有被替换成符号链接。',
