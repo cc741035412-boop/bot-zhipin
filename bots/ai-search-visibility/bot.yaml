@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: ai-search-visibility
 name: "AI Search Visibility"
+nameZh: "AI 推荐排查员"
 tagline: "查 AI 助手和搜索推不推荐你的产品、推了谁、怎么补"
 category: 市场
 author:

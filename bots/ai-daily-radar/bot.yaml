@@ -1,6 +1,7 @@
 # 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: ai-daily-radar
 name: "AI Daily Radar"
+nameZh: "AI 早报员"
 tagline: "每天早上一份 AI 新动态简报，标明厂商自称还是独立测过"
 category: 学习
 author:

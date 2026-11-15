@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: dr-eggbot
 name: dr eggbot
+nameZh: Bot 设计师
 tagline: Grok Bot 团队出品的 Bot 设计师，问几个问题就帮你造好 Bot
 category: 管家
 author:

@@ -42,6 +42,7 @@ export function useSubmit() {
   const preview = computed(() => s.plaintext ? previewModel(s.plaintext, {
     login: s.user?.login, addedAt: update.value ? existing.value?.addedAt : undefined,
     names: new Map(s.context?.index.map((bot) => [bot.slug, bot.name || bot.slug]) || []),
+    namesZh: new Map(s.context?.index.flatMap((bot) => bot.nameZh ? [[bot.slug, bot.nameZh]] : []) || []),
     images: shots.slots.map((shot) => ({ url: shot.url, thumb: shot.thumb, size: shot.size, format: shot.format })),
   }) : null)
   const blockers = computed(() => {

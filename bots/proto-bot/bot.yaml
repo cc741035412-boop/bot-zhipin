@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: proto-bot
 name: "Proto Bot"
+nameZh: "原型工程师"
 tagline: "把产品点子做成你真实应用里能点的原型，以草稿 PR 交付"
 category: 产品
 author:

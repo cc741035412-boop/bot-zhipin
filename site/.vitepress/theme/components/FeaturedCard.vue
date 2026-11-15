@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import BotName from './BotName.vue'
 import BotPortrait from './BotPortrait.vue'
 import BzIcon from './BzIcon.vue'
 import ExternalHint from './ExternalHint.vue'
@@ -14,7 +15,7 @@ import { nextPoke } from '../pitch'
 // 整张卡可点进详情：名字那个链接用伪元素铺满整卡（样式在 home.css），砖（戳）、作者、导入在它上面。
 const props = defineProps<{
   bot: {
-    slug: string; name: string; tagline: string; avatar: string | null; category: string; quotaCost: string
+    slug: string; name: string; nameZh?: string | null; tagline: string; avatar: string | null; category: string; quotaCost: string
     templateUrl: string; detailUrl: string; author: { name: string; link: string }; external?: boolean; official?: boolean
   }
   note?: string | null
@@ -44,7 +45,7 @@ function importBot() {
       </div>
       <div class="bot-head">
         <div class="bot-title">
-          <h3 class="bot-name"><a :href="bot.detailUrl">{{ bot.name }}</a></h3>
+          <h3 class="bot-name"><a :href="bot.detailUrl"><BotName :bot="bot" /></a></h3>
           <span v-if="!bot.external" class="bz-tag source-tag">作者投稿</span>
         </div>
         <p class="bot-byline">

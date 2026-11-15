@@ -18,6 +18,7 @@ import SearchTrigger from './SearchTrigger.vue'
 import DefaultAvatar from './DefaultAvatar.vue'
 import BzIcon from './BzIcon.vue'
 import { energy, fitRoundBox, makeBody, seeded, separation, step, type Body, type Box, type World } from '../ballpit-physics'
+import { displayName, fullName, originalName } from '../../../../scripts/lib/bot-name.mjs'
 
 interface ShelfBot { slug: string; name: string; nameZh?: string | null; tagline: string; detailUrl: string; avatar: string | null }
 interface Slot { bot: ShelfBot; color: string; size: number; seat: number }
@@ -107,11 +108,8 @@ const hovered = ref<number | null>(null)
 const active = ref<number | null>(null)
 const roving = ref(0)
 const owner = Symbol('球池名片')
-// 名片上的名字：有中文叫法（bot.yaml 的 nameZh）的以它为主、原名跟在下面；没有的只有原名。
-// 规矩和 scripts/lib/bot-name.mjs 一致（那个模块合进来以后，这三行换成从它引入）。
-const displayName = (bot: ShelfBot) => bot.nameZh?.trim() || bot.name
-const originalName = (bot: ShelfBot) => bot.nameZh?.trim() && bot.nameZh !== bot.name ? bot.name : null
-const fullName = (bot: ShelfBot) => originalName(bot) ? `${displayName(bot)}（${originalName(bot)}）` : displayName(bot)
+// 名片上的名字：有中文叫法（bot.yaml 的 nameZh）的以它为主、原名小字跟在下面；没有的只有原名。
+// 规矩是全站共用的 scripts/lib/bot-name.mjs（displayName / originalName / fullName），这里不另写一份。
 
 const bodyEls: HTMLElement[] = [], squashEls: HTMLElement[] = [], botEls: HTMLElement[] = [], hopEls: HTMLElement[] = [], glowEls: HTMLElement[] = []
 const avatars: (InstanceType<typeof DefaultAvatar> | null)[] = []

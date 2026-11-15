@@ -95,6 +95,7 @@ applyServerFields(botYamlText, { login, addedAt }) // → 新的 bot.yaml 文本
 }
 ```
 
+- `index[]` 里写了中文叫法的 Bot 多一个 `nameZh`（没写的不带这个键）；投稿预览用它给「改编自」那一行写原 Bot 的中文叫法。
 - `copy` 取自 `explanations()`，给预览页用（浏览器不能 import 用了 `node:fs` 的 `bots.mjs`）。
 
 `build.json`：`{ "commit": "<同上>", "builtAt": "<ISO 时间>" }`，给上线通知判断「这个提交部署了没有」。

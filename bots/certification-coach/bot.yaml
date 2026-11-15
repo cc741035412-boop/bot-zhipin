@@ -1,6 +1,7 @@
 # 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: certification-coach
 name: "Certification Coach"
+nameZh: "考证教练"
 tagline: "对照官方考纲逐条摸底，用原创练习题帮你备考证书"
 category: 学习
 author:

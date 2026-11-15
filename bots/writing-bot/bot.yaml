@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: writing-bot
 name: "Writing Bot"
+nameZh: "改稿编辑"
 tagline: "帮你改邮件、文章和文档，更清楚但不改原意"
 category: 内容
 author:

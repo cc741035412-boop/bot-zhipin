@@ -9,14 +9,17 @@ import { data as bots } from '../../data/bots.data.mjs'
 import { data as squadData } from '../../data/squads.data.mjs'
 import { SHELF_COPY, SQUAD_COPY } from '../../meta.mjs'
 import { searchBots, searchSquads } from '../search'
+import { displayName } from '../../../../scripts/lib/bot-name.mjs'
 import { avatarColor } from '../avatar'
 import { faceColors } from '../face'
+import BotName from './BotName.vue'
 import BotPortrait from './BotPortrait.vue'
 import SquadStill from './SquadStill.vue'
 
 interface PaletteBot {
   slug: string
   name: string
+  nameZh?: string | null
   tagline: string
   category: string
   addedAt: string
@@ -31,7 +34,7 @@ interface PaletteSquad {
   formation: string
   detailUrl: string
   author: { name: string }
-  members: { bot: string; name: string; title: string | null; avatar: string | null; lead: boolean }[]
+  members: { bot: string; name: string; nameZh?: string | null; title: string | null; avatar: string | null; lead: boolean }[]
 }
 
 // 一次最多列 8 条：再多就该接着输入，而不是往下翻。小队单独一组，排在 Bot 后面，最多 3 支。
@@ -45,7 +48,7 @@ const squads = squadData as PaletteSquad[]
 function faces(squad: PaletteSquad) {
   const lead = squad.members.find((member) => member.lead)
   const rest = squad.members.filter((member) => member !== lead)
-  return [...(lead ? [lead] : []), ...rest].slice(0, 3).map((member) => ({ slug: member.bot, name: member.name, avatar: member.avatar }))
+  return [...(lead ? [lead] : []), ...rest].slice(0, 3).map((member) => ({ slug: member.bot, name: member.name, nameZh: member.nameZh, avatar: member.avatar }))
 }
 // 空状态里睡着的那只：固定 slug，种子配色算出来是蓝色（货架空状态的 empty-shelf 是红色，放在这里像报错）。
 const SLEEPER = { slug: 'search-empty', name: '', avatar: null }
@@ -62,10 +65,10 @@ const HINTS = [
   { keys: ['esc'], label: '关闭' },
 ] as const
 
-// 没输入时列的是「全部 Bot」，顺序和货架的「最新」一致：新上架的在前。
+// 没输入时列的是「全部 Bot」，顺序和货架的「最新」一致：新上架的在前，同一天按显示出来的名字。
 const byName = new Intl.Collator('zh-CN')
 const shelf: PaletteBot[] = [...(bots as PaletteBot[])].sort((a, b) =>
-  String(b.addedAt).localeCompare(String(a.addedAt)) || byName.compare(a.name, b.name))
+  String(b.addedAt).localeCompare(String(a.addedAt)) || byName.compare(displayName(a), displayName(b)))
 
 const router = useRouter()
 const route = useRoute()
@@ -294,7 +297,7 @@ onBeforeUnmount(() => {
                 <BotPortrait :bot="bot" :rest="index === active ? 'wide' : 'idle'" />
               </span>
               <span class="sp-text">
-                <span data-part="name">{{ bot.name }}</span>
+                <span data-part="name"><BotName :bot="bot" small /></span>
                 <span data-part="tagline">{{ bot.tagline }}</span>
               </span>
               <span class="sp-tag">{{ bot.category }}</span>

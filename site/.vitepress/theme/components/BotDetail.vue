@@ -10,10 +10,13 @@ import { botPalette, categoryStyle } from '../color'
 import BotAvatar from './BotAvatar.vue'
 import BotActions from './BotActions.vue'
 import BotMini from './BotMini.vue'
+import BotName from './BotName.vue'
 import DetailStarters from './DetailStarters.vue'
 import { heatState, loadHeat } from '../heat'
 // 哪些权限算「要连账号」「会自己跑」只在摘要那边定义一次（单测保证它们还在 schema 的权限枚举里），这里不另写。
 import { ACCOUNT_PERMISSIONS, SELF_RUNNING_PERMISSION } from '../../../../scripts/lib/bot-summary.mjs'
+// 读屏和替代文字里怎么称呼它：有中文叫法用中文叫法。
+import { displayName } from '../../../../scripts/lib/bot-name.mjs'
 import BzIcon from './BzIcon.vue'
 import ExternalHint from './ExternalHint.vue'
 import LiveAnnouncer from './LiveAnnouncer.vue'
@@ -30,6 +33,7 @@ const props = defineProps({
 })
 const paletteOf = (bot) => botPalette(bot.avatar ? '#8a8a93' : avatarColor(bot.slug))
 const palette = computed(() => paletteOf(props.bot))
+const called = computed(() => displayName(props.bot))
 
 // 投稿预览里的数据可能还没通过校验：下面只认类型对的值，其余当作没写，页面不报错。
 const list = (value) => Array.isArray(value) ? value : []
@@ -92,14 +96,14 @@ onBeforeUnmount(() => watcher?.disconnect())
       <header ref="header" class="detail-header">
         <BotAvatar ref="avatar" :bot="bot" />
         <div class="detail-info">
-          <component :is="preview ? 'h2' : 'h1'">{{ bot.name }}</component>
+          <component :is="preview ? 'h2' : 'h1'"><BotName :bot="bot" wrap /></component>
           <p class="detail-tagline">{{ bot.tagline }}</p>
           <p class="detail-tags"><span class="bz-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span></p>
         </div>
       </header>
 
       <!-- 侧栏：一键导入、三项属性、作者和来源。宽屏吸顶；窄屏排在头部下面。 -->
-      <aside class="detail-rail" data-testid="detail-rail" :aria-label="`${bot.name} 的导入和基本信息`" @pointerenter="overRail(true, $event)" @pointerleave="overRail(false, $event)">
+      <aside class="detail-rail" data-testid="detail-rail" :aria-label="`${called} 的导入和基本信息`" @pointerenter="overRail(true, $event)" @pointerleave="overRail(false, $event)">
         <span v-if="!preview" class="rail-peek" data-testid="rail-peek" :data-show="String(headerGone)" aria-hidden="true"><BotMini :bot="bot" :size="28" :rest="railHover ? 'wide' : 'idle'" bare /></span>
         <BotActions :bot="bot" />
         <!-- 档位和权限的含义不直接显示，放在 title 和读屏文本里。 -->
@@ -149,7 +153,7 @@ onBeforeUnmount(() => watcher?.disconnect())
           </div>
           <div v-if="bot.forkedFrom" data-testid="forked-from">
             <dt>改编自</dt>
-            <dd><a :href="`/bots/${bot.forkedFrom}`" :target="preview ? '_blank' : undefined" :rel="preview ? 'noopener noreferrer' : undefined">{{ bot.forkedFromName }}<ExternalHint v-if="preview" /></a></dd>
+            <dd><a :href="`/bots/${bot.forkedFrom}`" :target="preview ? '_blank' : undefined" :rel="preview ? 'noopener noreferrer' : undefined"><BotName :bot="{ name: bot.forkedFromName, nameZh: bot.forkedFromNameZh }" small /><ExternalHint v-if="preview" /></a></dd>
           </div>
         </dl>
       </aside>
@@ -172,7 +176,7 @@ onBeforeUnmount(() => watcher?.disconnect())
           <div class="bot-screenshots">
             <template v-for="(url, index) in list(bot.screenshots)" :key="index">
               <span v-if="preview && !url" class="screenshot-error">截图 {{ index + 1 }}（待放入）</span>
-              <BotScreenshot v-else :url="url" :alt="`${bot.name}截图 ${index + 1}`" />
+              <BotScreenshot v-else :url="url" :alt="`${called}截图 ${index + 1}`" />
             </template>
           </div>
           <p v-if="!list(bot.screenshots).length">暂无截图。</p>
@@ -272,7 +276,7 @@ onBeforeUnmount(() => watcher?.disconnect())
           <ul class="related-grid">
             <li v-for="other in related" :key="other.slug" class="related-card bz-bot-scope" :style="paletteOf(other)" data-testid="related-card" :data-slug="other.slug" @pointerenter="peek(other.slug, $event)" @pointerleave="peek('', $event)">
               <BotMini :bot="other" :size="40" :rest="peeking === other.slug ? 'wide' : 'idle'" bare />
-              <h3 class="related-name"><a :href="other.detailUrl">{{ other.name }}</a></h3>
+              <h3 class="related-name"><a :href="other.detailUrl"><BotName :bot="other" /></a></h3>
               <p class="related-tagline">{{ other.tagline }}</p>
             </li>
           </ul>

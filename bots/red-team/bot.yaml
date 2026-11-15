@@ -1,6 +1,7 @@
 # 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: red-team
 name: "Red Team"
+nameZh: "反方辩手"
 tagline: "需求文档、方案发出去前，先让它替反方挑刺再改一版"
 category: 产品
 author:

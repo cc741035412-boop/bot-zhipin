@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: video-edit-desk
 name: "Video Edit Desk"
+nameZh: "视频剪辑助理"
 tagline: "上传视频，帮你剪片段、加字幕、按平台出尺寸"
 category: 内容
 author:

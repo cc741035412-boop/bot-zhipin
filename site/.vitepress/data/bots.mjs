@@ -40,9 +40,10 @@ export function readCuration() {
  */
 export function shelfData(bots = readBots(), { squads = readSquads(), curation = readCuration() } = {}) {
   const names = new Map(bots.map((bot) => [bot.slug, bot.data.name]))
+  const namesZh = new Map(bots.map((bot) => [bot.slug, bot.data.nameZh]))
   const base = bots.map((bot) => summarizeBot(bot, {
     asset: (file) => `/bot-assets/${bot.slug}/${encodeURIComponent(file)}`,
-    names,
+    names, namesZh,
   }))
   const bySlug = new Map(base.map((bot) => [bot.slug, bot]))
   const enums = loadEnums()

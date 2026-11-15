@@ -6,7 +6,7 @@ import BzIcon from './BzIcon.vue'
 import { SQUAD_COPY } from '../../meta.mjs'
 import { rosterLine } from '../squad'
 
-interface Member { bot: string; name: string; title: string | null; avatar: string | null; lead: boolean }
+interface Member { bot: string; name: string; nameZh?: string | null; title: string | null; avatar: string | null; lead: boolean }
 const props = defineProps<{ squad: { slug: string; name: string; tagline: string; formation: string; detailUrl: string; members: Member[] } }>()
 const photo = ref<InstanceType<typeof SquadLineup>>()
 const hovered = ref(false)

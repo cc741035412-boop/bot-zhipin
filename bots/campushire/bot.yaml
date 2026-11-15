@@ -1,6 +1,7 @@
 # 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: campushire
 name: "CampusHire"
+nameZh: "校招求职助理"
 tagline: "帮计算机学生找实习校招岗，对着 JD 改简历、记进度"
 category: 求职
 author:

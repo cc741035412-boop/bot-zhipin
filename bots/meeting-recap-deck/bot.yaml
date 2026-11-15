@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: meeting-recap-deck
 name: "Meeting Recap Deck"
+nameZh: "会后回顾制作员"
 tagline: "贴会议笔记，按你的 PPT 模板出一份会后回顾"
 category: 运营
 author:

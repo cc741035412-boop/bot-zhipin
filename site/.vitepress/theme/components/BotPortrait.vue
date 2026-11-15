@@ -2,9 +2,10 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import DefaultAvatar from './DefaultAvatar.vue'
 import { avatarColor } from '../avatar'
+import { displayName } from '../../../../scripts/lib/bot-name.mjs'
 import type { StateId } from '../vendor/bloub/states'
 import type { Play } from '../live/playback'
-const props = defineProps<{ bot: { slug: string; name: string; avatar: string | null }; rest?: StateId; look?: { yaw: number; pitch: number } | null }>()
+const props = defineProps<{ bot: { slug: string; name: string; nameZh?: string | null; avatar: string | null }; rest?: StateId; look?: { yaw: number; pitch: number } | null }>()
 const live = ref<InstanceType<typeof DefaultAvatar>>()
 const failed = ref(false)
 const image = ref<HTMLImageElement>()
@@ -16,6 +17,6 @@ defineExpose({ color, play: (detail: Play) => live.value?.play(detail) })
 </script>
 
 <template>
-  <img v-if="bot.avatar && !failed" ref="image" :src="bot.avatar" :alt="`${bot.name}头像`" width="92" height="92" @error="failed = true">
+  <img v-if="bot.avatar && !failed" ref="image" :src="bot.avatar" :alt="`${displayName(bot)}头像`" width="92" height="92" @error="failed = true">
   <DefaultAvatar v-else ref="live" :slug="bot.slug" :rest="rest" :look="look" />
 </template>

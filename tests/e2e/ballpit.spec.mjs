@@ -4,6 +4,7 @@ import { test, expect } from '@playwright/test'
 import { existsSync, readFileSync } from 'node:fs'
 import { parse } from 'yaml'
 import { SITE } from '../../site/.vitepress/meta.mjs'
+import { displayName, fullName, originalName } from '../../scripts/lib/bot-name.mjs'
 
 const pit = (page) => page.getByTestId('ballpit')
 const bots = (page) => page.getByTestId('pit-bot')
@@ -15,15 +16,13 @@ const places = (page) => page.locator('.pit-body').evaluateAll((els) => els.map(
 const settled = (page) => expect(pit(page).locator('.pit-haze.is-on:not(.is-dim)'), '球池落定').toHaveCount(1, { timeout: 30_000 })
 const noHorizontalScroll = async (page, width) => expect(await page.evaluate(() => document.documentElement.scrollWidth), `${width}px 不横向滚动`).toBeLessThanOrEqual(width)
 
-// 名片上怎么称呼：有中文叫法（nameZh）的以它为主、原名跟在下面；没有的只有原名。和 scripts/lib/bot-name.mjs 是同一条规矩。
+// 名片上怎么称呼：全站共用 scripts/lib/bot-name.mjs 的规矩（有中文叫法以它为主、原名跟在下面；没有的只有原名）。
 function naming(slug) {
   for (const dir of ['tests/fixtures/bots', 'bots']) {
     const file = `${dir}/${slug}/bot.yaml`
     if (!existsSync(file)) continue
     const data = parse(readFileSync(file, 'utf8'))
-    const zh = typeof data.nameZh === 'string' && data.nameZh.trim() ? data.nameZh : null
-    const original = zh && zh !== data.name ? data.name : null
-    return { name: zh ?? data.name, original, full: original ? `${zh}（${original}）` : zh ?? data.name, tagline: data.tagline }
+    return { name: displayName(data), original: originalName(data), full: fullName(data), tagline: data.tagline }
   }
   throw new Error(`找不到 ${slug} 的 bot.yaml`)
 }

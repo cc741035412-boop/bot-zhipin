@@ -1,6 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: search-ads-review
 name: "Search Ads Review"
+nameZh: "搜索广告复盘员"
 tagline: "按目标安装成本复盘苹果搜索广告，列出该改的词和出价"
 category: 市场
 author:
