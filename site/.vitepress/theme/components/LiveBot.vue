@@ -1,6 +1,8 @@
 <!-- 渲染方式参考 jeremy-prt/bloub BloubBot.vue（MIT，提交 b4bb3c1）。 -->
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, shallowRef, useId, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, shallowRef, useAttrs, useId, watch } from 'vue'
+
+defineOptions({ inheritAttrs: false })
 import { BotEngine, type BotFrame } from '../vendor/bloub/engine'
 import { NOTIF_BLUE } from '../vendor/bloub/decor'
 import { RAYON, DEMI_VIEWBOX } from '../vendor/bloub/repere'
@@ -48,6 +50,24 @@ function play(detail: Play) {
 }
 function eventPlay(event: Event) { play((event as CustomEvent<Play>).detail) }
 defineExpose({ play })
+
+const attrs = useAttrs()
+// 根属性不依赖 frame：避免每帧 fallthrough 合并 style，覆盖运行时 CSS 变量或重复写颜色。
+const svgAttrs = computed(() => ({
+  ...attrs,
+  ref: svg,
+  class: ['bz-live', attrs.class],
+  'data-testid': 'live-bot',
+  'data-state': state.value,
+  'data-running': 'false',
+  'data-follow': 'rest',
+  'data-shape': props.shapeId,
+  width: props.size,
+  height: props.size,
+  viewBox: `${-VB} ${-VB} ${VB * 2} ${VB * 2}`,
+  'aria-hidden': 'true',
+  'onBz-play': eventPlay,
+}))
 
 function tick(t: number) {
   playback.tick(t)
@@ -98,20 +118,7 @@ function dotAttrs(dot: BotFrame['dots'][number]) {
 </script>
 
 <template>
-  <svg
-    ref="svg"
-    class="bz-live"
-    data-testid="live-bot"
-    :data-state="state"
-    data-running="false"
-    data-follow="rest"
-    :data-shape="shapeId"
-    :width="size"
-    :height="size"
-    :viewBox="`${-VB} ${-VB} ${VB * 2} ${VB * 2}`"
-    aria-hidden="true"
-    @bz-play="eventPlay"
-  >
+  <svg v-bind="svgAttrs">
     <defs>
       <!-- 眼睛是 mask 中的洞，移动到身体边缘时自然裁切。 -->
       <mask :id="maskId" maskUnits="userSpaceOnUse" :x="-VB" :y="-VB" :width="VB * 2" :height="VB * 2">

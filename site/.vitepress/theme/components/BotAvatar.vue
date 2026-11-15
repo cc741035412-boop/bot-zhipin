@@ -28,7 +28,7 @@ function finishTyping() {
   stopTyping?.()
   stopTyping = undefined
 }
-function show(line: string, touch = false) {
+function show(line: string, touch = false, bounce = true) {
   clearTimeout(timer)
   stopTyping?.()
   text.value = line
@@ -53,7 +53,7 @@ function show(line: string, touch = false) {
   } else finishTyping()
   // 重启 CSS 动画，不替换按钮 DOM，保留键盘焦点。
   button.value?.classList.remove('is-speaking')
-  if (!isReducedMotion()) {
+  if (bounce && !isReducedMotion()) {
     void button.value?.offsetWidth
     button.value?.classList.add('is-speaking')
   }
@@ -85,7 +85,8 @@ function click(event: MouseEvent) {
   else {
     const poke = nextPoke(props.bot.slug)
     play({ state: poke.state })
-    show(poke.text, pointer === 'touch')
+    // 戳本身已有变身反馈，不叠加按钮位移，让连续点按保持稳定命中。
+    show(poke.text, pointer === 'touch', false)
   }
   pointerFocus = false
 }

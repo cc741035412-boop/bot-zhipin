@@ -35,6 +35,20 @@ test('全卡 wide 常驻、读屏全文与视觉打字分离；动作回 wide、
   await expect(bot).toHaveAttribute('data-state', 'idle', { timeout: 4000 })
 })
 
+test('身体填色只由根 SVG 的主题变量控制，动画帧不覆盖内联变量', async ({ page }) => {
+  await page.goto('/')
+  const bot = card(page).getByTestId('live-bot'), fill = bot.locator('[data-part="fill"]')
+  await page.evaluate(() => document.documentElement.classList.remove('dark'))
+  const light = await fill.evaluate((el) => getComputedStyle(el).fill)
+  await bot.evaluate((el) => el.style.setProperty('--bz-bot-dark', '#f1efe9'))
+  await page.waitForTimeout(250)
+  await expect(fill).toHaveCSS('fill', light)
+  await page.evaluate(() => document.documentElement.classList.add('dark'))
+  await expect(fill).toHaveCSS('fill', 'rgb(241, 239, 233)')
+  await page.waitForTimeout(250)
+  await expect(fill).toHaveCSS('fill', 'rgb(241, 239, 233)')
+})
+
 test('详情按钮只驱动本地 Bot，导入上报/新页与复制播报仍正常', async ({ page, context }) => {
   await page.goto(`/bots/${slug}`)
   const bot = page.getByTestId('live-bot')

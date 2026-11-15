@@ -80,7 +80,7 @@
 - 底色卡片色，2px 墨色描边、圆角 16px，硬投影 `3px 3px 0 var(--bz-bot-color)`；圆体 14px/700/1.45，内边距 8px 14px。尖角为旋转 45° 的 12px 方块，仅右、下 2px 描边。
 - 水平居中，向上生长；width:max-content，max-width:min(260px, 100% - 32px)；最多两行，line-clamp:2、text-wrap:balance 防孤字。
 - 弹出 opacity 0→1 180ms；位移 +6px→0、scale .92→1 280ms 弹簧缓动，原点底部中心；收起 opacity 120ms，位移和缩放倒放。
-- 跳动原点脚底，560ms、每段弹性缓动；沿用 0/24/54/80/100% 的 translateY 0/2/-12/0/0px 与 scale (1,1)/(1.07,.92)/(.96,1.05)/(1.02,.98)/(1,1)，同时必须通过新尺寸下的逐帧净距验收。每次说话重新触发。
+- 跳动原点脚底，560ms、每段弹性缓动；沿用 0/24/54/80/100% 的 translateY 0/2/-12/0/0px 与 scale (1,1)/(1.07,.92)/(.96,1.05)/(1.02,.98)/(1,1)，同时必须通过新尺寸下的逐帧净距验收。悬停和键盘说话重新触发；鼠标/触摸戳只播 Bot 变身、不叠加按钮位移，连续点击保持稳定命中。
 - 每卡 `data-testid=pitch-bubble`，`data-open="true|false"`；全页最多开一个。有 pitch 用 pitch，没有则 DEFAULT_PITCHES 随机且不连续重复；戳时改用 §5 专用台词。
 - 头像按钮 `aria-label="听听{名字}的自荐"`；打开时 aria-describedby 指向独立的 `bz-sr-only` 全文元素。视觉 tooltip 设 aria-hidden、不用 aria-live；气泡 `data-text` 从打开起就是全文，内部唯一一个 span 用于逐字层，`[data-testid=typing]` 用 i 容器及三个 i 点、aria-hidden，避免逐字播报。初次加载不自动开气泡。
 - focus-visible：2px 墨色 outline，offset 2px，头像圆形且 offset 4px；不挡气泡。
@@ -190,7 +190,7 @@ Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的�
 
 `theme/face.ts`：`botFace(slug)` 委托 `resolveFace(slug, entry)`，返回 `{slug, shape, radii, color, source}`。已知官方形状 source=official；未知形状用 seed 轮廓 + 官方色，source=seed；无数据时原 avatarSeed 算法、SHAPES/COLORS 选择不变，shape 为 seed:<id>，fixtures 不变。
 
-`DefaultAvatar` 使用 botFace(slug) 的 radii/shape/color。`faceColors(hex)` 返回 light/dark/outline：light 原色小写；dark 委托 color.ts 的 darkSwap（仅一份深色换奶白规则）；L>0.85 时 outline='rgba(0,0,0,.12)'，否则 null。根 SVG 内联 `--bz-bot-light` / `--bz-bot-dark`，有描边再内联 `--bz-bot-outline`；`--bz-bot-body` 由 CSS 切换，描边仅浅色显示。**待集成确认的差异**：计划写浅色描边 1px，LB1 明定 outline 渲染 1.5px；本文接口按 LB1 记录，不将两者声称一致。
+`DefaultAvatar` 使用 botFace(slug) 的 radii/shape/color。`faceColors(hex)` 返回 light/dark/outline：light 原色小写；dark 委托 color.ts 的 darkSwap（仅一份深色换奶白规则）；L>0.85 时 outline='rgba(0,0,0,.12)'，否则 null。根属性与动画帧更新隔离，不逐帧覆盖主题变量。根 SVG 内联 `--bz-bot-light` / `--bz-bot-dark`，有描边再内联 `--bz-bot-outline`；`--bz-bot-body` 由 CSS 切换，描边仅浅色显示。**待集成确认的差异**：计划写浅色描边 1px，LB1 明定 outline 渲染 1.5px；本文接口按 LB1 记录，不将两者声称一致。
 
 ## 7. 排序与外链
 
