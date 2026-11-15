@@ -9,7 +9,7 @@ import { useBotAction } from '../live/scope'
 const play = useBotAction()
 import BzIcon from './BzIcon.vue'
 
-// compact：列表卡用小号按钮（「导入」+ 幽灵款的复制）；详情页用实心的「一键导入」+ 次级的复制。
+// compact：列表卡用小号按钮（「导入」+ 幽灵款的复制）；详情页侧栏用实心的「一键导入」+ 次级的复制，都撑满一行。
 // 按钮一律「图标 + 动词」：导入是右上箭头（会开新标签页，读屏另有一句），复制是 copy，复制成功换成对勾。
 const props = defineProps<{ bot: { slug: string; templateUrl: string; external: boolean }; compact?: boolean }>()
 const copied = ref(false)
@@ -51,9 +51,9 @@ onBeforeUnmount(() => clearTimeout(timer))
 
 <template>
   <div class="bot-actions">
-    <button v-if="preview" data-testid="btn-import" type="button" class="bz-btn action-import" :class="compact ? 'sm' : 'primary'" aria-disabled="true"><BzIcon name="arrow-up-right" />{{ compact ? '导入' : '一键导入' }}</button>
-    <a v-else data-testid="btn-import" class="bz-btn action-import" :class="compact ? 'sm' : 'primary'" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot"><BzIcon name="arrow-up-right" />{{ compact ? '导入' : '一键导入' }}<span class="bz-sr-only">（在新标签页打开）</span></a>
-    <button v-if="!bot.external" ref="copyButton" data-testid="btn-prompt" type="button" class="bz-btn action-prompt" :class="[compact && 'ghost sm', { copied }]" :aria-disabled="preview || undefined" @click="copyPrompt"><BzIcon :name="copied ? 'check' : 'copy'" />{{ copied ? '已复制' : '复制安装提示词' }}</button>
+    <button v-if="preview" data-testid="btn-import" type="button" class="bz-btn action-import" :class="compact ? 'sm' : 'primary block'" aria-disabled="true"><BzIcon name="arrow-up-right" />{{ compact ? '导入' : '一键导入' }}</button>
+    <a v-else data-testid="btn-import" class="bz-btn action-import" :class="compact ? 'sm' : 'primary block'" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot"><BzIcon name="arrow-up-right" />{{ compact ? '导入' : '一键导入' }}<span class="bz-sr-only">（在新标签页打开）</span></a>
+    <button v-if="!bot.external" ref="copyButton" data-testid="btn-prompt" type="button" class="bz-btn action-prompt" :class="[compact ? 'ghost sm' : 'block', { copied }]" :aria-disabled="preview || undefined" @click="copyPrompt"><BzIcon :name="copied ? 'check' : 'copy'" />{{ copied ? '已复制' : '复制安装提示词' }}</button>
   </div>
   <p v-if="preview" class="bot-actions-note" data-testid="preview-actions-note">上架后可用</p>
   <dialog v-if="fallback && !bot.external" ref="dialog" class="prompt-fallback" data-testid="prompt-fallback" :aria-labelledby="`copy-title-${bot.slug}`" :aria-describedby="`copy-help-${bot.slug}`" @click="backdrop" @close="fallback = false; copyButton?.focus()">
