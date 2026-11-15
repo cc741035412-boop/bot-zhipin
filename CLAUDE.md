@@ -16,7 +16,7 @@
 | 命令 | 作用 |
 |---|---|
 | `npm run check` | 提交前必须通过：validate + test + build |
-| `npm run validate` | 校验所有 Bot |
+| `npm run validate` | 校验所有 Bot、小队和策展 |
 | `npm test` | vitest 单元测试 |
 | `npm run dev` | 只看页面（没有计数后端，热度显示「—」） |
 | `npm run dev:full` | 页面 + 计数接口 + 本地 D1，端口 8788 |
@@ -29,8 +29,8 @@
 - 不复制 fork 来源（原 Grok Bot 教程站）的任何文字、图片、组件代码。
 - `site/.vitepress/theme/vendor/bloub/` 是第三方 MIT 代码，不改。
 - 不提交任何密钥。线上变量在 Cloudflare 后台，本地在 `.dev.vars`（gitignore）。
-- 分类、权限、额度的取值只在 `schema/bot.schema.json` 里定义，代码里通过 `loadEnums()` 读取，不写死。
+- 岗位（字段名 `category`，9 个：产品、市场、销售、内容、运营、学习、求职、管家、生活）、权限、额度的取值只在 `schema/bot.schema.json` 里定义，代码里通过 `loadEnums()` 读取，不写死。每个岗位的颜色和吉祥物在 `theme/color.ts`，一句说明在 `meta.mjs` 的 `CATEGORY_COPY`，改枚举时一起改，单测会核对。
 - 本仓库本地还有 `upstream` 远端（原仓库）。`gh pr create` 一律带 `--repo jakob52123/bot-zhipin`，绝不推送或提 PR 到 upstream。
 - 构建产物里不能有 `_worker.js`（会让 Pages 忽略 `functions/`）。
-- 改了 `schema/bot.schema.json` 要运行 `npm run gen:schema`；`scripts/lib/validate/generated/` 是派生物，不算第二份枚举。
+- 改了 `schema/` 下任何一份 schema（`bot`、`squad`、`curation`）都要运行 `npm run gen:schema`；`scripts/lib/validate/generated/` 是派生物，不算第二份枚举。
 - 改了标签页图标的画法（`theme/live/favicon.ts` 的 `FAVICON_DEFAULT`、`FAVICON_FACE`、`faviconSvg`）要运行 `npm run gen:favicon`，把 `site/public/` 下重新生成的三个图标一起提交。

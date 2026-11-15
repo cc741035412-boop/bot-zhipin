@@ -21,7 +21,7 @@
 | `scripts/gen-schema-validator.mjs` | `npm run gen:schema`：把三份 schema 各预编译成 `scripts/lib/validate/generated/<名字>-schema.mjs` | 维护者 |
 | `scripts/sync-assets.mjs` | 构建前把截图、头像复制到 `site/public/bot-assets/`，并生成 `site/public/api-data/slugs.json`、`squad-slugs.json` | 维护者 |
 | `site/` | VitePress 站点根目录；`site/.vitepress/meta.mjs` 放站名、仓库地址、安装提示词、默认台词、每个岗位的一句说明（`CATEGORY_COPY`） | 维护者 |
-| `site/.vitepress/data/` | 数据加载器：`bots.data`（Bot 摘要 + 装饰）、`squads.data`（小队摘要）、`curation.data`（策展）；三份都由 `bots.mjs` 的 `shelfData()` 一次算出，保证对得上 | 维护者 |
+| `site/.vitepress/data/` | 数据加载器：`bots.data`（列表数据：Bot 摘要 + 装饰，不带 `about` 全文）、`squads.data`（小队摘要）、`curation.data`（策展）；三份都由 `bots.mjs` 的 `shelfData()` 一次算出，保证对得上 | 维护者 |
 | `site/squads/[slug].md` + `[slug].paths.mjs` | 小队页的动态路由 `/squads/<slug>` | 维护者 |
 | `site/.vitepress/theme/components/SquadDetail.vue` | 小队页组件（目前是只渲染数据的占位版） | 维护者 |
 | `site/.vitepress/theme/vendor/bloub/` | 第三方 MIT 头像引擎，**不要改** | 只能整体升级 |
@@ -59,8 +59,8 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
    │  load-bots.mjs                           │  load-squads.mjs          │  load-curation.mjs
    ├──────────────────────────────────────────┴───────────────────────────┤
    ├──► scripts/validate.mjs（PR 时在 CI 里跑：Bot + 小队 + 策展，小队和策展引用的 slug 必须在货架上）
-   └──► site/.vitepress/data/bots.mjs 的 shelfData() ──► bots.data、squads.data、curation.data
-            + 动态路由 /bots/<slug>、/squads/<slug> ──► site/.vitepress/dist/
+   └──► site/.vitepress/data/bots.mjs 的 shelfData() ──► bots.data（列表，不带 about）、squads.data、curation.data
+            + 动态路由 /bots/<slug>（参数里是完整摘要，带 about）、/squads/<slug> ──► site/.vitepress/dist/
                                                                           │
 浏览器 ── GET /api/stats、POST /api/click ──► functions/api/* ──► D1（DB） │
                                      └─ 读 /api-data/slugs.json（ASSETS）─┘
@@ -72,13 +72,13 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 
 三份数据都在构建时算好，页面里 `import { data } from '…/data/<名字>.data.mjs'` 直接用。
 
-**Bot 摘要**（`bots.data`，数组；详情页的 `params.bot` 是同一个形状）。`summarizeBot()` 是纯函数，V5 新增：
+**Bot 摘要**。`summarizeBot()` 是纯函数，出的是完整摘要：详情页的 `params.bot` 拿到的就是它。首页和搜索面板用的 `bots.data`（数组）是同一个形状**去掉 `about`**（`bots.mjs` 的 `listSummaries()`）：82 个 Bot 的完整摘要有 245KB，去掉 `about` 是 100KB，而这份数据每个页面都要加载。要在首页用 `about` 里的东西，先想清楚值不值得让每个页面多背这些字。V5 新增的字段：
 
 | 字段 | 含义 |
 |---|---|
-| `category` | 岗位，7 选 1 |
+| `category` | 岗位，9 选 1（产品、市场、销售、内容、运营、学习、求职、管家、生活） |
 | `pitches` | 台词数组（没写是 `[]`）；`pitch` 保留，取第一句或 `null` |
-| `about` | 没写是 `null`；写了就是 `{ intro, does[], starters[], skills[{name, does}], routines[{what, when, default, quiet}], fit, notFit, cnFit, cnNote }`，缺的数组是 `[]`、缺的字符串是 `null` |
+| `about` | **只在完整摘要里**，列表数据没有这个键。没写是 `null`；写了就是 `{ intro, does[], starters[], skills[{name, does}], routines[{what, when, default, quiet}], fit, notFit, cnFit, cnNote }`，缺的数组是 `[]`、缺的字符串是 `null` |
 | `needsAccount` | 权限里有「外部账号」或「浏览器 Cookie」 |
 | `selfRunning` | 权限里有「定时自动运行」 |
 
@@ -104,7 +104,7 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 
 `flow` 里的 `from`、`to` 是成员的 slug，或 `you`（代表用户本人）。
 
-**策展**（`curation.data`，对象）：`{ featured: [{ bot, note }], picks: [slug], collections: [{ slug, title, blurb, bots: [slug] }], editorNotes: { slug: 一句话 } }`。里面的 `bot`、`bots` 都是 slug，Bot 的信息按 slug 去 `bots.data` 里取。没有策展文件时四项都是空的。
+**策展**（`curation.data`，对象）：`{ featured: [{ bot, note }], picks: [slug], collections: [{ slug, title, blurb, bots: [slug] }], editorNotes: { slug: 一句话 } }`。里面的 `bot`、`bots` 都是 slug，Bot 的信息按 slug 去 `bots.data` 里取。没有策展文件时四项都是空的。首页的主推读的就是这里的 `featured`（没写主推时退回热度前三）。
 
 ## 构建与部署
 
@@ -124,7 +124,7 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 - 页面路径：首页 `/`，详情页 `/bots/<slug>`，小队页 `/squads/<slug>`（小队可以和 Bot 同名，路由不同）。
 - **小队和策展放在哪**：默认是仓库里的 `squads/` 和 `curation/shelf.yaml`。规则是「跟着 Bot 目录取兄弟目录」：`<Bot 目录的上级>/squads`、`<上级>/curation/shelf.yaml`，所以只设 `BOTS_DIR=tests/fixtures/bots` 就会一起用 fixtures 的小队和策展；要单独指定用环境变量 `SQUADS_DIR`、`CURATION_FILE`。目录或文件不存在就当空，不报错。
 - **引用必须落在货架上**：小队成员、策展里的 slug 都要是货架上的 Bot，`npm run validate` 会拦；下架一个被引用的 Bot 要同时改小队和策展。网站构建时再兜一层底：对不上的那一项丢掉并打印警告，成员不到 2 个的小队不出页面。
-- **岗位**：字段名是 `category`，界面和文档里叫「岗位」。取值和顺序只在 `schema/bot.schema.json`；颜色和吉祥物在 `theme/color.ts`，一句说明在 `meta.mjs` 的 `CATEGORY_COPY`，单测保证它们和枚举一个不多、一个不少。
+- **岗位**：字段名是 `category`，界面和文档里叫「岗位」，意思是「这个 Bot 干的是哪一行」。一共 9 个：产品、市场、销售、内容、运营、学习、求职、管家、生活（决策 38）。取值和顺序只在 `schema/bot.schema.json`；颜色和吉祥物在 `theme/color.ts`，一句说明在 `meta.mjs` 的 `CATEGORY_COPY`，单测保证它们和枚举一个不多、一个不少。
 - **开发热更新**：`bot-watch.mjs` 同时监听 Bot 目录、小队目录和策展文件，哪一处变了都重启 dev server 刷新数据和动态路由。
 - 图片引用：`/bot-assets/<slug>/<文件名>`。
 - 不复制原站（fork 来源）的任何文字、图片和组件代码。

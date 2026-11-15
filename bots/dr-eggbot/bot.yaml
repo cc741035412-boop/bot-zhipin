@@ -10,6 +10,7 @@ templateUrl: https://x.ai/bot/_jOdbfkB16zxu7MRcmReE
 addedAt: 2026-11-15
 prerequisites:
   - 自带两个定时体检，其中每个工作日读全部 Bot 对话的那个比较烧额度，用不上可以暂停
+  - 做网页按钮界面那个技能会在共享云电脑上装 Tailscale 并联网
 quotaCost: 高
 permissions:
   - 定时自动运行

@@ -69,7 +69,7 @@
 
 **眼睛**：所有活体用恒定深色眼睛 `--bz-eye`。唯一例外是官方色近乎纯黑的 Bot（`darkSwap` 会换色的那些，L < 0.04）：浅色主题下身体是黑的，黑眼睛看不见，`DefaultAvatar` 给它加 `bz-live-ink` 类，CSS 把 `--bz-eye` 换成奶白 `#f1efe9`；深色主题下身体已换成奶白，眼睛照旧是深色（决策 32）。
 
-岗位映射唯一位于 `theme/color.ts` 的 `CATEGORY_MASCOTS`（`CATEGORY_COLORS` 由它派生）：产品橙 `#ff6a13` blob、市场粉 `#ff2e93` sparkle、销售青绿 `#14b8a6` star、内容紫 `#8b5cf6` tablet、运营琥珀 `#f5a623` hex、管家蓝 `#3b82f6` cloud、个人薄荷绿 `#34d399` teardrop，每只和招牌砖墙里对应那只同色同形（决策 33）。岗位名来自现有 Bot 数据，schema 仍是合法枚举真源；单测验证映射完整覆盖枚举。`categoryStyle(category)` 仅提供 `--bz-category-color`，岗位标签和筛选胶囊的小圆点共用；未知岗位回退中性灰。岗位的**顺序**由 `theme/enums.data.mjs`（构建时 `loadEnums()`）给到浏览器，不在页面代码里另写一份。
+岗位映射唯一位于 `theme/color.ts` 的 `CATEGORY_MASCOTS`（`CATEGORY_COLORS` 由它派生）：产品橙 `#ff6a13` blob、市场粉 `#ff2e93` sparkle、销售青绿 `#14b8a6` star、内容紫 `#8b5cf6` tablet、运营琥珀 `#f5a623` hex、学习棕 `#9a6a3a` pebble、求职玫红 `#f43f5e` heart、管家蓝 `#3b82f6` cloud、生活薄荷绿 `#34d399` teardrop，每只和招牌砖墙里对应那只同色同形，9 个岗位正好用完招牌的 9 只（决策 38）。岗位名来自现有 Bot 数据，schema 仍是合法枚举真源；单测验证映射完整覆盖枚举。`categoryStyle(category)` 仅提供 `--bz-category-color`，岗位标签和筛选胶囊的小圆点共用；未知岗位回退中性灰。岗位的**顺序**由 `theme/enums.data.mjs`（构建时 `loadEnums()`）给到浏览器，不在页面代码里另写一份。
 
 ### 1.1 v5 阶梯（写在 `theme/styles/tokens.css` 最前面）
 
@@ -198,12 +198,12 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 
 `<section class="shelf-section" aria-labelledby="featured-title">`。区块标题只有 `h2`「本周主推」，没有说明。
 
-- **选哪三个**：由编辑定，写在 `meta.mjs` 的 `FEATURED`（slug 数组，按这个顺序排；现在是 `idea-stress-test`、`quota-saver`、`copy-humanizer`）。名单里有 Bot 不在货架上时（比如测试数据），退回热度最高的 3 个（热度相同比上架日期、再比名字；热度没拿到时就是最新 3 个）；这时 Bot 总数 < 3 整个区块不显示。和列表一样只拍快照：进入页面、首次拿到热度各定一次，之后点击不会让卡片跳位。不受分类筛选和排序影响。
+- **选哪三个**：由编辑定，写在 `curation/shelf.yaml` 的 `featured`（最多三个，按写的顺序排；现在是 `idea-stress-test`、`quota-saver`、`copy-humanizer`）。每个主推带的那句 `note` 现在还没显示。没写主推时，退回热度最高的 3 个（热度相同比上架日期、再比名字；热度没拿到时就是最新 3 个）；这时 Bot 总数 < 3 整个区块不显示。和列表一样只拍快照：进入页面、首次拿到热度各定一次，之后点击不会让卡片跳位。不受岗位筛选和排序影响。
 - **网格** `.featured-grid`：3 张等宽卡，≥900px 一排、间距 16；<900px 竖排、间距 16。
 - **主推卡** `[data-testid="featured-card"]`（带 `data-slug`、class `bz-bot-scope`，**不带** `data-testid="bot-card"`）：圆角 12、细边 + 内高光、内边距 24，深色底色透明、浅色 `--bz-surface-1`；左上常驻一团 Bot 色柔光（`::before`，深色 22%、浅色 16%，不透明度 .7），悬停时更亮、细边染 Bot 色（42%）。**左对齐**，三张等高，底行贴底：
   1. 头行：72px 头像砖（`.featured-tile.bz-tile`，活 Bot 占砖 68%，`aria-hidden`，点它是戳）+ 右边名字（`h3.bot-name > a`，链到详情页，title 档 16px/600 圆体）和作者行（13px `--bz-text-3`：`by 作者 ↗`，后面跟「· 官方市场」或「· 社区收录」）。作者自己投稿的，名字右边一个「作者投稿」标签。
   2. 介绍 `.bot-tagline`（15px/1.6，`--bz-text-2`，固定两行高，多了省略），到头行 16。
-  3. 底行 `.featured-foot`：左边分类标签 + 额度（`bolt` +「额度 低/中/高」，「高」用 `--bz-quota-high`）；右边「导入」`[data-testid="featured-import"]`（`.bz-btn.sm`，`arrow-up-right` + 文字，上报和动画逻辑同列表）。
+  3. 底行 `.featured-foot`：左边岗位标签 + 额度（`bolt` +「额度 低/中/高」，「高」用 `--bz-quota-high`）；右边「导入」`[data-testid="featured-import"]`（`.bz-btn.sm`，`arrow-up-right` + 文字，上报和动画逻辑同列表）。
 - **整张卡可点进详情**，做法和层级同列表卡（§3.2「整卡可点」）：砖、作者链接、「导入」在链接上面。
 - 悬停主推卡：Bot `wide`，不显示气泡；点砖 = 戳（和列表、详情共用同一个 slug 的戳历史）；点「导入」：上报、Bot 播 `comet`、新标签打开。
 
@@ -214,7 +214,7 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 工具栏 `.shelf-toolbar` 只有两样（货架为空时不显示），到列表 24：
 
 - 左：**排序**，分段控件「热门 / 最新」，规格见 §1b「分段控件」（高 40px、触摸 44px、13px/600，选中滑块跟着 `aria-pressed` 滑动）。`role=group`、`aria-label=排序`、按钮 `aria-pressed`，`sort-hot` / `sort-new`。/submit 的预览切换复用同一套并自己覆盖颜色。
-- 右：**分类筛选** `.filter-chips`，一排圆角 8 的小按钮 `[data-testid="filter-category"]`（`role=group`、`aria-label=按分类筛选`），靠右对齐：第一个「全部」（小圆点是一圈彩虹），后面是货架上实际出现的分类，按 schema 枚举顺序，每个前面一个该分类颜色的 8px 圆点。高 32px（触摸 44px）、细边、13px/600 `--bz-text-2`；悬停底 `--bz-surface-3`；选中（`aria-pressed="true"`）时描边和底色染上分类色（55% / 14%），文字 `--bz-ink`；「全部」没有分类色，选中时是 `--bz-border-strong` 边 + `--bz-surface-3` 底。单选。
+- 右：**岗位筛选** `.filter-chips`，一排圆角 8 的小按钮 `[data-testid="filter-category"]`（`role=group`、`aria-label=按岗位筛选`），靠右对齐：第一个「全部」（小圆点是一圈彩虹），后面是货架上实际出现的岗位，按 schema 枚举顺序，每个前面一个该岗位颜色的 8px 圆点。高 32px（触摸 44px）、细边、13px/600 `--bz-text-2`；悬停底 `--bz-surface-3`；选中（`aria-pressed="true"`）时描边和底色染上岗位色（55% / 14%），文字 `--bz-ink`；「全部」没有岗位色，选中时是 `--bz-border-strong` 边 + `--bz-surface-3` 底。单选。
 - <1100px：筛选换到第二行，整行自己横向滚动（隐藏滚动条、右端 28px 渐隐），不撑破页面。
 - 工具栏里没有搜索框（首屏搜索框和 ⌘K 还在）。键盘顺序：排序 → 筛选 → 第一张卡片。
 - 筛选和排序可以叠加。默认热门；stats 失败且用户未手选时改最新。不记住选择。
@@ -241,10 +241,10 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 | 外壳 `.bot-card` | 保留 `data-slug`、`bz-bot-scope`。圆角 **12**，`--bz-hairline` 细边 + 内高光，不带投影；深色底色透明，浅色 `--bz-surface-1`。article 是容器查询的容器，版式网格在里面的 `.bot-card-body`：三列 `52px / 1fr / auto`，三行，间距 12，内边距 20×24 |
 | 第一行 | 左：52 的格子里一只 44 的 Bot（头像按钮 `[data-testid=avatar]`，不用方砖）。中：名字 `h3.bot-name > a[data-testid="detail-link"]`（title 档 16px/600 圆体）；作者自己投稿的，名字右边一个「作者投稿」标签（橙）。名字下面是**作者行** `.bot-byline`（13px `--bz-text-3`，只占一行）：`author-link`「by 作者 ↗」，后面跟**来源**「· 官方市场」或「· 社区收录」；作者名太长就省略，来源始终留着。**右上角**：「导入」`btn-import`（`.bz-btn.sm`，`arrow-up-right` + 文字） |
 | 第二行 | 介绍 `.bot-tagline`（15px/1.6，`--bz-text-2`），固定两行高（48px），多了省略；气泡也落在这一格 |
-| 第三行 | 左 `.bot-stats`（**属性**，13px `--bz-text-3`，图标 16，项间距 16，tabular-nums）：分类标签 → 额度（`bolt` +「额度 低/中/高」，「高」用 `--bz-quota-high`）→ 门槛（`plug` +「要连账号」或 `plug-off` +「不用连账号」）→「会自己跑」（`clock`，有才显示）→ 热度（`flame` + 数字，大于 0 才显示，「热度」两个字只给读屏）。门槛和「会自己跑」在组件里从 `bot.permissions` 现算：含「外部账号」或「浏览器 Cookie」算要连账号，含「定时自动运行」算会自己跑。右：「复制安装提示词」`btn-prompt`（`.bz-btn.ghost.sm`，`copy` + 文字；外部收录没有这个按钮） |
+| 第三行 | 左 `.bot-stats`（**属性**，13px `--bz-text-3`，图标 16，项间距 16，tabular-nums）：岗位标签 → 额度（`bolt` +「额度 低/中/高」，「高」用 `--bz-quota-high`）→ 门槛（`plug` +「要连账号」或 `plug-off` +「不用连账号」）→「会自己跑」（`clock`，有才显示）→ 热度（`flame` + 数字，大于 0 才显示，「热度」两个字只给读屏）。门槛和「会自己跑」在组件里从 `bot.permissions` 现算：含「外部账号」或「浏览器 Cookie」算要连账号，含「定时自动运行」算会自己跑。右：「复制安装提示词」`btn-prompt`（`.bz-btn.ghost.sm`，`copy` + 文字；外部收录没有这个按钮） |
 | 窄卡片 | 卡片自己窄于 400px 时（手机、/submit 预览；用 `@container`，不看视口）：内边距 20px，「导入」挪到第四行，和「复制安装提示词」并排，各自撑开、高 44；窄于 320px 各占一行 |
 | 悬停 | 仅 `@media (hover:hover)`。卡片 `::after` 是一层绝对定位的渐变：左上角 `color-mix(in srgb, var(--bz-bot-color) 18%, transparent)` 的径向光，叠在自上而下的柔光上；默认 `opacity: 0`，150ms `ease-in-out` 淡入到 1；细边同时染上 Bot 色（45%）。**卡片本身不位移、不缩放。** 内容在这层之上（`z-index`）。触摸点开气泡或键盘聚焦头像时这层也亮起来 |
-| 标签 | 见 §1b「标签」：系统字体 12px/600，高 22px，左右 8px，圆角 8px；分类色、来源色 14% 混卡片底，文字为该色 40% 混 `--bz-ink`，两主题对比度均 ≥4.5。来源标签只有「作者投稿」一种；「官方市场」「社区收录」写在作者行里，不做标签 |
+| 标签 | 见 §1b「标签」：系统字体 12px/600，高 22px，左右 8px，圆角 8px；岗位色、来源色 14% 混卡片底，文字为该色 40% 混 `--bz-ink`，两主题对比度均 ≥4.5。来源标签只有「作者投稿」一种；「官方市场」「社区收录」写在作者行里，不做标签 |
 | 热度 | 列表卡上大于 0 才显示，火苗是 `--bz-flame`；没有热度不占位。详情页始终显示：加载「热度 …」，失败「热度 —」，title 为「热度暂时获取不到」 |
 | 按钮 | 见 §1b「按钮」。卡片上都是小号：「导入」是 Bot 色淡染的玻璃，「复制安装提示词」是幽灵款。复制成功：图标换成 `check`、文字换成「已复制」、字和边变 `--bz-success`，1.8 秒后恢复 |
 
@@ -331,7 +331,7 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 | 第一次进站（每个会话一次） | Hero 的 9 只 Bot 按上排、下排的顺序依次 swirl 入场，间隔 120ms |
 | Hero 里的 Bot | 悬停：砖上浮 2px、柔光变亮，Bot 跳一下 + wide；点击 = 戳；仍然 aria-hidden |
 | 点首屏搜索框、按 ⌘K / Ctrl+K、「/」 | 打开搜索命令面板（`SearchPalette`）；关闭后焦点回到原处 |
-| 点分类筛选按钮 | 列表只留这个分类，计数跟着变，网格淡入 200ms；主推不变 |
+| 点岗位筛选按钮 | 列表只留这个岗位，计数跟着变，网格淡入 200ms；主推不变 |
 | 空货架 / 筛选无结果 | 一只睡着的 Bot（96px），rest=sleep，无灰度滤镜 |
 | 404 页 | not-found Layout 插槽；120px 头像砖里的 Bot 先 exclaim、再常驻 rest=thinking；「这一页走丢了」+ href=/「回货架看看」，没有说明句（版式见 §10） |
 | 触摸 | 点按 = 戳 + 气泡显示 4 秒；点别处关闭；不跟随视线 |
@@ -401,7 +401,7 @@ Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的�
 - **头部**（`.detail-header`，上方留 64px 给气泡）：≥768px 左右布局、间距 32，窄屏上下布局。左边一块 **120×120** 的头像砖舞台（<768px 96）里一只活 Bot（占砖 68%）；舞台后面垫一团 Bot 色柔光（头部的 `::before`，16%）。右边自上而下：
   - 名字 `h1`（h1 档 32px/700 圆体；预览里是 `h2`）。
   - 介绍（16px/1.5，`--bz-text-2`）。
-  - 一行元信息 `.bot-meta`（13px `--bz-text-3`，项间距 16）：分类标签 → 「作者投稿」标签（不是外部收录才有）→ 作者和来源（`author-link`「by 作者 ↗」+「· 官方市场」或「· 社区收录」，和列表卡同一套规则）→「上架 日期」→ 热度（`flame` +「热度 N」）。
+  - 一行元信息 `.bot-meta`（13px `--bz-text-3`，项间距 16）：岗位标签 → 「作者投稿」标签（不是外部收录才有）→ 作者和来源（`author-link`「by 作者 ↗」+「· 官方市场」或「· 社区收录」，和列表卡同一套规则）→「上架 日期」→ 热度（`flame` +「热度 N」）。
   - 「改编自 <原 Bot 名>」（`data-testid=forked-from`，链原详情页；有才显示）。
   - 按钮（到上面 24，高 44）：「一键导入」`btn-import`（`.bz-btn.primary`，`arrow-up-right` + 文字，**这一屏唯一的实心主按钮**）；不是外部收录的，旁边一枚「复制安装提示词」`btn-prompt`（`.bz-btn`，`copy` + 文字，复制后变 `check` +「已复制」）。窄屏两个按钮撑满。
 - **气泡**在头像上方：左边和砖对齐、往右长，尖角朝下探进砖里指着 Bot（尖角中心距气泡左边 60px）；不会盖住「返回货架」，也不压到名字。头像也支持说话、跳动和戳。
@@ -424,7 +424,7 @@ Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的�
 | 情况 | 表现 |
 |---|---|
 | 无 Bot | 虚线框（`1px dashed var(--bz-border-strong)`、圆角 12、上下内边距 48）里居中：96px sleep Bot +「货架上还没有 Bot」（16px/600）+「做第一个投稿的人」（次级按钮，前面一个 `plus` 图标）；data-testid=empty-state；不显示主推、工具栏、计数和页尾 |
-| 筛选无结果 | 同样式：96px sleep Bot +「这个分类下暂时没有 Bot」+「看看全部」按钮；data-testid=empty-filter（筛选项只列货架上有的分类，正常不会出现） |
+| 筛选无结果 | 同样式：96px sleep Bot +「这个岗位下暂时没有 Bot」+「看看全部」按钮；data-testid=empty-filter（筛选项只列货架上有的岗位，正常不会出现） |
 | 搜索无结果 | 搜索面板里一只睡着的 Bot +「没找到，换个词试试」（货架为空时是「货架上还没有 Bot」） |
 | 404 | 上下各留 96px，内容居中：120px 头像砖（`.bz-tile.s120`，砖背后一小团这只 Bot 颜色的光）里的 Bot 先 exclaim、再循环 thinking → 小字「404」（12px/600，`--bz-text-3`，`aria-hidden`）→「这一页走丢了」（h1 档 32px）→「← 回货架看看」（次级按钮，染这只 Bot 的颜色，前面一个 `arrow-left` 图标，到标题 32）。只有标题和返回按钮，没有说明句 |
 | 详情页某块没内容 | 整块不渲染（截图、技能、定时任务、设计说明）；投稿预览例外，见 §9 |
@@ -445,7 +445,7 @@ Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的�
 1. **LB1**：idle 眼睛隔 1.5 秒不同；左右 ±300px 的眼睛平均 x 差 ≥10、上下 y 差 ≥6；rAF ≤75 次/秒；离屏 500ms 内暂停，隐藏停钟；reduce 首帧不变；SSR 有 body path、无 hydration 警告。burst 300ms 内生效、有粒子，2.6±0.6 秒回 idle 且双眼存在。
 2. **LB2**：真脸数据与 25 轮廓合法、fixtures 不变；暗色换色对卡片底 ≥3:1；真实构建带官方色。
 3. **LB3**：全卡进入 300ms 内 wide，typing 先出现，350+28×字数+300ms 内全文；离开 200ms 内关气泡、600ms 内 idle。键盘、触摸、单开回归通过；戳 200ms 内进集合、状态时长+0.6 秒内回 idle，连戳 alert；导入 200ms 内 comet 且正常上报/开页；复制 wink；30 秒睡眠、输入 300ms 内 exclaim、2.5 秒内 idle；会话首次有 swirl、刷新不重播。Hero、空货架、404 与真实脸接线通过。
-4. **LB6**：黑眼睛、attentif 首帧、身体占比 ≥80%、SVG 特效外溢；八类标签浅深对比度 ≥4.5、外部标签中性。（招牌只数和大小以本文件 §2.2 为准，LB6 的 7/5 只断言已被 LB8 取代。）
+4. **LB6**：黑眼睛、attentif 首帧、身体占比 ≥80%、SVG 特效外溢；九个岗位的标签浅深对比度 ≥4.5（LB6 当时是旧的八类）、外部标签中性。（招牌只数和大小以本文件 §2.2 为准，LB6 的 7/5 只断言已被 LB8 取代。）
 5. **LB9**：搜索面板的打开方式、键盘、焦点、对比度（`verify/lb9-search.spec.mjs`）。
 6. **LB8**（`verify/lb8-raycast.spec.mjs`）：v4 的验收。里面和 v5 冲突的数（砖圆角 28、h1 80px、卡片圆角 16、头像 56、详情头像 160、按钮 ≥40、Bot 色实底按钮、斜向极光）已被 v5 取代，以本文和仓库 `tests/e2e/` 为准；其余（导航条、砖墙 9 块、搜索框、筛选排序、横向不滚动、减少动效、对比度）仍然有效。
 7. **目视**：`verify/out/LB8/` 的截图和 Raycast 实测截图并排看：深色版是干净有质感的商店，同时一眼看得出是 Grok Bot 的世界；浅色版同样干净；手机版不挤。

@@ -49,10 +49,11 @@ describe('合法的策展', () => {
     expect(real.data.picks).toHaveLength(23)
     expect(real.data.collections.map((item) => item.slug)).toEqual(['zero-setup', 'pm-kit', 'solo-video', 'daily-brief', 'community'])
     expect(real.data.collections.map((item) => item.bots.length)).toEqual([8, 8, 8, 7, 5])
-    // 每个 Bot 一条编辑点评，写给的都是货架上的 Bot。
-    const shelfSlugs = loadAllBots(join(ROOT, 'bots')).map((bot) => bot.slug).sort()
-    expect(Object.keys(real.data.editorNotes).sort()).toEqual(shelfSlugs)
-    expect(shelfSlugs).toHaveLength(82)
+    // 编辑点评写给的都是货架上的 Bot。不要求每个 Bot 都有：新投稿进来时还没人写点评。
+    const shelfSlugs = new Set(loadAllBots(join(ROOT, 'bots')).map((bot) => bot.slug))
+    const noted = Object.keys(real.data.editorNotes)
+    expect(noted.length).toBeGreaterThan(0)
+    for (const slug of noted) expect(shelfSlugs.has(slug), slug).toBe(true)
     const fixture = loadCuration(join(ROOT, 'tests/fixtures/curation/shelf.yaml'))
     expect(fixture.data.featured).toHaveLength(3)
     expect(fixture.data.collections).toHaveLength(2)
