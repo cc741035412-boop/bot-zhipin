@@ -1,6 +1,8 @@
 // V5 的 bot.yaml 新规则：岗位枚举、多句台词、about。
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
+import YAML from 'yaml'
 import { ROOT, loadBot, loadEnums } from '../../scripts/lib/load-bots.mjs'
 import { buildBotModel } from '../../scripts/lib/bot-model.mjs'
 import { validateModels } from '../../scripts/lib/validate/core.mjs'
@@ -156,5 +158,28 @@ describe('about', () => {
   it('网站投稿（非外部收录）也可以写 about 和多句台词', () => {
     const login = fresh().data.author.github
     expect(check((data) => { data.about = about(); data.pitch = ['第一句话', '第二句话'] }, { policy: { submission: { login } } }).errors).toEqual([])
+  })
+})
+
+describe('投稿模板里的例子', () => {
+  const text = readFileSync(join(ROOT, 'bots/_template/bot.yaml'), 'utf8')
+  it('岗位注释列的是 schema 里的 7 个岗位，示例值也在里面', () => {
+    const categories = loadEnums().categories
+    expect(text).toContain(`七选一：${categories.join('、')}`)
+    expect(categories).toContain(template.data.category)
+    expect(text).not.toMatch(/八选一|调研、定义/)
+  })
+  it('注释掉的 about 例子去掉注释后是合法的写法', () => {
+    const start = text.indexOf('# about:')
+    expect(start).toBeGreaterThan(0)
+    const block = text.slice(start).split('\n').filter((line) => line.startsWith('#')).map((line) => line.replace(/^# ?/, '')).join('\n')
+    const example = YAML.parse(block).about
+    expect(Object.keys(example)).toEqual(['intro', 'does', 'starters', 'routines', 'fit', 'notFit', 'cnFit', 'cnNote'])
+    expect(check((data) => { data.about = example }).errors).toEqual([])
+  })
+  it('模板的示例台词本身符合规则（一句，2 到 30 字）', () => {
+    expect(typeof template.data.pitch).toBe('string')
+    expect([...template.data.pitch].length).toBeGreaterThanOrEqual(2)
+    expect([...template.data.pitch].length).toBeLessThanOrEqual(30)
   })
 })

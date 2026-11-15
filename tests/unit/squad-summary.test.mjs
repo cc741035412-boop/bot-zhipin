@@ -9,7 +9,7 @@ import { loadAllSquads } from '../../scripts/lib/load-squads.mjs'
 import { loadCuration } from '../../scripts/lib/load-curation.mjs'
 import { buildSquadModel } from '../../scripts/lib/squad-model.mjs'
 import { summarizeSquad } from '../../scripts/lib/squad-summary.mjs'
-import { shelfData, readBots, readSquads, readCuration } from '../../site/.vitepress/data/bots.mjs'
+import { shelfData, shelfWatch, readBots, readSquads, readCuration } from '../../site/.vitepress/data/bots.mjs'
 import { syncAssets } from '../../scripts/sync-assets.mjs'
 
 const enums = loadEnums()
@@ -257,6 +257,23 @@ describe('网站数据：bots、squads、curation 三份对得上', () => {
     expect(data.squads).toEqual([])
     expect(data.curation).toEqual({ featured: [], picks: [], collections: [], editorNotes: {} })
     for (const item of data.bots) expect(item).toMatchObject({ editorNote: null, pick: null, squads: [] })
+  })
+  it('三个数据加载器和小队路由读的是同一份数据，监听范围覆盖 Bot、小队、策展三处', async () => {
+    const [bots, squads, curation, paths] = await Promise.all([
+      import('../../site/.vitepress/data/bots.data.mjs'), import('../../site/.vitepress/data/squads.data.mjs'),
+      import('../../site/.vitepress/data/curation.data.mjs'), import('../../site/squads/[slug].paths.mjs'),
+    ])
+    const data = shelfData()
+    expect(bots.default.load()).toEqual(data.bots)
+    expect(squads.default.load()).toEqual(data.squads)
+    expect(curation.default.load()).toEqual(data.curation)
+    const routes = paths.default.paths()
+    expect(routes.map((route) => route.params.slug)).toEqual(data.squads.map((squad) => squad.slug))
+    expect(routes[0].params.squad).toEqual(data.squads[0])
+    expect(Object.keys(routes[0].params.copy)).toEqual(['permissions', 'quota'])
+    const watch = shelfWatch()
+    expect(watch).toEqual([join(ROOT, 'bots/**/*'), join(ROOT, 'squads/**/*'), join(ROOT, 'curation/shelf.yaml')])
+    for (const loader of [bots, squads, curation]) expect(loader.default.watch).toEqual(watch)
   })
   it('sync-assets 另写一份 squad-slugs.json，和能出页面的小队一致', () => {
     const temp = mkdtempSync(join(tmpdir(), 'squad-sync-')); temps.push(temp)
