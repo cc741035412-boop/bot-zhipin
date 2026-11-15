@@ -1,0 +1,21 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: talent-discovery
+name: "Talent Discovery"
+tagline: "按岗位要求在公开网络上找候选人，每个人都附出处"
+category: 调研
+author:
+  name: "Tommy Hansen"
+  url: https://x.ai/bot/marketplace/bots/sherlock
+templateUrl: https://x.ai/bot/vIX2YW6rr6nQnf8-Rhyzc
+addedAt: 2026-11-15
+prerequisites:
+  - "一份岗位 JD，粘贴或一句话描述都行"
+  - "候选人名单存在共享云电脑上；上传已有名单前先删掉联系方式等用不到的列"
+  - "每日批次默认关，开了每个工作日都上网找人，比较烧额度"
+  - "它整理的是别人的公开信息，在国内用要自己注意个人信息合规"
+quotaCost: 高
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true

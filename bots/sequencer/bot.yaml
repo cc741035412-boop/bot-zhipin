@@ -1,0 +1,21 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: sequencer
+name: "Sequencer"
+tagline: "帮销售排开发信的跟进节奏，只写草稿，由你来发"
+category: 日常
+author:
+  name: "Simon Lackowski"
+  url: https://x.ai/bot/marketplace/bots/sequencer
+templateUrl: https://x.ai/bot/6xnxd_CHg0cXVMQCwnRrZ
+addedAt: 2026-11-15
+prerequisites:
+  - "连 Gmail，或粘贴几封你写过的开发信，让它学你的口吻"
+  - "一张跟进表：连 Google 表格或上传 CSV"
+  - "4 个定时任务默认关；盯收件箱那个每小时跑一次，最烧额度，可以不开"
+quotaCost: 高
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+  - 外部账号
+external: true

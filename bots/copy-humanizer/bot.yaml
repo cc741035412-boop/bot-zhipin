@@ -1,0 +1,18 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: copy-humanizer
+name: "Copy Humanizer"
+tagline: "把稿子改得像人写的，保留你的口吻，每处改动都说明"
+category: 日常
+author:
+  name: "Massimo De Luisa"
+  url: https://x.ai/bot/marketplace/bots/human-copywriter
+templateUrl: https://x.ai/bot/YwxIbVEWqXN-HYCxiMCoB
+addedAt: 2026-11-15
+prerequisites:
+  - "一两段你喜欢的文字当范例，可以跳过"
+  - "规则按英文写作习惯写的，改中文稿最好先给它一份你的中文禁用词"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

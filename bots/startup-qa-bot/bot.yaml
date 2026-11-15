@@ -1,0 +1,22 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: startup-qa-bot
+name: "Startup QA Bot"
+tagline: "每天用测试账号逛一遍你的产品，报告上了什么、坏了什么"
+category: 评审
+author:
+  name: "Shub Gaur"
+  url: https://x.ai/bot/marketplace/bots/startup-qa-bot
+templateUrl: https://x.ai/bot/XBauviUoNcdi05-ExoOo4
+addedAt: 2026-11-15
+prerequisites:
+  - "一个浏览器能打开的网页产品，测试环境或线上都行"
+  - "一个只给它用的邮箱，别用常用邮箱和密码：测试账号密码会明文存在共享云电脑上"
+  - "测线上会注册一个真实测试账号，可能触发欢迎邮件"
+  - "早间巡检默认关；每次逛几十个页面很烧额度，可以改成每周一次"
+quotaCost: 高
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+  - 外部账号
+external: true

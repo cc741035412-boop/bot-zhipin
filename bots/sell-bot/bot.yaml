@@ -1,0 +1,23 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: sell-bot
+name: "Sell Bot"
+tagline: "帮做销售的你写跟进、备通话、出报价，每封确认了才发"
+category: 日常
+author:
+  name: "Shub Gaur"
+  url: https://x.ai/bot/marketplace/bots/sell-bot
+templateUrl: https://x.ai/bot/znrhzY4AYMg4v3QTfU0IJ
+addedAt: 2026-11-15
+prerequisites:
+  - "建议连 Gmail 和 Google 日历；不连只给可复制的文本"
+  - "官网链接、价格和折扣底线、几封你发过的客户邮件"
+  - "10 个定时任务导入后全关，全开很烧额度，按需只开几个"
+  - "别连 X：读帖子会按条扣你的 X 接口费用"
+quotaCost: 高
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+  - 外部账号
+  - 代我发消息
+external: true

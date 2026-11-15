@@ -33,7 +33,7 @@ onMounted(() => { if (!preview) loadHeat() })
       <p>{{ bot.tagline }}</p>
       <p class="bot-meta">
         <span class="bot-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
-        <span v-if="bot.external" class="bot-tag external-tag">外部收录</span>
+        <span v-if="bot.external" class="bot-tag external-tag">{{ bot.official ? '官方市场' : '外部收录' }}</span>
         <span v-if="preview">by {{ bot.author.name }}</span>
         <a v-else data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
         <span>上架日期：<time :datetime="bot.addedAt">{{ bot.addedAt }}</time></span>
@@ -43,7 +43,7 @@ onMounted(() => { if (!preview) loadHeat() })
       <BotActions :bot="bot" />
       </div>
     </header>
-    <p v-if="bot.external" class="external-notice">这个 Bot 由原作者在 x.ai 发布，本站只收录链接。</p>
+    <p v-if="bot.external" class="external-notice">{{ bot.official ? '这个 Bot 来自 xAI 官方 Bot 市场，由原作者发布。本站只收录链接，中文介绍由本站撰写。' : '这个 Bot 由原作者在 x.ai 发布，本站只收录链接。' }}</p>
     <section data-testid="section-prereq">
       <h2>导入前准备</h2>
       <ul><li v-for="(item, index) in bot.prerequisites" :key="index">{{ item }}</li></ul>

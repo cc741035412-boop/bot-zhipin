@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: game-art-director
+name: "Game Art Director"
+tagline: "帮独立游戏定美术风格、写出图提示词、检查素材"
+category: 定义
+author:
+  name: "Danny Limanseta"
+  url: https://x.ai/bot/marketplace/bots/sable-game-art
+templateUrl: https://x.ai/bot/KQnsHIvv4_Xk7HyhmewP3
+addedAt: 2026-11-15
+prerequisites:
+  - "有游戏截图、参考图或现成素材就直接发给它"
+  - "它只写提示词不出图，出图要用你自己的工具或找画师"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true

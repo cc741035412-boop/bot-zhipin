@@ -1,0 +1,21 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: website-ops
+name: "Website Ops"
+tagline: "给你的网站做体检，要改的地方开成 PR 等你合并"
+category: 评审
+author:
+  name: "Josh Kim"
+  url: https://x.ai/bot/marketplace/bots/website-ops
+templateUrl: https://x.ai/bot/NYDai_DOI_2pNDIKerrpD
+addedAt: 2026-11-15
+prerequisites:
+  - "网站代码在 GitHub 上并连接 GitHub；不连只能做只读体检"
+  - "私有仓库的代码会克隆到共享云电脑上"
+  - "一次体检截图几十上百张，很耗额度；周体检默认关，可以只手动跑"
+quotaCost: 高
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+  - 外部账号
+external: true

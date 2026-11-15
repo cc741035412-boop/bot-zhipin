@@ -1,0 +1,23 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: proto-bot
+name: "Proto Bot"
+tagline: "把产品点子做成你真实应用里能点的原型，以草稿 PR 交付"
+category: 定义
+author:
+  name: "Shub Gaur"
+  url: https://x.ai/bot/marketplace/bots/proto-bot
+templateUrl: https://x.ai/bot/p4sSEZV7xqcBgdT7m2O8i
+addedAt: 2026-11-15
+prerequisites:
+  - "一个 GitHub 仓库和能打开的预览网址"
+  - "会花真钱：Cursor 云端构建和出图出视频都从你自己的账户扣，花费上限只是口头约定"
+  - "参考截图会变成公开链接，没发布的产品截图别用"
+  - "要在共享云电脑的浏览器里登录你的预览站，最好给测试账号"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+  - 外部账号
+  - 浏览器 Cookie
+external: true

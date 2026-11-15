@@ -1,0 +1,20 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: video-editor
+name: "Video Editor"
+tagline: "把口播原始素材剪成带字幕和配乐的竖屏短视频"
+category: 日常
+author:
+  name: "Ethan Ng"
+  url: https://x.ai/bot/marketplace/bots/video-editor
+templateUrl: https://x.ai/bot/14O3EsptD43aAhoAzvfq3
+addedAt: 2026-11-15
+prerequisites:
+  - "原始素材和脚本；素材大就给网盘链接，聊天上传只适合短片段"
+  - "交付文件夹里的旧版本会被自动删掉，要留底先自己备份"
+  - "第一次剪要在云电脑上装几个剪辑和转写工具，比较慢"
+  - "用到的 Remotion 对公司商用可能要付费授权，商用前自己确认"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+external: true

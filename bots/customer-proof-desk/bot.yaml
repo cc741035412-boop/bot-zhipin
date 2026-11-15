@@ -1,0 +1,18 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: customer-proof-desk
+name: "Customer Proof Desk"
+tagline: "把客户访谈稿整理成案例、证言和能直接引用的原话"
+category: 日常
+author:
+  name: "Anoop Baliga"
+  url: https://x.ai/bot/marketplace/bots/customer-stories
+templateUrl: https://x.ai/bot/AamPlGjd2lIdDv6seEMXR
+addedAt: 2026-11-15
+prerequisites:
+  - "几份客户通话或访谈的文字稿，录音要先转成文字"
+  - "要公开用的原话需要客户授权，它只起草授权请求，不代发"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

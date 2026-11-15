@@ -1,0 +1,18 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: pitch-deck-coach
+name: "Pitch Deck Coach"
+tagline: "像投资人一样读完你的融资路演稿，指出哪里不信、哪里记不住"
+category: 评审
+author:
+  name: "Hiten Shah"
+  url: https://x.ai/bot/marketplace/bots/pitch-deck-coach
+templateUrl: https://x.ai/bot/zkVS-PkX1ooTE2nP21DPO
+addedAt: 2026-11-15
+prerequisites:
+  - "一份融资路演稿，PPT 或 PDF"
+  - "你确认它的复述后，它会自动生成约 10 个评审文件，比较费额度"
+  - "只适合真正的融资路演稿，项目汇报用它会水土不服"
+quotaCost: 高
+permissions:
+  - 云电脑文件
+external: true

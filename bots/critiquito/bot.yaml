@@ -1,10 +1,11 @@
-# 外部收录：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: critiquito
 name: Critiquito
 tagline: 丢一张界面截图，按影响大小告诉你哪里该改、怎么改
 category: 评审
 author:
   name: Manuel Muñoz Solera
+  url: https://x.ai/bot/marketplace/bots/critiquito
 templateUrl: https://x.ai/bot/NqdH9qGvrq-yWRaXhJGM-
 addedAt: 2026-11-15
 prerequisites:

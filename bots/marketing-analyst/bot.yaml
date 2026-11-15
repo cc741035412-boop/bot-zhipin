@@ -1,0 +1,21 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: marketing-analyst
+name: "Marketing Analyst"
+tagline: "把广告投放数据做成周报月报，每个数字都标来源"
+category: 日常
+author:
+  name: "Josh Kim"
+  url: https://x.ai/bot/marketplace/bots/marketing-analyst
+templateUrl: https://x.ai/bot/1RbG9yW5MpQ55XcQlJ0aQ
+addedAt: 2026-11-15
+prerequisites:
+  - "在 Bot 浏览器里登录广告后台，或者贴各平台导出的 CSV"
+  - "登录的广告账号会留在共享云电脑上，有管理员权限的账号要慎重，建议只贴导出表"
+  - "邮件巡检每小时跑一次，很烧额度，没人发邮件问数就别开"
+quotaCost: 高
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+  - 浏览器 Cookie
+external: true

@@ -1,0 +1,20 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: call-follow-ups
+name: "Call Follow-Ups"
+tagline: "客户电话打完，帮你写好跟进邮件和双方承诺清单"
+category: 日常
+author:
+  name: "Daniel Brill"
+  url: https://x.ai/bot/marketplace/bots/call-follow-ups
+templateUrl: https://x.ai/bot/estQ8HWdKqhheDNmOGjcy
+addedAt: 2026-11-15
+prerequisites:
+  - "自动盯新通话要连 Gong 或 Granola；没有就把会议转录贴进来"
+  - "定时任务每 30 分钟跑一次，默认暂停，开之前建议改成每天一次"
+  - "开了以后会自动往你的邮箱草稿箱里放草稿，不会发出去"
+quotaCost: 高
+permissions:
+  - 定时自动运行
+  - 外部账号
+  - 代我发消息
+external: true

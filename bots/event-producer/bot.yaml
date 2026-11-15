@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: event-producer
+name: "Event Producer"
+tagline: "办活动的流程表、嘉宾名单和当天清单，它一条龙排好"
+category: 日常
+author:
+  name: "Jenna Nanpei"
+  url: https://x.ai/bot/marketplace/bots/event-producer
+templateUrl: https://x.ai/bot/wtEIGNZ8oipDDVQTDHMPB
+addedAt: 2026-11-15
+prerequisites:
+  - "告诉它活动名称和日期就能开始，不用连任何应用"
+  - "嘉宾名单存在共享云电脑上，办完可以让它删"
+  - "活动结束后记得关掉倒计时检查"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

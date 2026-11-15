@@ -1,0 +1,20 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: seo-aeo-desk
+name: "SEO & AEO Desk"
+tagline: "给个网址就能找选题、写内容简报，兼顾搜索和 AI 回答"
+category: 调研
+author:
+  name: "Adam Tanguay"
+  url: https://x.ai/bot/marketplace/bots/seo-aeo-desk
+templateUrl: https://x.ai/bot/0IhyZWxwbf2cFmsmroZQL
+addedAt: 2026-11-15
+prerequisites:
+  - "你的网站网址"
+  - "周报要 Google Search Console 或它的导出，没有就只做选题"
+  - "面向 Google 搜索和英文 AI 回答，做百度或公众号帮助有限"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true
