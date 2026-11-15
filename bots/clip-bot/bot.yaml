@@ -1,7 +1,7 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: clip-bot
 name: "Clip Bot"
-nameZh: "短片剪辑师"
+nameZh: "切片剪辑师"
 tagline: "把长视频里最值得看的片段剪成带字幕的短片"
 category: 内容
 author:

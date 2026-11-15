@@ -94,6 +94,10 @@ describe('rosterLine：小队卡上的那行名单', () => {
   it('没有队长：把名字连起来', () => {
     expect(rosterLine([{ name: '甲' }, { name: '乙' }, { name: '丙' }])).toBe('甲 · 乙 · 丙')
   })
+  it('没有队长、每人都有队内岗位：列岗位；有人没写岗位就还是列名字', () => {
+    expect(rosterLine([{ name: 'Distro Bot', nameZh: '增长操盘手', title: '增长' }, { name: 'Sell Bot', title: '销售' }])).toBe('增长 · 销售')
+    expect(rosterLine([{ name: 'Distro Bot', nameZh: '增长操盘手', title: '增长' }, { name: 'Sell Bot' }])).toBe('增长操盘手 · Sell Bot')
+  })
   it('有中文叫法的用中文叫法，这一行不带原名', () => {
     expect(rosterLine([{ name: 'Project Manager', nameZh: '项目经理', title: '队长', lead: true }, { name: 'A' }, { name: 'B' }])).toBe('队长 项目经理 · 专员 2 个')
     expect(rosterLine([{ name: 'Clip Bot', nameZh: '短片剪辑师' }, { name: '下载专家', nameZh: null }])).toBe('短片剪辑师 · 下载专家')

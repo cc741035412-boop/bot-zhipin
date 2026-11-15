@@ -1,7 +1,8 @@
 # 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: distro-bot
 name: "Distro Bot"
-tagline: "出海产品的增长操盘手：盯投放、出素材、追热点、写开发信"
+nameZh: "增长操盘手"
+tagline: "给出海产品做增长：盯投放、出素材、追热点、写开发信"
 category: 市场
 author:
   name: "Shub Gaur"

@@ -105,7 +105,8 @@ export function lineup(members: readonly LineupMember[], formation: string, vari
  */
 export function rosterLine(members: readonly { name: string; nameZh?: string | null; title?: string | null; lead?: boolean }[]): string {
   const lead = members.find((member) => member.lead)
-  if (!lead) return members.map((member) => displayName(member)).join(' · ')
+  // 没有队长：每人都写了队内岗位就列岗位（短，一行放得下，也比名字更说明分工），否则列名字
+  if (!lead) return members.every((member) => member.title) ? members.map((member) => member.title).join(' · ') : members.map((member) => displayName(member)).join(' · ')
   const rest = members.length - 1
   return `${lead.title || '队长'} ${displayName(lead)}${rest > 0 ? ` · 专员 ${rest} 个` : ''}`
 }

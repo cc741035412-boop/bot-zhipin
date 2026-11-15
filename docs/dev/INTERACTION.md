@@ -592,7 +592,7 @@ DOM 顺序：「返回货架」→ `.detail-layout`（头部 `header.detail-head
 8. **发布边界**：LB8 仅在 feat/raycast-look 提交，不推送、不开 PR；实际检查结果以交付说明为准。
 9. **首页第二批**（主推的编辑点评、专题、工具栏、分组、专题筛选、地址栏还原）：仓库里的 `tests/e2e/home.spec.mjs`，排序和分组的纯函数另有单测 `tests/unit/shelf.test.mjs`。用例只从页面上读数，示例货架和真实货架都能跑。示例货架每个分组只有一个 Bot、折不起来，所以「展开 / 收起」和「退回来还在」这两条在它上面会跳过；要验这两条，把 `E2E_BASE_URL` 指到真实数据的预览再跑这个文件。
 
-10. **中文叫法**（§3.4）：`tests/e2e/name-zh.spec.mjs` + `tests/unit/bot-name.test.mjs`。真实货架上再目视一遍：最长的几个名字（「Grok Bot 入门教练 Grok Bot Tutorial」「记忆卡制作员 Flashcard Forge Desk」）在两列、单列、390 和 320 宽的卡片里都只占一行，「导入」没被挤走。
+10. **中文叫法**（§3.4）：`tests/e2e/name-zh.spec.mjs` + `tests/unit/bot-name.test.mjs`。真实货架上再目视一遍：最长的几个名字（「Grok Bot 入门教练 Grok Bot Tutorial」「复习卡制作员 Flashcard Forge Desk」）在两列、单列、390 和 320 宽的卡片里都只占一行，「导入」没被挤走。
 
 ## 13. 标签页图标（favicon）
 

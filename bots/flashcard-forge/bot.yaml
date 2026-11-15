@@ -1,7 +1,7 @@
 # 外部收录（社区模板）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: flashcard-forge
 name: "Flashcard Forge Desk"
-nameZh: "记忆卡制作员"
+nameZh: "复习卡制作员"
 tagline: "把笔记和资料做成能导入 Anki 的记忆卡，每张标出处"
 category: 学习
 author:
