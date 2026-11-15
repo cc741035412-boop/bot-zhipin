@@ -54,7 +54,7 @@ for (const scheme of ['light', 'dark']) {
     expect(warnings).toEqual([])
   })
 
-  test(`${scheme}：八类标签和来源标签实际 CSS 对比度 ≥4.5，首页/详情一致`, async ({ page }) => {
+  test(`${scheme}：九个分组的标签和来源标签实际 CSS 对比度 ≥4.5，首页/详情一致`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme })
     await page.goto('/')
     const homeColor = await page.locator(`[data-testid="bot-card"][data-slug="${weekly}"] .category-tag`).evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])
@@ -91,7 +91,8 @@ for (const scheme of ['light', 'dark']) {
       })
       return { categories, source: [...document.querySelectorAll('.source-tag')].map(sample) }
     }, CATEGORY_COLORS)
-    expect(new Set(colors.categories.map((c) => c.bg.join(','))).size).toBe(8)
+    expect(new Set(colors.categories.map((c) => c.bg.join(','))).size).toBe(Object.keys(CATEGORY_COLORS).length)
+    expect(Object.keys(CATEGORY_COLORS)).toHaveLength(9)
     for (const color of [...colors.categories, ...colors.source]) {
       expect(color.ratio, `${color.name ?? '来源标签'} ${color.fg} / ${color.bg}`).toBeGreaterThanOrEqual(4.5)
     }

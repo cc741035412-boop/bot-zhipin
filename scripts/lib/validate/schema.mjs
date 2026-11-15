@@ -3,6 +3,8 @@ const decode = (key) => key.replace(/~1/g, '/').replace(/~0/g, '~')
 const parts = (pointer) => pointer.split('/').slice(1).map(decode)
 const valueAt = (data, pointer) => parts(pointer).reduce((value, key) => value?.[key], data)
 const show = (value) => JSON.stringify(value) ?? '（未填写）'
+// name、tagline、台词、介绍这类会显示在页面上的文字共用这一条规则。
+const NO_MARKUP = '^[^<>"]*$'
 
 function distance(a, b) {
   let row = Array.from({ length: b.length + 1 }, (_, i) => i)
@@ -14,31 +16,46 @@ function distance(a, b) {
   return row[b.length]
 }
 
-function propertySchema(pointer) {
-  return parts(pointer).reduce((node, key) => node?.properties?.[key] ?? node?.items, schema)
+// 「一句话或列表」两种写法都接受的字段：按实际类型只留一个分支的错误，避免一处错误出现三条。
+const BOT_UNIONS = {
+  prerequisites: {
+    expect: '要求 1～200 字的字符串，或至少一项、每项 1～100 字的字符串列表',
+    fix: (where) => `将 ${where} 填为实际准备事项；无需准备时写 prerequisites: 无。`,
+    empty: (where) => `在 ${where} 中补充实际内容；无需准备时写 prerequisites: 无。`,
+  },
+  pitch: {
+    expect: '要求一句 2～30 字的话，或 1～3 句互不相同的话组成的列表',
+    fix: (where) => `把 ${where} 写成一句话，或写成最多 3 行的列表（每行以「- 」开头）；不想写台词就删掉 pitch。`,
+  },
 }
 
-export function validateSchema(bot, report) {
-  if (check(bot.data)) return
+/**
+ * 把 Ajv 的错误翻译成中文「位置 / 问题 / 改法」。Bot、小队、策展三份 schema 共用。
+ * check 是预编译的校验函数；doc 是文件名（如 bot.yaml）；schemaFile 是 schema 的仓库路径。
+ */
+export function reportSchemaErrors({ check, schema, data, doc, schemaFile, unions = {}, report }) {
+  if (check(data)) return
+  const propertySchema = (pointer) => parts(pointer).reduce((node, key) => node?.properties?.[key] ?? node?.items, schema)
   const selected = new Map()
   for (const error of check.errors) {
     if (error.keyword === 'if') continue
-    // anyOf 只保留与实际类型相符的分支，避免一处错误出现三条。
-    if (error.schemaPath.startsWith('#/properties/prerequisites/anyOf')) {
-      const value = bot.data.prerequisites
+    const union = Object.keys(unions).find((field) => error.schemaPath.startsWith(`#/properties/${field}/anyOf`))
+    if (union) {
+      const value = data?.[union]
       const branch = typeof value === 'string' ? 0 : Array.isArray(value) ? 1 : null
       if (branch === null && error.keyword !== 'anyOf') continue
-      if (branch !== null && !error.schemaPath.startsWith(`#/properties/prerequisites/anyOf/${branch}/`)) continue
+      if (branch !== null && !error.schemaPath.startsWith(`#/properties/${union}/anyOf/${branch}/`)) continue
     }
     let pointer = error.instancePath
     if (error.keyword === 'required') pointer += `/${error.params.missingProperty}`
     if (error.keyword === 'additionalProperties') pointer += `/${error.params.additionalProperty}`
-    if (!selected.has(pointer) || (error.keyword === 'pattern' && ['/name', '/tagline', '/pitch'].includes(pointer))) selected.set(pointer, error)
+    if (!selected.has(pointer) || (error.keyword === 'pattern' && error.params.pattern === NO_MARKUP)) selected.set(pointer, error)
   }
   for (const [pointer, error] of selected) {
-    const where = parts(pointer).join('.') || '整个 bot.yaml'
-    const value = valueAt(bot.data, pointer)
+    const where = parts(pointer).join('.') || `整个 ${doc}`
+    const value = valueAt(data, pointer)
     const node = propertySchema(pointer)
+    const union = unions[parts(pointer)[0]]
     let problem, fix
     switch (error.keyword) {
       case 'required': {
@@ -48,14 +65,14 @@ export function validateSchema(bot, report) {
         problem = `缺少必填字段 ${where}${label ? `（${label}）` : ''}`
         fix = options
           ? `加一行 ${field}: ${options[Math.floor(options.length / 2)]}（可选值：${options.join('、')}）`
-          : `在 ${parts(error.instancePath).join('.') || 'bot.yaml 顶层'} 加上 ${field} 字段${node?.description ? `：${node.description}` : '，填写实际内容'}。`
+          : `在 ${parts(error.instancePath).join('.') || `${doc} 顶层`} 加上 ${field} 字段${node?.description ? `：${node.description}` : '，填写实际内容'}。`
         break
       }
       case 'additionalProperties': {
         const name = error.params.additionalProperty
         if (name.length > 64) {
           problem = `不认识的字段 ${where}`
-          fix = `删除字段 ${name}，只使用 schema/bot.schema.json 中定义的字段。`
+          fix = `删除字段 ${name}，只使用 ${schemaFile} 中定义的字段。`
           break
         }
         const legal = Object.keys(error.parentSchema.properties || {})
@@ -81,7 +98,7 @@ export function validateSchema(bot, report) {
             ? `templateUrl 当前值 ${show(value)}，必须以 https://x.ai/bot/ 开头`
             : `templateUrl 当前值 ${show(value)} 格式不正确；要求 https://x.ai/bot/ 后接字母、数字、下划线或短横线组成的非空 ID`
           fix = '将 templateUrl 替换成 Grok Bot 分享得到的完整模板链接，不加空格、查询参数或额外路径。'
-        } else if (['name', 'tagline', 'pitch'].includes(where)) {
+        } else if (error.params.pattern === NO_MARKUP) {
           problem = `${where} 不能使用字符 <、>、"（英文双引号）`
           fix = `删除 ${where} 中的 <、>、"，用纯文字描述，不要填写 HTML。`
         } else if (where === 'addedAt') {
@@ -97,12 +114,16 @@ export function validateSchema(bot, report) {
         fix = `把 ${where} 改成 ${error.params.type} 类型，不要用空值代替实际内容。`
         break
       case 'anyOf':
-        problem = `${where} 当前值 ${show(value)} 格式不正确；要求 1～200 字的字符串，或至少一项、每项 1～100 字的字符串列表`
-        fix = `将 ${where} 填为实际准备事项；无需准备时写 prerequisites: 无。`
+        problem = `${where} 当前值 ${show(value)} 格式不正确；${union?.expect || '要求一句话或一个列表'}`
+        fix = union?.fix(where) || `按照 ${schemaFile} 中 ${where} 的定义修改。`
         break
       case 'minItems':
         problem = `${where} 当前值 ${show(value)}，要求至少 ${error.params.limit} 项`
-        fix = `在 ${where} 中补充实际内容；无需准备时写 prerequisites: 无。`
+        fix = union?.empty?.(where) || `在 ${where} 中至少写 ${error.params.limit} 项；用不到这个字段就整段删掉。`
+        break
+      case 'maxItems':
+        problem = `${where} 现在有 ${Array.isArray(value) ? value.length : '多于上限的'} 项，最多 ${error.params.limit} 项`
+        fix = `删掉 ${where} 里多出来的，只留最重要的 ${error.params.limit} 项。`
         break
       case 'uniqueItems':
         problem = `${where} 当前值 ${show(value)} 含重复项；要求每个值只出现一次`
@@ -110,8 +131,15 @@ export function validateSchema(bot, report) {
         break
       default:
         problem = `${where} 当前值 ${show(value)} 不符合 ${error.keyword} 要求`
-        fix = `按照 schema/bot.schema.json 中 ${where} 的定义修改。`
+        fix = `按照 ${schemaFile} 中 ${where} 的定义修改。`
     }
-    report(bot.yamlPath, where, problem, fix)
+    report(where, problem, fix)
   }
+}
+
+export function validateSchema(bot, report) {
+  reportSchemaErrors({
+    check, schema, data: bot.data, doc: 'bot.yaml', schemaFile: 'schema/bot.schema.json', unions: BOT_UNIONS,
+    report: (where, problem, fix) => report(bot.yamlPath, where, problem, fix),
+  })
 }

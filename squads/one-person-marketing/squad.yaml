@@ -1,0 +1,38 @@
+# 小队：成员都是货架上的普通 Bot，这里只是一张编制表。字段规则见 schema/squad.schema.json。
+# flow、setup 目前只有示例条目，kickoff、tryout、notes 还没写：等核对过原套装的配置后再补全。
+slug: one-person-marketing
+name: 一个人的市场部
+tagline: 一个项目经理带四个专员：盯竞品、定定位、改官网、看数据
+formation: 带队
+origin: 原作者成套
+author:
+  name: Josh Kim
+  url: https://x.ai/bot/marketplace
+addedAt: 2026-11-15
+members:
+  - bot: project-manager
+    title: 队长
+    does: 把上线日期倒排成计划，把活派给专员，盯进度
+    lead: true
+  - bot: market-researcher
+    title: 竞品调研
+    does: 每周盯竞品的广告、落地页和定价
+  - bot: product-marketer
+    title: 定位文案
+    does: 先定产品定位，再照着写落地页和广告文案
+  - bot: website-ops
+    title: 官网运维
+    does: 给网站做体检，要改的地方开成 PR
+  - bot: marketing-analyst
+    title: 数据分析
+    does: 把投放数据做成周报月报，数字都标来源
+flow:
+  - from: market-researcher
+    to: product-marketer
+    what: 竞品简报
+setup:
+  - title: 放进同一个分区
+    detail: 在 Grok Bot 侧栏右键这几个 Bot，选 Move to new section。
+missing:
+  - name: Performance Marketer
+    does: 写广告简报并跟投放

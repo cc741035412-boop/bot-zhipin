@@ -6,7 +6,8 @@ import { botYamlSizeError } from '../yaml-limits.mjs'
 
 const DAY = 24 * 60 * 60 * 1000
 
-function validateDate(bot, now, report) {
+/** addedAt 是真实日期且不晚于明天（北京时间）。Bot 和小队共用。 */
+export function validateDate(bot, now, report) {
   const value = bot.data.addedAt
   // 非字符串或不符合 YYYY-MM-DD 的值由 schema 报告。
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return
@@ -97,16 +98,21 @@ export function validateModels(bots, { template, now = new Date(), others = [], 
   return { errors, warnings }
 }
 
-export function formatResult({ bots, errors, warnings }) {
+/** squads 只有全量校验（Bot + 小队 + 策展）才会带；只校验 Bot 时不打印小队数。 */
+export function formatResult({ bots, squads, errors, warnings }) {
   const lines = []
   for (const [items, mark, label, advice] of [[errors, '✗', '问题', '改法'], [warnings, '!', '提醒', '建议']]) {
     for (const item of items) lines.push(`${mark} ${item.file}\n  位置：${item.where}\n  ${label}：${item.problem}\n  ${advice}：${item.fix}\n`)
   }
   if (errors.length) {
-    const failedBots = new Set(errors.map((item) => item.file.split('/')[1])).size
-    lines.push(`校验未通过：${failedBots} 个 Bot 共 ${errors.length} 处错误${warnings.length ? `（另有 ${warnings.length} 条提醒）` : ''}。按上面的「改法」逐条修改后，重新运行 npm run validate。`)
+    const failed = (prefix) => new Set(errors.filter((item) => item.file.startsWith(prefix)).map((item) => item.file.split('/')[1])).size
+    const failedBots = failed('bots/'), failedSquads = failed('squads/')
+    const curation = errors.some((item) => item.file.startsWith('curation/'))
+    // 只有 Bot 出错时写法和以前一样；小队、策展出错才追加在后面。
+    const scope = [(failedBots || !(failedSquads || curation)) && `${failedBots} 个 Bot`, failedSquads && `${failedSquads} 支小队`, curation && '策展文件'].filter(Boolean).join('、')
+    lines.push(`校验未通过：${scope} 共 ${errors.length} 处错误${warnings.length ? `（另有 ${warnings.length} 条提醒）` : ''}。按上面的「改法」逐条修改后，重新运行 npm run validate。`)
   } else {
-    lines.push(`✓ 校验通过：${bots.length} 个 Bot（其中 ${bots.filter((bot) => bot.data?.external === true).length} 个外部收录）`)
+    lines.push(`✓ 校验通过：${bots.length} 个 Bot（其中 ${bots.filter((bot) => bot.data?.external === true).length} 个外部收录）${squads ? `，${squads.length} 支小队` : ''}`)
   }
   return lines.join('\n')
 }

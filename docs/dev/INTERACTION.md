@@ -69,7 +69,7 @@
 
 **眼睛**：所有活体用恒定深色眼睛 `--bz-eye`。唯一例外是官方色近乎纯黑的 Bot（`darkSwap` 会换色的那些，L < 0.04）：浅色主题下身体是黑的，黑眼睛看不见，`DefaultAvatar` 给它加 `bz-live-ink` 类，CSS 把 `--bz-eye` 换成奶白 `#f1efe9`；深色主题下身体已换成奶白，眼睛照旧是深色（决策 32）。
 
-分类映射唯一位于 `theme/color.ts` 的 `CATEGORY_COLORS`：调研紫 `#8b5cf6`、定义橙 `#ff6a13`、评审粉 `#ff2e93`、AI 评测青绿 `#14b8a6`、学习琥珀 `#f5a623`、求职棕 `#9a6a3a`、日常薄荷绿 `#34d399`、基础设施蓝 `#3b82f6`。分类名来自现有 Bot 数据，schema 仍是合法枚举真源；单测验证映射完整覆盖枚举。`categoryStyle(category)` 仅提供 `--bz-category-color`，分类标签和筛选胶囊的小圆点共用；未知分类回退中性灰。分类的**顺序**由 `theme/enums.data.mjs`（构建时 `loadEnums()`）给到浏览器，不在页面代码里另写一份。
+岗位映射唯一位于 `theme/color.ts` 的 `CATEGORY_MASCOTS`（`CATEGORY_COLORS` 由它派生）：产品橙 `#ff6a13` blob、市场粉 `#ff2e93` sparkle、销售青绿 `#14b8a6` star、内容紫 `#8b5cf6` tablet、运营琥珀 `#f5a623` hex、管家蓝 `#3b82f6` cloud、个人薄荷绿 `#34d399` teardrop，每只和招牌砖墙里对应那只同色同形（决策 33）。岗位名来自现有 Bot 数据，schema 仍是合法枚举真源；单测验证映射完整覆盖枚举。`categoryStyle(category)` 仅提供 `--bz-category-color`，岗位标签和筛选胶囊的小圆点共用；未知岗位回退中性灰。岗位的**顺序**由 `theme/enums.data.mjs`（构建时 `loadEnums()`）给到浏览器，不在页面代码里另写一份。
 
 ### 1.1 v5 阶梯（写在 `theme/styles/tokens.css` 最前面）
 

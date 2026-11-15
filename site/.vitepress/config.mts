@@ -20,7 +20,8 @@ export default defineConfig({
   lastUpdated: false,
   async buildEnd(config) { await generateHeaders(config.outDir) },
   transformPageData(pageData) {
-    const bot = pageData.params?.bot
+    // Bot 详情页和小队页都用自己的名字当标题、一句话介绍当 description。
+    const bot = pageData.params?.bot || pageData.params?.squad
     if (bot) {
       pageData.title = bot.name
       // 客户端路由切换时 VitePress 用 setAttribute 写入它（安全）；服务端那行不转义的
@@ -37,7 +38,7 @@ export default defineConfig({
   // VitePress 1.6.4 的 SSR 会过滤 frontmatter.head 中的 description。
   // 在最终 head 阶段补回，走属性转义，并覆盖默认 description，避免重复 meta。
   transformHead({ pageData }) {
-    return pageData.params?.bot
+    return pageData.params?.bot || pageData.params?.squad
       ? (pageData.frontmatter.head as HeadConfig[]).filter(([tag, attrs]) => tag === 'meta' && attrs?.name === 'description')
       : []
   },

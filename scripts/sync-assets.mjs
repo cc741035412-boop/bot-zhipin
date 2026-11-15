@@ -1,5 +1,6 @@
 // 把每个 Bot 的截图和头像复制到 site/public/bot-assets/<slug>/，网站用 /bot-assets/<slug>/<文件名> 引用。
-// 同时生成 site/public/api-data/slugs.json（全部 slug），计数接口靠它判断 slug 是否存在，见 docs/dev/API.md。
+// 同时生成 site/public/api-data/slugs.json（全部 slug），计数接口靠它判断 slug 是否存在，见 docs/dev/API.md；
+// 以及 squad-slugs.json（全部小队 slug），小队页的下架兜底（functions/squads/[slug].ts）靠它。
 // 这两个目录都是生成物，已 gitignore；每次 dev / build 前重建。
 import { copyFileSync, lstatSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, join, relative, resolve, sep } from 'node:path'
@@ -9,8 +10,9 @@ import { ROOT, BOTS_DIR, loadAllBots, loadBot } from './lib/load-bots.mjs'
 import { SCHEMA_SHA256 } from './lib/validate/generated/bot-schema.mjs'
 import { MAX_IMAGE_BYTES } from './lib/validate/images.mjs'
 import { LIMITS } from './submission/bundle-core.mjs'
-import { explanations } from '../site/.vitepress/data/bots.mjs'
-import { isPublicBot } from './lib/public-bot.mjs'
+import { explanations, shelfData } from '../site/.vitepress/data/bots.mjs'
+import { isPublicBot, isPublicSquad } from './lib/public-bot.mjs'
+import { loadAllSquads, squadsDirFor } from './lib/load-squads.mjs'
 
 const OUT = join(ROOT, 'site', 'public', 'bot-assets')
 const API_DATA = join(ROOT, 'site', 'public', 'api-data')
@@ -25,11 +27,14 @@ function safeFile(root, file) {
   })
 }
 
-export function syncAssets({ botsDir = BOTS_DIR, out = OUT, apiData = API_DATA } = {}) {
+export function syncAssets({ botsDir = BOTS_DIR, squadsDir = squadsDirFor(botsDir), out = OUT, apiData = API_DATA } = {}) {
   rmSync(out, { recursive: true, force: true })
   const bots = loadAllBots(botsDir).filter(isPublicBot)
   mkdirSync(apiData, { recursive: true })
   writeFileSync(join(apiData, 'slugs.json'), JSON.stringify(bots.map((b) => b.slug)) + '\n')
+  // 和网站生成页面用同一个口径（shelfData），清单里有的小队才有页面。
+  const squads = shelfData(bots, { squads: loadAllSquads(squadsDir).filter(isPublicSquad), curation: {} }).squads.map((squad) => squad.slug)
+  writeFileSync(join(apiData, 'squad-slugs.json'), JSON.stringify(squads) + '\n')
   let commit = process.env.CF_PAGES_COMMIT_SHA
   if (!commit) {
     try { commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() } catch { /* 仓库导出包没有 git 元数据 */ }
@@ -61,10 +66,10 @@ export function syncAssets({ botsDir = BOTS_DIR, out = OUT, apiData = API_DATA }
       n++
     }
   }
-  return { bots: bots.length, images: n }
+  return { bots: bots.length, squads: squads.length, images: n }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  const { bots, images } = syncAssets()
-  console.log(`[sync-assets] ${bots} 个 Bot；已复制 ${images} 个图片文件到 site/public/bot-assets/，已写 site/public/api-data/slugs.json`)
+  const { bots, squads, images } = syncAssets()
+  console.log(`[sync-assets] ${bots} 个 Bot、${squads} 支小队；已复制 ${images} 个图片文件到 site/public/bot-assets/，已写 site/public/api-data/slugs.json 和 squad-slugs.json`)
 }

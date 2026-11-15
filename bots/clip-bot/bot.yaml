@@ -2,7 +2,7 @@
 slug: clip-bot
 name: "Clip Bot"
 tagline: "把长视频里最值得看的片段剪成带字幕的短片"
-category: 日常
+category: 内容
 author:
   name: "This Week in AI"
   url: https://x.ai/bot/marketplace/bots/clip-bot

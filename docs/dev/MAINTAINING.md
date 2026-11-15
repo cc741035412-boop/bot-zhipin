@@ -6,7 +6,7 @@
 |---|---|---|
 | 网站投稿（默认） | PR 作者是 `bot-zhipin-submit[bot]`，分支 `submission/web-<数字id>-<slug>`，标题「新增 Bot：…」或「更新 Bot：…」；提交作者是投稿人本人；已开启自动合并 | 学员在 `/submit` 登录后提交，`functions/api/submit/` 建 PR。CI 自动运行，不用点批准运行 |
 | Issue 表单（备用） | Issue 带 `投稿` 标签，几十秒后 Issue 下出现自动回复；通过的会开一个 `submission/issue-<号>` 分支的 PR，作者是 github-actions | `.github/workflows/submission.yml`。网站投稿关闭或学员打不开投稿页时用 |
-| 自己 fork 提 PR | 普通 PR，只改 `bots/<slug>/` | 外部贡献者改了 `bots/` 以外的文件，CI 的范围检查会直接失败 |
+| 自己 fork 提 PR | 普通 PR，只改 `bots/<slug>/`，或只改 `squads/<slug>/squad.yaml`（投稿小队） | 外部贡献者改了这两处以外的文件（包括 `curation/`），CI 的范围检查会直接失败 |
 
 ## 审核一个网站投稿 PR
 
@@ -30,9 +30,28 @@
 
 注意：维护者自己提的 PR（比如改网站代码）作者是你本人，GitHub 不允许自己批准自己，只能用管理员身份绕过规则合并。投稿 PR 的作者不是你，走正常的批准流程即可。规则集要求代码所有者（`.github/CODEOWNERS`）批准。
 
+## 审核一个小队 PR
+
+小队只能走 fork + PR，PR 里应该只有 `squads/<slug>/squad.yaml` 一个文件（多了别的文件范围检查会失败）。
+
+1. 等 `validate-and-build` 通过：机器已经查过格式、成员都在货架上且不重复、`flow` 两头都是成员或 `you`、「带队」恰好一个队长。
+2. 人工核对：分工和交接是不是真的跑得通（对照各成员的详情页）；`kickoff`、`setup` 里有没有密钥、内部链接；`origin` 写得对不对（学员自己编的写「学员投稿」，照搬原作者成套发布的写「原作者成套」）。
+3. 已有小队被修改时，`addedAt` 和 `author.github` 不能变（CI 会拦）。
+
+## 策展（只有维护者能改）
+
+首页主推、推荐排序、专题和编辑点评都在 `curation/shelf.yaml`，文件里每一段都有注释；规则见 `schema/curation.schema.json`。改完运行 `npm run validate`：
+
+- `featured` 最多 3 个；`picks` 是「推荐」排序的置顶顺序，写在前面的先出现；`collections` 按写的顺序显示，每个 2 到 12 个 Bot；`editorNotes` 是 slug 对一句话。
+- 里面的 slug 必须是货架上的 Bot。写错了，或者那个 Bot 已经下架，校验会报错并指到具体位置（比如 `collections.1.bots.3`）。
+
 ## 下架
 
 提一个 PR 删掉 `bots/<slug>/`，合并后约 1 分钟首页消失；详情页由 `functions/bots/[slug].ts` 兜底，立即返回 404。
+
+**下架前先搜一下这个 slug 有没有被引用**：`grep -rn "<slug>" squads curation`。被小队或策展引用的 Bot 不能单独删，`npm run validate` 会失败。要在同一个 PR 里一起处理：从 `curation/shelf.yaml` 里删掉它；它所在的小队，要么去掉这个成员（剩下不到 2 个就整支下架），要么把它记到 `missing` 里。
+
+小队下架同理：提 PR 删掉 `squads/<slug>/`，小队页由 `functions/squads/[slug].ts` 兜底返回 404；成员 Bot 不受影响。
 
 ## 网站投稿的开关与排障
 

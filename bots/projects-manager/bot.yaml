@@ -2,7 +2,7 @@
 slug: projects-manager
 name: "Projects Manager"
 tagline: "用 Notion 看板给你的多个 Bot 派活、盯进度"
-category: 基础设施
+category: 管家
 author:
   name: "Eric Zakariasson"
   url: https://x.ai/bot/marketplace/bots/projects-manager

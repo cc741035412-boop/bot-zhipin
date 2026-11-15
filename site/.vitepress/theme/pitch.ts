@@ -26,10 +26,22 @@ export const nextPoke = createPokes()
 // 跨卡片、跨页面共享：全页只允许一个头像发言。
 export const activePitch = ref<symbol | null>(null)
 const previous = new Map<string, string>()
-export function nextPitch(slug: string, pitch?: string | null) {
-  if (pitch) return pitch
+const turn = new Map<string, number>()
+/**
+ * 这次该说哪一句。pitch 可以是一句话，也可以是几句话的数组（摘要里的 pitches）。
+ * 有专属台词：在它自己的几句里按顺序轮换，第一次说第一句，多于一句时不会连说同一句。
+ * 没有专属台词：从通用池里随机挑，不连续重复。
+ */
+export function nextPitch(slug: string, pitch?: string | readonly string[] | null, random: () => number = Math.random) {
+  const own = (typeof pitch === 'string' ? [pitch] : Array.isArray(pitch) ? pitch : [])
+    .filter((text): text is string => typeof text === 'string' && text !== '')
+  if (own.length) {
+    const index = (turn.get(slug) ?? 0) % own.length
+    turn.set(slug, index + 1)
+    return own[index]
+  }
   const choices = DEFAULT_PITCHES.filter((text) => text !== previous.get(slug))
-  const text = choices[Math.floor(Math.random() * choices.length)] || DEFAULT_PITCHES[0]
+  const text = choices[Math.floor(random() * choices.length)] || DEFAULT_PITCHES[0]
   previous.set(slug, text)
   return text
 }

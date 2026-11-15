@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jakob52123/bot-zhipin/schema/curation.schema.json",
+  "title": "curation/shelf.yaml",
+  "description": "维护者的策展：首页主推、推荐排序、专题、编辑点评。里面的 slug 都必须是货架上的 Bot。",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "featured": {
+      "description": "首页主推，最多 3 个",
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["bot", "note"],
+        "properties": {
+          "bot": { "description": "货架上这个 Bot 的 slug", "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "minLength": 2, "maxLength": 40 },
+          "note": { "description": "为什么推它", "type": "string", "minLength": 4, "maxLength": 80 }
+        }
+      }
+    },
+    "picks": {
+      "description": "「推荐」排序的置顶顺序，写 Bot 的 slug",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "minLength": 2, "maxLength": 40 }
+    },
+    "collections": {
+      "description": "专题，按写的顺序显示",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["slug", "title", "blurb", "bots"],
+        "properties": {
+          "slug": { "description": "专题的英文短名，只能用小写字母、数字和短横线", "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "minLength": 2, "maxLength": 40 },
+          "title": { "description": "专题标题", "type": "string", "minLength": 2, "maxLength": 12, "pattern": "^[^<>\"]*$" },
+          "blurb": { "description": "一句话说明这个专题", "type": "string", "minLength": 4, "maxLength": 40, "pattern": "^[^<>\"]*$" },
+          "bots": {
+            "description": "专题里的 Bot，2 到 12 个，写 slug",
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 12,
+            "uniqueItems": true,
+            "items": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "minLength": 2, "maxLength": 40 }
+          }
+        }
+      }
+    },
+    "editorNotes": {
+      "description": "详情页的「编辑点评」：Bot 的 slug 对应一句话",
+      "type": "object",
+      "additionalProperties": { "type": "string", "minLength": 4, "maxLength": 100 }
+    }
+  }
+}

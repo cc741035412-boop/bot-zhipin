@@ -54,15 +54,19 @@ export function validateContent(bot, template, report) {
   }
 }
 
+// 台词可以是一句话，也可以是几句话的列表。
+const pitchLines = (value) => typeof value === 'string' ? [value] : Array.isArray(value) ? value : []
+
 export function validateTemplate(bot, template, report) {
   const data = bot.data
   if (data) {
+    const examples = pitchLines(template.data.pitch)
     const fields = [
       ['slug', data.slug === template.data.slug],
       ['templateUrl', typeof data.templateUrl === 'string' && data.templateUrl.includes('REPLACE-ME')],
       ['author.github', data.author?.github === template.data.author.github],
       ['tagline', data.tagline === template.data.tagline],
-      ['pitch', data.pitch === template.data.pitch],
+      ['pitch', pitchLines(data.pitch).some((line) => examples.includes(line))],
     ]
     for (const [field, leftover] of fields) {
       if (leftover) report(bot.yamlPath, field, `${field} 还是模板里的示例`, `修改 bot.yaml 的 ${field}，填写你自己的真实内容${field === 'slug' ? '，并将 Bot 文件夹改成同名' : ''}。`)

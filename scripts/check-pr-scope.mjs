@@ -7,6 +7,8 @@ import YAML from 'yaml'
 
 const trusted = new Set(['OWNER', 'MEMBER', 'COLLABORATOR'])
 const botFile = /^bots\/[a-z0-9]+(?:-[a-z0-9]+)*\/.+$/
+// 小队只有一个文件：squads/<slug>/squad.yaml。
+const squadFile = /^squads\/[a-z0-9]+(?:-[a-z0-9]+)*\/squad\.yaml$/
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8', maxBuffer: 16 * 1024 * 1024, stdio: ['ignore', 'pipe', 'pipe'] })
 
 function addedAt(commit, file) {
@@ -39,11 +41,18 @@ export function checkPrScope({ base, head, association }) {
   for (let i = 0; i < entries.length - 1; i += 2) {
     const status = entries[i], file = entries[i + 1]
     const slug = file.split('/')[1] || ''
-    if (!botFile.test(file) || slug.length < 2 || slug.length > 40) {
-      errors.push(`越界文件：${JSON.stringify(file)}；外部投稿只能修改 bots/<slug>/，不能修改 bots/_template/、bots/LICENSE 或其他文件。`)
+    const validLength = slug.length >= 2 && slug.length <= 40
+    if (file.startsWith('squads/')) {
+      if (!squadFile.test(file) || !validLength) {
+        errors.push(`越界文件：${JSON.stringify(file)}；投稿小队只能新增或修改 squads/<slug>/squad.yaml 这一个文件，小队文件夹里不能放别的东西。`)
+        continue
+      }
+    } else if (!botFile.test(file) || !validLength) {
+      errors.push(`越界文件：${JSON.stringify(file)}；外部投稿只能修改 bots/<slug>/ 和 squads/<slug>/squad.yaml，不能修改 bots/_template/、bots/LICENSE、curation/ 或其他文件。`)
       continue
     }
-    if (file === `bots/${slug}/bot.yaml` && status !== 'A' && status !== 'D') {
+    // 已上架的 Bot 和小队：上架日期和投稿人账号都不能改。
+    if ((file === `bots/${slug}/bot.yaml` || file === `squads/${slug}/squad.yaml`) && status !== 'A' && status !== 'D') {
       try {
         if (addedAt(baseCommit, file) !== addedAt(headCommit, file)) {
           errors.push(`${file}：addedAt 是上架日期，不能修改；请保留 base 中的日期。`)
@@ -72,7 +81,7 @@ function main() {
       console.error(`✗ PR 范围检查未通过：\n${errors.join('\n')}`)
       process.exitCode = 1
     } else {
-      console.log(`✓ PR 范围检查通过：${trusted.has(values.association) ? '维护者不受投稿范围限制' : '改动均在允许的 Bot 目录内，已有 addedAt 未改动，作者未改动'}。`)
+      console.log(`✓ PR 范围检查通过：${trusted.has(values.association) ? '维护者不受投稿范围限制' : '改动均在允许的 Bot 目录和小队文件内，已有 addedAt 未改动，作者未改动'}。`)
     }
   } catch {
     console.error('✗ 无法检查 PR 范围。请在 git 仓库中运行，确保两个提交可读。\n用法：node scripts/check-pr-scope.mjs --base <ref> --head <ref> --association <GitHub author_association>')

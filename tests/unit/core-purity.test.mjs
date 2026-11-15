@@ -9,6 +9,9 @@ const entries = [
   ...['schema', 'content', 'images', 'secrets'].map((name) => `scripts/lib/validate/${name}.mjs`),
   'scripts/lib/submit-fields.mjs', 'scripts/submission/bundle-core.mjs',
   'scripts/lib/bundle-web.mjs', 'scripts/submission/screenshot-plan.mjs',
+  // V5：小队和策展的模型、校验、摘要也都是纯函数。
+  'scripts/lib/bot-summary.mjs', 'scripts/lib/squad-model.mjs', 'scripts/lib/squad-summary.mjs',
+  'scripts/lib/curation-summary.mjs', 'scripts/lib/validate/squads.mjs',
 ]
 function scan(file, seen = new Set()) {
   if (seen.has(file)) return

@@ -2,7 +2,7 @@
 slug: last30days
 name: "last30days"
 tagline: "查任何话题最近 30 天大家真实在说什么，按来源汇总"
-category: 调研
+category: 内容
 author:
   name: "Matt Van Horn"
   url: https://x.ai/bot/marketplace/bots/last30days

@@ -1,8 +1,11 @@
 import { expect, it } from 'vitest'
 import { buildBotModel } from '../../scripts/lib/bot-model.mjs'
-import { summarizeBot, permissionCopy, quotaCopy } from '../../scripts/lib/bot-summary.mjs'
-import { botSummaries, explanations, readBots } from '../../site/.vitepress/data/bots.mjs'
-import { loadAllBots, loadEnums } from '../../scripts/lib/load-bots.mjs'
+import { join } from 'node:path'
+import { summarizeBot, decorateSummary, pitchLines, permissionCopy, quotaCopy, ACCOUNT_PERMISSIONS, SELF_RUNNING_PERMISSION } from '../../scripts/lib/bot-summary.mjs'
+import { botSummaries, explanations, readBots, shelfData } from '../../site/.vitepress/data/bots.mjs'
+import { ROOT, loadAllBots, loadEnums } from '../../scripts/lib/load-bots.mjs'
+import { loadAllSquads } from '../../scripts/lib/load-squads.mjs'
+import { loadCuration } from '../../scripts/lib/load-curation.mjs'
 import { SITE } from '../../site/.vitepress/meta.mjs'
 
 const model = (extra = {}) => ({
@@ -14,7 +17,8 @@ it('摘要完整字段和默认值稳定', () => {
     slug: 'demo', name: '示例', tagline: '一句真实介绍', category: undefined,
     author: { name: '作者', github: 'demo', url: null, link: 'https://github.com/demo' },
     templateUrl: 'https://x.ai/bot/demo', addedAt: undefined, prerequisites: ['无'], quotaCost: undefined,
-    permissions: [], pitch: null, forkedFrom: null, forkedFromName: null, external: false, official: false,
+    permissions: [], needsAccount: false, selfRunning: false, pitch: null, pitches: [], about: null,
+    forkedFrom: null, forkedFromName: null, external: false, official: false,
     avatar: null, screenshots: [], skills: [], hasRoutines: false, routinesUrl: null, detailUrl: '/bots/demo',
   })
 })
@@ -28,10 +32,11 @@ it.each([
 ])('official 判定：%s', (_label, external, url, expected) => {
   expect(summarizeBot(model({ external, author: { name: '作者', url } })).official).toBe(expected)
 })
-it('所有现有 Bot 和 fixtures 的 wrapper 与共享摘要逐字相同', () => {
+it('没有策展和小队时，wrapper 等于共享摘要加默认装饰（所有现有 Bot 和 fixtures 逐字相同）', () => {
   for (const bots of [readBots(), loadAllBots('tests/fixtures/bots')]) {
     const names = new Map(bots.map((bot) => [bot.slug, bot.data.name]))
-    expect(JSON.stringify(botSummaries(bots))).toBe(JSON.stringify(bots.map((bot) => summarizeBot(bot, { names }))))
+    expect(JSON.stringify(botSummaries(bots, { squads: [], curation: {} })))
+      .toBe(JSON.stringify(bots.map((bot) => ({ ...summarizeBot(bot, { names }), editorNote: null, pick: null, squads: [] }))))
   }
 })
 it('作者主页优先于模板，GitHub 优先于主页', () => {
@@ -73,4 +78,95 @@ it('文案导出与 schema 枚举和 explanations 完全一致', () => {
   expect(explanations()).toEqual({ permissions: permissionCopy, quota: quotaCopy })
   expect(Object.keys(permissionCopy)).toEqual(enums.permissions)
   expect(Object.keys(quotaCopy)).toEqual(enums.quotaCosts)
+})
+
+// ---- V5：多句台词、about、两个提示、策展和小队的装饰 ----
+it('pitch 归一成 pitches：一句、多句、没写、类型不对', () => {
+  expect(summarizeBot(model({ pitch: '可以帮你' }))).toMatchObject({ pitch: '可以帮你', pitches: ['可以帮你'] })
+  expect(summarizeBot(model({ pitch: ['第一句话', '第二句话', '第三句话'] }))).toMatchObject({ pitch: '第一句话', pitches: ['第一句话', '第二句话', '第三句话'] })
+  expect(summarizeBot(model())).toMatchObject({ pitch: null, pitches: [] })
+  expect(summarizeBot(model({ pitch: '' }))).toMatchObject({ pitch: null, pitches: [] })
+  // 投稿预览的数据可能还没通过校验：不是文字的一律丢掉，不报错。
+  expect(summarizeBot(model({ pitch: 123 }))).toMatchObject({ pitch: null, pitches: [] })
+  expect(summarizeBot(model({ pitch: ['有效的一句', 5, null, ''] }))).toMatchObject({ pitch: '有效的一句', pitches: ['有效的一句'] })
+  expect(pitchLines({ a: 1 })).toEqual([])
+})
+it('about：没写是 null；写了就把缺的数组补成 []、缺的字符串补成 null', () => {
+  expect(summarizeBot(model()).about).toBe(null)
+  expect(summarizeBot(model({ about: {} })).about).toBe(null)
+  expect(summarizeBot(model({ about: '一句话' })).about).toBe(null)
+  expect(summarizeBot(model({ about: ['列表'] })).about).toBe(null)
+  expect(summarizeBot(model({ about: { intro: '你给它一份文档，它挑出问题交给你。' } })).about).toEqual({
+    intro: '你给它一份文档，它挑出问题交给你。', does: [], starters: [], skills: [], routines: [],
+    fit: null, notFit: null, cnFit: null, cnNote: null,
+  })
+  const full = {
+    intro: '你给它一份文档，它挑出问题交给你。', does: ['挑问题', '排顺序'], starters: ['帮我看这份文档'],
+    skills: [{ name: 'check', does: '逐条检查' }],
+    routines: [{ what: '检查更新', when: '每天早上', default: '关', quiet: '不打扰' }],
+    fit: '要自查的人', notFit: '还没动笔的人', cnFit: '好', cnNote: '直接贴正文不用连账号',
+  }
+  expect(summarizeBot(model({ about: full })).about).toEqual(full)
+  // 坏数据不让摘要报错：数组里只留类型对的，对象里缺的字段是 null。
+  expect(summarizeBot(model({ about: { does: '不是列表', starters: ['好的', 3], skills: ['字符串', { name: '只有名字' }], routines: [null, { what: '任务' }] } })).about).toEqual({
+    intro: null, does: [], starters: ['好的'], skills: [{ name: '只有名字', does: null }],
+    routines: [{ what: '任务', when: null, default: null, quiet: null }],
+    fit: null, notFit: null, cnFit: null, cnNote: null,
+  })
+})
+it('needsAccount 和 selfRunning 按权限判断，用到的权限名都在 schema 枚举里', () => {
+  const flags = (permissions) => { const { needsAccount, selfRunning } = summarizeBot(model({ permissions })); return { needsAccount, selfRunning } }
+  expect(flags([])).toEqual({ needsAccount: false, selfRunning: false })
+  expect(flags(['联网', '云电脑文件', '代我发消息'])).toEqual({ needsAccount: false, selfRunning: false })
+  expect(flags(['外部账号'])).toEqual({ needsAccount: true, selfRunning: false })
+  expect(flags(['浏览器 Cookie'])).toEqual({ needsAccount: true, selfRunning: false })
+  expect(flags(['定时自动运行'])).toEqual({ needsAccount: false, selfRunning: true })
+  expect(flags(['外部账号', '定时自动运行'])).toEqual({ needsAccount: true, selfRunning: true })
+  expect(flags('外部账号')).toEqual({ needsAccount: false, selfRunning: false })
+  const { permissions } = loadEnums()
+  for (const permission of [...ACCOUNT_PERMISSIONS, SELF_RUNNING_PERMISSION]) expect(permissions).toContain(permission)
+})
+it('decorateSummary：编辑点评、推荐序号、所在小队；不传数据时是默认值，不修改入参', () => {
+  const summary = summarizeBot(model())
+  const before = JSON.stringify(summary)
+  expect(decorateSummary(summary)).toEqual({ ...summary, editorNote: null, pick: null, squads: [] })
+  const squads = [
+    { slug: 'team-a', name: '甲队', detailUrl: '/squads/team-a', members: [{ bot: 'other', title: '队长', lead: true }, { bot: 'demo', title: '记录员', lead: false }] },
+    { slug: 'team-b', name: '乙队', detailUrl: '/squads/team-b', members: [{ bot: 'other', title: '成员', lead: false }] },
+    { slug: 'team-c', name: '丙队', detailUrl: '/squads/team-c', members: [{ bot: 'demo', title: '队长', lead: true }] },
+  ]
+  const decorated = decorateSummary(summary, { curation: { picks: ['other', 'demo'], editorNotes: { demo: '一句点评' } }, squads })
+  expect(decorated.editorNote).toBe('一句点评')
+  expect(decorated.pick).toBe(1)
+  expect(decorated.squads).toEqual([
+    { slug: 'team-a', name: '甲队', title: '记录员', lead: false, detailUrl: '/squads/team-a' },
+    { slug: 'team-c', name: '丙队', title: '队长', lead: true, detailUrl: '/squads/team-c' },
+  ])
+  expect(decorateSummary(summary, { curation: { picks: ['demo'], editorNotes: {} } }).pick).toBe(0)
+  expect(decorateSummary(summary, { curation: { picks: ['other'], editorNotes: { other: '别人的' } } })).toMatchObject({ pick: null, editorNote: null })
+  expect(JSON.stringify(summary)).toBe(before)
+})
+it('slug 撞上对象自带属性名时不会把内置函数当成点评', () => {
+  const summary = { ...summarizeBot(model()), slug: 'constructor' }
+  expect(decorateSummary(summary, { curation: { picks: [], editorNotes: {} } }).editorNote).toBe(null)
+})
+it('fixtures 的货架数据：装饰来自策展和小队文件', () => {
+  const { bots } = shelfData(loadAllBots(join(ROOT, 'tests/fixtures/bots')), {
+    squads: loadAllSquads(join(ROOT, 'tests/fixtures/squads')),
+    curation: loadCuration(join(ROOT, 'tests/fixtures/curation/shelf.yaml')).data,
+  })
+  const by = Object.fromEntries(bots.map((bot) => [bot.slug, bot]))
+  expect(by['demo-prd-reviewer']).toMatchObject({
+    pick: 1, editorNote: '示例点评：问题按严重程度排好了，先看前三条就够。', needsAccount: true, selfRunning: false,
+    squads: [{ slug: 'demo-squad', name: '示例·周会小队', title: '队长', lead: true, detailUrl: '/squads/demo-squad' }],
+  })
+  expect(by['demo-prd-reviewer'].about.does).toHaveLength(3)
+  expect(by['demo-weekly-digest']).toMatchObject({ pick: 0, editorNote: null, selfRunning: true, about: null, pitches: [] })
+  expect(by['demo-external']).toMatchObject({ pick: null, editorNote: null, pitch: '我是外面请来的，链接点开就能用。' })
+  expect(by['demo-external'].pitches).toHaveLength(2)
+  expect(by['demo-external'].about.routines).toEqual([
+    { what: '检查资料有没有更新', when: '每天早上 9 点', default: '关', quiet: '不打扰' },
+    { what: '发一份本周汇总', when: '每周五下午', default: '未说明', quiet: '照发' },
+  ])
+  expect(by['demo-external'].squads).toEqual([{ slug: 'demo-squad', name: '示例·周会小队', title: '外援', lead: false, detailUrl: '/squads/demo-squad' }])
 })

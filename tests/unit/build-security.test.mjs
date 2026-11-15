@@ -42,6 +42,23 @@ it('description 仅进入 head，SSR transformHead 恢复被 VitePress 过滤的
   expect(config.transformHead({ pageData: page })).toEqual([['meta', { name: 'description', content: '一句介绍' }]])
 })
 
+it('小队页同样用小队名当标题、一句话介绍当 description；普通页面不动', () => {
+  const page = {
+    params: { slug: 'test-squad', squad: { name: '测试小队', tagline: '一个队长带两个帮手' } }, description: '旧描述',
+    frontmatter: { description: '旧描述', head: [['meta', { name: 'description', content: '旧描述' }]] },
+  }
+  config.transformPageData(page)
+  expect(page.title).toBe('测试小队')
+  expect(page.frontmatter.title).toBe('测试小队')
+  expect(page.description).toBe('一个队长带两个帮手')
+  expect(page.frontmatter).not.toHaveProperty('description')
+  expect(config.transformHead({ pageData: page })).toEqual([['meta', { name: 'description', content: '一个队长带两个帮手' }]])
+  const plain = { title: '首页', description: '站点描述', frontmatter: {} }
+  config.transformPageData(plain)
+  expect(plain).toEqual({ title: '首页', description: '站点描述', frontmatter: {} })
+  expect(config.transformHead({ pageData: plain })).toEqual([])
+})
+
 it('npm build 必须先校验：非法 Bot 阻止同步素材和 VitePress 构建', () => {
   const script = JSON.parse(readFileSync(join(work, 'package.json'), 'utf8')).scripts.build
   expect(script).toBe('node scripts/validate.mjs && node scripts/sync-assets.mjs && vitepress build site')

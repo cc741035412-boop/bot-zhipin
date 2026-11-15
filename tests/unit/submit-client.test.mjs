@@ -422,3 +422,36 @@ it('复制给 AI 与 CLI 四项格式一致，支持空错误和动态错误摘�
   expect(explainError('invalid', { errors })).toMatchObject({ message: '还有 1 处要改', aiText: copyForAi(errors) })
   expect(copyForAi([])).toContain('投稿页检查没通过')
 })
+
+// ---- V5：投稿预览遇到 about、多句台词、新岗位都不报错，摘要形状和货架上的一致 ----
+it('预览：fixture 自带的 about 和一句台词照常进摘要，装饰字段是默认值', () => {
+  const { summary } = previewModel(plaintext, { now, login: 'example-user' })
+  expect(summary).toMatchObject({ category: '产品', pitch: '评审会上被问住之前，先让我问你一遍。', pitches: ['评审会上被问住之前，先让我问你一遍。'], editorNote: null, pick: null, squads: [], needsAccount: true, selfRunning: false })
+  expect(summary.about).toMatchObject({ cnFit: '好', skills: [], routines: [] })
+  expect(summary.about.does).toHaveLength(3)
+  expect(checkBundle(plaintext, { context, login: 'example-user', now }).errors).toEqual([])
+})
+it('预览：多句台词通过校验，摘要里是数组', () => {
+  const input = bundle({ pitch: ['先让我问你一遍。', '验收标准我一条条圈出来。'] })
+  expect(checkBundle(input, { context, login: 'example-user', now }).errors).toEqual([])
+  expect(previewModel(input, { now }).summary).toMatchObject({ pitch: '先让我问你一遍。', pitches: ['先让我问你一遍。', '验收标准我一条条圈出来。'] })
+})
+it.each([
+  ['about 写成一句话', { about: '一句话' }, 'about'],
+  ['about 里的列表写成一句话', { about: { does: '不是列表', skills: '也不是', routines: [null, 5] } }, 'about.does'],
+  ['台词写成数字', { pitch: 123 }, 'pitch'],
+  ['台词列表里混了别的类型', { pitch: ['正常的一句', null, { a: 1 }] }, 'pitch.1'],
+  ['台词写了四句', { pitch: ['第一句话', '第二句话', '第三句话', '第四句话'] }, 'pitch'],
+  ['岗位写的是旧分类', { category: '评审' }, 'category'],
+])('预览：%s 时不抛错，照样出预览，错误由校验用中文指出位置', (_label, change, where) => {
+  const input = bundle(change)
+  let result
+  expect(() => { result = previewModel(input, { now }) }).not.toThrow()
+  expect(result.summary.name).toBe('示例·PRD 评审员')
+  expect(Array.isArray(result.summary.pitches)).toBe(true)
+  expect(result.summary.about === null || typeof result.summary.about === 'object').toBe(true)
+  expect(result.summary).toMatchObject({ editorNote: null, pick: null, squads: [] })
+  const errors = checkBundle(input, { context, login: 'example-user', now }).errors
+  expect(errors.map((error) => error.where)).toContain(where)
+  for (const error of errors) expect(error.file).toBe(`bots/${slug}/bot.yaml`)
+})
