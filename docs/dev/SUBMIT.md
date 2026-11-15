@@ -4,14 +4,14 @@
 
 ## 0. 一句话
 
-AI 生成 `https://bot-zhipin.pages.dev/submit#BZB1:…` → 学员在 `/submit` 预览、用 GitHub 登录、逐张传截图、勾授权、提交 → Function 用 GitHub App 在 `submission/web-<数字id>-<slug>` 建单提交并开 PR、开启自动合并 → `pull_request` CI 自动跑 → 维护者 Approve → 自动合并 → `announce-live` 工作流在部署完成后评论「已上线」。
+AI 生成 `https://bot.jiachengbo.com/submit#BZB1:…` → 学员在 `/submit` 预览、用 GitHub 登录、逐张传截图、勾授权、提交 → Function 用 GitHub App 在 `submission/web-<数字id>-<slug>` 建单提交并开 PR、开启自动合并 → `pull_request` CI 自动跑 → 维护者 Approve → 自动合并 → `announce-live` 工作流在部署完成后评论「已上线」。
 
 原 Issue 表单链路（`submission.yml`）保留为备用，行为见 §8。
 
 ## 1. 投稿链接
 
 - 格式不变：`BZB1:` + base64url(gzip(明文投稿包 `BOT-ZHIPIN-BUNDLE v1`))，限额照旧（30 个文件、单文本 100KB、文本总量 400KB、解压后 512KB）。
-- 链接：`${SITE.url}/submit#${token}`。`SITE.url = 'https://bot-zhipin.pages.dev'`，加在 `site/.vitepress/meta.mjs` 的 `SITE` 里。
+- 链接：`${SITE.url}/submit#${token}`。`SITE.url = 'https://bot.jiachengbo.com'`，加在 `site/.vitepress/meta.mjs` 的 `SITE` 里。
 - 长度上限是 `bundle-core.mjs` 导出的 `URL_LIMITS`（`submitUrl: 16000`、`issueUrl: 7500`），CLI 和浏览器共用。
 - 链接超过 16000 字符时，CLI 改为输出 `${SITE.url}/submit` 加整行令牌，让学员打开页面后粘进「已有投稿包」输入框。粘贴框也接受明文投稿包。
 - `#` 后面的内容不发给服务器。页面读到后存进 sessionStorage，再用 `history.replaceState` 去掉片段。

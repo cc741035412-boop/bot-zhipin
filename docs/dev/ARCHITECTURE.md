@@ -183,7 +183,7 @@ GITHUB_TOKEN 创建的 PR 不会触发普通 PR 事件，因此显式执行 `gh 
 接口、cookie、回执、限流、错误码以 [`SUBMIT.md`](SUBMIT.md) 为准；页面状态和文案以 [`INTERACTION-SUBMIT.md`](INTERACTION-SUBMIT.md) 为准。
 
 ```text
-AI：make-submission-link → https://bot-zhipin.pages.dev/submit#BZB1:…
+AI：make-submission-link → https://bot.jiachengbo.com/submit#BZB1:…
  /submit（浏览器）：解包 → 预览卡片和详情页 → 校验内核即时报错
    → 用 GitHub 登录（/api/auth/*，零 scope OAuth App，取完身份即撤销令牌）
    → 截图逐张上传（/api/submit/screenshot → GitHub blob，返回签名回执）

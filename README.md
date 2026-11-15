@@ -2,7 +2,7 @@
 
 Grok Bot 模板货架：挑一个顺手的直接导入，也欢迎把你做的 Bot 挂上来。
 
-- 网站：https://bot-zhipin.pages.dev
+- 网站：https://bot.jiachengbo.com
 - 每个 Bot 是 [`bots/`](bots/) 下的一个文件夹，里面有岗位说明、技能、定时任务、截图和作者的设计说明
 - 几个 Bot 可以编成一支小队：[`squads/`](squads/) 下一支队一个文件，写清谁是队长、各管什么、怎么配合
 - 任何人都可以通过 PR 投稿，合并后网站自动更新，投稿者成为项目贡献者
@@ -18,14 +18,14 @@ Grok Bot 模板货架：挑一个顺手的直接导入，也欢迎把你做的 B
 
 ## 我要投稿
 
-最快的方式：打开 **https://bot-zhipin.pages.dev/submit** ，点「复制投稿提示词」，发给你的 AI（你的 Grok Bot、Codex 或 Claude Code）。也可以直接复制下面这段：
+最快的方式：打开 **https://bot.jiachengbo.com/submit** ，点「复制投稿提示词」，发给你的 AI（你的 Grok Bot、Codex 或 Claude Code）。也可以直接复制下面这段：
 
 ```text
 请帮我把我做的 Grok Bot 投稿到「Bot 直聘」：https://github.com/jakob52123/bot-zhipin
 1. 先完整读一遍仓库根目录的 AGENTS.md，严格按它的步骤做。
 2. 能从你自己（或我的 Bot 配置）里查到的信息直接用，查不到的再一次问清我；不要编造效果和截图。
 3. 不要向我要 GitHub 令牌或密码。
-4. 最后给我一个 https://bot-zhipin.pages.dev/submit 开头的投稿链接。
+4. 最后给我一个 https://bot.jiachengbo.com/submit 开头的投稿链接。
 ```
 
 AI 只会问你几件它查不到的事，然后给你一个链接：**点开 → 用 GitHub 登录 → 拖截图 → 勾授权提交**。检查、开 PR、上线后通知你，全部自动。

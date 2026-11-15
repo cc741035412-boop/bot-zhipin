@@ -5,7 +5,9 @@ export const SITE = {
   // 只给页面的 meta description 用，界面上不显示
   tagline: 'Grok Bot 模板货架：挑一个顺手的直接导入，也欢迎把你做的 Bot 挂上来。',
   repo: 'https://github.com/jakob52123/bot-zhipin',
-  url: 'https://bot-zhipin.pages.dev',
+  // 正式域名（2026-11-15 起）。旧地址 bot-zhipin.pages.dev 还能打开，页面头部的脚本会把它跳到这里（config.mts）。
+  url: 'https://bot.jiachengbo.com',
+  legacyHost: 'bot-zhipin.pages.dev',
   branch: 'main',
 }
 

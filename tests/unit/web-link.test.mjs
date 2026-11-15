@@ -254,7 +254,7 @@ describe('站点配置', () => {
       '1. 先完整读一遍仓库根目录的 AGENTS.md，严格按它的步骤做。',
       '2. 能从你自己（或我的 Bot 配置）里查到的信息直接用，查不到的再一次问清我；不要编造效果和截图。',
       '3. 不要向我要 GitHub 令牌或密码。',
-      '4. 最后给我一个 https://bot-zhipin.pages.dev/submit 开头的投稿链接。',
+      '4. 最后给我一个 https://bot.jiachengbo.com/submit 开头的投稿链接。',
     ].join('\n'))
   })
   it('提示词从 SITE 动态拼接仓库和站点地址', () => {
@@ -268,6 +268,6 @@ describe('站点配置', () => {
   })
   it('CONTRIBUTE_URL 是站内投稿页，SITE.url 是正式站点', () => {
     expect(CONTRIBUTE_URL).toBe('/submit')
-    expect(SITE.url).toBe('https://bot-zhipin.pages.dev')
+    expect(SITE.url).toBe('https://bot.jiachengbo.com')
   })
 })

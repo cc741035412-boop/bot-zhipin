@@ -20,10 +20,10 @@ afterEach(() => {
   vi.useRealTimers()
   vi.unstubAllGlobals()
 })
-function bot(running = true) {
+function bot(running = true, at = null) {
   let state = 'idle'
   const client = {
-    el: { getAttribute: () => String(running) },
+    el: { getAttribute: () => String(running), ...(at && { getBoundingClientRect: () => ({ left: at.x - 10, top: at.y - 10, width: 20, height: 20 }) }) },
     state: () => state,
     busy: () => false,
     play: vi.fn((detail) => { state = detail.state }),
@@ -62,6 +62,25 @@ describe('发呆与入场（浏览器接口全 mock）', () => {
     expect(a.play).toHaveBeenLastCalledWith({ state: 'exclaim' })
     vi.advanceTimersByTime(499)
     expect(b.state()).toBe('idle')
+  })
+  it('全体睡着时被吵醒：只有离指针最近的一只冒感叹号，其余安静睁眼', () => {
+    const far = bot(true, { x: 900, y: 100 }), near = bot(true, { x: 120, y: 80 }), mid = bot(true, { x: 500, y: 300 })
+    vi.advanceTimersByTime(500 + 800)
+    expect([far, near, mid].map((client) => client.state())).toEqual(['sleep', 'sleep', 'sleep'])
+    const move = new Event('pointermove')
+    Object.assign(move, { clientX: 100, clientY: 100 })
+    doc.dispatchEvent(move)
+    expect(near.play).toHaveBeenLastCalledWith({ state: 'exclaim' })
+    expect(far.play).toHaveBeenLastCalledWith({ state: 'idle', hold: 0 })
+    expect(mid.play).toHaveBeenLastCalledWith({ state: 'idle', hold: 0 })
+  })
+  it('没有坐标的输入（键盘）只吓醒第一只', () => {
+    const a = bot(true, { x: 900, y: 100 }), b = bot(true, { x: 120, y: 80 })
+    vi.advanceTimersByTime(500 + 800)
+    doc.dispatchEvent(new Event('keydown'))
+    expect(a.state()).toBe('exclaim')
+    expect(b.state()).toBe('idle')
+    expect(b.play).toHaveBeenLastCalledWith({ state: 'idle', hold: 0 })
   })
   it('短演示阈值不能打断正在播的临时动作；新输入重置阈值', () => {
     const a = bot()
