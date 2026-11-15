@@ -406,11 +406,11 @@ onBeforeUnmount(() => {
 .sp-item[aria-selected="true"] { background: color-mix(in srgb, var(--bz-ink) 7%, transparent); }
 
 /*
-  LiveBot 的画布四周留了放动效的余量，身体只占 63%。
-  画布放到 48px 并居中，身体正好撑满 32px 的头像位；溢出的部分在行内留白里。
+  LiveBot 的画布（viewBox ±112）四周只留一圈放动效的余量，身体约占 89%。
+  画布放到 36px 并居中，身体正好撑满 32px 的头像位；溢出的 2px 在行内留白里。
 */
-.sp-face { position: relative; flex: none; width: 32px; height: 32px; --bz-eye: var(--bz-card); }
-.sp-face :deep(svg) { position: absolute; top: -8px; left: -8px; width: 48px; height: 48px; pointer-events: none; }
+.sp-face { position: relative; flex: none; width: 32px; height: 32px; }
+.sp-face :deep(svg) { position: absolute; top: -2px; left: -2px; width: 36px; height: 36px; pointer-events: none; }
 .sp-face :deep(img) { display: block; width: 100%; height: 100%; border: 1px solid var(--bz-border); border-radius: 50%; object-fit: cover; }
 .sp-item[aria-selected="true"] .sp-face { animation: sp-hop 360ms var(--bz-ease-pop); }
 
@@ -436,10 +436,10 @@ onBeforeUnmount(() => {
 .sp-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 16px 36px; color: var(--bz-text-2); }
 /*
   睡着的 Bot 是一颗上下弹的小球，一有输入会惊醒成「!」再睡回去。
-  画布 132px：小球 13px、「!」53px；只给它留 72px 的行高，画布透明的余量叠在上下留白里。
+  画布 94px（viewBox ±112）：小球 13px、「!」53px；只给它留 72px 的行高，画布透明的余量叠在上下留白里。
 */
-.sp-sleeper { position: relative; display: block; width: 72px; height: 72px; --bz-eye: var(--bz-card); }
-.sp-sleeper :deep(svg) { position: absolute; top: -30px; left: -30px; width: 132px; height: 132px; pointer-events: none; }
+.sp-sleeper { position: relative; display: block; width: 72px; height: 72px; }
+.sp-sleeper :deep(svg) { position: absolute; top: -11px; left: -11px; width: 94px; height: 94px; pointer-events: none; }
 /* 地上的影子：小球悬在它上面弹，「!」正好站在它上面。用 ::before，画在 Bot 下面。 */
 .sp-sleeper::before {
   content: '';
@@ -496,7 +496,7 @@ onBeforeUnmount(() => {
 @media (prefers-reduced-motion: reduce) {
   .sp-panel, .sp-item[aria-selected="true"] .sp-face { animation: none; }
   /* 减少动效时 LiveBot 停在醒着的静态脸，比小球大得多：画布缩一号，去掉给小球配的影子。 */
-  .sp-sleeper :deep(svg) { top: -16px; left: -16px; width: 104px; height: 104px; }
+  .sp-sleeper :deep(svg) { top: -1px; left: -1px; width: 74px; height: 74px; }
   .sp-sleeper::before { display: none; }
 }
 </style>

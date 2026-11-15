@@ -104,7 +104,7 @@ onBeforeUnmount(() => { alive = false; releaseEntry?.() })
           <button type="button" data-testid="sort-new" class="shelf-button" :aria-pressed="sort === 'new'" @click="select('new')">最新</button>
         </div>
         <div class="filter-chips" role="group" :aria-label="SHELF_COPY.filterLabel">
-          <button type="button" data-testid="filter-category" class="filter-chip" :aria-pressed="filter === ALL" @click="choose(ALL)"><i class="chip-dot all" aria-hidden="true" />{{ SHELF_COPY.allCategories }}</button>
+          <button type="button" data-testid="filter-category" class="filter-chip all" :aria-pressed="filter === ALL" @click="choose(ALL)"><i class="chip-dot all" aria-hidden="true" />{{ SHELF_COPY.allCategories }}</button>
           <button v-for="category in categories" :key="category" type="button" data-testid="filter-category" class="filter-chip" :style="categoryStyle(category)" :aria-pressed="filter === category" @click="choose(category)"><i class="chip-dot" aria-hidden="true" />{{ category }}</button>
         </div>
         <span class="bot-count">共 {{ visible.length }} 个 Bot</span>
@@ -124,5 +124,9 @@ onBeforeUnmount(() => { alive = false; releaseEntry?.() })
         <a class="shelf-button" :href="CONTRIBUTE_URL">做第一个投稿的人</a>
       </div>
     </section>
+    <footer v-if="bots.length" class="shelf-footer">
+      <p>{{ SHELF_COPY.footer }}</p>
+      <a class="shelf-button contribute" :href="CONTRIBUTE_URL"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 2.5v11M2.5 8h11" /></svg>{{ SHELF_COPY.contribute }}</a>
+    </footer>
   </main>
 </template>

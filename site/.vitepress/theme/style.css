@@ -106,6 +106,9 @@
 .bz-live { --bz-bot-body: var(--bz-bot-light); overflow: visible; }
 .dark .bz-live { --bz-bot-body: var(--bz-bot-dark); }
 .dark .bz-live [data-part="outline"] { display: none; }
+/* 近乎纯黑的 Bot：浅色主题下身体是黑的，眼睛换成奶白；深色主题身体已换成奶白，眼睛照旧是深色。 */
+.bz-live.bz-live-ink { --bz-eye: #f1efe9; }
+.dark .bz-live.bz-live-ink { --bz-eye: #16161b; }
 .VPNavBarTitle .title, .VPNavBarMenuLink, .shelf-intro h1, .section-heading h2, .block-heading h3, .featured-card h4, .bot-card h2,
 .shelf-button, .filter-chip, .bot-tag, .pitch-bubble, .sort-controls, .detail-info h1, .detail-info > h2, .bot-detail section h2, .not-found h1 {
   font-family: var(--bz-font-display);
@@ -188,25 +191,26 @@
 
 /* ---------- 4. 首屏 Hero ---------- */
 .hero-aurora {
-  position: absolute; z-index: 0; top: calc(-1 * var(--vp-nav-height)); left: 0; right: 0; height: 780px;
+  position: absolute; z-index: 0; top: calc(-1 * var(--vp-nav-height)); left: 0; right: 0; height: 800px;
   overflow: hidden; pointer-events: none; opacity: var(--bz-aurora-opacity);
-  -webkit-mask-image: radial-gradient(ellipse 62% 78% at 50% 26%, #000 22%, transparent 78%);
-  mask-image: radial-gradient(ellipse 62% 78% at 50% 26%, #000 22%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 60% 76% at 50% 28%, #000 24%, transparent 80%);
+  mask-image: radial-gradient(ellipse 60% 76% at 50% 28%, #000 24%, transparent 80%);
 }
+/* 几道同向的斜光带：中间亮、两头淡，各自沿着自己的方向慢慢来回流动 */
 .hero-aurora > i {
-  position: absolute; left: 50%; top: 0; width: 980px; height: 210px; border-radius: 50%;
-  filter: blur(64px); will-change: transform;
-  background: linear-gradient(90deg, transparent, var(--bz-band) 28%, var(--bz-band) 72%, transparent);
-  transform: translate3d(var(--bz-band-x), var(--bz-band-y), 0) rotate(-28deg);
+  position: absolute; left: 50%; top: 0; width: var(--bz-band-w, 1180px); height: var(--bz-band-h, 150px); border-radius: 50%;
+  filter: blur(var(--bz-band-blur, 46px)); will-change: transform;
+  background: linear-gradient(90deg, transparent, var(--bz-band) 30%, var(--bz-band) 70%, transparent);
+  transform: translate3d(var(--bz-band-x), var(--bz-band-y), 0) rotate(-30deg);
   animation: bz-aurora var(--bz-band-time, 22s) ease-in-out infinite alternate;
 }
-.hero-aurora > i:nth-child(1) { --bz-band: #ff6a13; --bz-band-x: -62%; --bz-band-y: 150px; --bz-band-time: 21s; }
-.hero-aurora > i:nth-child(2) { --bz-band: #8b5cf6; --bz-band-x: -112%; --bz-band-y: 330px; --bz-band-time: 27s; animation-delay: -9s; }
-.hero-aurora > i:nth-child(3) { --bz-band: #14b8a6; --bz-band-x: 2%; --bz-band-y: 60px; --bz-band-time: 24s; animation-delay: -5s; }
-.hero-aurora > i:nth-child(4) { --bz-band: #ff2e93; --bz-band-x: -26%; --bz-band-y: 430px; --bz-band-time: 31s; width: 720px; height: 130px; animation-delay: -14s; }
+.hero-aurora > i:nth-child(1) { --bz-band: #ff6a13; --bz-band-x: -52%; --bz-band-y: 230px; --bz-band-time: 21s; }
+.hero-aurora > i:nth-child(2) { --bz-band: #8b5cf6; --bz-band-x: -88%; --bz-band-y: 330px; --bz-band-w: 1040px; --bz-band-h: 130px; --bz-band-time: 27s; animation-delay: -9s; }
+.hero-aurora > i:nth-child(3) { --bz-band: #14b8a6; --bz-band-x: -14%; --bz-band-y: 150px; --bz-band-w: 1040px; --bz-band-h: 130px; --bz-band-time: 24s; animation-delay: -5s; }
+.hero-aurora > i:nth-child(4) { --bz-band: #ff2e93; --bz-band-x: -22%; --bz-band-y: 400px; --bz-band-w: 820px; --bz-band-h: 90px; --bz-band-blur: 40px; --bz-band-time: 31s; animation-delay: -14s; }
 @keyframes bz-aurora {
-  from { transform: translate3d(calc(var(--bz-band-x) - 5%), calc(var(--bz-band-y) - 14px), 0) rotate(-28deg) scale(1); }
-  to { transform: translate3d(calc(var(--bz-band-x) + 6%), calc(var(--bz-band-y) + 22px), 0) rotate(-24deg) scale(1.1); }
+  from { transform: translate3d(calc(var(--bz-band-x) - 4%), calc(var(--bz-band-y) + 18px), 0) rotate(-30deg) scaleY(.92); }
+  to { transform: translate3d(calc(var(--bz-band-x) + 5%), calc(var(--bz-band-y) - 22px), 0) rotate(-27deg) scaleY(1.12); }
 }
 .shelf-intro { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; padding-top: 44px; text-align: center; }
 .hero-portraits {
@@ -298,7 +302,7 @@
 .featured-card h4 a:hover, .bot-card h2 a:hover { text-decoration: underline; }
 .featured-card .bot-tagline { min-height: 48px; margin-top: 6px; }
 .bot-tagline { font-size: 15px; line-height: 1.6; color: var(--bz-text-2); text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-.featured-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 14px; margin-top: 14px; }
+.featured-card .featured-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 14px; margin-top: 16px; }
 .featured-card .shelf-button { margin-top: 22px; }
 @media (hover: hover) {
   .featured-card:hover { border-color: color-mix(in srgb, var(--bz-bot-color) 42%, var(--bz-hairline)); }
@@ -335,9 +339,11 @@
 .chip-dot.all { background: conic-gradient(#ff6a13, #f5a623, #34d399, #14b8a6, #3b82f6, #8b5cf6, #ff2e93, #ff6a13); }
 .filter-chip:hover { border-color: color-mix(in srgb, var(--bz-category-color, var(--bz-ink)) 45%, var(--bz-hairline)); color: var(--bz-ink); }
 .filter-chip[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--bz-category-color, var(--bz-ink)) 55%, transparent);
-  background: color-mix(in srgb, var(--bz-category-color, var(--bz-ink)) 14%, transparent); color: var(--bz-ink);
+  border-color: color-mix(in srgb, var(--bz-category-color) 55%, transparent);
+  background: color-mix(in srgb, var(--bz-category-color) 14%, transparent); color: var(--bz-ink);
 }
+/* 「全部」没有分类色：选中时只比轨道亮一档 */
+.filter-chip.all[aria-pressed="true"] { border-color: color-mix(in srgb, var(--bz-ink) 20%, transparent); background: color-mix(in srgb, var(--bz-ink) 9%, transparent); }
 .bot-count { flex: none; font-size: 13px; color: var(--bz-text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .toolbar-search { width: 280px; height: 43px; font-size: 14px; }
 
@@ -411,9 +417,14 @@
 @container (max-width: 399px) {
   .bot-card-body { grid-template-columns: 64px minmax(0, 1fr); grid-template-rows: auto 1fr auto auto; grid-template-areas: "avatar head" "pitch pitch" "stats stats" "actions actions"; gap: 14px; padding: 20px; }
   .bot-card .bot-actions { display: flex; grid-area: actions; }
-  .bot-card .bot-actions > .shelf-button { flex: 1 1 auto; padding-inline: 14px; }
+  .bot-card .bot-actions > .shelf-button { flex: 1 1 auto; align-self: auto; margin-top: 0; padding-inline: 14px; }
 }
 @container (max-width: 479px) { .stat-permissions { display: none; } }
+
+/* 页尾：一条细线、一句话、再给一次投稿入口 */
+.shelf-footer { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; margin-top: 96px; padding-top: 40px; border-top: 1px solid var(--bz-hairline); text-align: center; }
+.shelf-footer p { font-size: 14px; line-height: 1.6; color: var(--bz-text-3); }
+.shelf-footer .shelf-button.contribute { margin-top: 16px; }
 
 /* ---------- 7. 台词气泡（漫画风：实底、粗描边、Bot 色硬投影） ---------- */
 .shelf-page .pitch-bubble {
@@ -457,7 +468,7 @@
 .back-link { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px 0 12px; border: 1px solid var(--bz-hairline); border-radius: 999px; background: var(--bz-glass); box-shadow: var(--bz-highlight); color: var(--bz-text-2); font-size: 13px; font-weight: 600; transition: color 150ms ease, border-color 150ms ease; }
 .back-link:hover { border-color: var(--bz-border); }
 /* 头部上方留出气泡的位置，气泡不会盖住「返回货架」 */
-.detail-header { position: relative; isolation: isolate; display: flex; align-items: center; gap: 40px; margin: 60px 0 48px; }
+.detail-header { position: relative; isolation: isolate; display: flex; align-items: center; gap: 40px; margin: 68px 0 48px; }
 /* Bot 色的一团柔光垫在舞台后面：伪元素，不是文字祖先的背景 */
 .detail-header::before {
   content: ''; position: absolute; z-index: -1; left: -120px; top: -110px; width: 440px; height: 420px; pointer-events: none;
@@ -483,7 +494,7 @@
 }
 .bot-detail > section + section { margin-top: 16px; }
 .shelf-page .external-notice { margin-bottom: 16px; padding-block: 16px; color: var(--bz-text-2); line-height: 1.8; }
-.bot-detail section > h2 { margin-bottom: 14px; font-size: 18px; font-weight: 600; line-height: 1.4; }
+.bot-detail section > h2 { margin-bottom: 14px; font-size: 20px; font-weight: 600; line-height: 1.4; }
 .bot-detail section p, .bot-detail section li { line-height: 1.8; color: var(--bz-text-2); }
 .bot-detail section a:not(.screenshot-link), .detail-info [data-testid="forked-from"] a { color: var(--bz-ink); text-decoration: underline; }
 .bot-detail section a:hover { color: var(--bz-ink-hover); }
@@ -509,15 +520,18 @@
 .design-body { max-width: 720px; min-width: 0; }
 .design-body img { max-width: 100%; height: auto; border-radius: 12px; }
 .design-body pre { max-width: 100%; overflow-x: auto; }
-.shelf-page .design-body h2 { margin: 32px 0 16px; }
+/* 设计说明里的小标题比区块标题低一级 */
+.shelf-page .design-body h2 { margin: 28px 0 12px; padding-top: 24px; border-top-color: var(--bz-hairline); font-size: 17px; font-weight: 600; line-height: 1.5; letter-spacing: 0; }
 .shelf-page .design-body > h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
-.shelf-page .design-body p { margin: 16px 0; }
+.shelf-page .design-body h3 { margin: 20px 0 6px; font-size: 15px; font-weight: 600; line-height: 1.6; color: var(--bz-ink); }
+.shelf-page .design-body p { margin: 10px 0; }
 
 /* ---------- 10. 投稿预览复用卡片和详情：把旧版式留下的偏移归零 ---------- */
 .submit-preview .bot-card.bot-card { padding: 0; }
 .submit-preview .bot-card .bot-card-body .avatar-stage { margin: 0; }
 .submit-preview .bot-detail .detail-header { margin-top: 64px; }
 .submit-preview .detail-header .avatar-root { align-self: center; }
+.submit-preview .detail-header::before { left: calc(50% - 220px); }
 .submit-preview .bot-detail > section { padding: 18px 20px; }
 
 /* ---------- 11. 响应式 ---------- */
@@ -544,12 +558,13 @@
   .detail-info h1, .detail-info > h2 { font-size: 30px; }
   .detail-info > p { font-size: 16px; }
   .bot-detail > section { padding: 22px 20px; }
+  .shelf-page .external-notice { padding-inline: 20px; }
   .bot-screenshots { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 679px) {
   .shelf-page { --bz-gutter: 16px; }
   .hero-aurora { height: 560px; }
-  .hero-aurora > i { width: 620px; height: 170px; filter: blur(48px); }
+  .hero-aurora > i { --bz-band-w: 640px; --bz-band-h: 120px; --bz-band-blur: 40px; top: -70px; }
   .shelf-intro { padding-top: 28px; }
   .hero-portraits { --bz-hero-tile: min(60px, calc((100vw - 72px) / 5)); --bz-hero-gap: 8px; margin-bottom: 14px; }
   .hero-portrait { border-radius: 14px; }
@@ -561,6 +576,7 @@
   .section-heading h2 { font-size: 28px; }
   .section-heading p { font-size: 15px; }
   .shelf-toolbar { margin-top: 64px; gap: 12px; }
+  .shelf-footer { margin-top: 64px; }
   .sort-controls .shelf-button { padding-inline: 16px; }
   .permission-list li { flex-wrap: wrap; gap: 4px 12px; }
 }

@@ -13,10 +13,12 @@ async function stub(page) {
 test.beforeEach(async ({ page }) => { await stub(page) })
 
 for (const width of [1280, 1100, 1024, 900, 680, 390, 320]) {
-  test(`${width}px：30 字两行气泡、网格断点及无横向溢出`, async ({ page }) => {
+  test(`${width}px：30 字两行气泡留在卡片内、不压头像和导入按钮，网格断点及无横向溢出`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 })
     await page.goto('/')
     const bot = card(page)
+    // 卡片排在精选区下面，不在首屏：先滚到卡片再悬停。
+    await bot.scrollIntoViewIfNeeded()
     await bot.getByTestId('avatar').hover()
     await expect(opened(page)).toHaveCount(1)
     // 等打字完成后再替换排版样本，避免活体打字覆盖测试文本。
@@ -25,15 +27,26 @@ for (const width of [1280, 1100, 1024, 900, 680, 390, 320]) {
     await bubble.locator('span').evaluate((el, text) => { el.textContent = text }, longPitch)
     await page.waitForTimeout(650)
     const geometry = await bot.evaluate((el) => {
-      const bubble = el.querySelector('[role="tooltip"]'), avatar = el.querySelector('[data-testid="avatar"]')
-      const b = bubble.getBoundingClientRect(), a = avatar.getBoundingClientRect(), c = el.getBoundingClientRect()
-      const css = getComputedStyle(bubble)
-      return { lines: (b.height - parseFloat(css.paddingTop) - parseFloat(css.paddingBottom) - parseFloat(css.borderTopWidth) - parseFloat(css.borderBottomWidth)) / parseFloat(css.lineHeight), gap: a.top - b.bottom - 7, left: b.left - c.left, right: c.right - b.right, top: b.top - c.top }
+      const rect = (selector) => el.querySelector(selector).getBoundingClientRect()
+      const b = rect('[role="tooltip"]'), a = rect('[data-testid="avatar"]'), i = rect('[data-testid="btn-import"]'), t = rect('.bot-tagline'), c = el.getBoundingClientRect()
+      const css = getComputedStyle(el.querySelector('[role="tooltip"]'))
+      const hit = (p, q) => !(p.right <= q.left || q.right <= p.left || p.bottom <= q.top || q.bottom <= p.top)
+      return {
+        lines: (b.height - parseFloat(css.paddingTop) - parseFloat(css.paddingBottom) - parseFloat(css.borderTopWidth) - parseFloat(css.borderBottomWidth)) / parseFloat(css.lineHeight),
+        left: b.left - c.left, right: c.right - b.right, top: b.top - c.top, bottom: c.bottom - b.bottom,
+        overAvatar: hit(b, a), overImport: hit(b, i),
+        // 气泡盖在介绍那一块上：顶边对齐，且在头像下面。
+        onTagline: Math.abs(b.top - t.top), belowAvatar: b.top - a.bottom,
+        taglineOpacity: getComputedStyle(el.querySelector('.bot-tagline')).opacity,
+      }
     })
     expect(geometry.lines).toBeLessThanOrEqual(2.1)
-    expect(geometry.gap).toBeGreaterThanOrEqual(8)
-    for (const side of ['left', 'right', 'top']) expect(geometry[side]).toBeGreaterThanOrEqual(0)
-    // 气泡稳定后重播同一句，逐帧检查跳起、拉伸与弹性超调，而非只看动画结束。
+    for (const side of ['left', 'right', 'top', 'bottom']) expect(geometry[side], `气泡${side}边在卡片内`).toBeGreaterThanOrEqual(0)
+    expect(geometry.overAvatar, '气泡不压头像').toBe(false)
+    expect(geometry.overImport, '气泡不压导入按钮').toBe(false)
+    expect(geometry.onTagline).toBeLessThanOrEqual(1)
+    expect(geometry.taglineOpacity, '气泡出现时介绍淡出').toBe('0')
+    // 气泡稳定后重播同一句，逐帧检查跳起、拉伸与弹性超调：头像始终不碰气泡，朝上的尖角（约 11px）有地方放。
     const minimumGap = await bot.evaluate((el) => {
       const avatar = el.querySelector('[data-testid="avatar"]'), bubble = el.querySelector('[role="tooltip"]')
       avatar.classList.remove('is-speaking')
@@ -44,15 +57,17 @@ for (const width of [1280, 1100, 1024, 900, 680, 390, 320]) {
       let minimum = Infinity
       for (let time = 0; time <= 560; time += 4) {
         animation.currentTime = time
-        minimum = Math.min(minimum, avatar.getBoundingClientRect().top - bubble.getBoundingClientRect().bottom - 7)
+        minimum = Math.min(minimum, bubble.getBoundingClientRect().top - avatar.getBoundingClientRect().bottom)
       }
       animation.finish()
       return minimum
     })
-    expect(minimumGap).toBeGreaterThanOrEqual(8)
+    expect(minimumGap).toBeGreaterThanOrEqual(13)
     const columns = await page.locator('.bot-grid').evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length)
-    expect(columns).toBe(width >= 1100 ? 3 : width >= 680 ? 2 : 1)
-    if (width < 680) expect((await bot.boundingBox()).width).toBeLessThanOrEqual(520)
+    expect(columns).toBe(width >= 900 ? 2 : 1)
+    const cardBox = await bot.boundingBox()
+    if (width >= 1280) expect(cardBox.width).toBeCloseTo(558, 0)
+    if (width < 900) expect(cardBox.width, '单列时卡片撑满内容区').toBeGreaterThanOrEqual(width - 64 - 1)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
     await page.goto(`/bots/${reviewer}`)
     await page.getByTestId('avatar').hover()
@@ -75,8 +90,8 @@ test('鼠标、Tab、Enter、空格、Esc、失焦、单开和跳动重播', asy
   await expect(a).not.toHaveAttribute('aria-describedby')
   await page.mouse.move(0, 0)
   await expect(opened(page)).toHaveCount(0)
-  // 真正从前一个按钮 Tab 到头像，不只调用 focus()。
-  await page.getByTestId('sort-new').focus()
+  // 真正从前一个按钮 Tab 到头像，不只调用 focus()。排序后面还有分类筛选和搜索入口，卡片前的最后一个控件是工具栏搜索框。
+  await page.getByTestId('search-trigger-toolbar').focus()
   await page.keyboard.press('Tab')
   await expect(a).toBeFocused()
   await expect(opened(page)).toHaveCount(1)
@@ -119,7 +134,7 @@ test('触摸重说与 4 秒计时、点外部关闭、触摸后键盘仍工作',
     await avatar.tap()
     await page.touchscreen.tap(8, 120)
     await expect(opened(page)).toHaveCount(0)
-    await page.getByTestId('sort-new').focus()
+    await page.getByTestId('search-trigger-toolbar').focus()
     await page.keyboard.press('Tab')
     await expect(opened(page)).toHaveCount(1)
     await page.keyboard.press('Enter')
@@ -187,19 +202,23 @@ for (const dark of [false, true]) {
 }
 
 for (const dark of [false, true]) {
-  test(`${dark ? '深' : '浅'}色：彩色 token、Bot 色按钮、漫画气泡和卡片悬停`, async ({ page }) => {
+  test(`${dark ? '深' : '浅'}色：Raycast 质感 token、Bot 色按钮、漫画气泡和卡片悬停`, async ({ page }) => {
     await page.goto('/')
     await page.evaluate((dark) => document.documentElement.classList.toggle('dark', dark), dark)
-    const ink = dark ? 'rgb(244, 244, 245)' : 'rgb(20, 20, 24)'
-    const paper = dark ? 'rgb(22, 22, 27)' : 'rgb(255, 255, 255)'
-    const background = dark ? 'rgb(12, 12, 15)' : 'rgb(246, 245, 241)'
-    const border = dark ? 'rgb(38, 38, 45)' : 'rgb(235, 232, 225)'
+    const ink = dark ? 'rgb(255, 255, 255)' : 'rgb(20, 20, 24)'
+    const paper = dark ? 'rgb(12, 13, 15)' : 'rgb(255, 255, 255)'
+    const background = dark ? 'rgb(7, 8, 10)' : 'rgb(246, 245, 241)'
+    const glass = dark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.7)'
+    const hairline = dark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(20, 20, 24, 0.08)'
     await expect(page.locator('body')).toHaveCSS('background-color', background)
-    await expect(page.getByTestId('contribute-link')).toHaveCSS('background-color', ink)
+    // 「我要投稿」是搜索框下面的玻璃胶囊，不再是墨色实底。
+    await expect(page.getByTestId('contribute-link')).toHaveCSS('background-color', glass)
+    await expect(page.getByTestId('contribute-link')).toHaveCSS('border-top-color', hairline)
+    await expect(page.getByTestId('search-trigger')).toHaveCSS('background-color', paper)
     for (const button of await page.locator('.shelf-button.primary').all()) {
       await expect(button).toHaveCSS('border-radius', '999px')
     }
-    for (const button of await page.getByTestId('btn-import').all()) {
+    for (const button of [...await page.getByTestId('btn-import').all(), ...await page.getByTestId('featured-import').all()]) {
       const colors = await button.evaluate((el) => {
         const css = getComputedStyle(el)
         const rgb = (name) => {
@@ -211,19 +230,30 @@ for (const dark of [false, true]) {
       expect(colors.bg).toBe(colors.expectedBg)
       expect(colors.fg).toBe(colors.expectedFg)
     }
-    const selected = await page.getByTestId('sort-hot').evaluate((el) => ({ color: getComputedStyle(el).color, background: getComputedStyle(el.parentElement, '::after').backgroundColor }))
-    expect(selected).toEqual({ color: paper, background: ink })
+    // 分段控件：玻璃轨道 + 亮一档的选中滑块，选中文字用墨色。
+    const selected = await page.getByTestId('sort-hot').evaluate((el) => ({ color: getComputedStyle(el).color, background: getComputedStyle(el.parentElement, '::after').backgroundColor, track: getComputedStyle(el.parentElement).backgroundColor, height: el.parentElement.getBoundingClientRect().height }))
+    expect(selected).toEqual({ color: ink, background: dark ? 'rgba(255, 255, 255, 0.1)' : 'rgb(255, 255, 255)', track: glass, height: 48 })
     const bot = card(page)
-    await expect(bot).toHaveCSS('border-radius', '28px')
-    await expect(bot).toHaveCSS('background-color', paper)
+    await bot.scrollIntoViewIfNeeded()
+    await page.mouse.move(4, 4)
+    await expect(bot).toHaveCSS('border-radius', '16px')
+    // 深色下卡片底色透明，浅色下是卡片白；细边 + 内高光。
+    await expect(bot).toHaveCSS('background-color', dark ? 'rgba(0, 0, 0, 0)' : paper)
     await expect(bot).toHaveCSS('background-image', 'none')
-    const restingShadow = await bot.evaluate((el) => getComputedStyle(el).boxShadow)
-    expect(restingShadow).not.toBe('none')
-    expect(restingShadow.match(/(?:rgba?|color)\(/g)).toHaveLength(2)
+    await expect(bot).toHaveCSS('border-top-color', hairline)
+    expect(await bot.evaluate((el) => getComputedStyle(el).boxShadow)).toContain('inset')
+    const stage = await bot.locator('.avatar-stage').boundingBox(), avatar = await bot.getByTestId('avatar').boundingBox()
+    expect([stage.width, stage.height]).toEqual([64, 64])
+    expect([avatar.width, avatar.height]).toEqual([56, 56])
+    await expect(bot.locator('.avatar-stage')).toHaveCSS('border-radius', '16px')
+    const glow = () => bot.evaluate((el) => { const css = getComputedStyle(el, '::after'); return { opacity: css.opacity, image: css.backgroundImage, duration: css.transitionDuration } })
+    expect(await glow()).toMatchObject({ opacity: '0', duration: '0.15s' })
+    expect((await glow()).image).toContain('radial-gradient')
     await bot.getByTestId('avatar').hover()
-    await expect(bot).toHaveCSS('border-top-color', border)
-    await expect(bot).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, -4)')
-    expect(await bot.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe(restingShadow)
+    // 悬停：淡入一层 Bot 色光晕、细边染色；卡片本身不位移、不缩放。
+    await expect.poll(async () => (await glow()).opacity).toBe('1')
+    await expect(bot).not.toHaveCSS('border-top-color', hairline)
+    await expect(bot).toHaveCSS('transform', 'none')
     const bubble = bot.getByTestId('pitch-bubble')
     await expect(bubble).toHaveCSS('background-color', paper)
     await expect(bubble).toHaveCSS('border-top-width', '2px')
@@ -241,7 +271,7 @@ for (const dark of [false, true]) {
   })
 }
 
-test('同一个排序指示块滑动、舞台漂移与静止地影、正热度火苗', async ({ page }) => {
+test('同一个排序指示块滑动、头像玻璃砖静止不漂移、正热度火苗', async ({ page }) => {
   await page.goto('/')
   const controls = page.locator('.sort-controls')
   const indicator = () => controls.evaluate((el) => {
@@ -261,11 +291,14 @@ test('同一个排序指示块滑动、舞台漂移与静止地影、正热度�
   })
   const moved = await indicator()
   expect(moved.x).toBeCloseTo(moved.width, 1)
+  // 旧版的大舞台有 18 秒的光斑漂移；新版头像站在一块静止的玻璃砖里，Bot 色柔光画在伪元素上。
   const stage = card(page).locator('.avatar-stage')
   expect(await stage.evaluate((el) => {
-    const css = getComputedStyle(el), shadow = getComputedStyle(el, '::before')
-    return [css.animationDuration, css.animationTimingFunction, css.animationIterationCount, css.animationDirection, shadow.animationName]
-  })).toEqual(['18s', 'ease-in-out', 'infinite', 'alternate', 'none'])
+    const css = getComputedStyle(el), glow = getComputedStyle(el, '::before')
+    return { animation: css.animationName, image: css.backgroundImage, glowAnimation: glow.animationName, glow: glow.backgroundImage.includes('radial-gradient') }
+  })).toEqual({ animation: 'none', image: 'none', glowAnimation: 'none', glow: true })
+  // 首屏唯一一直在流动的是 Hero 背后的极光。
+  expect(await page.locator('.hero-aurora > i').first().evaluate((el) => { const css = getComputedStyle(el); return [css.animationIterationCount, css.animationDirection] })).toEqual(['infinite', 'alternate'])
   await expect(card(page).getByTestId('heat').locator('svg')).toHaveClass('is-hot')
   await expect(card(page, weekly).getByTestId('heat').locator('svg')).not.toHaveClass('is-hot')
 })

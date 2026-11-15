@@ -35,6 +35,7 @@ export const SHELF_COPY = {
   filterLabel: '按分类筛选',
   emptyFilter: '这个分类下暂时没有 Bot',
   showAll: '看看全部',
+  footer: '货架到底啦。没找到合适的？把你做的 Bot 也挂上来。',
 }
 
 export const POKE_PITCHES = ['哎，痒！', '再戳我就变形了', '好啦好啦，我在呢', '你找我呀？']

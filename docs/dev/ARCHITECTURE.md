@@ -21,6 +21,15 @@
 | `site/.vitepress/theme/face.ts` | 官方形状映射、botFace / resolveFace、faceColors 和 seed 回退 | 维护者 |
 | `site/.vitepress/theme/shapes-extra.ts` | 15 种原创径向轮廓，不复制 x.ai 路径 | 维护者 |
 | `site/.vitepress/theme/color.ts` | contrast、darkSwap、buttonColors、botPalette 纯函数配色 | 维护者 |
+| `site/.vitepress/theme/style.css` | 全站视觉：token、悬浮导航条换肤、Hero、精选、工具栏、列表卡、气泡、详情页、响应式和减少动效；分节见文件内注释 | 维护者 |
+| `site/.vitepress/theme/enums.data.mjs` | 构建时用 `loadEnums()` 读 schema，把分类枚举（含顺序）给到浏览器；首页分类筛选用 | 维护者 |
+| `site/.vitepress/theme/components/BotShelf.vue` | 首页：极光、砖墙、标题、搜索入口、精选、排序 + 分类筛选、列表、空状态 | 维护者 |
+| `site/.vitepress/theme/components/HeroPortrait.vue` | 砖墙里的一块玻璃砖 + 一只吉祥物（数据在 `meta.mjs` 的 `HERO_MASCOTS`） | 维护者 |
+| `site/.vitepress/theme/components/FeaturedCard.vue` | 精选大卡：活 Bot、名字、介绍、作者、热度、导入；不带气泡 | 维护者 |
+| `site/.vitepress/theme/components/SearchTrigger.vue` | 长得像输入框的按钮（首屏和工具栏各一个），只负责派发 `bz-search-open` | 维护者 |
+| `site/.vitepress/theme/components/SearchPalette.vue` + `theme/search.ts` | 搜索命令面板和它的匹配、排序规则；挂在 Layout 的 `layout-bottom` 插槽，全站可用 | 维护者 |
+| `site/.vitepress/theme/components/BotCard.vue`、`BotAvatar.vue`、`BotActions.vue` | 列表卡：article 是容器查询的容器，里面的 `.bot-card-body` 是版式网格；头像外层在卡片里 `display: contents`，玻璃砖和气泡各占一格。/submit 的投稿预览复用这几个组件 | 维护者 |
+| `site/.vitepress/theme/components/BotDetail.vue` | 详情页：玻璃砖舞台 + 信息，下面各区块是细边玻璃卡；同样被投稿预览复用 | 维护者 |
 | `site/.vitepress/data/faces.json` | slug → color / shape / fetchedAt 的离线真脸数据，静态 import | 维护者 |
 | `scripts/sync-faces.mjs` | 手动抓 x.ai 模板页；--check 离线校验 | 维护者 |
 | `functions/api/` | 点击计数接口 | 维护者 |
@@ -53,7 +62,10 @@ bots/*/bot.yaml, *.md, screenshots/
 
 - 面向用户的文案一律简体中文。
 - **构建不联网**：真脸抓取是维护者独立操作，npm run build 不调用 sync-faces；页面静态导入 faces.json，不在运行时拉脸数据。抓取失败保留旧条目并警告，无数据用原 seed 算法。
-- 活体/真脸/彩色模块为本轮目标架构，分工见 TASKS，接口与状态标记见 INTERACTION v2；不表示所有实现线已经验收。
+- 活体/真脸/彩色模块的接口与状态标记见 INTERACTION（现为 v4）；版式和视觉规格也在那里，改样式前先读。
+- **导航条不另写组件**：悬浮玻璃导航条是给 VitePress 默认顶栏（`.VPNavBar`）换肤，汉堡菜单、主题开关、社交链接都是默认主题的。默认主题的 scoped 样式特异性高，覆盖规则统一写成 `.Layout .VPNav …` 前缀；背景色通过 `--vp-nav-bg-color` 变量给，不和它的 `:not()` 选择器拼特异性。
+- **文字的祖先不放背景图**：极光、柔光、悬停层都在独立元素或伪元素里，这样对比度可以按纯色底算（验收脚本会沿祖先链检查）。
+- **版式跟着容器走**：列表卡用 `@container` 按卡片自身宽度切换宽/窄版式，所以同一张卡放进 /submit 的窄预览栏不用另写样式。
 - 页面路径：首页 `/`，详情页 `/bots/<slug>`。
 - 图片引用：`/bot-assets/<slug>/<文件名>`。
 - 不复制原站（fork 来源）的任何文字、图片和组件代码。

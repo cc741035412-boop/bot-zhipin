@@ -27,7 +27,7 @@ for (const scheme of ['light', 'dark']) {
     expect(frames.client).toEqual(frames.ssr)
     for (const frame of frames.client) expect(frame.viewBox).toBe('-112 -112 224 224')
     const heroes = page.locator('.hero-portrait')
-    await expect(heroes).toHaveCount(7)
+    await expect(heroes).toHaveCount(9)
     await expect(page.locator('.hero-portraits')).toHaveAttribute('aria-hidden', 'true')
     for (const [i, mascot] of HERO_MASCOTS.entries()) {
       const svg = heroes.nth(i).getByTestId('live-bot')
@@ -93,15 +93,22 @@ for (const scheme of ['light', 'dark']) {
   })
 }
 
-test('招牌七/五只响应式大小，排序不换脸、各断点无横滚', async ({ page }) => {
+test('招牌九块砖（上五下四）按断点缩放，排序不换脸、各断点无横滚', async ({ page }) => {
   await page.goto('/')
   for (const width of [1280, 1100, 1024, 900, 680, 679, 400, 390, 320]) {
     await page.setViewportSize({ width, height: 900 })
-    const widths = await page.locator('.hero-portrait').evaluateAll((els) => els.map((el) => el.getBoundingClientRect().width).filter(Boolean))
-    const factor = width >= 680 ? 1 : width >= 400 ? .75 : .62
-    const sizes = width >= 680 ? [60, 68, 80, 96, 80, 68, 60] : [68, 80, 96, 80, 68]
-    expect(widths).toHaveLength(sizes.length)
-    widths.forEach((w, i) => expect(w).toBeCloseTo(sizes[i] * factor, 1))
+    const tiles = await page.locator('.hero-portrait').evaluateAll((els) => els.map((el) => { const r = el.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height } }))
+    // 所有宽度都显示 9 块；≥1100 是 124，680–1099 是 96，再窄按视口缩到 ≤60。
+    const size = width >= 1100 ? 124 : width >= 680 ? 96 : Math.min(60, (width - 72) / 5)
+    expect(tiles).toHaveLength(9)
+    for (const tile of tiles) { expect(tile.w).toBeCloseTo(size, 0); expect(tile.h).toBeCloseTo(size, 0) }
+    const top = tiles.slice(0, 5), bottom = tiles.slice(5)
+    for (const tile of top) expect(tile.y).toBeCloseTo(top[0].y, 0)
+    for (const tile of bottom) expect(tile.y).toBeCloseTo(bottom[0].y, 0)
+    expect(bottom[0].y).toBeGreaterThan(top[0].y + size)
+    // 下排相对上排错开半格：下排第一块的中心落在上排第一、二块中心的正中间。
+    expect(bottom[0].x + bottom[0].w / 2).toBeCloseTo((top[0].x + top[1].x + top[0].w) / 2, 0)
+    for (const tile of tiles) { expect(tile.x).toBeGreaterThanOrEqual(0); expect(tile.x + tile.w).toBeLessThanOrEqual(width) }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
   }
   await page.getByTestId('sort-new').click()
