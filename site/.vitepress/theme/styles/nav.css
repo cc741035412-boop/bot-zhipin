@@ -1,5 +1,5 @@
 /* nav.css：悬浮玻璃导航条（VitePress 默认顶栏换肤，不另写导航组件）。
-   右侧顺序：我要投稿（次级小按钮，中性玻璃）、主题开关、GitHub；后两个是 32px 的幽灵图标按钮。 */
+   右侧顺序：我要投稿（次级小按钮，中性玻璃，前面一个 plus 图标）、主题开关、GitHub；后两个是 32px 的幽灵图标按钮。 */
 
 /* 这个站没有文档页：滚动后才冒出来的「回到顶部」条会从悬浮岛后面露出来，全站关掉。 */
 .Layout .VPLocalNav { display: none; }
@@ -38,6 +38,12 @@
 .Layout .VPNavBar .VPNavBarMenuLink:hover, .Layout .VPNavBar .VPNavBarMenuLink.active:hover {
   border-color: var(--bz-border-hover); background-color: var(--bz-surface-3); color: var(--bz-ink);
 }
+/* plus 图标：和 theme/icons.ts 的 plus 同一条路径（24 网格、线宽 1.5、圆头），用遮罩画，颜色跟着文字走；手机菜单里那一项也带 */
+.Layout .VPNavBar .VPNavBarMenuLink::before, .Layout .VPNav .VPNavScreenMenuLink::before {
+  content: ''; flex: none; width: 16px; height: 16px; margin-right: 6px; background-color: currentColor;
+  -webkit-mask: var(--bz-icon-plus) center / contain no-repeat; mask: var(--bz-icon-plus) center / contain no-repeat;
+}
+.Layout .VPNav { --bz-icon-plus: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5v14M5 12h14'/%3E%3C/svg%3E"); }
 
 /* 主题开关和 GitHub：去掉默认的分隔线和胶囊开关，统一成 32px 幽灵图标按钮 */
 .Layout .VPNav .VPNavBar .content-body > .appearance::before,
@@ -68,7 +74,7 @@
   box-shadow: var(--bz-highlight), var(--bz-shadow-float);
 }
 .Layout .VPNav .VPNavScreen .container { max-width: none; padding: var(--bz-sp-2) 0 0; }
-.Layout .VPNav .VPNavScreenMenuLink { font-size: var(--bz-fs-body); font-weight: 600; }
+.Layout .VPNav .VPNavScreenMenuLink { display: flex; align-items: center; font-size: var(--bz-fs-body); font-weight: 600; }
 .Layout .VPNav .VPNavScreenAppearance { border-radius: var(--bz-r-control); background-color: var(--bz-surface-2); }
 .Layout .VPNav .VPNavScreenAppearance .text { font-size: var(--bz-fs-sm); }
 @media (max-width: 767px) {

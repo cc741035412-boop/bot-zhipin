@@ -132,8 +132,12 @@ test('触摸重说与 4 秒计时、点外部关闭、触摸后键盘仍工作',
     await expect(opened(page)).toHaveCount(1)
     await expect(opened(page)).toHaveCount(0, { timeout: 1800 })
     await avatar.tap()
-    await page.touchscreen.tap(8, 120)
+    // 「点外部」点导航条中间的空白：整张卡是链接以后，卡片旁边 16px 的留白也在触摸的模糊命中范围里
+    // （浏览器会把落在链接边上的点按算给这个链接），点那里等于点卡片、会进详情。
+    const bar = await page.locator('.VPNavBar').boundingBox()
+    await page.touchscreen.tap(bar.x + bar.width / 2, bar.y + bar.height / 2)
     await expect(opened(page)).toHaveCount(0)
+    await expect(page).toHaveURL(/\/$/)
     await page.getByTestId('filter-category').last().focus()
     await page.keyboard.press('Tab')
     await expect(opened(page)).toHaveCount(1)
@@ -189,7 +193,8 @@ for (const dark of [false, true]) {
       for (const link of await page.locator('.shelf-page a[target="_blank"]').all()) {
         await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
         await expect(link).toContainText('（在新标签页打开）')
-        await expect(link.locator('.external-icon[aria-hidden="true"]')).toHaveText('↗')
+        // 导入按钮是「图标 + 动词」，用图标库里的右上箭头；其余外链沿用文字后面的「↗」。两种都对读屏隐藏。
+        await expect(link.locator('.external-icon[aria-hidden="true"], svg[data-icon="arrow-up-right"][aria-hidden="true"]')).toHaveCount(1)
       }
       await page.keyboard.press('Tab')
       for (const control of await page.locator('.shelf-page a, .shelf-page button').all()) {
@@ -325,11 +330,11 @@ test('复制成功单一播报区、1.8 秒恢复；失败 dialog 全选/焦点/
   await page.goto('/')
   const copy = card(page, weekly).getByTestId('btn-prompt')
   await copy.click()
-  await expect(copy).toHaveText('已复制 ✓')
+  await expect(copy).toHaveText('已复制')
   await expect(page.locator('.shelf-page [aria-live]')).toHaveCount(1)
   await expect(page.locator('.shelf-page [aria-live]')).toHaveText('已复制安装提示词')
   await page.waitForTimeout(1400)
-  await expect(copy).toHaveText('已复制 ✓')
+  await expect(copy).toHaveText('已复制')
   await expect(copy).toHaveText('复制安装提示词', { timeout: 1000 })
   await page.evaluate(() => { window.denyClipboard = true })
   for (const method of ['Escape', 'backdrop', 'button']) {

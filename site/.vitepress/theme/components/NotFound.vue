@@ -18,7 +18,6 @@ onMounted(() => bot.value?.play({ state: 'exclaim' }))
     </div>
     <p class="not-found-code" aria-hidden="true">404</p>
     <h1>{{ NOT_FOUND.title }}</h1>
-    <p class="not-found-text">{{ NOT_FOUND.description }}</p>
     <a class="bz-btn" href="/"><BzIcon name="arrow-left" />{{ NOT_FOUND.back }}</a>
   </main>
 </template>

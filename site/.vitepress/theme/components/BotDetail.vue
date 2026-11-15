@@ -53,18 +53,25 @@ onMounted(() => { if (!preview) loadHeat() })
       <h2>导入前准备</h2>
       <ul><li v-for="(item, index) in bot.prerequisites" :key="index">{{ item }}</li></ul>
     </section>
+    <!-- 额度：三格强度条 + 一个字。档位的含义不直接显示，放在 title 和读屏文本里。 -->
     <section data-testid="section-quota">
       <h2>额度消耗</h2>
-      <p class="quota-line"><span class="bz-tag quota-tag" :data-quota="bot.quotaCost"><BzIcon name="bolt" :size="12" />{{ bot.quotaCost }}</span>{{ copy.quota[bot.quotaCost] }}</p>
+      <p class="quota-meter" data-testid="quota-meter" :data-quota="bot.quotaCost" :title="copy.quota[bot.quotaCost]">
+        <span class="quota-bars" aria-hidden="true"><i /><i /><i /></span>
+        <span class="quota-level">{{ bot.quotaCost }}</span>
+        <span v-if="copy.quota[bot.quotaCost]" class="bz-sr-only">：{{ copy.quota[bot.quotaCost] }}</span>
+      </p>
     </section>
+    <!-- 权限：一排标签。每项的含义同样在 title 和读屏文本里。 -->
     <section data-testid="section-permissions">
       <h2>会用到的权限</h2>
       <ul v-if="bot.permissions.length" class="permission-list">
-        <li v-for="permission in bot.permissions" :key="permission"><span class="bz-tag">{{ permission }}</span><span>{{ copy.permissions[permission] }}</span></li>
+        <li v-for="permission in bot.permissions" :key="permission" class="bz-tag" :title="copy.permissions[permission]">{{ permission }}<span v-if="copy.permissions[permission]" class="bz-sr-only">：{{ copy.permissions[permission] }}</span></li>
       </ul>
       <p v-else>不需要额外权限</p>
     </section>
-    <section v-if="!bot.external" data-testid="section-screenshots">
+    <!-- 下面几块没有内容就整块不渲染；投稿预览里照旧显示「还缺什么」的提示。 -->
+    <section v-if="!bot.external && (preview || bot.screenshots.length)" data-testid="section-screenshots">
       <h2>截图</h2>
       <div class="bot-screenshots">
         <template v-for="(url, index) in bot.screenshots" :key="index">
@@ -74,7 +81,7 @@ onMounted(() => { if (!preview) loadHeat() })
       </div>
       <p v-if="!bot.screenshots.length">暂无截图。</p>
     </section>
-    <section v-if="!bot.external" data-testid="section-skills">
+    <section v-if="!bot.external && (preview || bot.skills.length)" data-testid="section-skills">
       <h2>技能</h2>
       <ul v-if="bot.skills.length" class="skill-list">
         <li v-for="skill in bot.skills" :key="skill.sourceUrl">
@@ -88,16 +95,14 @@ onMounted(() => { if (!preview) loadHeat() })
     </section>
     <section v-if="!bot.external && bot.hasRoutines" data-testid="section-routines">
       <h2>定时任务</h2>
-      <p>这个 Bot 配有定时任务，安装前请查看运行时间与输出位置。</p>
       <span v-if="preview">上架后可查看</span>
       <a v-else :href="bot.routinesUrl" target="_blank" rel="noopener noreferrer">查看定时任务<ExternalHint /></a>
     </section>
-    <section v-if="!bot.external" data-testid="section-design">
+    <section v-if="!bot.external && (preview || designHtml)" data-testid="section-design">
       <h2>设计说明</h2>
       <!-- 仅插入 paths 加载器安全渲染的 HTML，绝不编译投稿内容。 -->
       <div v-if="designHtml" class="vp-doc design-body" v-html="designHtml" />
       <p v-else>暂无设计说明。</p>
     </section>
-    <p v-if="bot.external" class="external-notice">{{ bot.official ? '这个 Bot 来自 xAI 官方 Bot 市场，由原作者发布。本站只收录链接，中文介绍由本站撰写。' : '这个 Bot 由原作者在 x.ai 发布，本站只收录链接。' }}</p>
   </component>
 </template>

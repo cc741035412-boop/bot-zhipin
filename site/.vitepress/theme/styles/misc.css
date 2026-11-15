@@ -33,7 +33,6 @@
 }
 .shelf-page.not-found .not-found-code { font-size: var(--bz-fs-xs); line-height: var(--bz-lh-xs); font-weight: 600; letter-spacing: .12em; color: var(--bz-text-3); font-variant-numeric: tabular-nums; }
 .not-found h1 { margin-top: var(--bz-sp-2); font-size: var(--bz-fs-h1); font-weight: 700; line-height: var(--bz-lh-h1); letter-spacing: -.01em; }
-.shelf-page.not-found .not-found-text { max-width: 28em; margin-top: var(--bz-sp-2); font-size: var(--bz-fs-body); line-height: var(--bz-lh-body); color: var(--bz-text-2); }
 .not-found .bz-btn { margin-top: var(--bz-sp-6); }
 
 /* ---------- 投稿预览复用卡片和详情：把旧版式留下的偏移归零 ---------- */

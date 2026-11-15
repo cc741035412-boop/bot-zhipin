@@ -8,7 +8,8 @@ import { botPalette, categoryStyle } from '../color'
 import { reportClick } from '../heat'
 import { nextPoke } from '../pitch'
 
-// 精选卡：活 Bot、名字、作者、介绍、分类和额度、导入。不带台词气泡，也不参与分类筛选。
+// 主推卡：活 Bot、名字、作者、介绍、分类和额度、导入。不带台词气泡，也不参与分类筛选。
+// 整张卡可点进详情：名字那个链接用伪元素铺满整卡（样式在 home.css），砖（戳）、作者、导入在它上面。
 const props = defineProps<{ bot: {
   slug: string; name: string; tagline: string; avatar: string | null; category: string; quotaCost: string
   templateUrl: string; detailUrl: string; author: { name: string; link: string }; external?: boolean; official?: boolean
@@ -53,7 +54,7 @@ function importBot() {
         <span class="bz-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
         <span class="bot-stat stat-quota" :data-quota="bot.quotaCost"><BzIcon name="bolt" />额度 {{ bot.quotaCost }}</span>
       </div>
-      <a data-testid="featured-import" class="bz-btn sm" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot">导入<ExternalHint /></a>
+      <a data-testid="featured-import" class="bz-btn sm" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot"><BzIcon name="arrow-up-right" />导入<span class="bz-sr-only">（在新标签页打开）</span></a>
     </div>
   </article>
 </template>

@@ -2,6 +2,7 @@
 export const SITE = {
   // 占位站名，正式名字定了改这里
   name: 'Bot 直聘',
+  // 只给页面的 meta description 用，界面上不显示
   tagline: 'Grok Bot 模板货架：挑一个顺手的直接导入，也欢迎把你做的 Bot 挂上来。',
   repo: 'https://github.com/jakob52123/bot-zhipin',
   url: 'https://bot-zhipin.pages.dev',
@@ -25,26 +26,24 @@ export const HERO_MASCOTS = [
 // 首页主推：编辑挑的三个，按这个顺序排。这几个不在货架上时（比如测试数据），退回按热度取前三。
 export const FEATURED = ['idea-stress-test', 'quota-saver', 'copy-humanizer']
 
-// 首页货架的固定文案；搜索占位字和搜索面板里的输入框保持一致。
+// 首页货架的固定文案。界面上不放解释性的句子（决策 37）：这里只有标题、按钮、标签和状态反馈。
+// 搜索占位字首屏搜索框和搜索面板共用。
 export const SHELF_COPY = {
-  searchPlaceholder: '搜 Bot：名字、分类、作者…',
+  searchPlaceholder: '搜索',
   searchLabel: '搜索 Bot',
   contribute: '我要投稿',
   featuredTitle: '本周主推',
-  featuredSub: '编辑挑的三个。',
   allTitle: '全部 Bot',
   allCategories: '全部',
   filterLabel: '按分类筛选',
   emptyFilter: '这个分类下暂时没有 Bot',
   showAll: '看看全部',
-  footer: '货架到底啦。没找到合适的？把你做的 Bot 也挂上来。',
 }
 
 export const POKE_PITCHES = ['哎，痒！', '再戳我就变形了', '好啦好啦，我在呢', '你找我呀？']
 export const ANGRY_PITCH = '别戳啦！'
 export const NOT_FOUND = {
   title: '这一页走丢了',
-  description: '这个 Bot 可能已经下架了，或者链接写错了。',
   back: '回货架看看',
 }
 

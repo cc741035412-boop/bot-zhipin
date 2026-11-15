@@ -1,4 +1,4 @@
-/* 首页：区块、精选卡、工具栏、列表卡、页尾、筛选为空。
+/* 首页：区块、主推卡、工具栏、列表卡、页尾、筛选为空。
    卡片里的头像砖、名字、作者行、介绍、标签着色、操作按钮，详情页和投稿预览也在用，统一写在这里。
    只用 V5-DESIGN §1、§2 里写了名字的 token 和基础类。 */
 
@@ -18,7 +18,11 @@
 .bot-head { min-width: 0; }
 .bot-title { display: flex; align-items: center; gap: var(--bz-sp-2); min-width: 0; }
 .bot-name { min-width: 0; font-family: var(--bz-font-display); font-size: var(--bz-fs-title); font-weight: 600; line-height: 1.35; letter-spacing: -.01em; color: var(--bz-ink); }
-.bot-name a:hover { text-decoration: underline; }
+/* 整张卡可点进详情：名字那个链接用伪元素铺满整张卡（列表卡铺满 .bot-card-body，主推卡铺满 .featured-card），
+   鼠标在卡上任何地方都是手型。DOM 里仍然只有这一个指向详情的链接，键盘顺序和读屏文本不变。
+   头像砖（戳、气泡）、作者链接、按钮抬到它上面，各管各的，互不误触。悬停的反馈是整张卡的光晕，名字不再加下划线。 */
+:is(.bot-card, .featured-card) .bot-name a::after { content: ''; position: absolute; inset: 0; z-index: 0; border-radius: calc(var(--bz-r-card) - 1px); }
+:is(.bot-card, .featured-card) :is(.avatar-stage, .featured-tile, a.bot-author, .bz-btn) { position: relative; z-index: 1; }
 .bot-byline { font-size: var(--bz-fs-sm); line-height: 1.5; color: var(--bz-text-3); }
 /* 卡片里的作者行只占一行：作者名太长就省略，后面的「· 官方市场」始终留着 */
 .bot-head .bot-byline { display: flex; min-width: 0; margin-top: 2px; }
@@ -156,8 +160,8 @@
 /* ---------- 6. 筛选为空、页尾 ---------- */
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: var(--bz-sp-4); padding: var(--bz-sp-8) var(--bz-sp-4); border: 1px dashed var(--bz-border-strong); border-radius: var(--bz-r-card); background: var(--bz-surface-2); text-align: center; }
 .shelf-page .empty-state p { font-size: var(--bz-fs-body); line-height: 1.6; color: var(--bz-text-2); }
-.shelf-footer { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: var(--bz-sp-4); margin-top: var(--bz-sp-9); padding-top: var(--bz-sp-7); border-top: 1px solid var(--bz-hairline); text-align: center; }
-.shelf-footer p { font-size: var(--bz-fs-body); line-height: 1.6; color: var(--bz-text-2); text-wrap: balance; }
+/* 页尾只有一枚「我要投稿」，居中放在细线下面 */
+.shelf-footer { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: var(--bz-sp-9); padding-top: var(--bz-sp-7); border-top: 1px solid var(--bz-hairline); }
 
 /* ---------- 7. 投稿预览复用列表卡：把 submit.css 里旧版式留下的偏移归零 ---------- */
 .submit-preview .bot-card.bot-card { padding: 0; }

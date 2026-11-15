@@ -15,8 +15,6 @@ import DefaultAvatar from './DefaultAvatar.vue'
 import LiveAnnouncer from './LiveAnnouncer.vue'
 
 const ALL = 'all'
-// 副标题按「：，」拆成短句，各自不拆行：换行只落在标点后面，不会把词劈成两半。
-const taglineClauses = SITE.tagline.match(/[^：，]+[：，]?/g) || [SITE.tagline]
 const hero = ref()
 let releaseEntry
 const sort = ref('hot')
@@ -83,15 +81,11 @@ onBeforeUnmount(() => { alive = false; releaseEntry?.() })
         <HeroPortrait v-for="mascot in HERO_MASCOTS" :key="mascot.key" :mascot="mascot" />
       </div>
       <h1>{{ SITE.name }}</h1>
-      <p class="hero-sub"><span v-for="(clause, index) in taglineClauses" :key="index">{{ clause }}</span></p>
       <SearchTrigger class="hero-search" data-testid="search-trigger" />
     </header>
     <section v-if="featured.length" class="shelf-section" aria-labelledby="featured-title">
       <header class="bz-section-head">
-        <div>
-          <h2 id="featured-title">{{ SHELF_COPY.featuredTitle }}</h2>
-          <p>{{ SHELF_COPY.featuredSub }}</p>
-        </div>
+        <div><h2 id="featured-title">{{ SHELF_COPY.featuredTitle }}</h2></div>
       </header>
       <div class="featured-grid" :class="{ 'grid-enter': featuredEntering }" @animationend="featuredEntering = false">
         <FeaturedCard v-for="bot in featured" :key="bot.slug" :bot="bot" />
@@ -123,11 +117,10 @@ onBeforeUnmount(() => { alive = false; releaseEntry?.() })
       <div v-else data-testid="empty-state" class="empty-state">
         <DefaultAvatar slug="empty-shelf" rest="sleep" :size="120" />
         <p>货架上还没有 Bot</p>
-        <a class="bz-btn" :href="CONTRIBUTE_URL">做第一个投稿的人</a>
+        <a class="bz-btn" :href="CONTRIBUTE_URL"><BzIcon name="plus" />做第一个投稿的人</a>
       </div>
     </section>
     <footer v-if="bots.length" class="shelf-footer">
-      <p>{{ SHELF_COPY.footer }}</p>
       <a data-testid="contribute-link" class="bz-btn" :href="CONTRIBUTE_URL"><BzIcon name="plus" />{{ SHELF_COPY.contribute }}</a>
     </footer>
   </main>

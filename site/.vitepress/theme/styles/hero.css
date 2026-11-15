@@ -1,4 +1,4 @@
-/* hero.css：首屏（极光、砖墙、站名、副标题、搜索框）。
+/* hero.css：首屏（极光、砖墙、站名、搜索框）。首屏不放副标题：砖墙 → 站名 → 搜索框。
    极光是砖墙背后的三团色光，像舞台背光；到站名那里已经淡没了，文字背后是干净的底色。 */
 
 .shelf-home {
@@ -54,10 +54,8 @@
   .hero-portrait:hover::before { opacity: 1; background: radial-gradient(110% 95% at 50% 100%, color-mix(in srgb, var(--bz-bot-color) 56%, transparent), transparent 74%); }
 }
 
-/* ---------- 站名、副标题、搜索框 ---------- */
+/* ---------- 站名、搜索框 ---------- */
 .shelf-intro h1 { font-size: var(--bz-fs-display); font-weight: 700; line-height: var(--bz-lh-display); letter-spacing: -.02em; text-wrap: balance; }
-.shelf-intro .hero-sub { max-width: 30em; margin-top: var(--bz-sp-4); font-size: var(--bz-fs-h3); font-weight: 400; line-height: 1.5; color: var(--bz-text-2); }
-.hero-sub > span { display: inline-block; max-width: 100%; }
 .search-trigger {
   display: inline-flex; align-items: center; gap: var(--bz-sp-3); flex: none; width: 476px; max-width: 100%; height: 51px; padding: 0 var(--bz-sp-3) 0 var(--bz-sp-4);
   border: 1px solid var(--bz-border-strong); border-radius: var(--bz-r-card); background: var(--bz-card); box-shadow: var(--bz-highlight);
@@ -76,7 +74,6 @@
   .search-trigger:hover { border-color: var(--bz-border-hover); color: var(--bz-text-2); }
 }
 .hero-search { margin-top: var(--bz-sp-6); }
-.shelf-intro .contribute { margin-top: var(--bz-sp-4); }
 
 @media (max-width: 1099px) {
   .shelf-home { --bz-hero-tile: 96px; --bz-hero-gap: 16px; --bz-glow-w: 440px; --bz-glow-h: 300px; --bz-glow-blur: 80px; }

@@ -16,7 +16,8 @@ test('全卡 wide 常驻、读屏全文与视觉打字分离；动作回 wide、
   await bot.evaluate((el) => el.addEventListener('bz-play', (event) => {
     el.dataset.lastPlay = `${event.detail.state}:${event.detail.hold}`
   }))
-  await c.locator('.bot-tagline').hover()
+  // 介绍上面盖着整卡链接（整张卡可点），所以不等「介绍自己接到指针」，直接把鼠标移到介绍的位置。
+  await c.locator('.bot-tagline').hover({ force: true })
   await expect(bot).toHaveAttribute('data-last-play', 'wide:Infinity')
   await expect(bot).toHaveAttribute('data-state', 'wide')
   await expect(bubble.getByTestId('typing')).toBeVisible()
@@ -71,7 +72,7 @@ test('详情按钮只驱动本地 Bot，导入上报/新页与复制播报仍正
 test('减少动效中途切换：打字立即完成，静态帧不变；恢复后基础状态正确', async ({ page }) => {
   await page.goto('/')
   const c = card(page), bubble = c.getByTestId('pitch-bubble'), bot = c.getByTestId('live-bot')
-  await c.locator('.bot-tagline').hover()
+  await c.locator('.bot-tagline').hover({ force: true })
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await expect(bubble.locator('span')).toHaveText(await bubble.getAttribute('data-text'))
   await expect(bubble.getByTestId('typing')).toHaveCount(0)

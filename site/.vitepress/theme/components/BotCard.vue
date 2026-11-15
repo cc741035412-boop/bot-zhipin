@@ -26,7 +26,8 @@ const origin = computed(() => props.bot.external ? (props.bot.official ? '官方
 
 <template>
   <article class="bot-card bz-bot-scope" :style="botPalette(bot.avatar ? '#8a8a93' : avatarColor(bot.slug))" data-testid="bot-card" :data-slug="bot.slug" @pointerenter="avatar?.enter($event)" @pointerleave="avatar?.leave($event)">
-    <!-- article 是容器查询的容器；版式网格放在里面这层，才能按卡片自己的宽度切换。 -->
+    <!-- article 是容器查询的容器；版式网格放在里面这层，才能按卡片自己的宽度切换。
+         整张卡可点进详情：名字那个链接用伪元素铺满这一层（样式在 home.css），头像、作者、按钮在它上面。 -->
     <div class="bot-card-body">
       <BotAvatar v-if="active" ref="avatar" :bot="bot" whole-card />
       <div class="bot-head">

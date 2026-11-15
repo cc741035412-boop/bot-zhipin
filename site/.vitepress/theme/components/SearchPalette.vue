@@ -6,6 +6,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vitepress'
 import { data as bots } from '../../data/bots.data.mjs'
+import { SHELF_COPY } from '../../meta.mjs'
 import { searchBots } from '../search'
 import { avatarColor } from '../avatar'
 import { faceColors } from '../face'
@@ -244,7 +245,7 @@ onBeforeUnmount(() => {
             ref="input" v-model="query" class="sp-input" data-testid="search-input" type="text"
             role="combobox" aria-label="搜索 Bot" aria-expanded="true" aria-haspopup="listbox" aria-autocomplete="list"
             :aria-controls="LIST_ID" :aria-activedescendant="activeId"
-            placeholder="搜 Bot：名字、分类、作者…"
+            :placeholder="SHELF_COPY.searchPlaceholder"
             autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go"
           >
           <button type="button" class="sp-esc" aria-label="关闭搜索" @click="hide"><kbd class="sp-key">esc</kbd></button>
@@ -273,7 +274,7 @@ onBeforeUnmount(() => {
               </span>
             </div>
           </div>
-          <p v-if="more > 0" class="sp-more">还有 {{ more }} 个，接着输入可以缩小范围</p>
+          <p v-if="more > 0" class="sp-more">还有 {{ more }} 个</p>
           <div v-if="!results.length" class="sp-empty" data-testid="search-empty">
             <span class="sp-sleeper" aria-hidden="true"><BotPortrait :bot="SLEEPER" rest="sleep" /></span>
             <span>{{ emptyText }}</span>
