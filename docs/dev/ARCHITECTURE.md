@@ -16,6 +16,13 @@
 | `scripts/sync-assets.mjs` | 构建前把截图、头像复制到 `site/public/bot-assets/`，并生成 `site/public/api-data/slugs.json` | 维护者 |
 | `site/` | VitePress 站点根目录；`site/.vitepress/meta.mjs` 放站名、仓库地址、安装提示词、默认台词 | 维护者 |
 | `site/.vitepress/theme/vendor/bloub/` | 第三方 MIT 头像引擎，**不要改** | 只能整体升级 |
+| `site/.vitepress/theme/live/` | 单 rAF 时钟 clock.ts、视线 gaze.ts、帧与反应接线；离屏/隐藏/减少动效暂停 | 维护者 |
+| `site/.vitepress/theme/components/LiveBot.vue` | SSR sample(0) + 客户端活体 SVG；bz-play 事件入口 | 维护者 |
+| `site/.vitepress/theme/face.ts` | 官方形状映射、botFace / resolveFace、faceColors 和 seed 回退 | 维护者 |
+| `site/.vitepress/theme/shapes-extra.ts` | 15 种原创径向轮廓，不复制 x.ai 路径 | 维护者 |
+| `site/.vitepress/theme/color.ts` | contrast、darkSwap、buttonColors、botPalette 纯函数配色 | 维护者 |
+| `site/.vitepress/data/faces.json` | slug → color / shape / fetchedAt 的离线真脸数据，静态 import | 维护者 |
+| `scripts/sync-faces.mjs` | 手动抓 x.ai 模板页；--check 离线校验 | 维护者 |
 | `functions/api/` | 点击计数接口 | 维护者 |
 | `migrations/` | D1 表结构 | 维护者 |
 | `tests/unit/` | vitest 单元测试；`tests/fixtures/` 校验器样例；`tests/e2e/` Playwright 真浏览器 | 维护者 |
@@ -24,6 +31,8 @@
 ## 数据流
 
 ```
+x.ai 模板页 →（维护者跑 sync-faces）→ site/.vitepress/data/faces.json → 构建
+
 bots/*/bot.yaml, *.md, screenshots/
    │  scripts/lib/load-bots.mjs
    ├──────────────► scripts/validate.mjs（PR 时在 CI 里跑）
@@ -43,6 +52,8 @@ bots/*/bot.yaml, *.md, screenshots/
 ## 约定
 
 - 面向用户的文案一律简体中文。
+- **构建不联网**：真脸抓取是维护者独立操作，npm run build 不调用 sync-faces；页面静态导入 faces.json，不在运行时拉脸数据。抓取失败保留旧条目并警告，无数据用原 seed 算法。
+- 活体/真脸/彩色模块为本轮目标架构，分工见 TASKS，接口与状态标记见 INTERACTION v2；不表示所有实现线已经验收。
 - 页面路径：首页 `/`，详情页 `/bots/<slug>`。
 - 图片引用：`/bot-assets/<slug>/<文件名>`。
 - 不复制原站（fork 来源）的任何文字、图片和组件代码。
