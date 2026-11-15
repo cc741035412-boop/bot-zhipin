@@ -365,3 +365,13 @@ CREATE TABLE IF NOT EXISTS bot_owners (
 
 - `issue.mjs`：`author.github` 缺失时，用 Issue 作者补上（调用 `applyServerFields`，只改 github 和缺失的 name，addedAt 规则不变）；填了但不一致时仍然报错（防冒名）。
 - 成功评论里加一句：「下次可以直接在网站上投稿，更快：<SITE.url>/submit」。
+
+## 9. 线上联调记录（2026-11-15）
+
+用维护者账号在生产环境走完一遍，结论：
+
+- **新增**：投稿页提交 → App 开 PR（作者 `bot-zhipin-submit[bot]`，提交作者是投稿人的 noreply 邮箱）→ `pull_request` CI 不用人批准就自动运行（`author_association=NONE`，走严格范围检查）→ 自动合并已开启（MERGE）→ 维护者 Approve 后约 50 秒自动合并 → 约 45 秒后 `上线通知` 评论「已上线」并删除投稿分支 → 投稿页进度自己走到「已上线」。
+- **更新**：同一账号再投同名 Bot，标题变为「更新 Bot」，`addedAt` 沿用原值；第二层 tree 用一个 `040000` 条目**确实整体替换旧目录**（去掉的 `routines.md` 在 PR 里显示为删除），其他 Bot 不受影响。§3.5 第 11 步的备用方案不需要。
+- **授权页**：零 scope OAuth App 显示「Public data only · Limited access to your public data」。
+- **CPU**（`wrangler pages deployment tail` 实测，18 次 dryRun 加真实提交）：普通投稿 8–17ms，接近上限的大投稿包（36 万字节、29 个文件）22–44ms，1.9MB 截图上传 64ms，冷启动首个请求 28ms。全部 `outcome: ok`，没有 `exceededCpu`，但都高于免费版名义上的 10ms。流量上来后如果出现 1102 错误，先升级 Workers Paid，再考虑拆接口。
+- **Node 版本**：CI 用 Node 22，没有 `Uint8Array.fromBase64`；依赖这个原生方法的测试要 `skipIf`。workerd 里有原生 `toBase64`，不需要 `nodejs_compat`。
