@@ -165,7 +165,7 @@ describe('M1 明文唯一入口与严格 base64url', () => {
     expect(result.status).toBe(400); expect((await result.json()).error).toBe('bad_request')
     expect(decompress).not.toHaveBeenCalled(); expect(gh.installationToken).not.toHaveBeenCalled()
   })
-  it('浏览器使用原生 strict base64url，不重新编码检查', async () => {
+  it.skipIf(typeof Uint8Array.fromBase64 !== 'function')('浏览器使用原生 strict base64url，不重新编码检查', async () => {
     const token = await encodeToken(input.bundle)
     const native = vi.spyOn(Uint8Array, 'fromBase64')
     const encode = vi.spyOn(globalThis, 'btoa')
