@@ -57,7 +57,9 @@ for (const scheme of ['light', 'dark']) {
   test(`${scheme}：九个分组的标签和来源标签实际 CSS 对比度 ≥4.5，首页/详情一致`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme })
     await page.goto('/')
-    const homeColor = await page.locator(`[data-testid="bot-card"][data-slug="${weekly}"] .category-tag`).evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])
+    // 首页按分组分段时列表卡不带分组标签（组头已经说了），主推卡带。
+    await expect(page.locator(`[data-testid="bot-card"][data-slug="${weekly}"] .category-tag`)).toHaveCount(0)
+    const homeColor = await page.locator(`[data-testid="featured-card"][data-slug="${weekly}"] .category-tag`).evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])
     await page.goto(`/bots/${weekly}`)
     expect(await page.locator('.category-tag').evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])).toEqual(homeColor)
     await page.goto('/')

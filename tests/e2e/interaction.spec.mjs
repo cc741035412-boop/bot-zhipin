@@ -63,7 +63,7 @@ for (const width of [1280, 1100, 1024, 900, 680, 390, 320]) {
       return minimum
     })
     expect(minimumGap).toBeGreaterThanOrEqual(13)
-    const columns = await page.locator('.bot-grid').evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length)
+    const columns = await page.locator('.bot-grid').first().evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length)
     expect(columns).toBe(width >= 900 ? 2 : 1)
     const cardBox = await bot.boundingBox()
     if (width >= 1280) expect(cardBox.width).toBeCloseTo(562, 0)
@@ -90,8 +90,8 @@ test('鼠标、Tab、Enter、空格、Esc、失焦、单开和跳动重播', asy
   await expect(a).not.toHaveAttribute('aria-describedby')
   await page.mouse.move(0, 0)
   await expect(opened(page)).toHaveCount(0)
-  // 真正从前一个按钮 Tab 到头像，不只调用 focus()。工具栏只有排序和分类筛选，卡片前的最后一个控件是最后一枚分类按钮。
-  await page.getByTestId('filter-category').last().focus()
+  // 真正从前一个按钮 Tab 到头像，不只调用 focus()。工具栏是分组切换 → 排序，卡片前的最后一个控件是排序的最后一项「最热」。
+  await page.getByTestId('sort-hot').focus()
   await page.keyboard.press('Tab')
   await expect(a).toBeFocused()
   await expect(opened(page)).toHaveCount(1)
@@ -138,12 +138,12 @@ test('触摸重说与 4 秒计时、点外部关闭、触摸后键盘仍工作',
     await page.touchscreen.tap(bar.x + bar.width / 2, bar.y + bar.height / 2)
     await expect(opened(page)).toHaveCount(0)
     await expect(page).toHaveURL(/\/$/)
-    await page.getByTestId('filter-category').last().focus()
+    await page.getByTestId('sort-hot').focus()
     await page.keyboard.press('Tab')
     await expect(opened(page)).toHaveCount(1)
     await page.keyboard.press('Enter')
     await expect(opened(page)).toHaveCount(1)
-    for (const button of await page.locator('.shelf-page .bz-btn, .shelf-page .bz-seg, .shelf-page .filter-chip').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(44)
+    for (const button of await page.locator('.shelf-page .bz-btn, .shelf-page .bz-seg, .shelf-page .collection-card').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(44)
   } finally { await context.close() }
 })
 
@@ -160,7 +160,8 @@ test('减少动效保留 120ms 淡入、没有跳动/上浮/网格动画', async
   expect(motion.property).toContain('opacity')
   expect(motion.duration).toContain('0.12s')
   expect(await card(page).evaluate((el) => getComputedStyle(el).transform)).toBe('none')
-  expect(await page.locator('.bot-grid').evaluate((el) => getComputedStyle(el).animationName)).toBe('none')
+  expect(await page.locator('.bot-grid').first().evaluate((el) => getComputedStyle(el).animationName)).toBe('none')
+  expect(await page.locator('.shelf-list').evaluate((el) => getComputedStyle(el).animationName)).toBe('none')
   expect(await card(page).locator('.avatar-stage').evaluate((el) => el.getAnimations().length)).toBe(0)
 })
 
@@ -227,8 +228,9 @@ for (const dark of [false, true]) {
     await expect(contribute).toHaveCSS('color', ink)
     expect((await contribute.boundingBox()).height).toBe(36)
     await expect(page.getByTestId('search-trigger')).toHaveCSS('background-color', paper)
-    // 全页只有分段控件是胶囊；按钮、筛选都是圆角 8。
-    for (const control of await page.locator('.shelf-page .bz-btn, .shelf-page .filter-chip').all()) await expect(control).toHaveCSS('border-radius', '8px')
+    // 全页只有分段控件（分组切换、排序）是胶囊；按钮都是圆角 8，专题卡和列表卡一样是圆角 12。
+    for (const control of await page.locator('.shelf-page .bz-btn').all()) await expect(control).toHaveCSS('border-radius', '8px')
+    for (const control of await page.getByTestId('collection-card').all()) await expect(control).toHaveCSS('border-radius', '12px')
     // 导入按钮是 Bot 色淡染的玻璃，不是 Bot 色实底：字始终是墨色，白色、灰色的 Bot 也不会像禁用。
     for (const button of [...await page.getByTestId('btn-import').all(), ...await page.getByTestId('featured-import').all()]) {
       await expect(button).toHaveCSS('color', ink)
@@ -242,7 +244,7 @@ for (const dark of [false, true]) {
       expect(alpha, '按钮底是淡染，不是实色').toBeLessThan(.3)
     }
     // 分段控件：玻璃轨道 + 亮一档的选中滑块，选中文字用墨色。
-    const selected = await page.getByTestId('sort-hot').evaluate((el) => ({ color: getComputedStyle(el).color, background: getComputedStyle(el.parentElement, '::after').backgroundColor, track: getComputedStyle(el.parentElement).backgroundColor, height: el.parentElement.getBoundingClientRect().height }))
+    const selected = await page.getByTestId('sort-rec').evaluate((el) => ({ color: getComputedStyle(el).color, background: getComputedStyle(el.parentElement, '::after').backgroundColor, track: getComputedStyle(el.parentElement).backgroundColor, height: el.parentElement.getBoundingClientRect().height }))
     expect(selected).toEqual({ color: ink, background: dark ? 'rgba(255, 255, 255, 0.1)' : 'rgb(255, 255, 255)', track: surface, height: 40 })
     const bot = card(page)
     await bot.scrollIntoViewIfNeeded()
@@ -291,7 +293,7 @@ for (const dark of [false, true]) {
 
 test('同一个排序指示块滑动、头像玻璃砖静止不漂移、正热度火苗', async ({ page }) => {
   await page.goto('/')
-  const controls = page.locator('.bz-seg')
+  const controls = page.locator('.sort-seg')
   const indicator = () => controls.evaluate((el) => {
     const css = getComputedStyle(el, '::after')
     return { x: new DOMMatrix(css.transform).m41, width: parseFloat(css.width), duration: css.transitionDuration }
