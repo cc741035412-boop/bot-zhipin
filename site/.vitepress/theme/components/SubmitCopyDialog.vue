@@ -18,6 +18,6 @@ function backdrop(event: MouseEvent) {
     <h2 id="submit-copy-title">复制没成功，请手动复制</h2>
     <p id="submit-copy-help">全选下面的文字，复制后发给你的 AI</p>
     <textarea ref="field" readonly rows="8" aria-label="要复制的文字" :value="clipboard.state.text" />
-    <button type="button" class="shelf-button" @click="dialog?.close()">关闭</button>
+    <button type="button" class="bz-btn" @click="dialog?.close()">关闭</button>
   </dialog>
 </template>
