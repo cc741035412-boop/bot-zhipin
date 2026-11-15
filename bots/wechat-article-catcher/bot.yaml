@@ -2,7 +2,7 @@
 slug: wechat-article-catcher
 name: "微信文章捕手"
 tagline: "贴公众号文章链接，原样存成 Markdown 和图片，免登录"
-category: 调研
+category: 内容
 author:
   name: "铁柱AGI"
   github: RongleCat

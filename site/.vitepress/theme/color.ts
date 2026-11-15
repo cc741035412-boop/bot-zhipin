@@ -6,8 +6,10 @@ export const CATEGORY_MASCOTS: Readonly<Record<string, Readonly<{ shape: string;
   '销售': { shape: 'star', color: '#14b8a6' },
   '内容': { shape: 'tablet', color: '#8b5cf6' },
   '运营': { shape: 'hex', color: '#f5a623' },
+  '学习': { shape: 'pebble', color: '#9a6a3a' },
+  '求职': { shape: 'heart', color: '#f43f5e' },
   '管家': { shape: 'cloud', color: '#3b82f6' },
-  '个人': { shape: 'teardrop', color: '#34d399' },
+  '生活': { shape: 'teardrop', color: '#34d399' },
 })
 // 岗位色就是吉祥物的颜色，不另写一份。
 export const CATEGORY_COLORS: Readonly<Record<string, string>> = Object.freeze(

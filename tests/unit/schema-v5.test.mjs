@@ -24,18 +24,19 @@ const at = (update, prefix) => check(update).errors.filter((error) => error.wher
 const long = (n) => '字'.repeat(n)
 
 describe('岗位', () => {
-  it('7 个岗位，顺序固定；字段名还是 category，说明改成「岗位」', () => {
-    expect(loadEnums().categories).toEqual(['产品', '市场', '销售', '内容', '运营', '管家', '个人'])
+  it('9 个岗位，顺序固定；字段名还是 category，说明改成「岗位」', () => {
+    expect(loadEnums().categories).toEqual(['产品', '市场', '销售', '内容', '运营', '学习', '求职', '管家', '生活'])
     expect(schema.properties.category.description).toBe('岗位')
   })
   it.each(loadEnums().categories)('%s 通过', (category) => {
     expect(check((data) => { data.category = category }).errors).toEqual([])
   })
-  it.each(['调研', '定义', '评审', 'AI 评测', '学习', '求职', '日常', '基础设施'])('旧分类 %s 不再接受，报错列出全部岗位', (category) => {
+  // 旧 8 类里的「学习」「求职」在新枚举里还在；「个人」是 7 个岗位那一版的叫法，已改成「生活」。
+  it.each(['调研', '定义', '评审', 'AI 评测', '日常', '基础设施', '个人'])('旧分类 %s 不再接受，报错列出全部岗位', (category) => {
     const errors = at((data) => { data.category = category }, 'category')
     expect(errors).toHaveLength(1)
     expect(errors[0].file).toBe('bots/demo-weekly-digest/bot.yaml')
-    expect(errors[0].problem).toContain('可选值：产品、市场、销售、内容、运营、管家、个人')
+    expect(errors[0].problem).toContain('可选值：产品、市场、销售、内容、运营、学习、求职、管家、生活')
     expect(errors[0].fix).toContain('改成以上可选值之一')
   })
 })
@@ -163,11 +164,11 @@ describe('about', () => {
 
 describe('投稿模板里的例子', () => {
   const text = readFileSync(join(ROOT, 'bots/_template/bot.yaml'), 'utf8')
-  it('岗位注释列的是 schema 里的 7 个岗位，示例值也在里面', () => {
+  it('岗位注释列的是 schema 里的 9 个岗位，示例值也在里面', () => {
     const categories = loadEnums().categories
-    expect(text).toContain(`七选一：${categories.join('、')}`)
+    expect(text).toContain(`九选一：${categories.join('、')}`)
     expect(categories).toContain(template.data.category)
-    expect(text).not.toMatch(/八选一|调研、定义/)
+    expect(text).not.toMatch(/八选一|七选一|调研、定义|管家、个人/)
   })
   it('注释掉的 about 例子去掉注释后是合法的写法', () => {
     const start = text.indexOf('# about:')

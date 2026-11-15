@@ -234,9 +234,10 @@ describe('网站数据：bots、squads、curation 三份对得上', () => {
     expect(data.curation.collections).toEqual(raw.collections)
     expect(data.bots.find((item) => item.slug === 'idea-stress-test').pick).toBe(0)
     expect(data.bots.find((item) => item.slug === 'project-manager').squads).toEqual([{ slug: 'one-person-marketing', name: '一个人的市场部', title: '队长', lead: true, detailUrl: '/squads/one-person-marketing' }])
-    // 契约 §6 的岗位人数。
+    // 契约 §9.1 的岗位人数（82 个）。
     const count = Object.fromEntries(enums.categories.map((category) => [category, data.bots.filter((item) => item.category === category).length]))
-    expect(count).toEqual({ 产品: 10, 市场: 11, 销售: 8, 内容: 9, 运营: 5, 管家: 6, 个人: 3 })
+    expect(count).toEqual({ 产品: 16, 市场: 11, 销售: 8, 内容: 12, 运营: 5, 学习: 11, 求职: 5, 管家: 8, 生活: 6 })
+    expect(data.bots).toHaveLength(82)
   })
   it('引用了货架上没有的 Bot：成员和策展项被丢掉；成员不到 2 个的小队不出页面', () => {
     const bots = loadAllBots(join(fixtures, 'bots'))
