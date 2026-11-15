@@ -139,7 +139,10 @@ test('触摸重说与 4 秒计时、点外部关闭、触摸后键盘仍工作',
     await expect(opened(page)).toHaveCount(1)
     await page.keyboard.press('Enter')
     await expect(opened(page)).toHaveCount(1)
-    for (const button of await page.locator('.shelf-button').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(44)
+    // 按钮触摸高度 44；分段控件整条 44，里面每一项的点按范围撑满整条。
+    for (const button of await page.locator('.shelf-button:not(.sort-controls > *), .bz-btn').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(44)
+    expect((await page.locator('.sort-controls').boundingBox()).height).toBeGreaterThanOrEqual(44)
+    expect(await page.getByTestId('sort-hot').evaluate((el) => { const hit = getComputedStyle(el, '::before'); return el.getBoundingClientRect().height - parseFloat(hit.top) - parseFloat(hit.bottom) })).toBeGreaterThanOrEqual(44)
   } finally { await context.close() }
 })
 
@@ -196,47 +199,44 @@ for (const dark of [false, true]) {
         expect(css.style).toBe('solid')
         expect(css.width).toBeGreaterThanOrEqual(2)
       }
-      for (const button of await page.locator('.shelf-button').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(40)
+      // v5：按钮高 36，分段控件高 40。
+      for (const button of await page.locator('.shelf-button:not(.sort-controls > *), .bz-btn').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(36)
+      for (const seg of await page.locator('.sort-controls, .bz-seg').all()) expect((await seg.boundingBox()).height).toBeGreaterThanOrEqual(40)
     }
   })
 }
 
 for (const dark of [false, true]) {
-  test(`${dark ? '深' : '浅'}色：Raycast 质感 token、Bot 色按钮、漫画气泡和卡片悬停`, async ({ page }) => {
+  test(`${dark ? '深' : '浅'}色：v5 token、玻璃和实心按钮、漫画气泡和卡片悬停`, async ({ page }) => {
     await page.goto('/')
     await page.evaluate((dark) => document.documentElement.classList.toggle('dark', dark), dark)
     const ink = dark ? 'rgb(255, 255, 255)' : 'rgb(20, 20, 24)'
     const paper = dark ? 'rgb(12, 13, 15)' : 'rgb(255, 255, 255)'
     const background = dark ? 'rgb(7, 8, 10)' : 'rgb(246, 245, 241)'
-    const glass = dark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(255, 255, 255, 0.7)'
+    const surface2 = dark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 20, 24, 0.03)'
+    const edge = dark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(20, 20, 24, 0.16)'
     const hairline = dark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(20, 20, 24, 0.08)'
     await expect(page.locator('body')).toHaveCSS('background-color', background)
-    // 「我要投稿」是搜索框下面的玻璃胶囊，不再是墨色实底。
-    await expect(page.getByTestId('contribute-link')).toHaveCSS('background-color', glass)
-    await expect(page.getByTestId('contribute-link')).toHaveCSS('border-top-color', hairline)
+    // 「我要投稿」是次级按钮：不在 Bot 范围里，就是中性玻璃。
+    await expect(page.getByTestId('contribute-link')).toHaveCSS('background-color', surface2)
+    await expect(page.getByTestId('contribute-link')).toHaveCSS('border-top-color', edge)
+    await expect(page.getByTestId('contribute-link')).toHaveCSS('border-radius', '8px')
     await expect(page.getByTestId('search-trigger')).toHaveCSS('background-color', paper)
     for (const button of await page.locator('.shelf-button.primary').all()) {
-      await expect(button).toHaveCSS('border-radius', '999px')
+      await expect(button).toHaveCSS('border-radius', '8px')
     }
     for (const button of [...await page.getByTestId('btn-import').all(), ...await page.getByTestId('featured-import').all()]) {
-      const colors = await button.evaluate((el) => {
-        const css = getComputedStyle(el)
-        const rgb = (name) => {
-          const hex = css.getPropertyValue(name).trim()
-          return `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`
-        }
-        return { bg: css.backgroundColor, fg: css.color, expectedBg: rgb('--bz-btn-bg'), expectedFg: rgb('--bz-btn-fg') }
-      })
-      expect(colors.bg).toBe(colors.expectedBg)
-      expect(colors.fg).toBe(colors.expectedFg)
+      // 实心按钮不再用 Bot 色：深色主题白底深字，浅色主题墨底白字。
+      await expect(button).toHaveCSS('background-color', dark ? 'rgb(255, 255, 255)' : 'rgb(20, 20, 24)')
+      await expect(button).toHaveCSS('color', dark ? 'rgb(11, 11, 13)' : 'rgb(255, 255, 255)')
     }
     // 分段控件：玻璃轨道 + 亮一档的选中滑块，选中文字用墨色。
     const selected = await page.getByTestId('sort-hot').evaluate((el) => ({ color: getComputedStyle(el).color, background: getComputedStyle(el.parentElement, '::after').backgroundColor, track: getComputedStyle(el.parentElement).backgroundColor, height: el.parentElement.getBoundingClientRect().height }))
-    expect(selected).toEqual({ color: ink, background: dark ? 'rgba(255, 255, 255, 0.1)' : 'rgb(255, 255, 255)', track: glass, height: 48 })
+    expect(selected).toEqual({ color: ink, background: dark ? 'rgba(255, 255, 255, 0.1)' : 'rgb(255, 255, 255)', track: surface2, height: 40 })
     const bot = card(page)
     await bot.scrollIntoViewIfNeeded()
     await page.mouse.move(4, 4)
-    await expect(bot).toHaveCSS('border-radius', '16px')
+    await expect(bot).toHaveCSS('border-radius', '12px')
     // 深色下卡片底色透明，浅色下是卡片白；细边 + 内高光。
     await expect(bot).toHaveCSS('background-color', dark ? 'rgba(0, 0, 0, 0)' : paper)
     await expect(bot).toHaveCSS('background-image', 'none')
@@ -244,8 +244,10 @@ for (const dark of [false, true]) {
     expect(await bot.evaluate((el) => getComputedStyle(el).boxShadow)).toContain('inset')
     const stage = await bot.locator('.avatar-stage').boundingBox(), avatar = await bot.getByTestId('avatar').boundingBox()
     expect([stage.width, stage.height]).toEqual([64, 64])
-    expect([avatar.width, avatar.height]).toEqual([56, 56])
-    await expect(bot.locator('.avatar-stage')).toHaveCSS('border-radius', '16px')
+    // 头像砖：比例圆角 24%，Bot 占砖内框（去掉 1px 细边）的 68%。
+    expect(avatar.width).toBeCloseTo((64 - 2) * .68, 1)
+    expect(avatar.height).toBeCloseTo((64 - 2) * .68, 1)
+    await expect(bot.locator('.avatar-stage')).toHaveCSS('border-radius', '24%')
     const glow = () => bot.evaluate((el) => { const css = getComputedStyle(el, '::after'); return { opacity: css.opacity, image: css.backgroundImage, duration: css.transitionDuration } })
     expect(await glow()).toMatchObject({ opacity: '0', duration: '0.15s' })
     expect((await glow()).image).toContain('radial-gradient')
@@ -256,6 +258,7 @@ for (const dark of [false, true]) {
     await expect(bot).toHaveCSS('transform', 'none')
     const bubble = bot.getByTestId('pitch-bubble')
     await expect(bubble).toHaveCSS('background-color', paper)
+    await expect(bubble).toHaveCSS('border-radius', '12px')
     await expect(bubble).toHaveCSS('border-top-width', '2px')
     await expect(bubble).toHaveCSS('border-top-color', ink)
     await expect(bubble).toHaveCSS('box-shadow', 'rgb(138, 138, 147) 3px 3px 0px 0px')
@@ -266,8 +269,8 @@ for (const dark of [false, true]) {
     expect(tip).toEqual({ width: '12px', height: '12px', border: '2px', color: ink, background: paper })
     await expect(bot.locator('.avatar-stage')).toHaveCSS('--bz-bot-color', '#8a8a93')
     await bot.getByTestId('btn-import').hover()
-    await expect(bot.getByTestId('btn-import')).toHaveCSS('background-color', 'rgb(138, 138, 147)')
-    await expect(bot.getByTestId('btn-import')).toHaveCSS('color', 'rgb(20, 20, 24)')
+    await expect(bot.getByTestId('btn-import')).toHaveCSS('background-color', dark ? 'rgb(235, 235, 235)' : 'rgb(44, 44, 51)')
+    await expect(bot.getByTestId('btn-import')).toHaveCSS('color', dark ? 'rgb(11, 11, 13)' : 'rgb(255, 255, 255)')
   })
 }
 

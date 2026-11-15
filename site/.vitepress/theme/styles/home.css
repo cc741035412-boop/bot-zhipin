@@ -1,0 +1,160 @@
+/* home.css：首页区块（区标题、精选、工具栏、列表卡、页尾）。 */
+
+/* ---------- 5. 内容区：区标题、精选、工具栏 ---------- */
+.shelf-section { position: relative; z-index: 1; margin-top: 128px; }
+.section-heading { margin-bottom: 64px; text-align: center; }
+.section-heading h2 { font-size: 40px; font-weight: 600; line-height: 1.2; letter-spacing: -.01em; }
+.section-heading p { margin-top: 12px; font-size: 16px; line-height: 1.6; color: var(--bz-text-2); text-wrap: balance; }
+.block-heading { margin-bottom: 24px; }
+.block-heading h3 { font-size: 20px; font-weight: 600; line-height: 1.4; }
+.block-heading p { margin-top: 2px; font-size: 15px; line-height: 1.6; color: var(--bz-text-2); }
+.featured-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.featured-card {
+  position: relative; isolation: isolate; display: flex; flex-direction: column; align-items: center; min-width: 0; padding: 32px;
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-radius-card); background: var(--bz-card-bg);
+  box-shadow: var(--bz-highlight), var(--bz-card-shadow); text-align: center; transition: border-color 150ms ease-in-out;
+}
+/* 顶上常驻一团 Bot 色柔光，悬停更亮 */
+.featured-card::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; opacity: .75;
+  background: radial-gradient(78% 58% at 50% 0%, color-mix(in srgb, var(--bz-bot-color) var(--bz-featured-glow), transparent), transparent 74%);
+  transition: opacity 150ms ease-in-out;
+}
+.featured-tile { --bz-tile-size: 96px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.featured-tile img, .bot-avatar img { object-fit: cover; border-radius: 50%; border: 1px solid var(--bz-border); }
+.featured-card h4 { margin-top: 24px; font-size: 20px; font-weight: 600; line-height: 1.4; }
+.featured-card h4 a:hover, .bot-card h2 a:hover { text-decoration: underline; }
+.featured-card .bot-tagline { min-height: 48px; margin-top: 6px; }
+.bot-tagline { font-size: 15px; line-height: 1.6; color: var(--bz-text-2); text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.featured-card .featured-meta { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px 14px; margin-top: 16px; }
+.featured-card .shelf-button { margin-top: 22px; }
+@media (hover: hover) {
+  .featured-card:hover { border-color: color-mix(in srgb, var(--bz-bot-color) 42%, var(--bz-hairline)); }
+  .featured-card:hover::before { opacity: 1; background: radial-gradient(96% 72% at 50% 0%, color-mix(in srgb, var(--bz-bot-color) calc(var(--bz-featured-glow) + 8%), transparent), transparent 76%); }
+  .featured-card:hover .bz-tile::before { opacity: 1; }
+}
+.shelf-toolbar { display: flex; align-items: center; gap: 16px; margin: 96px 0 28px; }
+
+.filter-chips {
+  display: flex; flex: 1 1 0; gap: 8px; min-width: 0; padding: 4px; margin: -4px; overflow-x: auto; overscroll-behavior-x: contain;
+  scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+}
+.filter-chips::-webkit-scrollbar { display: none; }
+.filter-chips::after { content: ''; flex: none; width: 20px; }
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 7px; flex: none; height: 36px; padding: 0 14px 0 12px;
+  border: 1px solid var(--bz-hairline); border-radius: 999px; background: transparent; color: var(--bz-text-2);
+  font-size: 13px; font-weight: 600; line-height: 1; white-space: nowrap; cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease, background-color 150ms ease;
+}
+.chip-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--bz-category-color); }
+.chip-dot.all { background: conic-gradient(#ff6a13, #f5a623, #34d399, #14b8a6, #3b82f6, #8b5cf6, #ff2e93, #ff6a13); }
+.filter-chip:hover { border-color: color-mix(in srgb, var(--bz-category-color, var(--bz-ink)) 45%, var(--bz-hairline)); color: var(--bz-ink); }
+.filter-chip[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--bz-category-color) 55%, transparent);
+  background: color-mix(in srgb, var(--bz-category-color) 14%, transparent); color: var(--bz-ink);
+}
+/* 「全部」没有分类色：选中时只比轨道亮一档 */
+.filter-chip.all[aria-pressed="true"] { border-color: color-mix(in srgb, var(--bz-ink) 20%, transparent); background: color-mix(in srgb, var(--bz-ink) 9%, transparent); }
+.bot-count { flex: none; font-size: 13px; color: var(--bz-text-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.toolbar-search { width: 280px; height: 43px; font-size: 14px; }
+
+/* ---------- 6. 列表和卡片 ---------- */
+.bot-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+.grid-enter { animation: bz-grid-enter 200ms ease; }
+@keyframes bz-grid-enter { from { opacity: .35; } to { opacity: 1; } }
+.bot-card {
+  position: relative; container-type: inline-size; display: flex; flex-direction: column; min-width: 0;
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-radius-card); background: var(--bz-card-bg);
+  box-shadow: var(--bz-highlight), var(--bz-card-shadow); transition: border-color 150ms ease-in-out;
+}
+/* 悬停层：左上角一团 Bot 色径向光，叠在自上而下的柔光上；卡片本身不位移、不缩放。 */
+.bot-card::after {
+  content: ''; position: absolute; inset: 0; z-index: 0; border-radius: calc(var(--bz-radius-card) - 1px); pointer-events: none; opacity: 0;
+  background-image: radial-gradient(120% 150% at 0% 0%, color-mix(in srgb, var(--bz-bot-color) 20%, transparent), transparent 62%),
+    radial-gradient(100% 100% at 50% 0%, var(--bz-hover-from) 0%, var(--bz-hover-to) 150%);
+  transition: opacity 150ms ease-in-out;
+}
+@media (hover: hover) {
+  .bot-card:hover { border-color: color-mix(in srgb, var(--bz-bot-color) 45%, var(--bz-hairline)); }
+  .bot-card:hover::after { opacity: 1; }
+  .bot-card:hover .bz-tile::before { opacity: 1; }
+}
+/* 触摸点开气泡、键盘聚焦头像时也亮起来 */
+.bot-card:has(.pitch-bubble[data-open="true"]) { border-color: color-mix(in srgb, var(--bz-bot-color) 45%, var(--bz-hairline)); }
+.bot-card:has(.pitch-bubble[data-open="true"])::after { opacity: 1; }
+.bot-card-body {
+  position: relative; z-index: 1; flex: 1; display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; grid-template-rows: auto 1fr auto;
+  grid-template-areas: "avatar head import" "pitch pitch pitch" "stats stats prompt";
+  gap: 16px; align-items: center; padding: 28px;
+}
+.bot-card .avatar-root, .bot-card .bot-actions { display: contents; }
+.bot-card .avatar-stage { grid-area: avatar; align-self: start; }
+
+.bot-head { grid-area: head; min-width: 0; }
+.bot-card h2 { font-size: 17px; font-weight: 700; line-height: 1.35; letter-spacing: -.005em; }
+.bot-card h2 a { display: block; }
+.bot-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; font-size: 13px; color: var(--bz-text-3); line-height: 1.6; }
+.bot-card .bot-meta { margin-top: 6px; }
+.bot-meta a, .bot-author { color: var(--bz-text-3); font-size: 13px; }
+
+.bot-card .bot-tagline { grid-area: pitch; align-self: start; min-height: 62px; transition: opacity 120ms ease; }
+.bot-card-body:has(.pitch-bubble[data-open="true"]) > .bot-tagline { opacity: 0; }
+.bot-stats { grid-area: stats; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 16px; min-width: 0; min-height: 24px; }
+.bot-heat, .bot-stat { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; line-height: 22px; color: var(--bz-text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.bot-heat svg, .bot-stat svg { flex: none; }
+.bot-heat.is-loading { opacity: .65; }
+.bot-heat svg.is-hot { color: var(--bz-flame); }
+.stat-quota[data-quota="低"] svg { color: var(--bz-quota-low); }
+.stat-quota[data-quota="中"] svg { color: var(--bz-quota-mid); }
+.stat-quota[data-quota="高"] svg { color: var(--bz-quota-high); }
+.bot-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+/* 贴着第一行顶部、和 64px 的砖垂直居中；名字换行时按钮不跟着往下掉 */
+.bot-card .action-import { grid-area: import; justify-self: end; align-self: start; margin-top: 12px; }
+.bot-card .action-prompt { grid-area: prompt; justify-self: end; }
+.bot-card .bot-actions-note { grid-column: 1 / -1; }
+/* 卡片自己变窄时（手机、投稿预览）：导入按钮挪到底部，和复制按钮并排 */
+@container (max-width: 399px) {
+  .bot-card-body { grid-template-columns: 64px minmax(0, 1fr); grid-template-rows: auto 1fr auto auto; grid-template-areas: "avatar head" "pitch pitch" "stats stats" "actions actions"; gap: 14px; padding: 20px; }
+  .bot-card .bot-actions { display: flex; grid-area: actions; }
+  .bot-card .bot-actions > .shelf-button { flex: 1 1 auto; align-self: auto; margin-top: 0; padding-inline: 14px; }
+}
+@container (max-width: 479px) { .stat-permissions { display: none; } }
+
+/* 页尾：一条细线、一句话、再给一次投稿入口 */
+.shelf-footer { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; margin-top: 96px; padding-top: 40px; border-top: 1px solid var(--bz-hairline); text-align: center; }
+.shelf-footer p { font-size: 14px; line-height: 1.6; color: var(--bz-text-3); }
+.shelf-footer .shelf-button.contribute { margin-top: 16px; }
+
+/* 卡片里：盖在介绍那一块上，尖角朝上指着头像 */
+.bot-card .pitch-bubble { grid-area: pitch; align-self: start; justify-self: start; }
+
+@media (max-width: 1099px) {
+  .featured-grid { gap: 20px; }
+  .featured-card { padding: 28px 22px; }
+  .shelf-toolbar { flex-wrap: wrap; row-gap: 16px; }
+  .filter-chips { order: 3; flex: 1 0 100%; }
+  .bot-count { margin-left: auto; }
+  .toolbar-search { width: 240px; }
+}
+@media (max-width: 899px) {
+  .featured-grid, .bot-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .featured-card { padding: 32px; }
+  .toolbar-search { width: 44px; padding: 0; justify-content: center; }
+  .toolbar-search .search-trigger-text, .toolbar-search .search-trigger-keys { display: none; }
+}
+@media (max-width: 679px) {
+  .shelf-section { margin-top: 88px; }
+  .section-heading { margin-bottom: 40px; }
+  .section-heading h2 { font-size: 28px; }
+  .section-heading p { font-size: 15px; }
+  .shelf-toolbar { margin-top: 64px; gap: 12px; }
+  .shelf-footer { margin-top: 64px; }
+}
+@media (pointer: coarse) {
+  .filter-chip, .toolbar-search { min-height: 44px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shelf-page .bot-card { animation: none !important; transform: none !important; }
+  .shelf-page .bot-grid, .shelf-page .featured-grid { animation: none !important; }
+}

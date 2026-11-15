@@ -258,7 +258,7 @@ for (const width of [1280, 768, 390, 320]) test(`24 ${width}px 所有主要状�
 })
 async function overflow(page) { expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true) }
 async function targets(page, minimum) {
-  for (const button of await page.locator('.submit-page button, .submit-page a.shelf-button, .submit-page [role="button"]').all()) if (await button.isVisible()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(minimum)
+  for (const button of await page.locator('.submit-page button, .submit-page a.shelf-button, .submit-page [role="button"]').all()) if (await button.isVisible()) expect(await button.evaluate((el) => (el.closest('.sort-controls, .bz-seg') || el).getBoundingClientRect().height)).toBeGreaterThanOrEqual(minimum) // v5：分段控件整条算一个点按高度，每一项的点按范围撑满整条
 }
 test('25 桌面可见控件 ≥40px；键盘顺序①→预览→②→③→④', async ({ page }) => {
   await mock(page, { loggedOut: true }); await open(page); await targets(page, 40)

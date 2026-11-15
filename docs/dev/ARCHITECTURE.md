@@ -21,7 +21,8 @@
 | `site/.vitepress/theme/face.ts` | 官方形状映射、botFace / resolveFace、faceColors 和 seed 回退 | 维护者 |
 | `site/.vitepress/theme/shapes-extra.ts` | 15 种原创径向轮廓，不复制 x.ai 路径 | 维护者 |
 | `site/.vitepress/theme/color.ts` | contrast、darkSwap、buttonColors、botPalette 纯函数配色 | 维护者 |
-| `site/.vitepress/theme/style.css` | 全站视觉：token、悬浮导航条换肤、Hero、精选、工具栏、列表卡、气泡、详情页、响应式和减少动效；分节见文件内注释 | 维护者 |
+| `site/.vitepress/theme/styles/` | 全站视觉，按区域分七个文件：`tokens.css`（token）、`base.css`（基础部件：按钮、标签、头像砖、区块标题、分段控件、气泡、焦点）、`nav.css`（导航条）、`hero.css`（首屏）、`home.css`（首页区块和卡片）、`detail.css`（详情页）、`misc.css`（404、空状态、弹窗）；`theme/index.ts` 按这个顺序引入。规格见 `INTERACTION.md` §1、§1b | 维护者 |
+| `site/.vitepress/theme/icons.ts` + `components/BzIcon.vue` | 全站唯一一套线性图标：路径数据 + 渲染组件 | 维护者 |
 | `site/.vitepress/theme/enums.data.mjs` | 构建时用 `loadEnums()` 读 schema，把分类枚举（含顺序）给到浏览器；首页分类筛选用 | 维护者 |
 | `site/.vitepress/theme/components/BotShelf.vue` | 首页：极光、砖墙、标题、搜索入口、精选、排序 + 分类筛选、列表、空状态 | 维护者 |
 | `site/.vitepress/theme/components/HeroPortrait.vue` | 砖墙里的一块玻璃砖 + 一只吉祥物（数据在 `meta.mjs` 的 `HERO_MASCOTS`） | 维护者 |
