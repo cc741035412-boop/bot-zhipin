@@ -1,9 +1,4 @@
-import { readFileSync } from 'node:fs'
-import Ajv2020 from 'ajv/dist/2020.js'
-import { SCHEMA_PATH } from '../load-bots.mjs'
-
-const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf8'))
-const check = new Ajv2020({ allErrors: true, verbose: true, strict: false }).compile(schema)
+import { validate as check, schema } from './generated/bot-schema.mjs'
 const decode = (key) => key.replace(/~1/g, '/').replace(/~0/g, '~')
 const parts = (pointer) => pointer.split('/').slice(1).map(decode)
 const valueAt = (data, pointer) => parts(pointer).reduce((value, key) => value?.[key], data)

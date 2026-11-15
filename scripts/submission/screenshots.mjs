@@ -1,5 +1,6 @@
 import { imageFormat, MAX_IMAGE_BYTES } from '../lib/validate/images.mjs'
-import { assertFileSet, LIMITS } from './bundle.mjs'
+import { LIMITS } from './bundle.mjs'
+import { planScreenshots } from './screenshot-plan.mjs'
 import { fail } from './errors.mjs'
 
 const bad = (problem, fix = '请拖入真实的 PNG/JPG/WEBP/GIF 截图，每张不超过 2MB；不要粘贴外站图片地址。') => fail('Issue', 'screenshots', problem, fix)
@@ -86,37 +87,9 @@ export async function downloadImage(url, { fetchImpl = fetch, timeoutMs = 20_000
 
 /** 只生成文件计划，不写盘。图片扩展名以文件头为准，并修正本地 Markdown 引用。 */
 export function makeFilePlan(bundle, images) {
-  if (!images.length) bad('至少需要一张截图。')
-  if (images.length < bundle.screenshots.length) bad('截图数量少于投稿包里的文件名数量。', '按投稿包里的顺序补齐截图，或让 AI 删除不再需要的文件名和引用。')
-  const files = { ...bundle.files }
-  const renames = []
-  for (let i = 0; i < images.length; i++) {
-    const bytes = Buffer.from(images[i])
-    const format = imageFormat(bytes)
-    if (bytes.length > MAX_IMAGE_BYTES) bad('截图超过 2MB。')
-    if (!format) bad('截图文件头无法识别，不能只改扩展名伪装图片。')
-    const ext = format === 'jpeg' ? 'jpg' : format
-    const original = bundle.screenshots[i]
-    // 已有 .jpeg 也是真实 JPEG 扩展名，无需改变引用。
-    const extension = original?.split('.').at(-1).toLowerCase()
-    const matches = extension === ext || (format === 'jpeg' && extension === 'jpeg')
-    const name = original ? (matches ? original : `${original.replace(/\.[^.]+$/, '')}.${ext}`) : `screenshot-${i + 1}.${ext}`
-    if (original && name !== original) renames.push([original, name])
-    const path = `bots/${bundle.slug}/screenshots/${name}`
-    if (Object.hasOwn(files, path)) bad('截图命名冲突，请为截图选择不同文件名。')
-    files[path] = bytes
-  }
-  assertFileSet(Object.keys(files))
-  for (const [file, value] of Object.entries(files)) {
-    if (!file.toLowerCase().endsWith('.md') || typeof value !== 'string') continue
-    let text = value
-    for (const [oldName, newName] of renames) {
-      for (const prefix of ['screenshots/', './screenshots/']) {
-        text = text.replaceAll(`](${prefix}${oldName})`, `](${prefix}${newName})`)
-          .replaceAll(`](<${prefix}${oldName}>)`, `](<${prefix}${newName}>)`)
-      }
-    }
-    files[file] = text
-  }
+  const bytes = images.map((image) => Buffer.from(image))
+  const plan = planScreenshots(bundle, bytes.map((image) => ({ size: image.length, format: imageFormat(image) })))
+  const files = { ...plan.files }
+  plan.images.forEach(({ name }, index) => { files[`bots/${bundle.slug}/screenshots/${name}`] = bytes[index] })
   return { slug: bundle.slug, files }
 }
