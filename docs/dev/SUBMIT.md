@@ -4,7 +4,7 @@
 
 ## 0. 一句话
 
-AI 生成 `https://bot-zhipin.pages.dev/submit#BZB1:…` → 学员在 `/submit` 预览、用 GitHub 登录、逐张传截图、勾授权、提交 → Function 用 GitHub App 在 `submission/web-<数字id>-<slug>` 建单提交并开 PR、开启自动合并 → `pull_request` CI 自动跑 → 维护者 Approve → 自动合并 → `announce-live` 工作流在部署完成后评论「已上线」。
+AI 生成 `https://bot-zhipin.pages.dev/submit#BZB1:…` → 学员在 `/submit` 预览、用 GitHub 登录、勾授权、提交（2026-11-15 起不传截图，DECISIONS 第 43 条）→ Function 用 GitHub App 在 `submission/web-<数字id>-<slug>` 建单提交并开 PR、开启自动合并 → `pull_request` CI 自动跑 → 维护者 Approve → 自动合并 → `announce-live` 工作流在部署完成后评论「已上线」。
 
 原 Issue 表单链路（`submission.yml`）保留为备用，行为见 §8。
 
@@ -166,6 +166,8 @@ applyServerFields(botYamlText, { login, addedAt }) // → 新的 bot.yaml 文本
 
 ### 3.4 截图上传 `POST /api/submit/screenshot`
 
+> 2026-11-15 起前端不再调用这个接口（DECISIONS 第 43 条）。接口保留，只为兼容部署时还开着旧页面的人；下面的规格不变。
+
 - 要求登录，否则 401。请求体就是图片原始字节，`Content-Type: image/png|jpeg|webp|gif`；`Content-Length` 必填且 ≤ 2097152，否则 413 `too_large`。读的时候边读边计数，超了立刻中断。
 - 校验文件头，格式必须和 Content-Type 同属一类（jpeg/jpg 视为同类），否则 415。
 - 编码：用原生 `Uint8Array.prototype.toBase64`；没有就在 `wrangler.toml` 加 `compatibility_flags = ["nodejs_compat"]`，改用 `Buffer`。**禁止**用纯 JS 循环做 base64。
@@ -180,7 +182,7 @@ applyServerFields(botYamlText, { login, addedAt }) // → 新的 bot.yaml 文本
 请求体（JSON，≤ 700KB）：
 
 ```json
-{ "bundle": "<BOT-ZHIPIN-BUNDLE v1 明文>", "screenshots": ["<receipt>", "…"], "license": true, "dryRun": false }
+{ "bundle": "<BOT-ZHIPIN-BUNDLE v1 明文>", "license": true, "dryRun": false }
 ```
 
 处理顺序（任何一步失败都不写 GitHub）：
@@ -188,7 +190,7 @@ applyServerFields(botYamlText, { login, addedAt }) // → 新的 bot.yaml 文本
 1. 要求登录。`license !== true` 返回 400 `license_required`。`dryRun` 为 true 但当前用户 id 不在 `SUBMIT_DRY_RUN_USER_IDS` 里，返回 403。
 2. 校验前仅计 `submit-try`（每人每小时 40 次）；解出 slug 后，非 dryRun 再计 `submit-slug`（同一人同一 slug 每 2 分钟 1 次）。每人每天 10 次和全站每小时 20 次的发布额度延后到第 10 步之后扣。超限返回 429 `rate_limited`，带 `retryAfter` 秒数和 `Retry-After` 头。
 3. 只 `unpack` 一次明文，允许首尾空白和代码围栏；`BZB1:` 一律 400 `bad_request`，不调用 `decodeToken`，不做服务端解压。浏览器仍可解压链接，原生 base64url strict 解码优先，旧浏览器回退；发送给服务端的始终是明文。解包同时拒绝非良构 UTF-16（孤立代理码元），失败带 `errors`。
-4. 回执：逐个验签，`uid` 必须等于当前用户，未过期，至少一张。失败返回 400 `receipt_invalid`，带 `slots: [下标]`（对应请求数组的位置，从 0 开始）。
+4. 回执：`screenshots` 可以不传，也可以是空数组，都当作零张（2026-11-15 起新页面不再带这个字段）；传了就必须是数组。有回执时逐个验签，`uid` 必须等于当前用户，未过期。失败返回 400 `receipt_invalid`，带 `slots: [下标]`（对应请求数组的位置，从 0 开始）。
 5. 拿安装令牌：用 App 私钥签 RS256 JWT，`POST /app/installations/{id}/access_tokens`，参数 `{ repositories: ['bot-zhipin'], permissions: { contents:'write', pull_requests:'write' } }`。令牌在 isolate 内存里缓存，最多 50 分钟。
 6. `GET /git/ref/heads/main` 拿 `mainHead`；`GET /git/commits/{mainHead}` 拿根 tree。
 7. 判断是谁的：`GET /contents/bots/{slug}/bot.yaml?ref={mainHead}`。
@@ -196,7 +198,7 @@ applyServerFields(botYamlText, { login, addedAt }) // → 新的 bot.yaml 文本
    - 已存在：`external: true` 仍返回 409 `slug_taken`。`bot_owners` 有记录时只比较 `user_id` 与会话 id，不同返回 409，不再比较 login（支持改名，防旧用户名被接管）。
    - 已存在但没有绑定记录（老 Bot）：沿用 `author.github` 与 login 忽略大小写的核对，不同返回 409。通过则沿用原 `addedAt`，PR 标题前缀改为「⚠ 更新已上架 Bot：」，正文开头加醒目提示「这个 Bot 之前没有绑定作者数字 ID，只按 GitHub 用户名核对，请人工确认是原作者」。成功建好或更新 PR 后写入绑定。
 8. 同时未合并的网站投稿 PR（见 `web_submissions` 表）达到 3 个且不是在更新其中一个时，返回 409 `pr_limit`，带 `pulls: [{ number, url, slug }]`。数之前先查这几个 PR 的状态，把已合并或已关闭的行删掉。
-9. `applyServerFields` 改写 `bot.yaml`；`planScreenshots` 定截图文件名并改写 Markdown 里的引用；`modelFromBundle` 建模型；用 `submit-context.json`（经 `ASSETS.fetch`，60 秒缓存，照 `slugs.ts` 的写法）调 `validateModels`，参数 `{ template, now, others: index 去掉本 slug, policy: { submission: { login } } }`。有错误返回 422 `invalid`，带 `errors`（含密钥扫描结果）。**校验和密钥扫描必须在任何 GitHub 仓库写操作之前完成。** 改写后模型还必须严格满足 `author.github === login`、`addedAt === 预期值`；不满足返回 422，问题「bot.yaml 的作者或日期字段写法特殊，无法自动填写」，改法「用普通的 `author:` 和 `addedAt:` 写法」。
+9. `applyServerFields` 改写 `bot.yaml`；`planScreenshots` 定截图文件名并改写 Markdown 里的引用（没有回执时忽略投稿包里的 screenshots 文件名段，不放截图）；`modelFromBundle` 建模型；用 `submit-context.json`（经 `ASSETS.fetch`，60 秒缓存，照 `slugs.ts` 的写法）调 `validateModels`，参数 `{ template, now, others: index 去掉本 slug, policy: { submission: { login } } }`。有错误返回 422 `invalid`，带 `errors`（含密钥扫描结果）。**校验和密钥扫描必须在任何 GitHub 仓库写操作之前完成。** 改写后模型还必须严格满足 `author.github === login`、`addedAt === 预期值`；不满足返回 422，问题「bot.yaml 的作者或日期字段写法特殊，无法自动填写」，改法「用普通的 `author:` 和 `addedAt:` 写法」。
 10. `dryRun` 到这里结束，返回 200 `{ ok:true, dryRun:true, slug, update, files: [路径…], warnings }`；只扣 `submit-try`，不写 `bot_owners`。非 dryRun 此时才扣 `submit`、`submit-all`，通过后才能开始首次 GitHub 写入。
 11. 建 tree：
     - 第一次 `POST /git/trees`，不带 base_tree：文本条目用 `content` 内联，截图条目用 `sha`；`mode` 一律 `100644`，`type` 一律 `blob`；路径相对 `bots/<slug>/`。
@@ -236,13 +238,13 @@ GitHub 客户端（`functions/_lib/github.ts`）只导出上面用到的固定�
 - 投稿人：@<login>（GitHub 账号已登录验证）
 - 提交作者记为投稿人，合并后计为贡献者。
 - 自动检查：校验器和密钥扫描在推送前已通过<，N 条提醒请复核>；构建以 validate-and-build 为准。
-- 投稿人已在投稿页勾选 CC BY 4.0 授权，并确认内容和截图有权公开。
+- 投稿人已在投稿页勾选 CC BY 4.0 授权，并确认内容有权公开。
 - 已开启自动合并：批准且检查通过后自动用普通合并合入。
 
 ## 维护者核对（机器判断不了）
 
 - [ ] 设计说明是真实经历，没有编造效果
-- [ ] 截图是这个 Bot 的真实输出，没有露出隐私、密钥或公司内部信息
+- [ ] 设计说明「实际效果」里摘的输出像这个 Bot 的真实输出，没有露出隐私、密钥或公司内部信息
 - [ ] 声明的权限和额度如实
 - [ ] 模板链接在无痕窗口能打开
 
@@ -331,7 +333,7 @@ CREATE TABLE IF NOT EXISTS bot_owners (
 ## 5. CLI（L5）
 
 - `node scripts/make-submission-link.mjs bots/<slug>`：本地校验时缺 `author.github` 就用 `applyServerFields` 填占位值，投稿包本身不改。
-- 输出第一行是 `${SITE.url}/submit#BZB1:…`。后面几行是给学员的提示：「点开链接 → 页面上用 GitHub 登录 → 拖入 N 张截图（各是什么）→ 勾授权 → 提交」。
+- 输出第一行是 `${SITE.url}/submit#BZB1:…`。后面几行是给学员的提示：「点开链接 → 页面上用 GitHub 登录 → 勾授权 → 提交」（不再有拖截图这一步）。
 - 超过 16000 字符走 §1 的退路。
 - `--issue` 参数照旧输出 GitHub Issue 预填链接（备用）。
 - `site/.vitepress/meta.mjs`：`SITE.url`；`submitPrompt()`（全文见 INTERACTION-SUBMIT.md §4.2）；`CONTRIBUTE_URL` 改成站内 `/submit`，首页「我要投稿」和空状态「做第一个投稿的人」都链到它（站内链接，去掉外链标记）。

@@ -7,18 +7,14 @@ import { ROOT, IMAGE_EXTS } from './lib/load-bots.mjs'
 import { validateBots } from './lib/validate/index.mjs'
 import { applyServerFields } from './lib/submit-fields.mjs'
 import { URL_LIMITS } from './submission/bundle-core.mjs'
-import { MAX_IMAGE_BYTES } from './lib/validate/images.mjs'
-import { assertFilename, assertPath, assertSlug, encode, LIMITS, pack, TEXT_EXTS } from './submission/bundle.mjs'
+import { assertPath, assertSlug, encode, LIMITS, pack, TEXT_EXTS } from './submission/bundle.mjs'
 import { SubmissionError, fail, formatErrors } from './submission/errors.mjs'
 import { parseBotMetadata } from './submission/issue.mjs'
 
-// 仅供临时副本校验缺图场景；绝不进入投稿包，也不能充当真实截图投稿。
-const placeholder = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'base64')
-
 export function readBundleDirectory(directory) {
   const dir = resolve(directory), slug = assertSlug(basename(dir))
-  const files = Object.create(null), images = Object.create(null)
-  let avatarOmitted = false
+  const files = Object.create(null)
+  let avatarOmitted = false, screenshotsOmitted = false
   const walk = (path, rel = '') => {
     const stat = lstatSync(path)
     if (stat.isSymbolicLink() || (!stat.isFile() && !stat.isDirectory())) fail('投稿目录', '文件类型', '不能读取符号链接或特殊文件。', '改用 Bot 目录内的普通文件和目录。')
@@ -30,27 +26,21 @@ export function readBundleDirectory(directory) {
     } else if (rel === 'avatar.png') {
       avatarOmitted = true
     } else if (rel.startsWith('screenshots/') && rel.split('/').length === 2 && IMAGE_EXTS.includes(extname(rel).toLowerCase())) {
-      if (stat.size > MAX_IMAGE_BYTES) fail(rel, '文件大小', '截图超过 2MB。', '先压缩到 2MB 以内再生成链接。')
-      images[basename(rel)] = readFileSync(path)
+      // 投稿不收截图（DECISIONS 第 43 条）：本地有图也不进投稿包，校验按网站看到的样子来。
+      screenshotsOmitted = true
     } else if (TEXT_EXTS.has(extname(rel).toLowerCase())) {
       if (stat.size > LIMITS.fileBytes) fail(rel, '文件大小', '单个文本文件不能超过 100KB。', '缩减文件后重试。')
       files[`bots/${slug}/${rel}`] = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(readFileSync(path))
     } else {
-      fail(rel, '文件类型', '投稿包只收 .yaml .yml .md .txt .json 文本及截图文件名。', '移除无关文件；头像不会通过 Issue 投稿传输，网站会使用默认头像。')
+      fail(rel, '文件类型', '投稿包只收 .yaml .yml .md .txt .json 文本。', '移除无关文件；头像不会通过 Issue 投稿传输，网站会使用默认头像。')
     }
   }
   walk(dir)
-  let screenshots = Object.keys(images)
-  if (!screenshots.length) {
-    const design = files[`bots/${slug}/DESIGN.md`] || ''
-    screenshots = [...new Set([...design.matchAll(/\]\(<?(?:\.\/)?screenshots\/([^\s)>]+)>?\)/g)].map((match) => match[1]))]
-    screenshots.forEach(assertFilename)
-  }
-  const bundle = { slug, files, screenshots }
-  return { bundle, plaintext: pack(bundle), images, avatarOmitted }
+  const bundle = { slug, files, screenshots: [] }
+  return { bundle, plaintext: pack(bundle), avatarOmitted, screenshotsOmitted }
 }
 
-function validateLocally({ bundle, images }, directory) {
+function validateLocally({ bundle }, directory) {
   const temp = mkdtempSync(join(tmpdir(), 'bot-link-'))
   try {
     const botsDir = join(temp, 'bots')
@@ -79,10 +69,6 @@ function validateLocally({ bundle, images }, directory) {
         : data.addedAt
       writeFileSync(join(dir, 'bot.yaml'), applyServerFields(sourceText, { login: 'submitter', addedAt }))
     }
-    mkdirSync(join(dir, 'screenshots'), { recursive: true })
-    if (Object.keys(images).length) {
-      for (const [name, bytes] of Object.entries(images)) writeFileSync(join(dir, 'screenshots', name), bytes)
-    } else writeFileSync(join(dir, 'screenshots/submission-placeholder.png'), placeholder)
     return validateBots({ botsDir })
   } finally { rmSync(temp, { recursive: true, force: true }) }
 }
@@ -101,10 +87,10 @@ export function makeSubmissionLink(directory, { validate = validateLocally } = {
   const steps = [
     url,
     '1. 点开链接（先登录 GitHub）。',
-    `2. 截图要在提交页里拖进去（至少一张${source.bundle.screenshots.length ? `，按此顺序：${source.bundle.screenshots.join('、')}` : ''}）。`,
-    '3. 确认有权公开内容与截图，勾选 CC BY 4.0 授权，点 Submit new issue（提交）。',
+    '2. 确认有权公开这些内容，勾选 CC BY 4.0 授权，点 Submit new issue（提交）。',
   ]
   if (source.avatarOmitted) steps.push('提示：Issue 投稿不传头像，将使用网站默认头像。')
+  if (source.screenshotsOmitted) steps.push('提示：投稿不收截图，screenshots/ 里的图片不会上传。')
   if (plain) steps.push(`\n链接超过 7500 字符。打开 ${baseUrl}，把下面整段粘到「投稿包」里：\n`, source.plaintext)
   return { url, fullUrlLength: fullUrl.length, plain, token, bundle: source.plaintext, output: steps.join('\n') }
 }
@@ -121,14 +107,13 @@ export function makeWebSubmissionLink(directory, { validate = validateLocally } 
   const url = long ? baseUrl : fullUrl
   const steps = [url]
   if (long) steps.push('打开后把下面这一行粘进『已有投稿包』', token)
-  const { screenshots } = source.bundle
   steps.push(
     '1. 点开链接，先看一眼你的 Bot 在网站上长什么样。',
     '2. 点「用 GitHub 登录」。',
-    `3. 把${screenshots.length ? ` ${screenshots.length} 张` : '至少 1 张'}截图拖进去${screenshots.length ? `（按顺序：${screenshots.join('、')}）` : ''}。`,
-    '4. 勾选授权，点提交。',
+    '3. 勾选授权，点提交。',
   )
   if (source.avatarOmitted) steps.push('提示：投稿包不传头像，将使用网站默认头像。')
+  if (source.screenshotsOmitted) steps.push('提示：投稿不收截图，screenshots/ 里的图片不会上传。')
   return { url, token, bundle: source.plaintext, long, output: steps.join('\n') }
 }
 
@@ -149,7 +134,7 @@ function main(args) {
       fix: '检查 --dir 路径、文件权限和 UTF-8 编码，确保目录及文件没有被替换成符号链接。',
     }]
     console.error(formatErrors(errors))
-    console.error('还没通过检查。请让 AI 按「改法」修复后重新生成链接；截图要在提交页里拖进去。')
+    console.error('还没通过检查。请让 AI 按「改法」修复后重新生成链接。')
     process.exitCode = 1
   }
 }

@@ -2,7 +2,7 @@ import MarkdownIt from 'markdown-it'
 import { prepareDesignSource, installSafeDesignRules } from '../../../../scripts/lib/design-markdown.mjs'
 import { summarizeBot, decorateSummary } from '../../../../scripts/lib/bot-summary.mjs'
 import { validate } from '../../../../scripts/lib/validate/generated/bot-schema.mjs'
-import { submissionModel, type PreviewImage } from './model'
+import { submissionModel } from './model'
 export { summarizeBot }
 
 export function renderDesign(markdown: string, {
@@ -16,7 +16,7 @@ export function renderDesign(markdown: string, {
   md.linkify.set({ fuzzyLink: false })
   // 不安装 attrs、snippet、frontmatter、Vue 等插件；HTML 仅供 v-html，不可编译。
   installSafeDesignRules(md, { assetUrl })
-  // 仅预览适配器提供截图槽位时启用 UI 规则；共享渲染 API 的默认输出不变。
+  // 仅投稿预览传入 screenshotNames 时启用 UI 规则；共享渲染 API 的默认输出不变。
   if (!screenshotNames) return md.render(prepareDesignSource(markdown), { slug })
   const image = md.renderer.rules.image!
   const hint = '<span class="external-icon" aria-hidden="true">↗</span><span class="bz-sr-only">（在新标签页打开）</span>'
@@ -24,10 +24,8 @@ export function renderDesign(markdown: string, {
     const src = tokens[index].attrGet('src') || ''
     if (blockedUrl && src === blockedUrl) return md.utils.escapeHtml(self.renderInlineAsText(tokens[index].children || [], options, env))
     const match = /^(?:\.\/)?screenshots\/([A-Za-z0-9_.-]+)$/.exec(src)
-    if (match && !assetUrl(match[1])) {
-      const n = screenshotNames.indexOf(match[1])
-      return `<span class="screenshot-error">截图${n >= 0 ? ` ${n + 1}` : ''}（待放入）</span>`
-    }
+    // 投稿不收截图：缺图的本地引用只留说明文字，不给「待放入」这种已经没处放的提示；校验会让删掉这行。
+    if (match && !assetUrl(match[1])) return md.utils.escapeHtml(self.renderInlineAsText(tokens[index].children || [], options, env))
     return image(tokens, index, options, env, self).replace('rel="noreferrer"', 'rel="noopener noreferrer"').replace('</a>', hint + '</a>')
   }
   const links: string[] = []
@@ -49,17 +47,14 @@ export function renderDesign(markdown: string, {
 }
 
 export function previewModel(plaintext: string, {
-  images = [], login, addedAt, names = new Map(), namesZh = new Map(), now,
+  login, addedAt, names = new Map(), namesZh = new Map(), now,
 }: {
-  images?: (PreviewImage | null)[]; login?: string | null; addedAt?: string
+  login?: string | null; addedAt?: string
   names?: Map<string, string>; namesZh?: Map<string, string>; now?: Date | string | number
 } = {}) {
-  const { model, plan, slug } = submissionModel(plaintext, { images, login, addedAt, now })
-  const urls = new Map(plan.images.map((image: PreviewImage & { name: string }) => {
-    const url = image.url || image.thumb || null
-    return [image.name, url && /^(?:blob:|data:image\/(?:jpeg|png|webp|gif);base64,)/i.test(url) ? url : null]
-  }))
-  const asset = (name: string) => urls.get(decodeURIComponent(name)) ?? null
+  const { model, slug } = submissionModel(plaintext, { login, addedAt, now })
+  // 投稿页不收截图：设计说明里的本地图片引用一律按缺图显示，校验会提示删掉。
+  const asset = () => null
   // 预览没有策展和小队：装饰字段取默认值（editorNote、pick 为 null，squads 为空），形状和货架上的一致。
   const summary = decorateSummary(summarizeBot(model, { asset, names, namesZh }))
   validate(model.data)
@@ -76,5 +71,5 @@ export function previewModel(plaintext: string, {
       : summary.author.url || summary.templateUrl || null
   }
   if (bad('/forkedFrom')) { summary.forkedFrom = null; summary.forkedFromName = null; summary.forkedFromNameZh = null }
-  return { model, summary, designHtml: renderDesign(model.design || '', { slug, assetUrl: asset, screenshotNames: plan.images.map((image) => image.name), blockedUrl: typeof model.data?.templateUrl === 'string' ? model.data.templateUrl : undefined }), slug }
+  return { model, summary, designHtml: renderDesign(model.design || '', { slug, assetUrl: asset, screenshotNames: [], blockedUrl: typeof model.data?.templateUrl === 'string' ? model.data.templateUrl : undefined }), slug }
 }

@@ -3,9 +3,12 @@ import { applyServerFields } from '../lib/submit-fields.mjs'
 import { decode, unpack, stripFence } from './bundle.mjs'
 import { fail } from './errors.mjs'
 
-export const LICENSE_TEXT = '我同意以 CC BY 4.0 授权这次投稿，并确认内容和截图都是我有权公开的'
+export const LICENSE_TEXT = '我同意以 CC BY 4.0 授权这次投稿，并确认内容是我有权公开的'
+// 第 43 条之前的表单文字：旧 Issue 重新运行时仍能识别。
+const LEGACY_LICENSE_TEXT = '我同意以 CC BY 4.0 授权这次投稿，并确认内容和截图都是我有权公开的'
 export const FORM_LABELS = Object.freeze({
   bundle: '投稿包（由你的 AI 生成，不用改）',
+  // 新表单已去掉截图栏；保留旧标题，避免旧 Issue 的截图栏被并进投稿包。
   screenshots: '截图：把 Bot 真实输出的截图拖到这里（至少一张，按投稿包里写的顺序）',
   license: '授权',
 })
@@ -72,7 +75,7 @@ function hasLicense(text) {
     const marker = /^\s{0,3}(`{3,}|~{3,})/.exec(line)
     if (marker) { fence = marker[1]; continue }
     if (/^(?: {4}|\t)/.test(line)) continue
-    if (line.trim() === `- [x] ${LICENSE_TEXT}` || line.trim() === `- [X] ${LICENSE_TEXT}`) return true
+    if ([LICENSE_TEXT, LEGACY_LICENSE_TEXT].some((text) => line.trim() === `- [x] ${text}` || line.trim() === `- [X] ${text}`)) return true
   }
   return false
 }
@@ -98,7 +101,7 @@ export function parseSubmission(input) {
   assertIdentity(input)
   const fields = parseForm(input.body)
   if (!hasLicense(fields.license)) {
-    fail('Issue', 'license', '尚未勾选内容与截图的公开授权。', '确认有权公开内容和截图后，勾选 CC BY 4.0 授权，再提交。')
+    fail('Issue', 'license', '尚未勾选内容的公开授权。', '确认有权公开这些内容后，勾选 CC BY 4.0 授权，再提交。')
   }
   const value = stripFence(fields.bundle)
   const bundle = unpack(value.startsWith('BZB1:') ? decode(value) : value)
@@ -139,6 +142,6 @@ export function publication(submission, { warnings = [], template, repo, default
     author: { name: login, email: `${id}+${login}@users.noreply.github.com` },
     committer: { name: 'github-actions[bot]', email: '41898282+github-actions[bot]@users.noreply.github.com' },
     message: `新增 Bot：${data.name}（投稿 #${number}）`, title: `新增 Bot：${data.name}`,
-    body: `## 自动投稿\n\n来源 Issue：https://github.com/${repo}/issues/${number}\nCloses #${number}\n\n- Bot：\`bots/${slug}/\`\n- 投稿人：@${login}\n- 自动检查：validateBots 与单 Bot 范围检查通过${warnings.length ? `（${warnings.length} 条提醒，请维护者复核）` : ''}；已请求 CI，构建结果以 validate-and-build 为准。\n- 投稿人已在表单勾选 CC BY 4.0 授权，并确认内容和截图有权公开。\n- 设计说明、截图与权限已做机器校验；真实性、隐私及模板链接可匿名访问无法由机器确认，下面对应项留给维护者核验。\n\n${checklist}`,
+    body: `## 自动投稿\n\n来源 Issue：https://github.com/${repo}/issues/${number}\nCloses #${number}\n\n- Bot：\`bots/${slug}/\`\n- 投稿人：@${login}\n- 自动检查：validateBots 与单 Bot 范围检查通过${warnings.length ? `（${warnings.length} 条提醒，请维护者复核）` : ''}；已请求 CI，构建结果以 validate-and-build 为准。\n- 投稿人已在表单勾选 CC BY 4.0 授权，并确认内容有权公开。\n- 设计说明与权限已做机器校验；真实性、隐私及模板链接可匿名访问无法由机器确认，下面对应项留给维护者核验。\n\n${checklist}`,
   }
 }

@@ -9,7 +9,7 @@ export const ERRORS = {
   license_required: { status: 400, message: '请先勾选授权。' },
   receipt_invalid: { status: 400, message: '有截图需要重新上传（带 slots）。' },
   unauthenticated: { status: 401, message: '请先用 GitHub 登录。' },
-  session_expired: { status: 401, message: '登录已过期，请重新登录（已传的截图不用重传）。' },
+  session_expired: { status: 401, message: '登录已过期，请重新登录。' },
   forbidden_origin: { status: 403, message: '请在本站页面里提交。' },
   not_found: { status: 404, message: '找不到这个投稿。' },
   slug_taken: { status: 409, message: '这个英文短名已被别人使用，请让 AI 换一个。' },

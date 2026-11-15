@@ -1,4 +1,5 @@
 import { IMAGE_EXTS } from '../bot-model.mjs'
+import { stripComments } from '../design-content.mjs'
 
 export const MAX_IMAGE_BYTES = 2 * 1024 * 1024
 export function imageFormat(bytes) {
@@ -12,7 +13,6 @@ export function imageFormat(bytes) {
 }
 
 export function validateImages(bot, report) {
-  let validShots = 0
   for (const file of [...bot.screenshots, ...(bot.avatar ? [bot.avatar] : [])]) {
     const name = file.path.split('/').at(-1)
     const dot = name.lastIndexOf('.')
@@ -25,9 +25,22 @@ export function validateImages(bot, report) {
       report(file.path, '图片格式', `不支持扩展名 ${ext || '（无）'}；允许的格式：${IMAGE_EXTS.map((s) => s.slice(1)).join('、')}`, '导出为允许的图片格式，不能只改扩展名。')
     } else if (format !== (ext === '.jpg' ? 'jpeg' : ext.slice(1))) {
       report(file.path, '文件头', `图片文件头与扩展名 ${ext} 不符：真实格式为 ${format || '无法识别（不是支持的图片）'}`, `重新导出真正的 ${ext.slice(1).toUpperCase()} 图片；不要把其他文件直接改名。`)
-    } else if (file !== bot.avatar) validShots++
+    }
   }
-  if (bot.data?.external !== true && validShots === 0) {
-    report('screenshots', '截图', '至少需要一张截图', '在 screenshots/ 放入至少一张真实使用截图，支持 png、jpg、jpeg、webp、gif。')
+  // 截图可选（DECISIONS 第 43 条）；但设计说明引用的本地截图必须真的存在，否则详情页会出现坏图。
+  const names = new Set(bot.screenshots.map((shot) => shot.file))
+  for (const name of designScreenshotRefs(bot.design)) {
+    if (!names.has(name)) report('DESIGN.md', '图片引用', `引用了 screenshots/${name}，但没有这张图`, '删掉这行图片引用。投稿不需要截图，Bot 的真实效果写进「实际效果」一节就行。')
   }
+}
+
+/** DESIGN.md 正文（去掉注释后）引用的本地截图文件名，已解码、去重、保持出现顺序。 */
+export function designScreenshotRefs(design) {
+  const refs = new Set()
+  for (const match of stripComments(design || '').matchAll(/\]\(<?(?:\.\/)?screenshots\/([^\s)>]+)>?\)/g)) {
+    let name = match[1]
+    try { name = decodeURIComponent(name) } catch { /* 畸形编码按原文比较 */ }
+    refs.add(name)
+  }
+  return [...refs]
 }

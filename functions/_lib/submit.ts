@@ -59,7 +59,9 @@ function safeErrors(error: unknown): Item[] {
 }
 
 export async function verifyReceipts(values: unknown, user: SessionUser, secrets: Secrets, now: number): Promise<Receipt[]> {
-  if (!Array.isArray(values) || !values.length) fail('receipt_invalid', { slots: [0] })
+  // 截图可选（DECISIONS 第 43 条）：新投稿页不再上传截图；旧页面传来的回执照常校验。
+  if (values === undefined || (Array.isArray(values) && !values.length)) return []
+  if (!Array.isArray(values)) fail('receipt_invalid', { slots: [0] })
   if (values.length > LIMITS.files) fail('receipt_invalid', { slots: values.map((_, i) => i) })
   // At most 30 independent native HMAC operations; preserve input order without
   // serializing 25 event-loop round trips in the largest supported submission.
@@ -120,13 +122,13 @@ function prBody(slug: string, user: SessionUser, update: boolean, warnings: Item
 - 投稿人：@${user.login}（GitHub 账号已登录验证）
 - 提交作者记为投稿人，合并后计为贡献者。
 - 自动检查：校验器和密钥扫描在推送前已通过${warnings.length ? `，${warnings.length} 条提醒请复核` : ''}；构建以 validate-and-build 为准。
-- 投稿人已在投稿页勾选 CC BY 4.0 授权，并确认内容和截图有权公开。
+- 投稿人已在投稿页勾选 CC BY 4.0 授权，并确认内容有权公开。
 - 已开启自动合并：批准且检查通过后自动用普通合并合入。
 
 ## 维护者核对（机器判断不了）
 
 - [ ] 设计说明是真实经历，没有编造效果
-- [ ] 截图是这个 Bot 的真实输出，没有露出隐私、密钥或公司内部信息
+- [ ] 设计说明「实际效果」里摘的输出像这个 Bot 的真实输出，没有露出隐私、密钥或公司内部信息
 - [ ] 声明的权限和额度如实
 - [ ] 模板链接在无痕窗口能打开
 

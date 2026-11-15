@@ -139,7 +139,7 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 AI 的本地 Bot 目录
   └─ scripts/make-submission-link.mjs（临时副本校验）
        └─ 预填 Issue 链接（过长时给明文投稿包）
-            └─ 学员登录 GitHub → 拖真实截图 → 勾 CC BY 4.0 → 提交
+            └─ 学员登录 GitHub → 勾 CC BY 4.0 → 提交（2026-11-15 起表单不再有截图栏，DECISIONS 第 43 条）
                  └─ .github/workflows/submission.yml（默认分支的可信代码）
                       ├─ 不通过：编辑/新发一条中文诊断评论
                       └─ 通过：submission/issue-<号>，默认分支之上的一个提交
@@ -149,10 +149,10 @@ AI 的本地 Bot 目录
 
 ### 代码分层
 
-- `scripts/submission/bundle.mjs`：纯文本容器 `pack({ slug, files, screenshots })` / `unpack(text)`；`files` 的键是完整的 `bots/<slug>/...` 相对路径。`encode(text)` / `decode(token)` 在明文与 `BZB1:` + base64url(gzip) 之间转换，保留文本原有换行和中文。每个文本段尾多一个容器换行；正文不能使用独占一行的 `=== ... ===` 保留分隔符。
-- `scripts/make-submission-link.mjs`：读取文本和截图名，缺图时从 DESIGN 的本地图片引用推导顺序。先在临时目录叠加默认 bots 数据进行 `validateBots` 校验，缺图时仅在副本放占位图，结束删除副本。截图、头像二进制均不进包；头像会提示省略，改用网站默认头像。支持位置参数和 `--dir`。URL 长度超过 7500 就输出不含 bundle 的表单链接与完整明文。
+- `scripts/submission/bundle.mjs`：纯文本容器 `pack({ slug, files, screenshots })` / `unpack(text)`（`pack` 总写一个 screenshots 段，`unpack` 允许省略这一段，按零张处理，第 43 条）；`files` 的键是完整的 `bots/<slug>/...` 相对路径。`encode(text)` / `decode(token)` 在明文与 `BZB1:` + base64url(gzip) 之间转换，保留文本原有换行和中文。每个文本段尾多一个容器换行；正文不能使用独占一行的 `=== ... ===` 保留分隔符。
+- `scripts/make-submission-link.mjs`：只读取文本；投稿包的 `screenshots` 段永远为空（第 43 条），本地 `screenshots/` 里有图也不进包，输出里提示「不会上传」。先在临时目录叠加默认 bots 数据进行 `validateBots` 校验，校验看到的就是网站会看到的样子：设计说明引用了本地截图会报「图片引用」。截图、头像二进制均不进包；头像会提示省略，改用网站默认头像。支持位置参数和 `--dir`。URL 长度超过 7500 就输出不含 bundle 的表单链接与完整明文。
 - `scripts/submission/issue.mjs`：固定字段解析（不把代码围栏内的标题当表单标题）、授权与作者校验、slug 占用/addedAt 检查、提交及 PR 元数据生成，均为纯函数。
-- `scripts/submission/screenshots.mjs`：Markdown / HTML 图片提取、受限下载；按文件头决定扩展名，生成文件计划并修正对应的简单本地 Markdown 图片引用。多出来的图片使用 `screenshot-<序号>.<ext>`；缺少已声明的图片或命名冲突会报错，不静默覆盖。
+- `scripts/submission/screenshots.mjs`：只服务旧 Issue 表单的截图栏（新表单没有这一栏，提取结果为空时直接跳过）。Markdown / HTML 图片提取、受限下载；按文件头决定扩展名，生成文件计划并修正对应的简单本地 Markdown 图片引用。多出来的图片使用 `screenshot-<序号>.<ext>`；缺少已声明的图片或命名冲突会报错，不静默覆盖。
 - `scripts/submission/from-issue.mjs`：注入适配器的流程编排。校验器及单 slug 范围检查均成功之前，不建分支、不创建 PR。
 - `scripts/submission/adapters.mjs`：默认分支签出目录的文件系统操作、`validateBots`、git / gh 参数数组适配器。测试替换命令和 fetch，不联系 GitHub。
 - `scripts/submission/errors.mjs`：统一中文「文件 / 位置 / 问题 / 改法」诊断，脱敏、代码块隔离和长度限制。只编辑 `github-actions[bot]` 发布且带 `<!-- bot-zhipin-submission -->` 的评论，不信任人类复制的标记。
@@ -161,7 +161,7 @@ AI 的本地 Bot 目录
 
 `submission.yml` 只处理带「投稿」标签、仍然 open 的 opened / edited / reopened 事件；同一个 Issue 的旧运行会被取消。签出仓库默认分支（完整历史），只安装生产依赖，Issue 正文、作者 login/id、编号都通过 env 传给 Node，不插入 shell。新增仅写一个 Bot 目录；更新需作者一致且原 addedAt 不变，才清空旧目录后重写。校验覆盖整个 bots 集合，可发现重复模板链接等跨 Bot 问题；范围检查覆盖删除、修改和未跟踪文件，并比普通贡献者规则更严格：只许本次 slug。
 
-分支固定为 `submission/issue-<号>`，每次从本次签出的默认分支提交重建一个提交并 force push；只覆盖工作流独占分支。作者使用 Issue login 与 `<id>+<login>@users.noreply.github.com`，提交者使用 Actions bot，不改 git config。PR 绑定来源 Issue 并含 `Closes #<号>`；自动化只勾选能证实的校验/授权项，截图真实性、隐私和模板页匿名可访问仍需维护者复核。
+分支固定为 `submission/issue-<号>`，每次从本次签出的默认分支提交重建一个提交并 force push；只覆盖工作流独占分支。作者使用 Issue login 与 `<id>+<login>@users.noreply.github.com`，提交者使用 Actions bot，不改 git config。PR 绑定来源 Issue 并含 `Closes #<号>`；自动化只勾选能证实的校验/授权项，「实际效果」摘录的真实性、隐私和模板页匿名可访问仍需维护者复核。
 
 GITHUB_TOKEN 创建的 PR 不会触发普通 PR 事件，因此显式执行 `gh workflow run ci.yml --repo <本仓库> --ref submission/issue-<号>`。CI 的 `validate-and-build` 跑在该分支 head 上，保留只读权限和两层历史；手动派发按 CONTRIBUTOR 严格检查范围。错误评论可随 Issue 编辑重试更新；发布后派发失败也不会误报成功，但先前已创建的分支/PR 可能保留，下次运行复用。
 
@@ -169,7 +169,7 @@ GITHUB_TOKEN 创建的 PR 不会触发普通 PR 事件，因此显式执行 `gh 
 
 - 解包只接受同一个合法 slug 下的普通相对路径，拒绝绝对路径、反斜杠、`..`、隐藏段、大小写重名和文件/目录冲突；每段最长 255 字符、全路径最长 1024。文本扩展名白名单为 `.yaml .yml .md .txt .json`，不执行任何投稿内容。
 - 最多 30 个文件（含截图），单文本最多 100KB、文本总量最多 400KB；gzip 输出由 zlib 的 `maxOutputLength` 硬限 512KB。只接收有效 UTF-8，不接受 NUL。写入前检查目录树，拒绝符号链接/特殊文件；运行开始要求干净签出目录。
-- 初始截图地址必须在 `https://github.com/user-attachments/assets/`，每一跳在请求前检查 HTTPS 和主机（`github.com` 或 `*.githubusercontent.com`），最多五次重定向；不发送身份凭据。整张图片含重定向/读流共 20 秒，按声明和实际流量双重限制 2MB，并验证文件头，不能靠改后缀伪装。
+- （旧表单兼容）初始截图地址必须在 `https://github.com/user-attachments/assets/`，每一跳在请求前检查 HTTPS 和主机（`github.com` 或 `*.githubusercontent.com`），最多五次重定向；不发送身份凭据。整张图片含重定向/读流共 20 秒，按声明和实际流量双重限制 2MB，并验证文件头，不能靠改后缀伪装。
 - 写权限只供可信默认分支脚本建立受限 Bot 提交/PR/评论及派发 CI；无需用户令牌。仍依赖人工批准和分支保护，不自动合并。图片头校验不能证明截图真实性、无隐私或完整可解码，自动校验不是内容审核。
 - 上线前维护者需确认「投稿」标签已存在、Actions 允许创建 PR，且这两个工作流已在默认分支；本任务不创建标签或操作真实 GitHub。新增标签本身不触发处理，之后需编辑或重新打开 Issue。
 - 本轮按契约保留 CI 原有 concurrency 配置：手动派发没有 PR number，多个不同分支的手动 CI 仍可能互相取消；联调需验证并安排必要的重派发，后续单独调整分组。Issue 的原生正文/URL 限制也可能比包格式更小，特别大的明文包需先缩减内容。
@@ -185,7 +185,7 @@ GITHUB_TOKEN 创建的 PR 不会触发普通 PR 事件，因此显式执行 `gh 
 AI：make-submission-link → https://bot-zhipin.pages.dev/submit#BZB1:…
  /submit（浏览器）：解包 → 预览卡片和详情页 → 校验内核即时报错
    → 用 GitHub 登录（/api/auth/*，零 scope OAuth App，取完身份即撤销令牌）
-   → 截图逐张上传（/api/submit/screenshot → GitHub blob，返回签名回执）
+   →（2026-11-15 起不再上传截图，DECISIONS 第 43 条；/api/submit/screenshot 保留只为兼容旧页面）
    → 提交（/api/submit：服务端重新校验和密钥扫描 → 改写 author.github、addedAt
         → GitHub App 在 submission/web-<id>-<slug> 建单提交 → 建或更新 PR → 开启自动合并）
  pull_request CI（validate-and-build）→ 维护者 Approve → 自动合并
@@ -202,7 +202,7 @@ AI：make-submission-link → https://bot-zhipin.pages.dev/submit#BZB1:…
 | `scripts/sync-assets.mjs` | 构建时另生成 `/api-data/submit-context.json`（已上架索引、模板原文、说明文案、限额）和 `/api-data/build.json` |
 | `site/.vitepress/theme/submit/` | 投稿页的浏览器端逻辑；`site/submit.md` 和 `Submit*.vue` 是界面 |
 | `functions/api/auth/*` | 登录、回调、me、退出 |
-| `functions/api/submit/*` | 截图上传、提交、状态 |
+| `functions/api/submit/*` | 提交、状态；截图上传接口只为兼容旧页面保留 |
 | `functions/_lib/github.ts` | 只暴露固定的几个 GitHub 操作，内部检查 URL 白名单和分支名，不导出通用请求方法 |
 | `.github/workflows/announce-live.yml` | 上线通知 |
 

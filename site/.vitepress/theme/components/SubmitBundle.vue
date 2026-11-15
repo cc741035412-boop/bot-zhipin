@@ -9,7 +9,7 @@ defineEmits<{ reset: [paste: boolean] }>()
 <template>
   <section class="submit-step submit-check" data-testid="step-check" :data-state="s.phase === 'bundle-error' || s.errors.length || taken ? 'error' : s.plaintext ? 'done' : 'current'" :inert="s.phase === 'submitting'">
     <div v-if="s.resume || s.updated" data-testid="resume-notice" class="submit-notice submit-resume">
-      <span>{{ s.updated ? '投稿包已更新，截图还在。' : '接着上次的投稿：' + name }}</span>
+      <span>{{ s.updated ? '投稿包已更新。' : '接着上次的投稿：' + name }}</span>
       <button type="button" class="bz-btn ghost sm submit-text-button" data-testid="bundle-reset" @click="$emit('reset', false)"><SubmitIcon name="swap" />换一个投稿包</button>
     </div>
     <header class="submit-step-heading"><SubmitStepMark :mark="s.errors.length || s.phase === 'bundle-error' || taken ? '!' : s.plaintext ? '✓' : '1'" /><h2 class="bz-h3">检查投稿包</h2><span class="submit-step-status">{{ s.phase === 'bundle-error' ? '读取失败' : s.errors.length || taken ? '要修改' : s.plaintext ? '已通过' : '读取中' }}</span></header>

@@ -23,7 +23,7 @@ const steps = computed(() => {
       <div><h3>{{ { checked: '检查通过', pr: '已创建 PR（合并请求）', review: '等待维护者审核', live: '已上线' }[item.step] }}</h3>
         <p v-if="item.step === 'checked'">格式、权限、密钥都查过了。</p>
         <p v-if="item.step === 'pr'"><a data-testid="pr-link" class="submit-link" :href="s.result.pr.url" target="_blank" rel="noopener noreferrer">PR #{{ s.result.pr.number }}<ExternalHint /></a></p>
-        <p v-if="item.step === 'review'">{{ s.progress === 'closed' ? '这个投稿被关闭了，原因请看 PR 里的留言。' : s.progress === 'failed' ? '自动检查出了点问题，维护者会在 PR 里留言告诉你怎么改。' : '维护者会核对截图和说明，一般 1–2 天内。有问题会在 PR 里留言。' }}</p>
+        <p v-if="item.step === 'review'">{{ s.progress === 'closed' ? '这个投稿被关闭了，原因请看 PR 里的留言。' : s.progress === 'failed' ? '自动检查出了点问题，维护者会在 PR 里留言告诉你怎么改。' : '维护者会核对说明，一般 1–2 天内。有问题会在 PR 里留言。' }}</p>
         <p v-if="item.step === 'live'"><a v-if="s.progress === 'live'" data-testid="live-link" class="submit-link" :href="`/bots/${s.slug}`" target="_blank" rel="noopener noreferrer">去看看你的 Bot<ExternalHint /></a><template v-else>审核通过后大约 1 分钟上线。</template></p>
       </div>
     </li></ol>

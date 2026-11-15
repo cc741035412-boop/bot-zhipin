@@ -1,5 +1,7 @@
 # 投稿页交互与视觉规格（第二期 · `/submit`）
 
+> **2026-11-15 起去掉了截图（DECISIONS 第 43 条）。** 流程是 ① 检查投稿包 → 预览 → ② 用 GitHub 登录 → ③ 授权并提交。本文里「放截图」这一步（§8）、截图槽位、截图回执暂存、截图相关的提交阻塞项、错误文案、`data-testid` 和验收要点都已作废，保留原文只作历史记录；和本条冲突的以第 43 条为准。
+
 本文件是 L4「投稿页交互实现」的依据，和 `docs/dev/SUBMIT.md`（接口契约）配套。视觉沿用第一期 `INTERACTION.md`：这里只写新增的部分，凡是写「同第一期 §N」的，数值、行为都照第一期来。
 数值是目标值，可以 ±2px 微调，但不能破坏 §16 的验收要点。
 
@@ -7,10 +9,10 @@
 
 ## 0. 原则与范围
 
-1. **一页做完**：学员从 AI 给的链接进来，在这一页看预览、登录、放截图、提交、看进度，不用再去 GitHub 填表。唯一会跳出去的是 GitHub 登录授权页。
-2. **先看后做**：不登录也能看到预览和检查结果；登录只在要放截图之前。
+1. **一页做完**：学员从 AI 给的链接进来，在这一页看预览、登录、提交、看进度，不用再去 GitHub 填表。唯一会跳出去的是 GitHub 登录授权页。
+2. **先看后做**：不登录也能看到预览和检查结果；登录只在提交之前。
 3. **任何错误都给下一步**：每条报错都要说清「怎么办」，能交给 AI 改的，给一个「复制给 AI」按钮，复制出来的文字 AI 拿到就能直接改。
-4. **不丢东西**：解开的投稿包、已经传好的截图，在刷新、登录跳转、会话过期后都还在（§3.3）。
+4. **不丢东西**：解开的投稿包在刷新、登录跳转、会话过期后都还在（§3.3）。
 5. **文案口语、短句、不吓人**。界面上除了「GitHub」「PR」「CC BY 4.0」「slug」这几个词，不出现英文。「PR」第一次出现时写成「PR（合并请求）」。
 6. 视觉只用第一期 token 和本文 §1 新增的几个 `--bz-` token，不另起一套。
 
@@ -82,9 +84,8 @@
    - 步骤 ① 检查投稿包（`step-check`）
    - 预览区（`preview`，§6）
    - 步骤 ② 用 GitHub 登录（`step-login`）
-   - 步骤 ③ 放截图（`step-shots`）
-   - 步骤 ④ 授权并提交（`step-submit`）
-4. 提交成功后，①–④ 整体换成结果面板（`submit-result`，§10.2），预览区保留。
+   - 步骤 ③ 授权并提交（`step-submit`）（原来的「③ 放截图」`step-shots` 已按第 43 条去掉）
+4. 提交成功后，①–③ 整体换成结果面板（`submit-result`，§10.2），预览区保留。
 5. 指南模式只有页头 + 指南（§4）。
 
 ### 2.3 三种宽度
@@ -114,13 +115,13 @@
                  └── 有令牌或有暂存 ─► 解包 decoding ─┬─► 包损坏 bundle-error ──「重新粘贴」──► guide
                                                      └─► 校验 validating ─┬─► 未通过 invalid（可「复制给 AI」）
                                                                           └─► 通过 valid
-valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬─► 成功 submitted ─► 轮询进度 ─► 已上线 live
-                                                  ├─► 被拒 rejected（422，回到 ① 显示错误）
-                                                  ├─► 被限流 / slug 被占 / 未合并太多 / 回执失效
-                                                  └─► 后端不可用 ─► 改用 Issue 投稿（备用）
+valid ─► 登录 ─► 授权 ─► 提交 submitting ─┬─► 成功 submitted ─► 轮询进度 ─► 已上线 live
+                                          ├─► 被拒 rejected（422，回到 ① 显示错误）
+                                          ├─► 被限流 / slug 被占 / 未合并太多
+                                          └─► 后端不可用 ─► 改用 Issue 投稿（备用）
 ```
 
-登录（§7）和截图（§8）各有自己的子状态，与上面的主流程并行。
+登录（§7）有自己的子状态，与上面的主流程并行。（截图子状态 §8 已作废。）
 
 ### 3.2 各步骤何时解锁
 
@@ -128,37 +129,34 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 |---|---|---|
 | ① 检查投稿包 | 解包成功 | — |
 | ② 用 GitHub 登录 | 解包成功即可（检查没通过也能先登录） | — |
-| ③ 放截图 | ① 通过**且**已登录 | 没登录：「先登录，再放截图」；没通过：「投稿包检查通过后才能放截图」 |
-| ④ 授权并提交 | 始终可勾选授权；提交按钮要等全部条件满足（§9） | — |
+| ③ 授权并提交 | 始终可勾选授权；提交按钮要等全部条件满足（§9） | — |
 
 ### 3.3 本地暂存（都包在 try/catch 里，读写失败就当没有）
 
 | 存什么 | 存哪里 | 何时清除 |
 |---|---|---|
 | 投稿包明文、来源令牌 | sessionStorage `bz-submit` | 点「再投一个」「换一个投稿包」时 |
-| 截图回执，加一张 320px 宽的 JPEG 缩略图（dataURL，每张 ≤ 30KB） | localStorage `bz-submit-shots:<用户 id>:<slug>` | 回执过期（服务端给的过期时间，至少 24 小时）、提交成功、换了账号 |
 | 提交结果（PR 号、slug、是不是更新） | sessionStorage `bz-submit` 里的 `result` 字段 | 点「再投一个」时 |
 | 内置浏览器提示条已关闭 | sessionStorage | 关掉标签页时 |
 
 规则：
 
-- 截图回执按「用户 id + slug」存。同一个账号重新打开同一个 Bot 的新链接，已经传过的截图直接显示为成功，不用重传。
-- 登录后发现账号和回执里的不一样，就丢掉旧回执，在 ③ 里提示一次：「换了账号，截图要重新放一次。」（`login-notice`，`data-kind="switched"`）
-- 新链接的投稿包和暂存的不一样：slug 相同就保留截图，并提示「投稿包已更新，截图还在。」；slug 不同就按新投稿处理。
+- （截图回执的暂存规则已按第 43 条去掉。）
+- 新链接的投稿包和暂存的不一样：slug 相同就提示「投稿包已更新。」；slug 不同就按新投稿处理。
 - 进入页面时如果没有令牌、但有暂存，① 上方显示提示条（`resume-notice`）：「接着上次的投稿：{名字}」，右侧有文字按钮「换一个投稿包」（`bundle-reset`），点了清掉暂存，回到指南模式。
 
 ## 4. 指南模式（没有投稿包）
 
 ### 4.1 画面
 
-- h1「把你的 Bot 挂上货架」。导语：「不用会 git。让你的 AI 把东西都准备好，你只要看一眼预览、登录、放截图、点提交。」
+- h1「把你的 Bot 挂上货架」。导语：「不用会 git。让你的 AI 把东西都准备好，你只要看一眼预览、登录、点提交。」
 - **三步图解**（`guide-steps`）：≥768px 三列，<768px 竖排。每一步是一张小卡：1px `--bz-border`，圆角 16px，内边距 20px。内容依次是：32px 线框图标（`stroke: currentColor; stroke-width: 1.6`，风格同第一期的小火苗）、序号加标题（16px / 700）、一句说明（14px / `--bz-text-2`）。
 
   | 序号 | 图标 | 标题 | 说明 |
   |---|---|---|---|
   | 1 | 剪贴板 | 复制提示词 | 点下面的按钮，把提示词发给你的 AI：Grok Bot、Codex、Claude Code 都行 |
   | 2 | 对话气泡 | 回答几个问题 | AI 自己能查到的不会问你，查不到的一次问清，最后给你一个投稿链接 |
-  | 3 | 向上箭头 | 打开链接提交 | 看预览、用 GitHub 登录、放截图、点提交。维护者审核通过就上线 |
+  | 3 | 向上箭头 | 打开链接提交 | 看预览、用 GitHub 登录、点提交。维护者审核通过就上线 |
 
 - **提示词框**（`submit-prompt`）：`--bz-surface-soft` 底，圆角 12px，内边距 16px，14px / 行高 1.8，`white-space: pre-wrap`，显示 §4.2 的全文。框下是主按钮「复制投稿提示词」（`copy-submit-prompt`）。
 - **「已经有投稿包了？」**（`paste-box`）：用原生 `<details>`，默认收起。展开后：
@@ -175,7 +173,7 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 ```text
 请帮我把我做的 Grok Bot 投稿到「Bot 直聘」：https://github.com/jakob52123/bot-zhipin
 1. 先完整读一遍仓库根目录的 AGENTS.md，严格按它的步骤做。
-2. 能从你自己（或我的 Bot 配置）里查到的信息直接用，查不到的再一次问清我；不要编造效果和截图。
+2. 能从你自己（或我的 Bot 配置）里查到的信息直接用，查不到的再一次问清我；不要编造效果。
 3. 不要向我要 GitHub 令牌或密码。
 4. 最后给我一个 https://bot-zhipin.pages.dev/submit 开头的投稿链接。
 ```
@@ -292,8 +290,8 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 
   | 元素 | 表现 |
   |---|---|
-  | 截图区 | 显示 ③ 里已放入的图（`blob:` 或 dataURL 缩略图）。没放的位置显示同尺寸的浅灰占位块，写「截图 {n}（待放入）」 |
-  | 设计说明里引用的 `screenshots/xxx` | 同上：有图就显示，没有就是占位块 |
+  | 截图区 | 网站投稿不带截图，预览里不显示截图区（第 43 条） |
+  | 设计说明里引用的 `screenshots/xxx` | 这是校验错误：没有这张图，① 里报错，改法是删掉这行图片引用（第 43 条） |
   | 技能 | 名字和说明照常显示；「查看源码」换成小字「上架后可查看源码」，不可点 |
   | 定时任务 | 链接换成小字「上架后可查看」 |
   | 改编自 | 链到线上 `/bots/{forkedFrom}`，新标签打开，带 ↗ 标记 |
@@ -311,12 +309,13 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 | 已登录（`user-badge`） | `me` 返回 200 | 一行：28px 圆形头像（`https://avatars.githubusercontent.com/u/{id}?s=56`，1px `--bz-border`，加载失败显示首字母圆）+「@{login}」（`user-login`，15px / 600）+ 文字按钮「不是你？退出」（`logout-button`，13px / `--bz-text-3`，悬停加下划线）。② 状态变为已完成 | 点退出 → `POST /api/auth/logout` | 回到未登录；③ 重新锁定，截图回执保留，换账号时按 §3.3 处理 |
 | 登录取消 | 回来时带 `?login=cancelled` | 中性提示（`login-notice`，`data-kind="cancelled"`）：「你取消了登录。想继续投稿，再点一次「用 GitHub 登录」就行。」 | 点登录 | 跳转中 |
 | 登录失败 | 回来时带 `?login=failed` | 错误提示（`data-kind="failed"`）：「登录没成功，可能是网络不稳。再试一次；还不行就换个网络，或者过一会儿再来。」 | 点登录 | 跳转中 |
-| 会话过期 | 回来时带 `?login=expired`；或者上传、提交时接口返回 `unauthenticated` / `session_expired` | 错误提示（`data-kind="expired"`）：「登录过期了，请重新登录。已经放好的截图都还在，不用重传。」② 变回未登录，③ 锁定但已传的图照常显示 | 点登录 | 跳转中 |
+| 会话过期 | 回来时带 `?login=expired`；或者上传、提交时接口返回 `unauthenticated` / `session_expired` | 错误提示（`data-kind="expired"`）：「登录过期了，请重新登录。」② 变回未登录 | 点登录 | 跳转中 |
 
 - 从登录回来（`?login=ok`）：焦点移到 ③ 的标题上，播报「已登录为 @{login}」。
-- 登录前一刻正在上传的截图会中断；回来后这些槽位显示为失败，可以重试。
 
-## 8. 截图（步骤 ③，`step-shots`）
+## 8. 截图（已作废，第 43 条）
+
+> 本节整节作废：投稿页不再有「放截图」这一步，下面的槽位、压缩、上传规格只作历史记录。
 
 ### 8.1 总体
 
@@ -355,9 +354,9 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 - 先把长边缩到 2560px 以内，按 JPEG 质量 .9 → .8 → .7 → .6 依次尝试，有一档 ≤2MB 就停。全部超限就进入 `too-large`。
 - 压缩后的图在预览区和缩略图里换成新图。
 
-## 9. 授权与提交按钮（步骤 ④，`step-submit`）
+## 9. 授权与提交按钮（步骤 ③，`step-submit`）
 
-- 勾选框（`license-checkbox`，原生 checkbox，可点区域至少 44×44px）。文字：「我同意以 CC BY 4.0 授权这次投稿，并确认内容和截图都是我有权公开的。」
+- 勾选框（`license-checkbox`，原生 checkbox，可点区域至少 44×44px）。文字：「我同意以 CC BY 4.0 授权这次投稿，并确认内容是我有权公开的。」
 - 下面小字（`license-help`，13px / `--bz-text-2`）：「意思是：别人可以在注明你是作者的前提下复制、改编、使用这个 Bot。」后跟「授权全文 ↗」（链到仓库的 `bots/LICENSE`）。
 - 提交按钮（`submit-button`，主按钮）：
   - 宽度：<768px 撑满，≥768px 自适应。
@@ -368,9 +367,6 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
   - 按钮下方列出还差什么（`submit-blockers`，13px / `--bz-text-2`），每条前加 `--bz-text-3` 的「·」，按顺序只列没满足的：
     - 「投稿包还没通过检查」
     - 「还没登录」
-    - 「截图 {n} 还空着」（每个空着的必填槽位一条）
-    - 「还有截图在传」
-    - 「还有截图没传上去」（有 `failed` / `too-large` / `unsupported` 的槽位）
     - 「还没勾选授权」
   - 点不可用的按钮：焦点跳到第一个没满足的步骤（检查摘要、登录按钮、对应的槽位、勾选框），播报「还差：{第一条}」。
 - 全部满足时按钮可用，`submit-blockers` 不显示。
@@ -400,7 +396,7 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
   |---|---|---|
   | `checked` | 检查通过 | 「格式、权限、密钥都查过了。」 |
   | `pr` | 已创建 PR（合并请求） | 「PR #{号} ↗」（`pr-link`，新标签打开） |
-  | `review` | 等待维护者审核 | 「维护者会核对截图和说明，一般 1–2 天内。有问题会在 PR 里留言。」 |
+  | `review` | 等待维护者审核 | 「维护者会核对说明，一般 1–2 天内。有问题会在 PR 里留言。」 |
   | `live` | 已上线 | 进行中写「审核通过后大约 1 分钟上线。」；完成写「去看看你的 Bot ↗」（`live-link`，`/bots/{slug}`，新标签打开） |
 
 - **状态和进度条的对应**（来自 `GET /api/submit/status` 的 `state`）：
@@ -426,7 +422,6 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 - **后端不可用**：`submit_disabled`、网络断开、5xx、超时都算。提示里给次按钮「改用 GitHub Issue 投稿 ↗」（`issue-fallback`）：
   - 用同一个投稿包生成预填好的 Issue 链接，新标签打开。
   - 链接超过 7500 字符时，按钮改成打开空白投稿表单，同时在提示里显示投稿包明文框和「复制投稿包」按钮（`issue-fallback-paste`），说明「打开的页面里，把投稿包粘进「投稿包」一栏」。
-  - 不管哪种情况都提醒：「在 GitHub 的页面上要再拖一次截图。」
 
 ## 11. 错误码文案对照表
 
@@ -434,7 +429,7 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 
 | 码 | 出现在哪 | 给学员看的文案 | 下一步（按钮 / 行为） |
 |---|---|---|---|
-| `bad_request` | 提交、上传 | 「页面状态有点乱，刷新一下再试。已经传好的截图不会丢。」 | 「刷新页面」按钮 |
+| `bad_request` | 提交 | 「页面状态有点乱，刷新一下再试。」 | 「刷新页面」按钮 |
 | `unauthenticated` | 上传、提交、状态 | 按 §7「会话过期」处理 | ② 回到未登录，焦点到「用 GitHub 登录」 |
 | `session_expired` | 同上 | 同上 | 同上 |
 | `forbidden_origin` | 提交、上传 | 「请直接在 bot-zhipin.pages.dev 上打开投稿页再提交。」 | 「复制本页链接」（复制 `/submit#` 加当前令牌） |
@@ -449,13 +444,13 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 | `rate_limited` | 登录、上传、提交 | 登录：「登录太频繁了，{倒计时}后再试。」上传：槽位提示「传得太快了，{倒计时}后再试。」提交：「提交太频繁了，{倒计时}后再试。」 | 倒计时结束后自动恢复按钮或「重试」 |
 | `github_error` | 上传、提交 | 「GitHub 那边出了点问题，这次没提交上去。过一会儿再点一次就行。」下面小字「错误编号：{requestId}」（`request-id`，等宽字体，可以选中复制） | 「再试一次」；次按钮「改用 GitHub Issue 投稿 ↗」 |
 | `submit_disabled` | 任意接口 | 「网站投稿暂时用不了。可以改用 GitHub Issue 投稿，效果一样。」 | 「改用 GitHub Issue 投稿 ↗」（§10.3） |
-| `receipt_invalid` | 提交 | 「有 {n} 张截图需要重新上传（上传记录过期了，或者换了账号）。」 | 对应槽位变成 `failed`，提示「这张需要重新上传。」；焦点移到第一个这样的槽位 |
+| `receipt_invalid` | 提交 | （已作废：新页面不传截图回执，不会遇到；只在部署时还开着旧页面、带了回执的人身上出现） | — |
 | 网络断开或超时 | 任意 | 「网络好像断了，检查一下网络再试。」 | 「再试一次」；连续 2 次失败后再出「改用 GitHub Issue 投稿 ↗」 |
 
 ## 12. 内置浏览器提示（`inapp-warning`）
 
 - 触发：UA 里有 `MicroMessenger`、` QQ/`、`Weibo`、`DingTalk`、`AlipayClient` 之一。不拦飞书和 Lark，它们的内置浏览器能正常登录。
-- 画面：页面最上方的中性提示条：「你现在是在 {微信 / QQ / 微博 / 钉钉 / 支付宝} 里打开的。GitHub 登录和传图在这里可能不顺，建议点右上角「…」，选「在浏览器打开」。」
+- 画面：页面最上方的中性提示条：「你现在是在 {微信 / QQ / 微博 / 钉钉 / 支付宝} 里打开的。GitHub 登录在这里可能不顺，建议点右上角「…」，选「在浏览器打开」。」
 - 两个按钮：
   - 「复制本页链接」（`inapp-copy-link`）：复制 `{站点}/submit#{当前令牌}`，没有令牌时复制 `/submit`。因为令牌已经从地址栏去掉了，必须带上，否则换个浏览器打开就丢了投稿包。
   - 「仍然在这里继续」（`inapp-dismiss`）：关掉提示条，在本标签页内记住。
@@ -464,7 +459,7 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 ## 13. 键盘、焦点、读屏
 
 - Tab 顺序就是 DOM 顺序（§2.2）。≥1024px 时预览区在右列，Tab 走完 ① 会先进预览区再回到 ②：这是有意的，先看检查结果，再看预览，然后往下做。
-- 每个槽位整体是一个可聚焦的按钮（`role="button"`），`aria-label="截图 {n}，{状态}，按回车选择图片"`；状态变化时 `aria-label` 跟着变。槽位里的「换一张」「移除」「重试」是独立按钮，Tab 依次经过。
+- （截图槽位的焦点和读屏规格已按第 43 条作废。）每个槽位整体是一个可聚焦的按钮（`role="button"`），`aria-label="截图 {n}，{状态}，按回车选择图片"`；状态变化时 `aria-label` 跟着变。槽位里的「换一张」「移除」「重试」是独立按钮，Tab 依次经过。
 - 焦点移动规则：
 
   | 时机 | 焦点去哪 |
@@ -520,11 +515,11 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 | 页面 | `submit-page`（根元素） |
 | 内置浏览器 | `inapp-warning`、`inapp-copy-link`、`inapp-dismiss` |
 | 指南模式 | `guide`、`guide-steps`、`submit-prompt`、`copy-submit-prompt`、`submit-prompt-fallback`、`paste-box`、`paste-input`、`paste-submit`、`contributing-link` |
-| 步骤卡 | `step-check`、`step-login`、`step-shots`、`step-submit`（都带 `data-state`） |
+| 步骤卡 | `step-check`、`step-login`、`step-submit`（都带 `data-state`；`step-shots` 已按第 43 条去掉） |
 | 投稿包 | `resume-notice`、`bundle-reset`、`bundle-loading`、`bundle-error`、`bundle-error-reason`、`bundle-error-copy`、`validation-ok`、`validation-errors`、`validation-error-item`、`validation-warnings`、`copy-errors`、`slug-notice`、`context-unavailable` |
 | 预览 | `preview`、`preview-toggle`、`preview-tab-card`、`preview-tab-detail`、`preview-card`、`preview-detail`、`preview-note`、`preview-actions-note` |
 | 登录 | `auth-checking`、`login-button`、`login-why`、`signup-link`、`login-notice`（带 `data-kind`）、`user-badge`、`user-login`、`logout-button` |
-| 截图 | `privacy-reminder`、`slots`、`slots-locked`、`slot`（带 `data-index`、`data-state`、`data-required`）、`slot-input`、`slot-progress`、`slot-thumb`、`slot-message`、`slot-replace`、`slot-remove`、`slot-retry`、`slot-cancel`、`slot-add` |
+| 截图（已作废，第 43 条） | `privacy-reminder`、`slots`、`slots-locked`、`slot`（带 `data-index`、`data-state`、`data-required`）、`slot-input`、`slot-progress`、`slot-thumb`、`slot-message`、`slot-replace`、`slot-remove`、`slot-retry`、`slot-cancel`、`slot-add` |
 | 提交 | `license-checkbox`、`license-help`、`submit-button`、`submit-blockers`、`submit-error`（带 `data-code`）、`retry-countdown`、`request-id`、`issue-fallback`、`issue-fallback-paste` |
 | 结果 | `submit-result`、`progress-step`（带 `data-step`、`data-state`）、`pr-link`、`live-link`、`status-stale`、`submit-another` |
 
@@ -548,11 +543,11 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 
 **登录**
 
-9. `/api/auth/me` 返回 401 时：`login-button` 可见；`slots-locked` 可见，里面有「先登录」；`signup-link` 的 href 是 `https://github.com/signup`。点 `login-button` 后，页面跳转到 `/api/auth/start`，跳转前 sessionStorage 的 `bz-submit` 里已经有投稿包。
-10. `me` 返回 `{ id: 1, login: 'demo' }` 时：`user-login` 的文字是「@demo」；`step-login` 的 `data-state="done"`；`slots-locked` 不存在。
+9. `/api/auth/me` 返回 401 时：`login-button` 可见；`signup-link` 的 href 是 `https://github.com/signup`。点 `login-button` 后，页面跳转到 `/api/auth/start`，跳转前 sessionStorage 的 `bz-submit` 里已经有投稿包。
+10. `me` 返回 `{ id: 1, login: 'demo' }` 时：`user-login` 的文字是「@demo」；`step-login` 的 `data-state="done"`。
 11. 分别带 `?login=cancelled`、`failed`、`expired` 打开：`login-notice` 的 `data-kind` 和参数一致，文案分别有「取消了登录」「没成功」「过期了」；URL 里不再有 `login` 参数。
 
-**截图**
+**截图**（本组验收要点已按第 43 条作废；改为验：页面上没有 `step-shots`，不带截图也能提交）
 
 12. 选一张 100KB 的 PNG：槽位依次经过 `uploading`（`slot-progress` 可见）到 `done`，`slot-thumb` 可见；`step-shots` 的状态短语是「1 / 1 张」。
 13. 选一张 3MB 的 PNG：先出现 `compressing`；最后发给 `/api/submit/screenshot` 的请求体不超过 2,097,152 字节，`Content-Type` 是 `image/jpeg`。选一张 3MB 的 GIF：`data-state="too-large"`，没有发出上传请求。选一个 `.heic` 文件或文本文件：`data-state="unsupported"`。
@@ -563,7 +558,7 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 
 **提交**
 
-18. 截图齐了但没勾授权：`submit-button` 是 `aria-disabled="true"`，`submit-blockers` 里有「还没勾选授权」；点按钮后焦点移到 `license-checkbox`。
+18. 检查通过、已登录但没勾授权：`submit-button` 是 `aria-disabled="true"`，`submit-blockers` 里有「还没勾选授权」；点按钮后焦点移到 `license-checkbox`。
 19. 全部满足后点提交，`/api/submit` 返回 200：`submit-result` 可见；焦点在它的 h2 上；`progress-step[data-step="pr"]` 是 `data-state="done"`，`pr-link` 的 href 等于返回的 PR 地址。把状态接口依次改成 `waiting_review`、`live`：10 秒内（用假时钟快进）`progress-step[data-step="live"]` 变成 `done`，`live-link` 的 href 是 `/bots/<slug>`。
 20. 提交返回 422，带 2 条错误：`step-check` 的 `data-state="error"`；`validation-error-item` 有 2 个；焦点在 ① 的摘要标题上。
 21. 返回 429，`Retry-After: 90`：`submit-error[data-code="rate_limited"]` 可见；`retry-countdown` 的文字里有「分钟」；`submit-button` 是 `aria-disabled="true"`。
@@ -587,9 +582,9 @@ valid ─► 登录 ─► 截图 ─► 授权 ─► 提交 submitting ─┬�
 | `bundle-error` | 粘贴坏令牌 |
 | ★ `invalid` | 粘贴缺字段的投稿包 |
 | ★ `valid-logged-out` | 有效令牌，`me` 返回 401 |
-| `valid-logged-in-empty` | 已登录，截图还没放 |
-| `slot-dragover` | 用 `dispatchEvent` 模拟拖入悬停 |
-| `slots-mixed` | 一个 `done`、一个 `uploading`（停在 40%）、一个 `failed`、一个 `too-large` |
+| `valid-logged-in-empty` | 已登录，还没勾授权 |
+| `slot-dragover` | 用 `dispatchEvent` 模拟拖入悬停（已作废，第 43 条） |
+| `slots-mixed` | 一个 `done`、一个 `uploading`（停在 40%）、一个 `failed`、一个 `too-large`（已作废，第 43 条） |
 | `blockers` | 没勾授权 |
 | `submitting` | 让提交请求挂起不返回 |
 | ★ `submitted-review` | 状态返回 `waiting_review` |

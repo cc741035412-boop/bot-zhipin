@@ -1,5 +1,5 @@
 name: 投稿 Bot
-description: 让你的 AI 生成投稿链接，拖入截图并授权，其余自动完成。
+description: 让你的 AI 生成投稿链接，勾选授权，其余自动完成。
 title: "投稿："
 labels: [投稿]
 body:
@@ -11,17 +11,10 @@ body:
       render: text
     validations:
       required: true
-  - type: textarea
-    id: screenshots
-    attributes:
-      label: 截图：把 Bot 真实输出的截图拖到这里（至少一张，按投稿包里写的顺序）
-      description: 先去掉密钥、公司内部信息和个人隐私；不要使用生成或伪造的截图。
-    validations:
-      required: true
   - type: checkboxes
     id: license
     attributes:
       label: 授权
       options:
-        - label: 我同意以 CC BY 4.0 授权这次投稿，并确认内容和截图都是我有权公开的
+        - label: 我同意以 CC BY 4.0 授权这次投稿，并确认内容是我有权公开的
           required: true
