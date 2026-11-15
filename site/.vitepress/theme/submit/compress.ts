@@ -1,3 +1,12 @@
+import { imageFormat } from '../../../../scripts/lib/validate/images.mjs'
+
+// 不信任扩展名或浏览器给出的 MIME，两者都与文件头核对。
+export async function inspectImage(file: File) {
+  const format = imageFormat(new Uint8Array(await file.slice(0, 16).arrayBuffer()))
+  if (!format || file.type.toLowerCase() !== `image/${format}`) throw { error: 'unsupported_type' }
+  return format as 'png' | 'jpeg' | 'webp' | 'gif'
+}
+
 const MAX_BYTES = 2_097_152
 const THUMB_BYTES = 30 * 1024
 

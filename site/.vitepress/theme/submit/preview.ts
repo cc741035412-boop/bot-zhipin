@@ -6,8 +6,8 @@ import { submissionModel, type PreviewImage } from './model'
 export { summarizeBot }
 
 export function renderDesign(markdown: string, {
-  slug, assetUrl = () => null,
-}: { slug: string; assetUrl?: (name: string) => string | null }) {
+  slug, assetUrl = () => null, screenshotNames, blockedUrl,
+}: { slug: string; assetUrl?: (name: string) => string | null; screenshotNames?: string[]; blockedUrl?: string }) {
   const md = new MarkdownIt({
     html: false, linkify: true,
     highlight: (code: string) => `<pre><code>${md.utils.escapeHtml(code)}</code></pre>`,
@@ -16,6 +16,35 @@ export function renderDesign(markdown: string, {
   md.linkify.set({ fuzzyLink: false })
   // 不安装 attrs、snippet、frontmatter、Vue 等插件；HTML 仅供 v-html，不可编译。
   installSafeDesignRules(md, { assetUrl })
+  // 仅预览适配器提供截图槽位时启用 UI 规则；共享渲染 API 的默认输出不变。
+  if (!screenshotNames) return md.render(prepareDesignSource(markdown), { slug })
+  const image = md.renderer.rules.image!
+  const hint = '<span class="external-icon" aria-hidden="true">↗</span><span class="bz-sr-only">（在新标签页打开）</span>'
+  md.renderer.rules.image = (tokens, index, options, env, self) => {
+    const src = tokens[index].attrGet('src') || ''
+    if (blockedUrl && src === blockedUrl) return md.utils.escapeHtml(self.renderInlineAsText(tokens[index].children || [], options, env))
+    const match = /^(?:\.\/)?screenshots\/([A-Za-z0-9_.-]+)$/.exec(src)
+    if (match && !assetUrl(match[1])) {
+      const n = screenshotNames.indexOf(match[1])
+      return `<span class="screenshot-error">截图${n >= 0 ? ` ${n + 1}` : ''}（待放入）</span>`
+    }
+    return image(tokens, index, options, env, self).replace('rel="noreferrer"', 'rel="noopener noreferrer"').replace('</a>', hint + '</a>')
+  }
+  const links: string[] = []
+  md.renderer.rules.link_open = (tokens, index, options, env, self) => {
+    const href = tokens[index].attrGet('href') || ''
+    if (blockedUrl && href === blockedUrl) { links.push('</span>'); return '<span>' }
+    const external = /^https?:\/\//i.test(href)
+    links.push((external ? hint : '') + '</a>')
+    if (external) { tokens[index].attrSet('target', '_blank'); tokens[index].attrSet('rel', 'noopener noreferrer') }
+    return self.renderToken(tokens, index, options)
+  }
+  md.renderer.rules.link_close = () => links.pop() || '</a>'
+  // 投稿 Markdown 不能再制造页面级 h1；仍然只作为 HTML 数据插入。
+  for (const type of ['heading_open', 'heading_close']) md.renderer.rules[type] = (tokens, index, options, env, self) => {
+    tokens[index].tag = `h${Math.min(6, Number(tokens[index].tag.slice(1)) + 2)}`
+    return self.renderToken(tokens, index, options)
+  }
   return md.render(prepareDesignSource(markdown), { slug })
 }
 
@@ -46,5 +75,5 @@ export function previewModel(plaintext: string, {
       : summary.author.url || summary.templateUrl || null
   }
   if (bad('/forkedFrom')) { summary.forkedFrom = null; summary.forkedFromName = null }
-  return { model, summary, designHtml: renderDesign(model.design || '', { slug, assetUrl: asset }), slug }
+  return { model, summary, designHtml: renderDesign(model.design || '', { slug, assetUrl: asset, screenshotNames: plan.images.map((image) => image.name), blockedUrl: typeof model.data?.templateUrl === 'string' ? model.data.templateUrl : undefined }), slug }
 }

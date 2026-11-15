@@ -35,6 +35,13 @@ export function createStore(options: { session?: Storage | null; local?: Storage
   }
   return {
     saveDraft(draft: Draft) { write(session, DRAFT, draft) },
+    inappDismissed() { return read(session, 'bz-submit-inapp-dismissed') === true },
+    dismissInapp() { write(session, 'bz-submit-inapp-dismissed', true) },
+    switchAccount(uid: string | number) {
+      const previous = read(session, 'bz-submit-account')
+      write(session, 'bz-submit-account', uid)
+      return previous !== null && previous !== uid
+    },
     loadDraft,
     clearDraft() { remove(session, DRAFT) },
     saveResult(result: unknown) { write(session, DRAFT, { ...loadDraft(), result }) },
@@ -63,7 +70,9 @@ export function createStore(options: { session?: Storage | null; local?: Storage
           if (name?.startsWith(PREFIX) && !name.startsWith(`${PREFIX}${uid}:`)) keys.push(name)
         }
         for (const name of keys) remove(local, name)
+        return keys.length > 0
       } catch { /* 存储不可用不能中断登录 */ }
+      return false
     },
   }
 }

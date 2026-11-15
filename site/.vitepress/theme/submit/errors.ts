@@ -38,7 +38,7 @@ export function explainError(code: string, details: {
   }
   if (code === 'network_error' || code === 'timeout') copy.fallback = (details.failures || 0) >= 2
   const seconds = Math.max(0, Math.ceil(details.retryAfter || 0))
-  const countdown = details.countdown || (seconds < 60 ? `${seconds} 秒` : seconds < 3600 ? `约 ${Math.ceil(seconds / 60)} 分钟` : `约 ${Math.ceil(seconds / 3600)} 小时`)
+  const countdown = details.countdown || countdownText(seconds)
   const n = details.n ?? (code === 'pr_limit' ? details.pulls?.length : details.slots?.length) ?? 0
   const fill = (text: string) => text.replaceAll('{slug}', details.slug || '').replaceAll('{n}', String(n))
     .replaceAll('{N}', String(details.errors?.length || 0)).replaceAll('{倒计时}', countdown)
@@ -46,6 +46,18 @@ export function explainError(code: string, details: {
   if (copy.aiText) copy.aiText = fill(copy.aiText)
   if (code === 'invalid') copy.aiText = copyForAi(details.errors || [])
   return copy
+}
+
+export function bundleErrorCopy(error: unknown) {
+  const problem = (error as { errors?: Diagnostic[] })?.errors?.[0]?.problem || ''
+  const reason = /展开后不能超过 512KB/.test(problem) ? '投稿包太大了（展开后超过 512KB）。'
+    : /压缩令牌/.test(problem) || !problem ? '链接好像没复制完整。' : problem
+  return { reason, aiText: `我打开投稿链接时，页面提示：${reason}。请重新运行 make-submission-link 生成一个新的投稿链接给我；如果链接太长，请把完整的 BZB1 令牌发给我，我粘贴到投稿页。` }
+}
+
+export function countdownText(seconds: number) {
+  seconds = Math.max(0, Math.ceil(seconds))
+  return seconds < 60 ? `${seconds} 秒` : seconds < 3600 ? `约 ${Math.ceil(seconds / 60)} 分钟` : `约 ${Math.ceil(seconds / 3600)} 小时`
 }
 
 export function copyForAi(errors: Diagnostic[]) {
