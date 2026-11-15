@@ -54,7 +54,7 @@
 - Hero 固定使用 `meta.mjs` 的 `HERO_MASCOTS`，每只 `{ key, shape, color }`；与货架数量、排序、自定义头像无关，空货架也有招牌。由左至右：琥珀 hex、紫 tablet、青绿 star、**橙 blob（中央）**、粉 sparkle、薄荷绿 teardrop、棕 pebble。7 种颜色/形状交错，色值见配置。
 - SSR 始终渲染 7 只，<680px 仅 CSS 隐藏两端，保留中间 5 只；不根据 window 决定首帧。`HeroPortrait` 直接用 `shapeRadii(mascot.shape)` 和 mascot.color 渲染 LiveBot，`data-shape` 保持形状 id，填色 rect 保留 `data-part="fill"`。
 - `.hero-portraits` / `.hero-portrait` 保留。按离中心距离 0/1/2/3，盒子宽高为 96/80/68/60px；<680px 乘 0.75，<400px 改乘 0.62（不是叠乘）。底边齐，间距 14px（<680px 为 6px），共用柔和地面阴影。
-- h1 为 `clamp(40px,7vw,64px)` / 800，行高 1.1、字距 -0.03em，balance；介绍 17px / 1.7，最大 34em，balance。招牌上半部有橙、紫、青绿、粉四团淡光晕（浅色 14%、深色 20% 混透明），限定在容器宽度内、不拦截点击；文字对比度不得降低到 4.5 以下。
+- h1 为 `clamp(40px,7vw,64px)` / 800，行高 1.1、字距 -0.03em，balance；介绍 17px / 1.7，最大 34em，balance。招牌上半部有橙、紫、青绿、粉四团淡光晕（浅色 14%、深色 20% 混透明），限定在容器宽度内，以椭圆 mask 向四周羽化，避免光晕呈矩形截断；不拦截点击，文字对比度不得降低到 4.5 以下。
 - 「我要投稿」仍为墨色胶囊加小加号，高 ≥40px，触摸 ≥44px，左右 20px；圆体 14/700，悬停上浮 2px；链接 CONTRIBUTE_URL。
 - 工具条左侧排序、右侧「共 N 个 Bot」（13px、三级文字色）。Hero 保留 `aria-hidden`，悬停和戳按 §5。
 
