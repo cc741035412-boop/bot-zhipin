@@ -247,7 +247,14 @@ test('同一个排序指示块滑动、舞台漂移与静止地影、正热度�
   expect((await indicator()).x).toBe(0)
   expect((await indicator()).duration).toBe('0.28s')
   await page.getByTestId('sort-new').click()
-  await page.waitForTimeout(300)
+  // 固定动画时钟，避免并行浏览器负载把 CSS 首帧推迟到 click 返回之后。
+  await controls.evaluate((el) => {
+    getComputedStyle(el, '::after').transform
+    for (const animation of el.getAnimations({ subtree: true })) {
+      animation.pause()
+      animation.currentTime = 300
+    }
+  })
   const moved = await indicator()
   expect(moved.x).toBeCloseTo(moved.width, 1)
   const stage = card(page).locator('.avatar-stage')
