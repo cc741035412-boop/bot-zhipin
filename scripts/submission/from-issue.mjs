@@ -1,4 +1,5 @@
 import { resolve } from 'node:path'
+import { SITE } from '../../site/.vitepress/meta.mjs'
 import { pathToFileURL } from 'node:url'
 import { SubmissionError, COMMENT_MARKER, errorItems, failureComment } from './errors.mjs'
 import { parseSubmission, checkOwnership, publication } from './issue.mjs'
@@ -22,7 +23,7 @@ export async function submitIssue(input, adapters) {
     const details = publication(submission, { ...adapters.context, warnings: result.warnings })
     const pr = await adapters.publish(plan, details)
     await adapters.dispatch(details.branch)
-    await adapters.comment(input.number, `${COMMENT_MARKER}\n✓ 检查通过，已自动创建 PR：${pr}。维护者审核合并后就会上线，你会成为项目贡献者。`)
+    await adapters.comment(input.number, `${COMMENT_MARKER}\n✓ 检查通过，已自动创建 PR：${pr}。维护者审核合并后就会上线，你会成为项目贡献者。\n下次可以直接在网站上投稿，更快：${SITE.url}/submit`)
     return { ok: true, pr, plan, details }
   } catch (error) {
     const errors = errorItems(error)

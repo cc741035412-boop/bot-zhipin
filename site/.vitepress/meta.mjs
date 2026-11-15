@@ -4,6 +4,7 @@ export const SITE = {
   name: 'Bot 直聘',
   tagline: 'Grok Bot 模板货架：挑一个顺手的直接导入，也欢迎把你做的 Bot 挂上来。',
   repo: 'https://github.com/jakob52123/bot-zhipin',
+  url: 'https://bot-zhipin.pages.dev',
   branch: 'main',
 }
 
@@ -26,7 +27,17 @@ export const NOT_FOUND = {
   back: '回货架看看',
 }
 
-export const CONTRIBUTE_URL = `${SITE.repo}/blob/${SITE.branch}/CONTRIBUTING.md`
+export const CONTRIBUTE_URL = '/submit'
+
+/** 投稿页的定稿提示词。 */
+export const submitPrompt = () =>
+  [
+    `请帮我把我做的 Grok Bot 投稿到「Bot 直聘」：${SITE.repo}`,
+    '1. 先完整读一遍仓库根目录的 AGENTS.md，严格按它的步骤做。',
+    '2. 能从你自己（或我的 Bot 配置）里查到的信息直接用，查不到的再一次问清我；不要编造效果和截图。',
+    '3. 不要向我要 GitHub 令牌或密码。',
+    `4. 最后给我一个 ${SITE.url}/submit 开头的投稿链接。`,
+  ].join('\n')
 
 /** 某个 Bot 在仓库里的地址，安装提示词里用 */
 export const botRepoUrl = (slug) => `${SITE.repo}/tree/${SITE.branch}/bots/${slug}`

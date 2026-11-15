@@ -1,0 +1,17 @@
+# 外部收录：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: pm-bot
+name: PM bot
+tagline: 把模糊需求写成带日期和验收标准的需求切片，你批了才开工
+category: 定义
+author:
+  name: Ulysses Ng
+templateUrl: https://x.ai/bot/FeeqMRMJr2jwixCROZcIh
+addedAt: 2026-11-15
+prerequisites:
+  - 一份 PRD，直接粘贴也行
+  - 自带的工作日早报按美国时区设置，导入后记得改成你的时区
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

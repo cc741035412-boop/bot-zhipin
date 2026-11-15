@@ -1,4 +1,5 @@
 import YAML from 'yaml'
+import { applyServerFields } from '../lib/submit-fields.mjs'
 import { decode, unpack, stripFence } from './bundle.mjs'
 import { fail } from './errors.mjs'
 
@@ -76,6 +77,23 @@ function hasLicense(text) {
   return false
 }
 
+/** 日期非法或缺失时只取 helper 改写的 author 段，原日期留给校验器报错。 */
+function fillIssueAuthor(text, data, login) {
+  const rewritten = applyServerFields(text, { login, addedAt: data.addedAt })
+  if (typeof data.addedAt === 'string') return rewritten
+  const original = YAML.parseDocument(text)
+  const patched = YAML.parseDocument(rewritten)
+  const author = patched.contents.items.find(({ key }) => key.value === 'author')
+  const authorText = rewritten.slice(author.key.range[0], author.value.range[2])
+  const oldAuthor = original.contents.items.find(({ key }) => key.value === 'author')
+  if (oldAuthor) return text.slice(0, oldAuthor.key.range[0]) + authorText + text.slice(oldAuthor.value.range[2])
+  const flow = original.contents.flow === true
+  const end = flow ? original.contents.range[1] - 1 : original.contents.range[2]
+  const addition = flow ? (original.contents.items.length ? ', ' : '') + authorText.trimEnd()
+    : (end && text[end - 1] !== '\n' ? '\n' : '') + authorText
+  return text.slice(0, end) + addition + text.slice(end)
+}
+
 export function parseSubmission(input) {
   assertIdentity(input)
   const fields = parseForm(input.body)
@@ -84,7 +102,12 @@ export function parseSubmission(input) {
   }
   const value = stripFence(fields.bundle)
   const bundle = unpack(value.startsWith('BZB1:') ? decode(value) : value)
-  const data = parseBotMetadata(bundle.files[`bots/${bundle.slug}/bot.yaml`], bundle.slug)
+  const yamlPath = `bots/${bundle.slug}/bot.yaml`
+  let data = parseBotMetadata(bundle.files[yamlPath], bundle.slug)
+  if (data.author?.github === undefined) {
+    bundle.files[yamlPath] = fillIssueAuthor(bundle.files[yamlPath], data, input.login)
+    data = parseBotMetadata(bundle.files[yamlPath], bundle.slug)
+  }
   if (typeof data.author?.github !== 'string' || data.author.github.toLowerCase() !== input.login.toLowerCase()) {
     fail(`bots/${bundle.slug}/bot.yaml`, 'author.github', 'author.github 必须等于 Issue 作者的 GitHub 用户名（忽略大小写），不能替别人冒名投稿。', '让实际作者提交 Issue，或把 author.github 改成当前投稿账号。')
   }

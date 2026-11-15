@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, ref } from 'vue'
+import { inject, nextTick, onBeforeUnmount, ref } from 'vue'
+import { previewMode } from '../submit/preview-mode'
+const preview = inject(previewMode, false)
 import { installPrompt } from '../../meta.mjs'
 import { reportClick } from '../heat'
 import { announceCopy } from '../announce'
@@ -15,6 +17,7 @@ const field = ref<HTMLTextAreaElement>()
 const copyButton = ref<HTMLButtonElement>()
 let timer: ReturnType<typeof setTimeout> | undefined
 async function copyPrompt() {
+  if (preview) return
   reportClick(props.bot.slug, 'prompt')
   try {
     await navigator.clipboard.writeText(installPrompt(props.bot.slug))
@@ -32,6 +35,7 @@ async function copyPrompt() {
   }
 }
 function importBot() {
+  if (preview) return
   play({ state: 'comet' })
   reportClick(props.bot.slug, 'import')
 }
@@ -45,9 +49,11 @@ onBeforeUnmount(() => clearTimeout(timer))
 
 <template>
   <div class="bot-actions">
-    <a data-testid="btn-import" class="shelf-button primary" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot">一键导入<ExternalHint /></a>
-    <button v-if="!bot.external" ref="copyButton" data-testid="btn-prompt" type="button" class="shelf-button" :class="{ copied }" @click="copyPrompt">{{ copied ? '已复制 ✓' : '复制安装提示词' }}</button>
+    <button v-if="preview" data-testid="btn-import" type="button" class="shelf-button primary" aria-disabled="true">一键导入</button>
+    <a v-else data-testid="btn-import" class="shelf-button primary" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot">一键导入<ExternalHint /></a>
+    <button v-if="!bot.external" ref="copyButton" data-testid="btn-prompt" type="button" class="shelf-button" :class="{ copied }" :aria-disabled="preview || undefined" @click="copyPrompt">{{ copied ? '已复制 ✓' : '复制安装提示词' }}</button>
   </div>
+  <p v-if="preview" data-testid="preview-actions-note">上架后可用</p>
   <dialog v-if="fallback && !bot.external" ref="dialog" class="prompt-fallback" data-testid="prompt-fallback" :aria-labelledby="`copy-title-${bot.slug}`" :aria-describedby="`copy-help-${bot.slug}`" @click="backdrop" @close="fallback = false; copyButton?.focus()">
     <h2 :id="`copy-title-${bot.slug}`">复制没成功，请手动复制</h2>
     <p :id="`copy-help-${bot.slug}`">全选下面的文字，复制后发给你的 Grok Bot</p>
