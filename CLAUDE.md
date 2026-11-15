@@ -33,3 +33,4 @@
 - 本仓库本地还有 `upstream` 远端（原仓库）。`gh pr create` 一律带 `--repo jakob52123/bot-zhipin`，绝不推送或提 PR 到 upstream。
 - 构建产物里不能有 `_worker.js`（会让 Pages 忽略 `functions/`）。
 - 改了 `schema/bot.schema.json` 要运行 `npm run gen:schema`；`scripts/lib/validate/generated/` 是派生物，不算第二份枚举。
+- 改了标签页图标的画法（`theme/live/favicon.ts` 的 `FAVICON_DEFAULT`、`FAVICON_FACE`、`faviconSvg`）要运行 `npm run gen:favicon`，把 `site/public/` 下重新生成的三个图标一起提交。

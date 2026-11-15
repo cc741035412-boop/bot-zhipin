@@ -17,6 +17,8 @@
 | `site/` | VitePress 站点根目录；`site/.vitepress/meta.mjs` 放站名、仓库地址、安装提示词、默认台词 | 维护者 |
 | `site/.vitepress/theme/vendor/bloub/` | 第三方 MIT 头像引擎，**不要改** | 只能整体升级 |
 | `site/.vitepress/theme/live/` | 单 rAF 时钟 clock.ts、视线 gaze.ts、帧与反应接线；离屏/隐藏/减少动效暂停 | 维护者 |
+| `site/.vitepress/theme/live/favicon.ts` | 标签页图标：随机 Bot、定时变身；纯函数出 SVG，`startFavicon` 在 `theme/index.ts` 里按需加载 | 维护者 |
+| `scripts/gen-favicon.mjs` + `site/public/favicon.*`、`apple-touch-icon.png` | 静态兜底图标及其生成脚本（`npm run gen:favicon`，生成物提交进仓库） | 维护者 |
 | `site/.vitepress/theme/components/LiveBot.vue` | SSR sample(0) + 客户端活体 SVG；bz-play 事件入口 | 维护者 |
 | `site/.vitepress/theme/face.ts` | 官方形状映射、botFace / resolveFace、faceColors 和 seed 回退 | 维护者 |
 | `site/.vitepress/theme/shapes-extra.ts` | 15 种原创径向轮廓，不复制 x.ai 路径 | 维护者 |
