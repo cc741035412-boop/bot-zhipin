@@ -230,6 +230,30 @@ describe('flowLayout：接力、搭伙和边界', () => {
     expectSane(layout)
   })
 
+  it('搭伙：一来一回的两条线，标签各在一侧，互不压住，也不压住节点；上半圈的名字写在砖上面', () => {
+    const layout = flowLayout(squad('搭伙', trio, [
+      { from: 'you', to: 'a', what: '植物照片' }, { from: 'a', to: 'you', what: '浇水提醒' },
+      { from: 'you', to: 'b', what: '小票' }, { from: 'b', to: 'you', what: '月度账单' },
+      { from: 'c', to: 'you', what: '饮食建议' }, { from: 'b', to: 'c', what: '外卖记录' },
+    ]), 1140)
+    const boxes = layout.edges.map(labelBox)
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) expect(overlap(boxes[i], boxes[j]), `${layout.edges[i].key} 压住 ${layout.edges[j].key}`).toBe(false)
+      for (const node of layout.nodes) {
+        const tile = { left: node.x - 28, right: node.x + 28, top: node.y - 28, bottom: node.y + 28 }
+        expect(overlap(boxes[i], tile), `${layout.edges[i].key} 的标签压住 ${node.id}`).toBe(false)
+      }
+    }
+    expect(nodeOf(layout, 'a').caption).toBe('above')
+    expect(nodeOf(layout, 'b').caption).toBe('below')
+    expectSane(layout)
+  })
+
+  it('接力：标签都放得下时只排一层', () => {
+    const layout = flowLayout(squad('接力', trio, [{ from: 'you', to: 'a', what: '素材' }, { from: 'a', to: 'b', what: '初稿' }, { from: 'b', to: 'c', what: '定稿' }]), 1140)
+    expect(new Set(layout.edges.map((edge) => edge.label.y)).size).toBe(1)
+  })
+
   it('带队但数据里没有队长时退回一条线', () => {
     expect(flowLayout(squad('带队', trio, [{ from: 'a', to: 'b', what: '东西' }]), 1140).kind).toBe('chain')
   })

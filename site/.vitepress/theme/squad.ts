@@ -115,8 +115,8 @@ export interface FlowNode {
   kind: 'member' | 'you'
   x: number
   y: number
-  /** 名字放哪：成员在砖下面，队长在砖右边（下面要出线） */
-  caption: 'below' | 'right' | 'none'
+  /** 名字放哪：成员在砖下面；队长在砖右边（下面要出线）；围成一圈时上半圈的在砖上面（下面要出线） */
+  caption: 'below' | 'right' | 'above' | 'none'
 }
 export interface FlowEdge {
   key: string
@@ -338,7 +338,9 @@ function chain(members: readonly LineupMember[], steps: readonly FlowStep[], wid
   // 相邻的标签在线上方分两层，宽度可以伸到隔壁那一格。
   const nearMax = Math.min(220, space * 1.7 - 16)
   const nearChips = new Map(near.map((link) => [link, chip(link.whats, nearMax)]))
-  const level = (link: Link) => Math.min(at.get(link.from)!, at.get(link.to)!) % 2
+  // 每个标签都不比一格宽时只排一层，紧贴着线；有放不下的才高低两层错开。
+  const stagger = [...nearChips.values()].some((item) => item.width > space - 16)
+  const level = (link: Link) => stagger ? Math.min(at.get(link.from)!, at.get(link.to)!) % 2 : 0
   const levelHeight = [0, 1].map((n) => Math.max(0, ...near.filter((link) => level(link) === n).map((link) => nearChips.get(link)!.height)))
   const labelsHeight = levelHeight[0] + (levelHeight[1] ? levelHeight[1] + (levelHeight[0] ? GAP : 0) : 0)
   const overTop = 8
@@ -378,8 +380,9 @@ function chain(members: readonly LineupMember[], steps: readonly FlowStep[], wid
 function ring(members: readonly LineupMember[], steps: readonly FlowStep[], width: number): FlowLayout {
   const links = mergeLinks(steps, (step) => ({ from: step.from === YOU ? 'you' : step.from, to: step.to === YOU ? 'you' : step.to }))
   const count = members.length
-  const rx = Math.min(width / 2 - 96, 360), ry = count <= 2 ? 0 : 150
-  const cx = width / 2, cy = 8 + HALF + ry
+  const rx = Math.min(width / 2 - 96, 360), ry = count <= 2 ? 0 : 172
+  // 上半圈的名字写在砖上面，所以顶上也要留出名字的高度。
+  const cx = width / 2, cy = 8 + (count <= 2 ? 0 : CAPTION) + HALF + ry
   const start = count <= 2 ? Math.PI : count === 4 ? -Math.PI * .75 : -Math.PI / 2
   const spot = new Map<string, { x: number; y: number }>([['you', { x: cx, y: cy }]])
   members.forEach((member, index) => {
@@ -388,7 +391,10 @@ function ring(members: readonly LineupMember[], steps: readonly FlowStep[], widt
   })
   const nodes: FlowNode[] = [
     { id: 'you', kind: 'you', x: r1(cx), y: r1(cy), caption: 'none' },
-    ...members.map((member) => ({ id: member.bot, kind: 'member' as const, ...roundSpot(spot.get(member.bot)!), caption: 'below' as const })),
+    ...members.map((member) => {
+      const point = spot.get(member.bot)!
+      return { id: member.bot, kind: 'member' as const, ...roundSpot(point), caption: point.y < cy - 1 ? 'above' as const : 'below' as const }
+    }),
   ]
   const edges = links.map((link) => {
     const a = spot.get(link.from)!, b = spot.get(link.to)!
@@ -396,18 +402,25 @@ function ring(members: readonly LineupMember[], steps: readonly FlowStep[], widt
     const ux = (b.x - a.x) / length, uy = (b.y - a.y) / length
     const both = links.some((other) => other.from === link.to && other.to === link.from)
     // 两个方向都有时各往自己的右手边让 8px。
-    const ox = both ? -uy * 8 : 0, oy = both ? ux * 8 : 0
+    const nx = -uy, ny = ux
+    const ox = both ? nx * 8 : 0, oy = both ? ny * 8 : 0
     const inset = HALF + GAP + 2
     const p1 = { x: a.x + ux * inset + ox, y: a.y + uy * inset + oy }, p2 = { x: b.x - ux * inset + ox, y: b.y - uy * inset + oy }
     const spoke = link.from === 'you' || link.to === 'you'
     if (spoke) {
+      // 压在线上的标签不能比线长；一来一回时标签在线的旁边，可以宽一些。
+      const max = both ? 150 : Math.min(180, Math.max(64, length - 2 * inset - 36))
+      const size = chip(link.whats, max)
+      // 一来一回的两条线：标签各放在自己那条线的外侧，整个让到两条线的中线以外，互不压住。
+      const away = both ? size.width / 2 * Math.abs(nx) + size.height / 2 * Math.abs(ny) + 3 : 0
+      const mid = { x: (a.x + b.x) / 2 + (both ? nx * away : 0), y: (a.y + b.y) / 2 + (both ? ny * away : 0) }
       return edgeOf(link, `M${r1(p1.x)} ${r1(p1.y)}L${r1(p2.x)} ${r1(p2.y)}`, { x: r1(p2.x), y: r1(p2.y), angle: angleOf(ux, uy) },
-        { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2, max: Math.min(180, Math.max(64, length - 2 * inset - 36)), anchor: 'center' })
+        { x: mid.x, y: mid.y, max, anchor: 'center' })
     }
     // 成员之间：控制点往圆外推，绕开中间的「你」。
     const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2
     const out = Math.hypot(mx - cx, my - cy) || 1
-    const push = Math.min(90, length * .28)
+    const push = Math.min(90, length * .28) * (both ? 1 + .35 * Math.sign(nx * (mx - cx) + ny * (my - cy) || 1) : 1)
     const qx = mx + (mx - cx) / out * push, qy = my + (my - cy) / out * push
     return edgeOf(link, `M${r1(p1.x)} ${r1(p1.y)}Q${r1(qx)} ${r1(qy)} ${r1(p2.x)} ${r1(p2.y)}`,
       { x: r1(p2.x), y: r1(p2.y), angle: angleOf(p2.x - qx, p2.y - qy) },

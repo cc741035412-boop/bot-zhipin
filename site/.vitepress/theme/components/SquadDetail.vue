@@ -157,10 +157,10 @@ onBeforeUnmount(() => {
             <span class="bz-tag squad-tag"><BzIcon name="users" :size="12" />{{ SQUAD_COPY.tag }}</span>
             <span class="bz-tag" data-testid="squad-formation">{{ squad.formation }}</span>
             <span class="squad-count" data-testid="squad-count">{{ SQUAD_COPY.count(squad.members.length) }}</span>
-            <span class="bot-byline">
+            <span class="squad-byline">
               <a v-if="squad.author.link" data-testid="squad-author" :href="squad.author.link" target="_blank" rel="noopener noreferrer">by {{ squad.author.name }}<ExternalHint /></a>
               <span v-else data-testid="squad-author">by {{ squad.author.name }}</span>
-              <span class="bot-origin" data-testid="squad-origin">· {{ squad.origin }}</span>
+              <span data-testid="squad-origin"> · {{ squad.origin }}</span>
             </span>
           </p>
           <h1>{{ squad.name }}</h1>
@@ -185,7 +185,7 @@ onBeforeUnmount(() => {
             <BotPortrait :ref="keep(item.bot)" :bot="portrait(item)" :rest="hoveredRow === item.bot ? 'wide' : 'idle'" />
           </div>
           <div class="roster-who">
-            <h3 class="bot-name"><a data-testid="member-link" :href="item.detailUrl">{{ item.name }}</a></h3>
+            <h3 class="roster-name"><a data-testid="member-link" :href="item.detailUrl">{{ item.name }}</a></h3>
             <span v-if="item.title" class="bz-tag" :class="{ solid: item.lead }" data-testid="member-title">{{ item.title }}</span>
             <span v-if="item.optional" class="bz-tag" data-testid="member-optional">{{ SQUAD_COPY.optional }}</span>
           </div>
@@ -198,7 +198,7 @@ onBeforeUnmount(() => {
         <li v-for="item in squad.missing" :key="`missing-${item.name}`" class="roster-row is-missing" data-testid="squad-missing">
           <div class="roster-tile bz-tile" aria-hidden="true"><BotStill ghost shape="pebble" /></div>
           <div class="roster-who">
-            <h3 class="bot-name">{{ item.name }}</h3>
+            <h3 class="roster-name">{{ item.name }}</h3>
             <span class="bz-tag">{{ SQUAD_COPY.missing }}</span>
           </div>
           <p class="roster-does">{{ item.does }}</p>
