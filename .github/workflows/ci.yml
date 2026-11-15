@@ -24,6 +24,12 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 2
+      - name: 打印 PR 作者关联（联调用）
+        if: github.event_name == 'pull_request'
+        env:
+          ASSOCIATION: ${{ github.event.pull_request.author_association }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: echo "author_association=$ASSOCIATION pr_author=$PR_AUTHOR"
       - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc

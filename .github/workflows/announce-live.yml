@@ -1,0 +1,35 @@
+name: 上线通知
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: announce-live
+  cancel-in-progress: false
+
+jobs:
+  announce-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+      - name: 等待部署并通知投稿人
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+          SITE_URL: https://bot-zhipin.pages.dev
+          APP_BOT_LOGIN: ${{ vars.SUBMIT_APP_BOT_LOGIN }}
+        run: node scripts/announce-live.mjs

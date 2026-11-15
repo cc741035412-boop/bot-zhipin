@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS pr_status (
+  pr INTEGER PRIMARY KEY,
+  body TEXT NOT NULL,
+  fetched_at INTEGER NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS bot_owners (
+  slug TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);

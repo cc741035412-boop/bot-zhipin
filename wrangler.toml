@@ -3,6 +3,14 @@ name = "bot-zhipin"
 pages_build_output_dir = "site/.vitepress/dist"
 compatibility_date = "2026-11-01"
 
+[vars]
+SUBMIT_REPO = "jakob52123/bot-zhipin" # 投稿目标 owner/repo，不是密钥
+GITHUB_APP_ID = "5767363" # 写仓库的 GitHub App 数字 ID，不是密钥
+GITHUB_APP_INSTALLATION_ID = "182141097" # App 安装到目标仓库的安装 ID，不是密钥
+GITHUB_APP_BOT_LOGIN = "bot-zhipin-submit[bot]" # App 的机器人 login（以 [bot] 结尾），不是密钥
+OAUTH_CLIENT_ID = "Ov23liMq1K0seT6gpvvU" # 零 scope OAuth App 的客户端 ID，不是密钥
+SUBMIT_DRY_RUN_USER_IDS = "341280686" # 可使用 dryRun 的 GitHub 数字 ID（逗号分隔），不是密钥
+
 [[d1_databases]]
 binding = "DB"
 database_name = "bot-zhipin"

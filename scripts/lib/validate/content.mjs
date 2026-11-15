@@ -1,5 +1,3 @@
-import { join } from 'node:path'
-
 import { hasDesignFrontmatter, stripComments } from '../design-content.mjs'
 export { stripComments }
 const headings = (text) => stripComments(text).split(/\r\n|\n|\r/).flatMap((line) => {
@@ -13,13 +11,13 @@ const headings = (text) => stripComments(text).split(/\r\n|\n|\r/).flatMap((line
 
 export function validateContent(bot, template, report) {
   if (bot.design !== null && hasDesignFrontmatter(bot.design)) {
-    report(join(bot.dir, 'DESIGN.md'), 'frontmatter', 'DESIGN.md 不允许 frontmatter', '删除开头 --- 到下一个 --- 的整个 frontmatter 块，只保留 Markdown 正文。')
+    report('DESIGN.md', 'frontmatter', 'DESIGN.md 不允许 frontmatter', '删除开头 --- 到下一个 --- 的整个 frontmatter 块，只保留 Markdown 正文。')
   }
   if (bot.data?.external === true) return
   if (bot.role === null || !stripComments(bot.role).trim()) {
-    report(join(bot.dir, 'ROLE.md'), '正文', bot.role === null ? '缺少 ROLE.md' : 'ROLE.md 去掉 HTML 注释后为空', '创建或补充 ROLE.md，写清 Bot 的岗位、职责和边界；不要只写注释。')
+    report('ROLE.md', '正文', bot.role === null ? '缺少 ROLE.md' : 'ROLE.md 去掉 HTML 注释后为空', '创建或补充 ROLE.md，写清 Bot 的岗位、职责和边界；不要只写注释。')
   }
-  const designPath = join(bot.dir, 'DESIGN.md')
+  const designPath = 'DESIGN.md'
   if (bot.design === null) {
     report(designPath, '正文', '缺少 DESIGN.md', '创建 DESIGN.md，按 bots/_template/DESIGN.md 的五个二级标题写至少 200 字正文。')
   } else {
@@ -30,13 +28,15 @@ export function validateContent(bot, template, report) {
     const missing = headings(template.design).filter((title) => !present.includes(title))
     if (missing.length) report(designPath, '二级标题', `缺少二级标题：${missing.join(' / ')}`, `补上以下标题及对应内容：${missing.map((title) => `## ${title}`).join('；')}。`, true)
   }
-  if (!bot.skills.length) report(join(bot.dir, 'skills'), '技能文件夹', 'skills/ 下至少需要一个技能文件夹', '创建 skills/<技能名>/SKILL.md，填写 frontmatter 和具体操作步骤。')
+  if (!bot.skills.length) report('skills', '技能文件夹', 'skills/ 下至少需要一个技能文件夹', '创建 skills/<技能名>/SKILL.md，填写 frontmatter 和具体操作步骤。')
   for (const skill of bot.skills) {
     if (!skill.exists) {
       report(skill.path, '文件', '技能文件夹缺少 SKILL.md', `在 skills/${skill.name}/ 中创建 SKILL.md，填写 name、description 的 frontmatter 和技能正文。`)
       continue
     }
-    if (skill.frontmatterError) {
+    if (skill.frontmatterTooLarge) {
+      report(skill.path, 'frontmatter', 'SKILL.md 的 frontmatter 超过 4KB', 'frontmatter 只放技能名称和简介，长内容写进 SKILL.md 正文。')
+    } else if (skill.frontmatterError) {
       const line = Number(/at line (\d+)/.exec(skill.frontmatterError)?.[1] || 1) + 1
       report(skill.path, 'frontmatter', `frontmatter YAML 格式错误（第 ${line} 行），必须是合法的「键: 值」映射`, '检查 --- 之间的 YAML 缩进、冒号、引号，name 和 description 都要填写非空文字。')
     } else if (!skill.frontmatter) {
@@ -75,6 +75,6 @@ export function validateTemplate(bot, template, report) {
     }
   }
   if (bot.routines !== null && bot.routines.trim() === template.routines.trim()) {
-    report(join(bot.dir, 'routines.md'), '正文', 'routines.md 还是模板里的示例', '修改 routines.md，写明实际任务的时间、动作和结果去向；没有定时任务就删除此文件。')
+    report('routines.md', '正文', 'routines.md 还是模板里的示例', '修改 routines.md，写明实际任务的时间、动作和结果去向；没有定时任务就删除此文件。')
   }
 }

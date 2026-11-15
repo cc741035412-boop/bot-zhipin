@@ -1,9 +1,4 @@
-import { readFileSync } from 'node:fs'
-import Ajv2020 from 'ajv/dist/2020.js'
-import { SCHEMA_PATH } from '../load-bots.mjs'
-
-const schema = JSON.parse(readFileSync(SCHEMA_PATH, 'utf8'))
-const check = new Ajv2020({ allErrors: true, verbose: true, strict: false }).compile(schema)
+import { validate as check, schema } from './generated/bot-schema.mjs'
 const decode = (key) => key.replace(/~1/g, '/').replace(/~0/g, '~')
 const parts = (pointer) => pointer.split('/').slice(1).map(decode)
 const valueAt = (data, pointer) => parts(pointer).reduce((value, key) => value?.[key], data)
@@ -58,6 +53,11 @@ export function validateSchema(bot, report) {
       }
       case 'additionalProperties': {
         const name = error.params.additionalProperty
+        if (name.length > 64) {
+          problem = `不认识的字段 ${where}`
+          fix = `删除字段 ${name}，只使用 schema/bot.schema.json 中定义的字段。`
+          break
+        }
         const legal = Object.keys(error.parentSchema.properties || {})
         const closest = legal.sort((a, b) => distance(name, a) - distance(name, b) || a.localeCompare(b))[0]
         problem = `不认识的字段 ${where}，是不是想写 ${closest}？`

@@ -1,5 +1,7 @@
 import { deleteExpired, validateClick } from './clicks'
 import { ApiError } from './errors'
+import { isSameOrigin, mediaType } from './origin'
+import { deleteExpiredLimits } from './ratelimit'
 import type { ApiContext, Env } from './types'
 
 const MAX_BODY_BYTES = 1024
@@ -29,10 +31,9 @@ export function clientIp(request: Pick<Request, 'headers'>, env: Pick<Env, 'ALLO
 }
 
 export function validateClickHeaders(request: Pick<Request, 'headers' | 'url'>) {
-  const mediaType = request.headers.get('Content-Type')?.split(';', 1)[0].trim().toLowerCase()
-  if (mediaType !== 'application/json') throw new ApiError(415, 'unsupported_media_type')
-  const origin = request.headers.get('Origin')
-  if ((origin !== null && origin !== new URL(request.url).origin)
+  if (mediaType(request) !== 'application/json') throw new ApiError(415, 'unsupported_media_type')
+  // Keep the legacy Fetch Metadata rule; submission POSTs use the stricter assertSameOrigin.
+  if (!isSameOrigin(request)
     || request.headers.get('Sec-Fetch-Site')?.toLowerCase() === 'cross-site') {
     throw new ApiError(403, 'forbidden')
   }
@@ -70,7 +71,10 @@ export async function readClickBody(request: Pick<Request, 'headers' | 'body'>) 
 export function scheduleCleanup(context: Pick<ApiContext, 'env' | 'waitUntil'>, now: number, random = Math.random) {
   if (random() < 0.01) {
     // Best effort: maintenance must not turn a successful click into a failed one.
-    context.waitUntil(deleteExpired(context.env.DB, now).catch(() => {}))
+    context.waitUntil(Promise.all([
+      deleteExpired(context.env.DB, now).catch(() => {}),
+      deleteExpiredLimits(context.env.DB, now).catch(() => {}),
+    ]).then(() => {}))
   }
 }
 
