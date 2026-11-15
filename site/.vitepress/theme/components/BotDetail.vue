@@ -10,6 +10,7 @@ import BotAvatar from './BotAvatar.vue'
 import BotActions from './BotActions.vue'
 import { loadHeat } from '../heat'
 import BotHeat from './BotHeat.vue'
+import BzIcon from './BzIcon.vue'
 import ExternalHint from './ExternalHint.vue'
 import LiveAnnouncer from './LiveAnnouncer.vue'
 import BotScreenshot from './BotScreenshot.vue'
@@ -19,43 +20,47 @@ const props = defineProps({
   designHtml: { type: String, default: '' },
 })
 const palette = computed(() => botPalette(props.bot.avatar ? '#8a8a93' : avatarColor(props.bot.slug)))
+// 来源：外部收录的写进作者那一项（官方市场 / 社区收录）；作者自己投稿的挂「作者投稿」标签。和列表卡同一套规则。
+const origin = computed(() => props.bot.external ? (props.bot.official ? '官方市场' : '社区收录') : '')
 onMounted(() => { if (!preview) loadHeat() })
 </script>
 
 <template>
   <component :is="preview ? 'div' : 'main'" class="shelf-page bot-detail bz-bot-scope" :style="palette" data-testid="bot-detail">
     <LiveAnnouncer v-if="!preview" />
-    <a v-if="!preview" class="back-link" href="/">← 返回货架</a>
+    <a v-if="!preview" class="bz-btn ghost sm back-link" href="/"><BzIcon name="arrow-left" />返回货架</a>
     <header class="detail-header bz-bot-scope" :style="palette">
       <BotAvatar ref="avatar" :bot="bot" />
       <div class="detail-info">
       <component :is="preview ? 'h2' : 'h1'">{{ bot.name }}</component>
-      <p>{{ bot.tagline }}</p>
+      <p class="detail-tagline">{{ bot.tagline }}</p>
       <p class="bot-meta">
-        <span class="bot-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
-        <span v-if="bot.external" class="bot-tag external-tag">{{ bot.official ? '官方市场' : '外部收录' }}</span>
-        <span v-if="preview">by {{ bot.author.name }}</span>
-        <a v-else data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
-        <span>上架日期：<time :datetime="bot.addedAt">{{ bot.addedAt }}</time></span>
+        <span class="bz-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
+        <span v-if="!bot.external" class="bz-tag source-tag">作者投稿</span>
+        <span class="bot-byline">
+          <span v-if="preview">by {{ bot.author.name }}</span>
+          <a v-else data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
+          <span v-if="origin" class="bot-origin">· {{ origin }}</span>
+        </span>
+        <span>上架 <time :datetime="bot.addedAt">{{ bot.addedAt }}</time></span>
         <BotHeat :slug="bot.slug" />
       </p>
       <p v-if="bot.forkedFrom" data-testid="forked-from">改编自 <a :href="`/bots/${bot.forkedFrom}`" :target="preview ? '_blank' : undefined" :rel="preview ? 'noopener noreferrer' : undefined">{{ bot.forkedFromName }}<ExternalHint v-if="preview" /></a></p>
       <BotActions :bot="bot" />
       </div>
     </header>
-    <p v-if="bot.external" class="external-notice">{{ bot.official ? '这个 Bot 来自 xAI 官方 Bot 市场，由原作者发布。本站只收录链接，中文介绍由本站撰写。' : '这个 Bot 由原作者在 x.ai 发布，本站只收录链接。' }}</p>
     <section data-testid="section-prereq">
       <h2>导入前准备</h2>
       <ul><li v-for="(item, index) in bot.prerequisites" :key="index">{{ item }}</li></ul>
     </section>
     <section data-testid="section-quota">
       <h2>额度消耗</h2>
-      <p class="quota-line"><span class="bot-tag quota-tag" :data-quota="bot.quotaCost">{{ bot.quotaCost }}</span>{{ copy.quota[bot.quotaCost] }}</p>
+      <p class="quota-line"><span class="bz-tag quota-tag" :data-quota="bot.quotaCost"><BzIcon name="bolt" :size="12" />{{ bot.quotaCost }}</span>{{ copy.quota[bot.quotaCost] }}</p>
     </section>
     <section data-testid="section-permissions">
       <h2>会用到的权限</h2>
       <ul v-if="bot.permissions.length" class="permission-list">
-        <li v-for="permission in bot.permissions" :key="permission"><span class="bot-tag">{{ permission }}</span><span>{{ copy.permissions[permission] }}</span></li>
+        <li v-for="permission in bot.permissions" :key="permission"><span class="bz-tag">{{ permission }}</span><span>{{ copy.permissions[permission] }}</span></li>
       </ul>
       <p v-else>不需要额外权限</p>
     </section>
@@ -93,5 +98,6 @@ onMounted(() => { if (!preview) loadHeat() })
       <div v-if="designHtml" class="vp-doc design-body" v-html="designHtml" />
       <p v-else>暂无设计说明。</p>
     </section>
+    <p v-if="bot.external" class="external-notice">{{ bot.official ? '这个 Bot 来自 xAI 官方 Bot 市场，由原作者发布。本站只收录链接，中文介绍由本站撰写。' : '这个 Bot 由原作者在 x.ai 发布，本站只收录链接。' }}</p>
   </component>
 </template>

@@ -54,10 +54,10 @@ for (const scheme of ['light', 'dark']) {
     expect(warnings).toEqual([])
   })
 
-  test(`${scheme}：八类标签实际 CSS 对比度 ≥4.5，首页/详情一致、外部标签中性`, async ({ page }) => {
+  test(`${scheme}：八类标签和来源标签实际 CSS 对比度 ≥4.5，首页/详情一致`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme })
     await page.goto('/')
-    const homeColor = await page.locator(`[data-slug="${weekly}"] .category-tag`).evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])
+    const homeColor = await page.locator(`[data-testid="bot-card"][data-slug="${weekly}"] .category-tag`).evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])
     await page.goto(`/bots/${weekly}`)
     expect(await page.locator('.category-tag').evaluate((el) => [getComputedStyle(el).color, getComputedStyle(el).backgroundColor])).toEqual(homeColor)
     await page.goto('/')
@@ -89,14 +89,18 @@ for (const scheme of ['light', 'dark']) {
         clone.remove()
         return result
       })
-      return { categories, external: [...document.querySelectorAll('.external-tag')].map(sample) }
+      return { categories, source: [...document.querySelectorAll('.source-tag')].map(sample) }
     }, CATEGORY_COLORS)
     expect(new Set(colors.categories.map((c) => c.bg.join(','))).size).toBe(8)
-    for (const color of [...colors.categories, ...colors.external]) {
-      expect(color.ratio, `${color.name ?? '外部收录'} ${color.fg} / ${color.bg}`).toBeGreaterThanOrEqual(4.5)
+    for (const color of [...colors.categories, ...colors.source]) {
+      expect(color.ratio, `${color.name ?? '来源标签'} ${color.fg} / ${color.bg}`).toBeGreaterThanOrEqual(4.5)
     }
-    expect(colors.external.length).toBeGreaterThan(0)
-    for (const color of colors.external) expect(Math.max(...color.bg) - Math.min(...color.bg)).toBeLessThan(10)
+    // 来源标签只有「作者投稿」，和分类标签同一种混法；官方市场、社区收录不做标签，写在作者行里。
+    expect(colors.source.length).toBeGreaterThan(0)
+    await expect(page.locator('.bz-tag', { hasText: /官方市场|社区收录/ })).toHaveCount(0)
+    await expect(page.locator('[data-testid="bot-card"][data-slug="demo-external"] .bot-byline')).toContainText('· 社区收录')
+    await expect(page.locator('[data-testid="bot-card"][data-slug="demo-external"] .source-tag')).toHaveCount(0)
+    await expect(page.locator(`[data-testid="bot-card"][data-slug="${weekly}"] .source-tag`)).toHaveText('作者投稿')
   })
 }
 

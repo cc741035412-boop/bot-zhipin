@@ -25,7 +25,8 @@ test('接口失败：最新排序、热度占位、链接与外部收录按钮',
   await page.goto('/')
   await expect(page.getByTestId('sort-new')).toHaveAttribute('aria-pressed', 'true')
   expect(await order(page)).toEqual([weekly, reviewer, external])
-  await expect(card(page, weekly).getByTestId('heat')).toHaveText('热度 —')
+  // 列表卡只在热度大于 0 时显示热度；拿不到热度就不占位。
+  await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
   await expect(page.getByTestId('contribute-link')).toHaveAttribute('href', CONTRIBUTE_URL)
   await expect(card(page, reviewer).getByTestId('author-link')).toHaveAttribute('href', 'https://github.com/example-user')
   await expect(card(page, external).getByTestId('author-link')).toHaveAttribute('href', 'https://x.ai/bot/demo-external-000')
@@ -46,7 +47,7 @@ test('延迟失败不覆盖用户手动排序；HTTP / JSON 失败均可降级',
   release()
   await response
   await expect(page.getByTestId('sort-hot')).toHaveAttribute('aria-pressed', 'true')
-  await expect(card(page, weekly).getByTestId('heat')).toHaveText('热度 —')
+  await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
   await page.unroute('**/api/stats')
   await page.route('**/api/stats', (route) => route.fulfill({ contentType: 'text/html', body: '<h1>没有后端</h1>' }))
   await page.reload()
@@ -64,7 +65,7 @@ test('热度更新不跳位、切换后重排、复制反馈与导入上报', as
   await page.goto('/')
   await expect(card(page, external).getByTestId('heat')).toHaveText('热度 5')
   expect(await order(page)).toEqual([external, reviewer, weekly])
-  await expect(card(page, weekly).getByTestId('heat')).toHaveText('热度 0')
+  await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
   await card(page, weekly).getByTestId('btn-prompt').click()
   await expect(card(page, weekly).getByTestId('btn-prompt')).toHaveText('已复制 ✓')
   expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(installPrompt(weekly))

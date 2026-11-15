@@ -66,7 +66,7 @@ for (const width of [1280, 1100, 1024, 900, 680, 390, 320]) {
     const columns = await page.locator('.bot-grid').evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length)
     expect(columns).toBe(width >= 900 ? 2 : 1)
     const cardBox = await bot.boundingBox()
-    if (width >= 1280) expect(cardBox.width).toBeCloseTo(558, 0)
+    if (width >= 1280) expect(cardBox.width).toBeCloseTo(562, 0)
     if (width < 900) expect(cardBox.width, '单列时卡片撑满内容区').toBeGreaterThanOrEqual(width - 64 - 1)
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
     await page.goto(`/bots/${reviewer}`)
@@ -90,8 +90,8 @@ test('鼠标、Tab、Enter、空格、Esc、失焦、单开和跳动重播', asy
   await expect(a).not.toHaveAttribute('aria-describedby')
   await page.mouse.move(0, 0)
   await expect(opened(page)).toHaveCount(0)
-  // 真正从前一个按钮 Tab 到头像，不只调用 focus()。排序后面还有分类筛选和搜索入口，卡片前的最后一个控件是工具栏搜索框。
-  await page.getByTestId('search-trigger-toolbar').focus()
+  // 真正从前一个按钮 Tab 到头像，不只调用 focus()。工具栏只有排序和分类筛选，卡片前的最后一个控件是最后一枚分类按钮。
+  await page.getByTestId('filter-category').last().focus()
   await page.keyboard.press('Tab')
   await expect(a).toBeFocused()
   await expect(opened(page)).toHaveCount(1)
@@ -134,15 +134,12 @@ test('触摸重说与 4 秒计时、点外部关闭、触摸后键盘仍工作',
     await avatar.tap()
     await page.touchscreen.tap(8, 120)
     await expect(opened(page)).toHaveCount(0)
-    await page.getByTestId('search-trigger-toolbar').focus()
+    await page.getByTestId('filter-category').last().focus()
     await page.keyboard.press('Tab')
     await expect(opened(page)).toHaveCount(1)
     await page.keyboard.press('Enter')
     await expect(opened(page)).toHaveCount(1)
-    // 按钮触摸高度 44；分段控件整条 44，里面每一项的点按范围撑满整条。
-    for (const button of await page.locator('.shelf-button:not(.sort-controls > *), .bz-btn').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(44)
-    expect((await page.locator('.sort-controls').boundingBox()).height).toBeGreaterThanOrEqual(44)
-    expect(await page.getByTestId('sort-hot').evaluate((el) => { const hit = getComputedStyle(el, '::before'); return el.getBoundingClientRect().height - parseFloat(hit.top) - parseFloat(hit.bottom) })).toBeGreaterThanOrEqual(44)
+    for (const button of await page.locator('.shelf-page .bz-btn, .shelf-page .bz-seg, .shelf-page .filter-chip').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(44)
   } finally { await context.close() }
 })
 
@@ -184,7 +181,9 @@ for (const dark of [false, true]) {
     for (const path of ['/', `/bots/${reviewer}`, `/bots/${weekly}`]) {
       await page.goto(path)
       await page.evaluate((dark) => document.documentElement.classList.toggle('dark', dark), dark)
-      await expect(page.getByTestId('heat').first()).not.toContainText('…')
+      // 列表卡只在热度大于 0 时显示热度；详情页始终显示。
+      if (path === '/') await expect(card(page).getByTestId('heat')).toHaveText('热度 3')
+      else await expect(page.getByTestId('heat').first()).not.toContainText('…')
       const ratios = await contrast(page.locator('.shelf-page [data-testid="author-link"], .shelf-page time, .shelf-page [data-testid="heat"]'))
       for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5)
       for (const link of await page.locator('.shelf-page a[target="_blank"]').all()) {
@@ -199,40 +198,47 @@ for (const dark of [false, true]) {
         expect(css.style).toBe('solid')
         expect(css.width).toBeGreaterThanOrEqual(2)
       }
-      // v5：按钮高 36，分段控件高 40。
-      for (const button of await page.locator('.shelf-button:not(.sort-controls > *), .bz-btn').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(36)
-      for (const seg of await page.locator('.sort-controls, .bz-seg').all()) expect((await seg.boundingBox()).height).toBeGreaterThanOrEqual(40)
+      for (const button of await page.locator('.shelf-page .bz-btn').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(32)
+      for (const seg of await page.locator('.shelf-page .bz-seg').all()) expect((await seg.boundingBox()).height).toBeGreaterThanOrEqual(40)
     }
   })
 }
 
 for (const dark of [false, true]) {
-  test(`${dark ? '深' : '浅'}色：v5 token、玻璃和实心按钮、漫画气泡和卡片悬停`, async ({ page }) => {
+  test(`${dark ? '深' : '浅'}色：Raycast 质感 token、中性玻璃按钮、漫画气泡和卡片悬停`, async ({ page }) => {
     await page.goto('/')
     await page.evaluate((dark) => document.documentElement.classList.toggle('dark', dark), dark)
     const ink = dark ? 'rgb(255, 255, 255)' : 'rgb(20, 20, 24)'
     const paper = dark ? 'rgb(12, 13, 15)' : 'rgb(255, 255, 255)'
     const background = dark ? 'rgb(7, 8, 10)' : 'rgb(246, 245, 241)'
-    const surface2 = dark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 20, 24, 0.03)'
-    const edge = dark ? 'rgba(255, 255, 255, 0.14)' : 'rgba(20, 20, 24, 0.16)'
+    const surface = dark ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 20, 24, 0.03)'
     const hairline = dark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(20, 20, 24, 0.08)'
     await expect(page.locator('body')).toHaveCSS('background-color', background)
-    // 「我要投稿」是次级按钮：不在 Bot 范围里，就是中性玻璃。
-    await expect(page.getByTestId('contribute-link')).toHaveCSS('background-color', surface2)
-    await expect(page.getByTestId('contribute-link')).toHaveCSS('border-top-color', edge)
-    await expect(page.getByTestId('contribute-link')).toHaveCSS('border-radius', '8px')
+    // 「我要投稿」挪到页尾，是一枚中性的次级按钮：圆角 8、高 36、墨色字，不是胶囊。
+    const contribute = page.getByTestId('contribute-link')
+    await expect(page.locator('.shelf-intro').getByTestId('contribute-link')).toHaveCount(0)
+    await expect(page.locator('.shelf-footer').getByTestId('contribute-link')).toHaveCount(1)
+    await expect(contribute).toHaveCSS('border-radius', '8px')
+    await expect(contribute).toHaveCSS('color', ink)
+    expect((await contribute.boundingBox()).height).toBe(36)
     await expect(page.getByTestId('search-trigger')).toHaveCSS('background-color', paper)
-    for (const button of await page.locator('.shelf-button.primary').all()) {
-      await expect(button).toHaveCSS('border-radius', '8px')
-    }
+    // 全页只有分段控件是胶囊；按钮、筛选都是圆角 8。
+    for (const control of await page.locator('.shelf-page .bz-btn, .shelf-page .filter-chip').all()) await expect(control).toHaveCSS('border-radius', '8px')
+    // 导入按钮是 Bot 色淡染的玻璃，不是 Bot 色实底：字始终是墨色，白色、灰色的 Bot 也不会像禁用。
     for (const button of [...await page.getByTestId('btn-import').all(), ...await page.getByTestId('featured-import').all()]) {
-      // 实心按钮不再用 Bot 色：深色主题白底深字，浅色主题墨底白字。
-      await expect(button).toHaveCSS('background-color', dark ? 'rgb(255, 255, 255)' : 'rgb(20, 20, 24)')
-      await expect(button).toHaveCSS('color', dark ? 'rgb(11, 11, 13)' : 'rgb(255, 255, 255)')
+      await expect(button).toHaveCSS('color', ink)
+      await expect(button).toHaveText(/^导入/)
+      expect((await button.boundingBox()).height).toBe(32)
+      const alpha = await button.evaluate((el) => {
+        const ctx = document.createElement('canvas').getContext('2d')
+        ctx.fillStyle = getComputedStyle(el).backgroundColor; ctx.fillRect(0, 0, 1, 1)
+        return ctx.getImageData(0, 0, 1, 1).data[3] / 255
+      })
+      expect(alpha, '按钮底是淡染，不是实色').toBeLessThan(.3)
     }
     // 分段控件：玻璃轨道 + 亮一档的选中滑块，选中文字用墨色。
     const selected = await page.getByTestId('sort-hot').evaluate((el) => ({ color: getComputedStyle(el).color, background: getComputedStyle(el.parentElement, '::after').backgroundColor, track: getComputedStyle(el.parentElement).backgroundColor, height: el.parentElement.getBoundingClientRect().height }))
-    expect(selected).toEqual({ color: ink, background: dark ? 'rgba(255, 255, 255, 0.1)' : 'rgb(255, 255, 255)', track: surface2, height: 40 })
+    expect(selected).toEqual({ color: ink, background: dark ? 'rgba(255, 255, 255, 0.1)' : 'rgb(255, 255, 255)', track: surface, height: 40 })
     const bot = card(page)
     await bot.scrollIntoViewIfNeeded()
     await page.mouse.move(4, 4)
@@ -242,12 +248,15 @@ for (const dark of [false, true]) {
     await expect(bot).toHaveCSS('background-image', 'none')
     await expect(bot).toHaveCSS('border-top-color', hairline)
     expect(await bot.evaluate((el) => getComputedStyle(el).boxShadow)).toContain('inset')
+    // 48 的砖、比例圆角 24%，Bot 占砖内框（去掉 1px 细边）的 68%。
     const stage = await bot.locator('.avatar-stage').boundingBox(), avatar = await bot.getByTestId('avatar').boundingBox()
-    expect([stage.width, stage.height]).toEqual([64, 64])
-    // 头像砖：比例圆角 24%，Bot 占砖内框（去掉 1px 细边）的 68%。
-    expect(avatar.width).toBeCloseTo((64 - 2) * .68, 1)
-    expect(avatar.height).toBeCloseTo((64 - 2) * .68, 1)
+    expect([stage.width, stage.height]).toEqual([48, 48])
+    expect(avatar.width / (stage.width - 2)).toBeCloseTo(.68, 2)
+    expect(avatar.height / (stage.height - 2)).toBeCloseTo(.68, 2)
     await expect(bot.locator('.avatar-stage')).toHaveCSS('border-radius', '24%')
+    // 介绍固定两行高，下面不再给气泡留空带：整张卡不超过 190。
+    expect((await bot.locator('.bot-tagline').boundingBox()).height).toBe(48)
+    expect((await bot.boundingBox()).height).toBeLessThanOrEqual(190)
     const glow = () => bot.evaluate((el) => { const css = getComputedStyle(el, '::after'); return { opacity: css.opacity, image: css.backgroundImage, duration: css.transitionDuration } })
     expect(await glow()).toMatchObject({ opacity: '0', duration: '0.15s' })
     expect((await glow()).image).toContain('radial-gradient')
@@ -257,10 +266,12 @@ for (const dark of [false, true]) {
     await expect(bot).not.toHaveCSS('border-top-color', hairline)
     await expect(bot).toHaveCSS('transform', 'none')
     const bubble = bot.getByTestId('pitch-bubble')
+    await expect(bubble).toHaveCSS('position', 'absolute')
     await expect(bubble).toHaveCSS('background-color', paper)
     await expect(bubble).toHaveCSS('border-radius', '12px')
     await expect(bubble).toHaveCSS('border-top-width', '2px')
     await expect(bubble).toHaveCSS('border-top-color', ink)
+    await expect(bubble).toHaveCSS('border-radius', '12px')
     await expect(bubble).toHaveCSS('box-shadow', 'rgb(138, 138, 147) 3px 3px 0px 0px')
     const tip = await bubble.evaluate((el) => {
       const css = getComputedStyle(el, '::after')
@@ -269,14 +280,13 @@ for (const dark of [false, true]) {
     expect(tip).toEqual({ width: '12px', height: '12px', border: '2px', color: ink, background: paper })
     await expect(bot.locator('.avatar-stage')).toHaveCSS('--bz-bot-color', '#8a8a93')
     await bot.getByTestId('btn-import').hover()
-    await expect(bot.getByTestId('btn-import')).toHaveCSS('background-color', dark ? 'rgb(235, 235, 235)' : 'rgb(44, 44, 51)')
-    await expect(bot.getByTestId('btn-import')).toHaveCSS('color', dark ? 'rgb(11, 11, 13)' : 'rgb(255, 255, 255)')
+    await expect(bot.getByTestId('btn-import')).toHaveCSS('color', ink)
   })
 }
 
 test('同一个排序指示块滑动、头像玻璃砖静止不漂移、正热度火苗', async ({ page }) => {
   await page.goto('/')
-  const controls = page.locator('.sort-controls')
+  const controls = page.locator('.bz-seg')
   const indicator = () => controls.evaluate((el) => {
     const css = getComputedStyle(el, '::after')
     return { x: new DOMMatrix(css.transform).m41, width: parseFloat(css.width), duration: css.transitionDuration }
@@ -303,7 +313,8 @@ test('同一个排序指示块滑动、头像玻璃砖静止不漂移、正热�
   // 首屏唯一一直在流动的是 Hero 背后的极光。
   expect(await page.locator('.hero-aurora > i').first().evaluate((el) => { const css = getComputedStyle(el); return [css.animationIterationCount, css.animationDirection] })).toEqual(['infinite', 'alternate'])
   await expect(card(page).getByTestId('heat').locator('svg')).toHaveClass('is-hot')
-  await expect(card(page, weekly).getByTestId('heat').locator('svg')).not.toHaveClass('is-hot')
+  // 没有热度的卡片不显示热度这一项，也不占位。
+  await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
 })
 
 test('复制成功单一播报区、1.8 秒恢复；失败 dialog 全选/焦点/遮罩/Esc', async ({ page }) => {

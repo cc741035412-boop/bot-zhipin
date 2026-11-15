@@ -1,14 +1,18 @@
 <script setup>
-import { inject, ref } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { previewMode, previewUpdate } from '../submit/preview-mode'
 const preview = inject(previewMode, false)
 const update = inject(previewUpdate, ref(false))
 import { heatLabel, heatState } from '../heat'
-defineProps({ slug: { type: String, required: true } })
+import BzIcon from './BzIcon.vue'
+// compact：列表卡用。热度大于 0 才出现，只显示火苗和数字（「热度」两个字留给读屏）；没有热度就不占位。
+const props = defineProps({ slug: { type: String, required: true }, compact: { type: Boolean, default: false } })
+const value = computed(() => heatState.values[props.slug] ?? 0)
 </script>
 <template>
-  <span data-testid="heat" class="bot-heat" :class="{ 'is-loading': !preview && (heatState.status === 'loading' || heatState.status === 'idle') }" :title="!preview && heatState.status === 'failed' ? '热度暂时获取不到' : undefined">
-    <svg :class="{ 'is-hot': !preview && heatState.values[slug] > 0 }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M13 3c1 5-4 5-2 9 2-1 3-2 3-4 3 3 5 5 5 8a7 7 0 0 1-14 0c0-4 4-7 8-13Z" /></svg>
-    {{ preview ? (update ? '热度 —' : '新上架') : heatLabel(slug) }}
+  <span v-if="!compact || preview || value > 0" data-testid="heat" class="bot-heat" :class="{ 'is-loading': !preview && (heatState.status === 'loading' || heatState.status === 'idle') }" :title="!preview && heatState.status === 'failed' ? '热度暂时获取不到' : undefined">
+    <BzIcon name="flame" :class="{ 'is-hot': !preview && value > 0 }" />
+    <template v-if="compact && !preview"><span class="bz-sr-only">热度</span> {{ value }}</template>
+    <template v-else>{{ preview ? (update ? '热度 —' : '新上架') : heatLabel(slug) }}</template>
   </span>
 </template>
