@@ -197,12 +197,20 @@ for (const dark of [false, true]) {
         // 导入按钮是「图标 + 动词」，用图标库里的右上箭头；其余外链沿用文字后面的「↗」。两种都对读屏隐藏。
         await expect(link.locator('.external-icon[aria-hidden="true"], svg[data-icon="arrow-up-right"][aria-hidden="true"]')).toHaveCount(1)
       }
+      // 首屏球池里的 Bot 落下来之前是隐藏的（聚焦不了）：等它们落定再逐个看焦点框
+      if (path === '/') await expect(page.locator('.pit-haze.is-on:not(.is-dim)')).toHaveCount(1, { timeout: 30_000 })
       await page.keyboard.press('Tab')
-      for (const control of await page.locator('.shelf-page a, .shelf-page button').all()) {
-        await control.focus()
-        const css = await control.evaluate((el) => ({ style: getComputedStyle(el).outlineStyle, width: parseFloat(getComputedStyle(el).outlineWidth) }))
-        expect(css.style).toBe('solid')
-        expect(css.width).toBeGreaterThanOrEqual(2)
+      // 聚焦和读样式放在同一次求值里：聚焦球池里的 Bot 会冒出名片（多出一个链接），分两步做会对错元素。
+      const rings = await page.locator('.shelf-page a, .shelf-page button').evaluateAll((els) => els.map((el) => {
+        el.focus()
+        const css = getComputedStyle(el)
+        return { focused: document.activeElement === el, style: css.outlineStyle, width: parseFloat(css.outlineWidth) }
+      }))
+      expect(rings.length).toBeGreaterThan(0)
+      for (const ring of rings) {
+        expect(ring.focused).toBe(true)
+        expect(ring.style).toBe('solid')
+        expect(ring.width).toBeGreaterThanOrEqual(2)
       }
       for (const button of await page.locator('.shelf-page .bz-btn').all()) expect((await button.boundingBox()).height).toBeGreaterThanOrEqual(32)
       for (const seg of await page.locator('.shelf-page .bz-seg').all()) expect((await seg.boundingBox()).height).toBeGreaterThanOrEqual(40)
@@ -222,7 +230,7 @@ for (const dark of [false, true]) {
     await expect(page.locator('body')).toHaveCSS('background-color', background)
     // 「我要投稿」挪到页尾，是一枚中性的次级按钮：圆角 8、高 36、墨色字，不是胶囊。
     const contribute = page.getByTestId('contribute-link')
-    await expect(page.locator('.shelf-intro').getByTestId('contribute-link')).toHaveCount(0)
+    await expect(page.getByTestId('ballpit').getByTestId('contribute-link')).toHaveCount(0)
     await expect(page.locator('.shelf-footer').getByTestId('contribute-link')).toHaveCount(1)
     await expect(contribute).toHaveCSS('border-radius', '8px')
     await expect(contribute).toHaveCSS('color', ink)
@@ -317,8 +325,8 @@ test('同一个排序指示块滑动、头像玻璃砖静止不漂移、正热�
     const css = getComputedStyle(el), glow = getComputedStyle(el, '::before')
     return { animation: css.animationName, image: css.backgroundImage, glowAnimation: glow.animationName, glow: glow.backgroundImage.includes('radial-gradient') }
   })).toEqual({ animation: 'none', image: 'none', glowAnimation: 'none', glow: true })
-  // 首屏唯一一直在流动的是 Hero 背后的极光。
-  expect(await page.locator('.hero-aurora > i').first().evaluate((el) => { const css = getComputedStyle(el); return [css.animationIterationCount, css.animationDirection] })).toEqual(['infinite', 'alternate'])
+  // 首屏的球池里没有一直在流动的装饰：光是静态渐变，Bot 的位置由脚本写 transform，落定后停表。
+  expect(await page.getByTestId('ballpit').locator('*').evaluateAll((els) => els.filter((el) => getComputedStyle(el).animationIterationCount === 'infinite').length)).toBe(0)
   await expect(card(page).getByTestId('heat').locator('svg')).toHaveClass(/is-hot/)
   // 没有热度的卡片不显示热度这一项，也不占位。
   await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)

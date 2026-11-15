@@ -1,61 +1,8 @@
-/* hero.css：首屏（极光、砖墙、站名、搜索框）。首屏不放副标题：砖墙 → 站名 → 搜索框。
-   极光是砖墙背后的三团色光，像舞台背光；到站名那里已经淡没了，文字背后是干净的底色。 */
+/* hero.css：首屏「球池」（站名、搜索框、掉下来的 Bot、地板、名片）和搜索框本身的样子。
+   组件是 components/HeroBallpit.vue；Bot 的位置由脚本只写 transform，这里不放任何一直在动的模糊层。
+   规格见 docs/dev/INTERACTION.md §2.2。首屏不放副标题：站名 → 搜索框。 */
 
-.shelf-home {
-  --bz-hero-tile: 124px; --bz-hero-gap: 20px; --bz-hero-pad: var(--bz-sp-7);
-  --bz-glow-w: 520px; --bz-glow-h: 360px; --bz-glow-blur: 90px;
-}
-
-/* ---------- 极光：独立的装饰层，不是任何文字的祖先 ---------- */
-.hero-aurora {
-  position: absolute; z-index: 0; top: calc(-1 * var(--vp-nav-height)); left: 0; right: 0;
-  /* 从页面顶一直到砖墙下沿再多 96px：遮罩在这个高度的 96% 处淡到 0，正好落在站名基线之上 */
-  height: calc(var(--vp-nav-height) + var(--bz-hero-pad) + 2 * var(--bz-hero-tile) + var(--bz-hero-gap) + 96px);
-  overflow: hidden; pointer-events: none; opacity: var(--bz-aurora-opacity);
-  -webkit-mask-image: radial-gradient(ellipse 58% 62% at 50% 34%, #000 0%, rgba(0, 0, 0, .9) 24%, rgba(0, 0, 0, .68) 44%, rgba(0, 0, 0, .4) 62%, rgba(0, 0, 0, .18) 78%, rgba(0, 0, 0, .05) 91%, transparent 100%);
-  mask-image: radial-gradient(ellipse 58% 62% at 50% 34%, #000 0%, rgba(0, 0, 0, .9) 24%, rgba(0, 0, 0, .68) 44%, rgba(0, 0, 0, .4) 62%, rgba(0, 0, 0, .18) 78%, rgba(0, 0, 0, .05) 91%, transparent 100%);
-}
-/* 三团色光：玫红在左、紫居中偏上、青绿在右；各自慢慢漂，只动 transform，不旋转。左边不用橙：橙在黑底上会发棕。 */
-.hero-aurora > i {
-  position: absolute; left: calc(50% + var(--bz-glow-x)); top: var(--bz-glow-y);
-  width: var(--bz-glow-w); height: var(--bz-glow-h); margin: calc(var(--bz-glow-h) / -2) 0 0 calc(var(--bz-glow-w) / -2);
-  border-radius: 50%; background: var(--bz-glow); filter: blur(var(--bz-glow-blur)); will-change: transform;
-  animation: bz-aurora var(--bz-glow-time) ease-in-out infinite alternate;
-}
-/* 横向位置按 1440 宽时的 28% / 52% / 74% 定；更宽的屏幕不再往外散，光始终在砖墙背后 */
-.hero-aurora > i:nth-child(1) { --bz-glow: #ff3d6e; --bz-glow-x: max(-22vw, -317px); --bz-glow-y: 40%; --bz-glow-time: 18s; --bz-drift-x: 24px; --bz-drift-y: -14px; }
-.hero-aurora > i:nth-child(2) { --bz-glow: #8b5cf6; --bz-glow-x: min(2vw, 29px); --bz-glow-y: 20%; --bz-glow-time: 24s; --bz-drift-x: -18px; --bz-drift-y: 24px; animation-delay: -9s; }
-.hero-aurora > i:nth-child(3) { --bz-glow: #14b8a6; --bz-glow-x: min(24vw, 346px); --bz-glow-y: 42%; --bz-glow-time: 21s; --bz-drift-x: -24px; --bz-drift-y: -16px; animation-delay: -5s; }
-.hero-aurora > i:nth-child(n + 4) { display: none; }
-@keyframes bz-aurora {
-  from { transform: translate3d(calc(-1 * var(--bz-drift-x)), calc(-1 * var(--bz-drift-y)), 0); }
-  to { transform: translate3d(var(--bz-drift-x), var(--bz-drift-y), 0); }
-}
-
-/* ---------- 砖墙 ---------- */
-.shelf-intro { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; padding-top: var(--bz-hero-pad); text-align: center; }
-.hero-portraits {
-  display: grid; grid-template-columns: repeat(10, calc((var(--bz-hero-tile) + var(--bz-hero-gap)) / 2)); row-gap: var(--bz-hero-gap);
-  margin-bottom: var(--bz-sp-6);
-}
-/* 砖的底比别处更实，Bot 和砖都从光里立出来 */
-.hero-portrait {
-  --bz-tile-size: var(--bz-hero-tile); --bz-tile-bg: var(--bz-hero-tile-bg);
-  grid-column: span 2; justify-self: center; box-shadow: var(--bz-hero-tile-highlight);
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-  transition: transform 240ms var(--bz-ease-spring), border-color var(--bz-dur) var(--bz-ease);
-}
-/* 第 6 块起是下排，整体错开半格 */
-.hero-portrait:nth-child(6) { grid-column: 2 / span 2; }
-.hero-bot { display: block; transform-origin: center bottom; }
-.hero-bot svg { display: block; width: 100%; height: 100%; }
-@media (hover: hover) {
-  .hero-portrait:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--bz-bot-color) 50%, var(--bz-hairline)); }
-  .hero-portrait:hover::before { opacity: 1; background: radial-gradient(110% 95% at 50% 100%, color-mix(in srgb, var(--bz-bot-color) 56%, transparent), transparent 74%); }
-}
-
-/* ---------- 站名、搜索框 ---------- */
-.shelf-intro h1 { font-size: var(--bz-fs-display); font-weight: 700; line-height: var(--bz-lh-display); letter-spacing: -.02em; text-wrap: balance; }
+/* ---------- 搜索框（长得像输入框的按钮） ---------- */
 .search-trigger {
   display: inline-flex; align-items: center; gap: var(--bz-sp-3); flex: none; width: 476px; max-width: 100%; height: 51px; padding: 0 var(--bz-sp-3) 0 var(--bz-sp-4);
   border: 1px solid var(--bz-border-strong); border-radius: var(--bz-r-card); background: var(--bz-card); box-shadow: var(--bz-highlight);
@@ -73,21 +20,112 @@
 @media (hover: hover) {
   .search-trigger:hover { border-color: var(--bz-border-hover); color: var(--bz-text-2); }
 }
-.hero-search { margin-top: var(--bz-sp-6); }
 
-@media (max-width: 1099px) {
-  .shelf-home { --bz-hero-tile: 96px; --bz-hero-gap: 16px; --bz-glow-w: 440px; --bz-glow-h: 300px; --bz-glow-blur: 80px; }
+/* ---------- 球池 ---------- */
+.ballpit {
+  --bz-pit-h: clamp(520px, calc(100svh - var(--vp-nav-height) - 124px), 800px);
+  --bz-pit-glow: 46%; --bz-pit-haze: 16%;
+  position: relative; z-index: 2; isolation: isolate; height: var(--bz-pit-h);
+}
+:root:not(.dark) .ballpit { --bz-pit-glow: 30%; --bz-pit-haze: 9%; }
+
+/* 站名和搜索框：浮在半空的两块实体，Bot 会落在它们上面 */
+.pit-copy {
+  position: absolute; z-index: 2; top: calc(var(--bz-pit-h) * .33); left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center; gap: var(--bz-sp-6); text-align: center; pointer-events: none;
+}
+.pit-copy > * { pointer-events: auto; }
+.pit-title { font-family: var(--bz-font-display); font-size: var(--bz-fs-display); font-weight: 700; line-height: var(--bz-lh-display); letter-spacing: -.02em; white-space: nowrap; }
+.pit-probe { display: inline-block; width: 0; height: 0; vertical-align: baseline; }
+
+/* 场景：出血到视口两边；自己不建层叠上下文，每只 Bot 各自和站名、搜索框排前后 */
+.pit-world, .pit-floor { position: absolute; left: calc(50% - 50vw); width: 100vw; pointer-events: none; }
+.pit-world { top: 0; bottom: 0; }
+.pit-body { position: absolute; z-index: 1; top: 0; left: 0; width: 0; height: 0; visibility: hidden; will-change: transform; }
+.pit-body.is-active { z-index: 3; }
+.pit-squash { position: absolute; top: 0; left: 0; width: 0; height: 0; }
+.pit-bot {
+  position: absolute; left: calc(var(--bz-pit-w) / -2); top: calc(var(--bz-pit-ht) / -2); width: var(--bz-pit-w); height: var(--bz-pit-ht);
+  padding: 0; border: 0; border-radius: var(--bz-pit-round); background: none; cursor: grab; pointer-events: auto;
+  touch-action: pan-y; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.pit-bot.is-held { cursor: grabbing; }
+/* 触屏：小个子和扁的（药片）点按范围补到至少 44×44，样子不变 */
+@media (pointer: coarse) {
+  .pit-bot::after {
+    content: ''; position: absolute;
+    inset: min(0px, calc((var(--bz-pit-ht) - 44px) / 2)) min(0px, calc((var(--bz-pit-w) - 44px) / 2));
+  }
+}
+.shelf-page .pit-bot:focus-visible { outline-offset: 3px; }
+.pit-hop { position: absolute; inset: 0; transform-origin: center bottom; pointer-events: none; }
+.pit-hop.is-hop { animation: bz-bounce 560ms var(--bz-ease-pop); }
+.pit-hop > svg { position: absolute; left: var(--bz-pit-sx); top: var(--bz-pit-sy); display: block; width: var(--bz-pit-ss); height: var(--bz-pit-ss); }
+
+/* 地板 */
+.pit-floor { z-index: 0; bottom: 0; height: 0; }
+.pit-floor::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--bz-border-strong) 16%, var(--bz-border-strong) 84%, transparent);
+}
+.pit-glow {
+  position: absolute; left: 0; top: calc(var(--bz-pit-gh) / -2); width: var(--bz-pit-gw); height: var(--bz-pit-gh); border-radius: 50%; opacity: 0;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--bz-bot-color) var(--bz-pit-glow), transparent), transparent); will-change: transform, opacity;
+}
+/* 身后的光晕：一个元素、一张静态背景（落定后由脚本写进两个变量，浅色深色各一份），只做透明度过渡 */
+.pit-haze {
+  position: absolute; left: 0; right: 0; top: -340px; height: 416px; opacity: 0; background-image: var(--bz-pit-haze-light, none); background-repeat: no-repeat;
+  transition: opacity 240ms var(--bz-ease);
+}
+.dark .pit-haze { background-image: var(--bz-pit-haze-dark, none); }
+.pit-haze.is-on { opacity: 1; transition-duration: 700ms; }
+.pit-haze.is-on.is-dim { opacity: .25; transition-duration: 240ms; }
+
+/* 名片：沿用台词气泡的样子（实底、2px 墨色描边、Bot 色硬投影、尖角朝下指着它），里面换成名字和一句话介绍 */
+.pit-card {
+  position: absolute; z-index: 1; left: var(--bz-pit-shift, 0px); bottom: calc(var(--bz-pit-top) + 16px); width: max-content; min-width: 168px; max-width: min(304px, calc(100vw - 32px));
+  border: 2px solid var(--bz-ink); border-radius: var(--bz-r-card); background: var(--bz-card); color: var(--bz-ink);
+  box-shadow: 3px 3px 0 var(--bz-bot-color); text-align: left; pointer-events: auto;
+  transform: translateX(-50%); transform-origin: calc(50% - var(--bz-pit-shift, 0px)) calc(100% + 10px);
+  animation: pit-pop 240ms var(--bz-ease-pop) backwards;
+}
+/* 名片和 Bot 之间那道缝也算名片的地盘：鼠标从 Bot 挪上来的路上不会掉出去 */
+.pit-card::before { content: ''; position: absolute; top: 100%; left: -2px; right: -2px; height: 20px; }
+.pit-card::after {
+  content: ''; position: absolute; left: clamp(14px, calc(50% - var(--bz-pit-shift, 0px) - 6px), calc(100% - 26px)); bottom: -8px; width: 12px; height: 12px;
+  border-right: 2px solid var(--bz-ink); border-bottom: 2px solid var(--bz-ink); background: var(--bz-card); transform: rotate(45deg); pointer-events: none;
+}
+@keyframes pit-pop { from { opacity: 0; transform: translateX(-50%) translateY(5px) scale(.94); } }
+.shelf-page .pit-card-link {
+  position: relative; z-index: 1; display: flex; flex-direction: column; padding: var(--bz-sp-3) 14px; border-radius: calc(var(--bz-r-card) - 2px);
+  color: var(--bz-ink); text-decoration: none;
+}
+.pit-card-name {
+  display: flex; align-items: center; gap: var(--bz-sp-2); font-family: var(--bz-font-display); font-size: var(--bz-fs-h3); font-weight: 700;
+  line-height: var(--bz-lh-h3); letter-spacing: -.01em;
+}
+.pit-card-go { margin-left: auto; color: var(--bz-text-3); transition: color var(--bz-dur) var(--bz-ease), transform var(--bz-dur) var(--bz-ease); }
+.pit-card-link:hover .pit-card-go { color: var(--bz-ink); transform: translateX(2px); }
+.pit-card-alias { font-family: var(--bz-font-text); font-size: var(--bz-fs-xs); font-weight: 600; line-height: var(--bz-lh-xs); color: var(--bz-text-3); }
+.pit-card-does {
+  margin-top: var(--bz-sp-2); font-family: var(--bz-font-text); font-size: var(--bz-fs-btn); line-height: 1.5; color: var(--bz-text-2); text-wrap: balance;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+
+/* 宽屏：舞台收进版心（和导航条同宽 1204），地板线只画在版心里，两端淡出 */
+@media (min-width: 1205px) {
+  .pit-floor::after {
+    left: calc(50% - 602px); right: calc(50% - 602px);
+    background: linear-gradient(90deg, transparent, var(--bz-border-strong) 13%, var(--bz-border-strong) 87%, transparent);
+  }
 }
 @media (max-width: 679px) {
-  .shelf-home {
-    --bz-hero-tile: min(60px, calc((100vw - 72px) / 5)); --bz-hero-gap: 8px; --bz-hero-pad: var(--bz-sp-5);
-    --bz-glow-w: 280px; --bz-glow-h: 200px; --bz-glow-blur: 56px;
-  }
-  .hero-portraits { margin-bottom: var(--bz-sp-5); }
-  .hero-search { width: 100%; margin-top: var(--bz-sp-5); }
   .search-trigger-keys { display: none; }
+  .ballpit { --bz-pit-h: clamp(460px, calc(100svh - var(--vp-nav-height) - 176px), 620px); }
+  .pit-copy { top: calc(var(--bz-pit-h) * .27); gap: var(--bz-sp-5); }
+  .pit-search { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-aurora > i { animation: none !important; }
-  .shelf-page .hero-bot, .shelf-page .hero-portrait { animation: none !important; transform: none !important; }
+  .pit-hop.is-hop, .pit-card { animation: none; }
+  .pit-haze { transition: none; }
 }

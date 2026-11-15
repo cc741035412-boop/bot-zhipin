@@ -72,18 +72,3 @@ export function registerReactions(client: Reactor) {
     for (const event of inputs) document.removeEventListener(event, input, true)
   }
 }
-
-/** 首页父组件挂载后调用；存储不可用时仍只在当前文档播放一次。 */
-let entered = false
-export function enterHero(portraits: Element[]) {
-  if (isReducedMotion() || entered || !portraits.length) return () => {}
-  entered = true
-  try {
-    if (sessionStorage.getItem('bz-hero-entered')) return () => {}
-    sessionStorage.setItem('bz-hero-entered', '1')
-  } catch { /* 隐私模式禁用存储，使用当前文档标记。 */ }
-  const timers = portraits.map((svg, i) => setTimeout(() => {
-    if (!isReducedMotion()) svg.dispatchEvent(new CustomEvent('bz-play', { detail: { state: 'swirl' } }))
-  }, i * 120))
-  return () => timers.forEach(clearTimeout)
-}

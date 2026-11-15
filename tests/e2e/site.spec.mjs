@@ -215,9 +215,10 @@ test('详情、SSR 头像一致性、技能和任务源码链接、外部隐藏�
 test('界面上没有解释性的句子：首屏、区块、页尾、404、搜索占位字', async ({ page }) => {
   await mockStats(page)
   await page.goto('/')
-  // 首屏只有砖墙、站名、搜索框；tagline 只留在 meta description 里。
-  await expect(page.locator('.shelf-intro > *')).toHaveCount(3)
-  await expect(page.locator('.shelf-intro p')).toHaveCount(0)
+  // 首屏的字只有站名和搜索框（其余是球池里的 Bot）；tagline 只留在 meta description 里。
+  await expect(page.locator('.pit-copy > *')).toHaveCount(2)
+  await expect(page.getByTestId('ballpit').locator('h1')).toHaveCount(1)
+  await expect(page.getByTestId('ballpit').locator('p')).toHaveCount(0)
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Grok Bot 模板货架/)
   await expect(page.getByTestId('search-trigger').locator('.search-trigger-text')).toHaveText('搜索')
   // 区块只有标题；列表区右侧保留计数。

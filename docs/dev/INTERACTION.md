@@ -10,13 +10,13 @@
 
 ## 0. 原则
 
-1. **界面是中性的，颜色只来自 Bot**：页面是一家干净、有层次的商店（细边、内高光、玻璃、大留白）。按钮、标签、筛选、边框都是黑白灰；彩色只出现在 Bot 身体、砖底的柔光、悬停时透出来的 Bot 色、按钮的淡染。这样彩色才显眼。首屏是一墙五颜六色、会动的吉祥物和砖墙背后的三团色光。货架保持官方色，不给灰色 Bot 换色（决策 30）。深色是主打。
+1. **界面是中性的，颜色只来自 Bot**：页面是一家干净、有层次的商店（细边、内高光、玻璃、大留白）。按钮、标签、筛选、边框都是黑白灰；彩色只出现在 Bot 身体、砖底的柔光、悬停时透出来的 Bot 色、按钮的淡染。这样彩色才显眼。首屏是一池五颜六色、会动的真 Bot（球池，§2.2）。货架保持官方色，不给灰色 Bot 换色（决策 30）。深色是主打。
    - **每个数都落在阶梯上**：字号、间距、圆角只用 §1 的取值。任意两个相邻元素的间距都要说得出是阶梯上的哪一档。
    - **先让人看懂它干什么**：信息比装饰重要，卡片和详情页宁可多一行有用的字，不留一块没用的空白。
    - 交付前每页过一遍自检四问：缩到 25% 看层级还清楚吗；灰度下主次分得清吗；和 Raycast 截图并排哪边更像成品；颜色是不是一眼够多（来自 Bot，而不是来自按钮）。
-2. **Bot 是活的**：呼吸、眨眼、视线漂移；全卡悬停有反应，首屏砖墙、主推卡也能互动。变形只作短暂彩蛋，常驻反应优先保留自身轮廓。
+2. **Bot 是活的**：呼吸、眨眼、视线漂移；全卡悬停有反应，首屏球池、主推卡也能互动。变形只作短暂彩蛋，常驻反应优先保留自身轮廓。
 3. **真脸**：读取官方公开的颜色和形状名；复用 MIT bloub 或原创轮廓，不复制 x.ai 路径、眼睛坐标或代码。
-4. **文字背后是纯色**：所有装饰光效（极光、砖里的柔光、卡片悬停层、详情页光晕）都放在独立的装饰元素或伪元素里，文字的祖先元素自己不放 `background-image`。名字、介绍、作者、热度、标签、筛选、排序、计数、按钮文字在两个主题下对比度都 ≥ 4.5。
+4. **文字背后是纯色**：所有装饰光效（球池的光晕、砖里的柔光、卡片悬停层、详情页光晕）都放在独立的装饰元素或伪元素里，文字的祖先元素自己不放 `background-image`。名字、介绍、作者、热度、标签、筛选、排序、计数、按钮文字在两个主题下对比度都 ≥ 4.5。
 5. **可用性底线不降**：键盘、触摸、读屏、焦点、对比度、减少动效全部保留；全页只开一个气泡，气泡不压头像和按钮。字体不联网，新增 token 统一 `--bz-`。按钮高 36px（触摸 44px）；触摸目标 ≥ 44px；320–1440 任何宽度不横向滚动。
 6. **界面上不放解释性的句子，功能靠动线和直觉表达**（决策 37）。
    - 不显示：副标题、区块说明、页尾引导语、额度和权限后面的说明句、来源说明、「暂无……」这类空提示、404 的说明句。没有内容的区块整块不渲染。
@@ -53,7 +53,7 @@
 - `--bz-ease-spring: cubic-bezier(.34,1.56,.64,1)`；旧 `--bz-ease-pop` 继续可用。
 - `--bz-font-display: ui-rounded, "SF Pro Rounded", "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", system-ui, sans-serif`：**只用于**站名、各级标题、卡片上的 Bot 名、气泡台词。`--bz-font-text: system-ui, -apple-system, "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", sans-serif`：其余全部（正文、按钮、标签、筛选、元信息）；VitePress 的 `--vp-font-family-base` 也指向它。按钮和标签不再用圆体。不加载网络字体或外部样式。
 - 兼容 /submit：不得删除或改名 `--bz-ink`、`--bz-ink-hover`、`--bz-paper`、`--bz-card`、`--bz-border`、`--bz-text-2`、`--bz-text-3`、`--bz-surface-soft`、`--bz-success`、`--bz-quota-*`、`--bz-radius-card`、`--bz-shadow-hover`、`--bz-font-display`、`--bz-ease-spring`、`--bz-ease-pop`。额度背景仍用同色 12% 混合。
-- 只在 `theme/styles/` 内部使用的派生量（`--bz-card-bg`、`--bz-tile-*`、`--bz-hero-tile-*`、`--bz-nav-*`、`--bz-seg-*`、`--bz-hover-*`、`--bz-aurora-opacity`、`--bz-featured-glow`、`--bz-btn-fill*`、`--bz-btn-edge*`、`--bz-glow-*`、`--bz-hero-*`）不算对外 token，可以随视觉调整。
+- 只在 `theme/styles/` 内部使用的派生量（`--bz-card-bg`、`--bz-tile-*`、`--bz-pit-*`、`--bz-nav-*`、`--bz-seg-*`、`--bz-hover-*`、`--bz-featured-glow`、`--bz-btn-fill*`、`--bz-btn-edge*`）不算对外 token，可以随视觉调整。
 - Grok 调色板：橙 `#ff6a13`、紫 `#8b5cf6`、青绿 `#14b8a6`、琥珀 `#f5a623`、棕 `#9a6a3a`、粉 `#ff2e93`、薄荷绿 `#34d399`、蓝 `#3b82f6`、玫红 `#f43f5e`。
 
 `theme/color.ts` 是纯函数配色层：
@@ -65,11 +65,11 @@
 | `buttonColors(hex)` | fg 从 `#ffffff`、`#141418` 选对比度较高者；仍 < 4.5 时，白字的 bg 每次向黑混 4%，深字的 bg 每次向白混 4%，直到 ≥ 4.5；返回小写 hex `{ bg, fg }` |
 | `botPalette(hex)` | 返回 `--bz-bot-light`、`--bz-bot-dark`、`--bz-btn-bg-light`、`--bz-btn-fg-light`、`--bz-btn-bg-dark`、`--bz-btn-fg-dark`；dark 按 darkSwap 后的颜色计算 |
 
-列表卡 article、主推卡、详情页根节点和头部、每块 Hero 砖、404 页均加 `bz-bot-scope` 并绑定 `botPalette`。CSS 将 `--bz-bot-color` 指向 light 或 dark 组，不用 JS 监听主题；同一个范围里还会把次级按钮的底和边（`--bz-btn-fill`、`--bz-btn-edge` 及悬停值）换成染了这只 Bot 颜色的版本。`--bz-btn-bg`、`--bz-btn-fg`（Bot 色实底按钮）v5 不再使用，变量留着。货架颜色来自 `avatarColor(slug)`，自定义头像用中性灰 `#8a8a93`；Hero 颜色来自 `HERO_MASCOTS`，不读取货架数据。
+列表卡 article、主推卡、详情页根节点和头部、球池里的每只 Bot、404 页均加 `bz-bot-scope` 并绑定 `botPalette`。CSS 将 `--bz-bot-color` 指向 light 或 dark 组，不用 JS 监听主题；同一个范围里还会把次级按钮的底和边（`--bz-btn-fill`、`--bz-btn-edge` 及悬停值）换成染了这只 Bot 颜色的版本。`--bz-btn-bg`、`--bz-btn-fg`（Bot 色实底按钮）v5 不再使用，变量留着。货架颜色来自 `avatarColor(slug)`，自定义头像用中性灰 `#8a8a93`；球池里的 Bot 就是货架上的 Bot，颜色同样来自 `avatarColor(slug)`。
 
 **眼睛**：所有活体用恒定深色眼睛 `--bz-eye`。唯一例外是官方色近乎纯黑的 Bot（`darkSwap` 会换色的那些，L < 0.04）：浅色主题下身体是黑的，黑眼睛看不见，`DefaultAvatar` 给它加 `bz-live-ink` 类，CSS 把 `--bz-eye` 换成奶白 `#f1efe9`；深色主题下身体已换成奶白，眼睛照旧是深色（决策 32）。
 
-分组映射唯一位于 `theme/color.ts` 的 `CATEGORY_MASCOTS`（`CATEGORY_COLORS` 由它派生）：产品橙 `#ff6a13` blob、市场粉 `#ff2e93` sparkle、销售青绿 `#14b8a6` star、内容紫 `#8b5cf6` tablet、运营琥珀 `#f5a623` hex、学习棕 `#9a6a3a` pebble、求职玫红 `#f43f5e` heart、管家蓝 `#3b82f6` cloud、生活薄荷绿 `#34d399` teardrop，每只和招牌砖墙里对应那只同色同形，9 个分组正好用完招牌的 9 只（决策 38）。分组名来自现有 Bot 数据，schema 仍是合法枚举真源；单测验证映射完整覆盖枚举。`categoryStyle(category)` 仅提供 `--bz-category-color`，分组标签和筛选胶囊的小圆点共用；未知分组回退中性灰。分组的**顺序**由 `theme/enums.data.mjs`（构建时 `loadEnums()`）给到浏览器，不在页面代码里另写一份。
+分组映射唯一位于 `theme/color.ts` 的 `CATEGORY_MASCOTS`（`CATEGORY_COLORS` 由它派生）：产品橙 `#ff6a13` blob、市场粉 `#ff2e93` sparkle、销售青绿 `#14b8a6` star、内容紫 `#8b5cf6` tablet、运营琥珀 `#f5a623` hex、学习棕 `#9a6a3a` pebble、求职玫红 `#f43f5e` heart、管家蓝 `#3b82f6` cloud、生活薄荷绿 `#34d399` teardrop，每只和 `meta.mjs` 的 `HERO_MASCOTS` 里对应那只同色同形，9 个分组正好用完这 9 只（决策 38；这 9 只原先站在首屏的砖墙上，首屏换成球池后只出现在组头和标签页图标里）。分组名来自现有 Bot 数据，schema 仍是合法枚举真源；单测验证映射完整覆盖枚举。`categoryStyle(category)` 仅提供 `--bz-category-color`，分组标签和筛选胶囊的小圆点共用；未知分组回退中性灰。分组的**顺序**由 `theme/enums.data.mjs`（构建时 `loadEnums()`）给到浏览器，不在页面代码里另写一份。
 
 ### 1.1 v5 阶梯（写在 `theme/styles/tokens.css` 最前面）
 
@@ -119,7 +119,7 @@
 | `tokens.css` | 全部 token、`.bz-bot-scope` 的 Bot 色、活体头像的身体色和眼睛 |
 | `base.css` | 页面骨架 `.shelf-page`、文字档位工具类、焦点、图标、§1b 的全部基础部件、头像按钮和跳动、气泡 |
 | `nav.css` | 悬浮导航条和手机菜单 |
-| `hero.css` | 极光、砖墙、站名、搜索框 |
+| `hero.css` | 首屏球池（站名、Bot、地板、名片）和搜索框本身 |
 | `home.css` | 首页区块、主推卡、专题、工具栏、分组、筛选条、列表卡、页尾；静止小 Bot（`StaticBot`）的样式 |
 | `detail.css` | Bot 详情页 |
 | `squad.css` | 小队：静态小 Bot、合影、首页的小队区块、小队详情页、流程图（§14） |
@@ -168,9 +168,9 @@
 
 ## 2. 首页布局
 
-内容区最大宽 1140px，左右留白 32px（<680px 时 16px）；`.shelf-page` 自己铺满视口宽，用内边距把内容收进 1140，所以极光这类装饰可以出血到视口边缘而不产生横向滚动（`overflow-x: clip`）。自上而下：悬浮导航条 → 首屏（砖墙、站名、搜索框）→ 「本周主推」→ 「小队」→ 「专题」→ 「全部 Bot」（工具栏 + 按分组分段的列表）→ 页尾的「我要投稿」。区块之间 96px（<680px 64px）。
+内容区最大宽 1140px，左右留白 32px（<680px 时 16px）；`.shelf-page` 自己铺满视口宽，用内边距把内容收进 1140，所以球池这类铺满视口的层可以出血到视口边缘而不产生横向滚动（`overflow-x: clip`）。自上而下：悬浮导航条 → 首屏（球池：站名、搜索框、掉下来的 Bot）→ 「本周主推」→ 「小队」→ 「专题」→ 「全部 Bot」（工具栏 + 按分组分段的列表）→ 页尾的「我要投稿」。区块之间 96px（<680px 64px）。
 
-组件怎么分：`BotShelf.vue` 只管页面骨架和首屏；首屏以下全部在 `HomeSections.vue` 里（主推、`HomeSquads`、`HomeCollections`、工具栏 `ShelfToolbar`、分组 `RoleGroup`、页尾）。排序、分组、地址栏读写是纯函数，在 `theme/shelf.ts`（有单测）。
+组件怎么分：`BotShelf.vue` 只管页面骨架；首屏是 `HeroBallpit.vue`（§2.2）；首屏以下全部在 `HomeSections.vue` 里（主推、`HomeSquads`、`HomeCollections`、工具栏 `ShelfToolbar`、分组 `RoleGroup`、页尾）。排序、分组、地址栏读写是纯函数，在 `theme/shelf.ts`（有单测）。
 
 ### 2.1 悬浮玻璃导航条
 
@@ -183,21 +183,51 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 - <768px：右侧收成汉堡；点开后菜单是导航条下面的一块圆角面板（距条 8px、左右 16px、圆角 16px、`--bz-card` 实底、细边、浮层投影），不再铺满全屏。
 - 站内没有文档页，滚动后才出现的 `.VPLocalNav`（「回到顶部」条）全站隐藏。
 
-### 2.2 Hero（`.shelf-intro`）
+### 2.2 首屏：球池（`HeroBallpit.vue`，`<header class="ballpit" data-testid="ballpit">`）
 
-- **极光**（`.hero-aurora`，`aria-hidden`，`.shelf-page` 的第一个子元素，不是文字的祖先）：砖墙背后的三团色光，像舞台背光。不再有斜向光带，不旋转。
-  - 橙 `#ff6a13` 在左（中心 28% / 40%），紫 `#8b5cf6` 居中偏上（52% / 20%），青绿 `#14b8a6` 在右（74% / 42%）。每团是 520×360 的椭圆，`blur(90px)`（680–1099px 是 440×300 / 80px，<680px 是 280×200 / 56px）。横向位置按视口宽的百分比算，到 1440 宽为止；再宽就不往外散，光始终在砖墙背后。
-  - 这一层从页面顶铺到「砖墙下沿 + 96px」；用椭圆遮罩 `ellipse 58% 62% at 50% 34%` 向四周淡出，**到站名基线以上已经淡到 0**，文字背后是干净的底色。整层不透明度深色 0.5、浅色 0.3。
-  - 每团各自缓慢漂移（±24px 以内，18 / 24 / 21 秒单程、`ease-in-out infinite alternate`，也就是 36–48 秒一个来回，只动 `transform`）。`prefers-reduced-motion: reduce` 时静止。
-- **砖墙**（`.hero-portraits`，`aria-hidden="true"`，内含 9 个 `.hero-portrait`）：固定使用 `meta.mjs` 的 `HERO_MASCOTS`，与货架数量、排序、自定义头像无关。
-  - 9 只：上排 5 只（琥珀 hex、青绿 star、**橙 blob（正中）**、粉 sparkle、蓝 cloud），下排 4 只（玫红 heart、紫 tablet、薄荷绿 teardrop、棕 pebble），下排相对上排错开半格。上下左右和斜向相邻的砖不同色系；单测检查。
-  - 所有宽度都显示 9 只，SSR 也是 9 只。砖：≥1100px **124×124**、间距 20；680–1099px 96×96、间距 16；<680px `min(60px, (100vw − 72px) / 5)`、间距 8（320 宽时 5 块一排刚好放下）。圆角一律是砖边长的 24%。
-  - 每块砖是 `.bz-tile`：比别处更实的底（深色 `rgba(18,19,22,.72)`、浅色 `rgba(255,255,255,.78)`）+ `--bz-hairline` 细边 + 一道更亮的内高光，底部一团该 Bot 颜色的柔光（`::before`）；Bot 占砖的 68%。Bot 和砖都从光里立出来；墙的两端不再用遮罩压暗，9 只一样亮。
-  - 互动：悬停该砖 → 砖上浮 2px、柔光变亮、细边染上 Bot 色，Bot 跳一下并 `wide`；点击 = 戳；首次进站依次 `swirl` 入场（§5）。跳动加在砖里面那层 `.hero-bot` 上，和砖的上浮互不覆盖。
-- **标题**：`h1`（站名）圆体 `--bz-fs-display`（`clamp(44px, 5.6vw, 72px)`）/ 700，行高 1.05，字距 −0.02em；视口 1440 时 72px，390 时 44px。砖墙到标题 32px（<680px 24px）。
-- **没有副标题**。首屏只有三样：砖墙 → 站名 → 搜索框。站点 tagline（`meta.mjs` 的 `SITE.tagline`）只给页面的 `meta description` 用，界面上不显示。
-- **搜索框**（`SearchTrigger`，`<button data-testid="search-trigger">`）：≥680px **476×51、圆角 12**（窄屏撑满）；`--bz-card` 底、1px `--bz-border-strong`、内高光；到站名 32px（<680px 24px）。左边 16px 的放大镜（`BzIcon`）+ 占位字「搜索」（15px，`--bz-text-3`；`meta.mjs` 的 `SHELF_COPY.searchPlaceholder`，搜索面板的输入框用同一个），右边两个键帽「⌘」「K」（24px 高、圆角 8、12px/600；非苹果设备挂载后显示「Ctrl」；<680px 不显示键帽）。读屏名称是「搜索 Bot」。悬停只把描边加深到 `--bz-border-hover`。点击派发 `window.dispatchEvent(new CustomEvent('bz-search-open'))`，由 `SearchPalette` 打开；关闭后焦点回到这个按钮。
+货架上的真 Bot 从导航条后面掉下来，堆在地板上，有三只坐在站名和搜索框上。站名的每个字和搜索框都是场景里的实体（碰撞体），不是贴在上面的字。为什么换、为什么收进版心见决策 41。样式在 `styles/hero.css`，物理在 `theme/ballpit-physics.ts`。
+
+**版式**
+
+- **高度**：`clamp(520px, 100svh − 导航让位 − 124px, 800px)`；<680px 是 `clamp(460px, 100svh − 导航让位 − 176px, 620px)`。地板是这块的底边。1440×900 时「本周主推」的标题在首屏底部露头。
+- **站名和搜索框**（`.pit-copy`）：水平居中，顶边在首屏高度的 33% 处（<680px 27%），上方留出让 Bot 落下来的空间。`h1`（站名）圆体 `--bz-fs-display`（`clamp(44px, 5.6vw, 72px)`）/ 700，行高 1.05，字距 −0.02em；视口 1440 时 72px，390 时 44px。站名到搜索框 32px（<680px 24px）。
+- **没有副标题**。首屏的字只有站名和搜索框。站点 tagline（`meta.mjs` 的 `SITE.tagline`）只给页面的 `meta description` 用，界面上不显示。
+- **搜索框**（`SearchTrigger`，`<button data-testid="search-trigger">`）：≥680px **476×51、圆角 12**（窄屏撑满）；`--bz-card` 底、1px `--bz-border-strong`、内高光。左边 16px 的放大镜（`BzIcon`）+ 占位字「搜索」（15px，`--bz-text-3`；`meta.mjs` 的 `SHELF_COPY.searchPlaceholder`，搜索面板的输入框用同一个），右边两个键帽「⌘」「K」（24px 高、圆角 8、12px/600；非苹果设备挂载后显示「Ctrl」；<680px 不显示键帽）。读屏名称是「搜索 Bot」。悬停只把描边加深到 `--bz-border-hover`。点击派发 `window.dispatchEvent(new CustomEvent('bz-search-open'))`，由 `SearchPalette` 打开；关闭后焦点回到这个按钮。
 - 首屏不放投稿按钮（和导航重复）；`[data-testid="contribute-link"]` 在页尾（§2.5 末尾）。
+- **舞台宽度**：视口宽于 1204px 时舞台**收进版心**——两面墙在版心两边（各离中线 602px，和悬浮导航条同宽），地板线只画在版心里、两端淡出，Bot 往中间收一点，堆成中间高两头矮的小丘。视口不宽于 1204px 时墙在视口外 28px（两边的 Bot 被屏幕边切掉一截），地板线横贯视口。场景层（`.pit-world`、`.pit-floor`）本身铺满视口宽，靠 `.shelf-page` 的 `overflow-x: clip` 不产生横向滚动。
+
+**谁上场**
+
+- 货架上没有自定义头像的 Bot，官方颜色和形状（`DefaultAvatar`）。挑选是确定性的：按颜色分组，色相隔着取（相邻不撞色），同色里优先还没用过的形状，灰黑的每 10 只最多插一只。
+- 数量看舞台宽：地板上 `round(1.5 × 舞台宽 / 平均直径)` 只，限 6–30（手机是 `2 ×`，限 6–15），另加 3 只坐席。1440 宽 24 只，390 宽 18 只。货架不足 7 只时不设坐席，有几只掉几只；0 只时只剩站名和搜索框。
+- 直径：桌面 56–120px 十二档循环（舞台窄于 1100px ×0.86，宽于 1680px ×1.15），手机 44–84px；坐席 54–76px（手机 40–52px）。
+- **坐席**：站名最后一个字上、搜索框左肩、搜索框右端各一只；肩膀太窄坐不下（很窄的手机）就改成落地。
+- **服务端只输出站名和搜索框**；Bot 在挂载、量完场景以后才渲染（没有脚本时就是站名和搜索框）。
+
+**物理和渲染**
+
+- `theme/ballpit-physics.ts`：不碰 DOM、没有第三方库。不旋转的圆角盒刚体（按每个形状的真实轮廓拟合：药片是扁的，水滴是竖的），固定步长 1/120 秒，重力 2300px/s²，顺序冲量加分离式位置修正；重心落在支撑范围外会滑下去（不旋转的刚体靠它装作会翻）。
+- 静态碰撞体：站名的每个字（canvas 量墨迹框）、站名和搜索框之间补的一块实心、搜索框。落地的 Bot 掉落时从站名和搜索框**后面**穿过，落到它们下面才恢复碰撞；站名和搜索框始终在 Bot 的上层，搜索框一直点得到。
+- 大的先掉、小的后掉，约 2 秒落定。种子固定（墙在版心两边用 42，否则用 7），同一宽度下每次落成同一堆。
+- 位置只写 `transform: translate3d`，由脚本直接写，不走 Vue 响应式；挤压和歪头写在里面一层。每只脚下一团自己颜色的光（`.pit-glow`，静态径向渐变，只动 transform 和 opacity）。全部落定后在身后画一张静态的光晕（`.pit-haze`，一个元素、一张背景，700ms 淡入；被搅动时先暗到 25%）。没有 `filter: blur`，没有一直在动的装饰。
+- **停表**：全部落定（动能低于阈值持续 0.45 秒）就停 rAF；首屏滚出视口（IntersectionObserver）或标签页隐藏时也停，模拟停在原地，回来接着走。落定以后每 5–10 秒有一只身上没压着别人的自己蹦一下（约 0.8 秒），其余时间不跑。
+- **回到首页不重演**：同一份文档里掉落只演一次（标记记在 `window.__bzBallpitPlayed` 上；不能用模块变量，因为 VitePress 首次进站和站内跳转回来用的是页面代码的两份副本）。之后再回到首页（从详情页后退、点站名回来），把同一场模拟同步快进到落定，直接摆好。窗口宽度跨档（数量或大小变了）时也是直接摆好；同档内只重量墙和碰撞体。
+
+**互动**
+
+| 触发 | 反应 |
+|---|---|
+| 鼠标停在 Bot 上 | 睁大眼（`wide`）+ 跳一下；停满 240ms 冒出名片（已经开着一张时换下一张只要 140ms）。移开 220ms 后收起；鼠标挪到名片上不收 |
+| 点一下 | 戳：随机变个身、向上弹一下（不说话），名片立刻出来。和货架上同一个 Bot 共用戳历史 |
+| 按住拖动 | 移动超过 5px 算抓：跟手、能挤开别的；松手带着速度飞出去（限速 2600px/s），这次松手不算点击 |
+| 鼠标快速扫过（≥650px/s） | 给碰到的 Bot 一个冲量 |
+| 触屏 | `touch-action: pan-y`：在 Bot 身上竖着划照常滚页面；点一下 = 戳 + 名片；横着拖才算抓。点别处收起名片 |
+| 键盘 | 整个球池只占一个 Tab 停靠点（roving tabindex）。←/→ 按屏幕上的左右顺序换一只；走到哪只，哪只出名片并播报「名字：一句话介绍」（`announce()`）；Enter / 空格同样出名片；Esc 收起；再按 Tab 到名片链接 |
+| 减少动效 | 不演掉落、不能拖、不自己蹦，没有跳动和名片的弹出动画；同一场模拟快进到落定直接显示。悬停、点击、键盘出名片照常 |
+
+**名片**（`[data-testid="pit-card"]`）：沿用台词气泡的样子（`--bz-card` 实底、2px `--bz-ink` 描边、Bot 色硬投影 `3px 3px 0`、圆角 12、12px 的尖角朝下指着它），出现在 Bot 头顶 16px 处。里面三行：名字（h3 档 20px/700 圆体，右边一个 `chevron-right`）、原名（只有写了中文叫法 `nameZh` 的才有，12px/600 `--bz-text-3`）、一句话介绍（14px/1.5 `--bz-text-2`，最多两行、均衡断行）。称呼的规矩是「有中文叫法以它为主，原名跟在下面」。**整张名片是进详情页的链接。** 宽度收到刚好包住最长的一行，最小 168px、最大 304px（且不超过视口宽 − 32px）；靠近屏幕边时名片往里收，尖角仍指着 Bot。全页只开一张，和列表卡的台词气泡互斥（共用 `pitch.ts` 的 `activePitch`）。
+
+**可用性**：每只 Bot 是一个 `button`（`[data-testid="pit-bot"]`，外层 `.pit-body` 带 `data-slug`），`aria-label` 是全称（「中文叫法（原名）」或原名），`aria-expanded` 表示名片开没开；焦点框沿用全站样式（偏移 3px）。地板和光是 `aria-hidden`。
 
 ### 2.3 本周主推
 
@@ -245,7 +275,7 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 列表区 `.shelf-list` 有三种状态：
 
 1. **按分组分段**（默认：选「全部」、没有专题筛选）。每个有 Bot 的分组一段 `section[data-testid="role-group"]`（`RoleGroup.vue`，带 `data-role`、`data-folded`），顺序跟 schema 枚举走，段与段之间 64（<680px 48）。
-   - **组头** `.role-head`：一块 40px 的头像砖（`.role-tile.bz-tile.s40`，砖底是分组色的柔光）里一只**活的**分组吉祥物（约 27px，和首屏砖墙里对应那只同色同形，`aria-hidden`）+ 分组名（`h3`，h3 档 20px/600 圆体）+ 右侧「N 个」（`.bz-count`）。**不显示分组说明**（`meta.mjs` 的 `CATEGORY_COPY` 那句只放在分组名和分组切换各项的 `title` 悬停提示里）。吉祥物和首屏砖墙一样能玩：悬停睁大眼（`wide`）跳一下，点它是戳；砖本身不位移。到卡片 16。
+   - **组头** `.role-head`：一块 40px 的头像砖（`.role-tile.bz-tile.s40`，砖底是分组色的柔光）里一只**活的**分组吉祥物（约 27px，颜色和形状见 `theme/color.ts` 的 `CATEGORY_MASCOTS`，`aria-hidden`）+ 分组名（`h3`，h3 档 20px/600 圆体）+ 右侧「N 个」（`.bz-count`）。**不显示分组说明**（`meta.mjs` 的 `CATEGORY_COPY` 那句只放在分组名和分组切换各项的 `title` 悬停提示里）。吉祥物能玩：悬停睁大眼（`wide`）跳一下，点它是戳；砖本身不位移。到卡片 16。
    - **卡片**：`.bot-grid` 两列（<900px 单列）、间距 16。分组显示时卡片**不带分组标签**。
    - **先露两行**：两列时先露 4 张，单列时先露 2 张；其余收在下面的按钮 `[data-testid="group-more"]`「展开 N 个」里（`.bz-btn.ghost.sm`，`chevron-down` 图标，`aria-expanded`、`aria-controls` 指向这一组的网格）。按钮居中，左右各一条细线，像一道折痕。展开后文字变「收起」、箭头转 180°，新露出来的卡片 240ms 淡入。**只比两行多出不到一行的小组不折**（两列时 ≤6 个、单列时 ≤3 个）：直接全露，没有按钮。
    - **收起时页面不乱跳**：按钮留在原地（上面收走多少，页面就回滚多少）；要是这样组头会被顶出屏幕，就退到组头。
@@ -272,7 +302,7 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 
 ### 3.1 玻璃砖（`.bz-tile`）
 
-首屏砖墙、主推卡、详情舞台、404 共用，规格见 §1b「头像砖」：比例圆角 24%、`--bz-surface-2` 底（首屏更实）+ `--bz-hairline` 细边 + 内高光，不带投影；`::before` 在砖底画一团 Bot 色的径向柔光（浅色 30%、深色 42% 混透明），所在卡片悬停时变亮。Bot 占砖的 68%。砖是静止的，没有漂移动画；砖里只放 Bot，不放文字。
+主推卡、分组组头、详情舞台、404 共用，规格见 §1b「头像砖」：比例圆角 24%、`--bz-surface-2` 底 + `--bz-hairline` 细边 + 内高光，不带投影；`::before` 在砖底画一团 Bot 色的径向柔光（浅色 30%、深色 42% 混透明），所在卡片悬停时变亮。Bot 占砖的 68%。砖是静止的，没有漂移动画；砖里只放 Bot，不放文字。
 
 **列表卡不用方砖**：像 Grok Bot 的列表那样，Bot 直接放大、身体填满头像框。`.avatar-stage` 在列表卡里只是一个 52×52 的格子（没有边、没有底、没有内高光、没有柔光），里面的头像按钮是 44×44。
 
@@ -350,7 +380,7 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 | `data-shape` / shapeId | 原样输出形状 id |
 | `data-part="body"` | 身体垫底 path，带 d，填 `var(--bz-eye, #16161b)`；眼睛是深色（唯一例外：官方色近乎纯黑的 Bot 在浅色主题下换成奶白，见 §1） |
 | `data-part="fill"` | mask 内身体填色 rect；DefaultAvatar 传入 `var(--bz-bot-body)` |
-| rest | 基础状态，默认 idle；卡片/主推/Hero 悬停 wide、空货架 sleep、404 thinking |
+| rest | 基础状态，默认 idle；卡片/主推/球池悬停 wide、空货架 sleep、404 thinking |
 | `data-part="eye"` | mask 内两眼 path；transform 直接用引擎 matrix(...)，opacity 用 alpha |
 | `data-part="dot|arc|notif"` | 粒子 / 圆环 / 通知点 |
 | radii / color | number[] 或 null（圆）；color 接受 CSS 变量，身体用 style fill，不用 fill 属性 |
@@ -367,18 +397,18 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 | 离开卡片 | 立即关闭气泡（120ms 淡出）、介绍回来，基础状态改 idle；进行中的戳/按钮临时动作不被打断 |
 | 鼠标进入主推卡 | wide + 左上柔光变亮；不跳、不出气泡 |
 | Tab 到头像 / Enter / 空格 / Esc / 失焦 | Tab 说一句；Enter/空格换一句并重新跳；Esc 关闭；失焦关闭 |
-| 点击或点按头像（「戳」） | 从 wink, burst, orbit, play, comet, egg, hexagon, thinking 随机选一个，不与上次重复；按引擎 duration 播完回 rest，换戳台词且不连续重复；滚动 3 秒内第 5 次触发 alert，说「别戳啦！」并清零计数。卡片/精选/详情按 slug 共享历史；Hero 使用独立的 `mascot:<key>` 历史，不污染货架 |
+| 点击或点按头像（「戳」） | 从 wink, burst, orbit, play, comet, egg, hexagon, thinking 随机选一个，不与上次重复；按引擎 duration 播完回 rest，换戳台词且不连续重复；滚动 3 秒内第 5 次触发 alert，说「别戳啦！」并清零计数。卡片/精选/详情按 slug 共享历史；球池里的 Bot 和货架上同一个 slug 共用历史；组头的分组吉祥物使用独立的 `mascot:<分组名>` 历史，不污染货架 |
 | 点卡片上头像、作者、按钮以外的任何地方（列表卡、主推卡） | 进这个 Bot 的详情页（整卡可点，§3.2） |
 | 点「导入」（列表、主推）或「一键导入」（详情） | 该卡 Bot 播 comet（「嗖」一下），新标签打开模板页 |
 | 复制成功 | wink |
 | 30 秒没有任何输入（减少动效时不触发） | data-running=true 的 Bot 依次进入 sleep，整波次错开 0–800ms；一个全局超时器管理整波 |
 | 睡着后有任何输入 | 取消待睡队列，所有 sleep Bot 立即 exclaim，按 2 秒 duration 回 rest |
-| 第一次进站（每个会话一次） | Hero 的 9 只 Bot 按上排、下排的顺序依次 swirl 入场，间隔 120ms |
-| Hero 里的 Bot | 悬停：砖上浮 2px、柔光变亮，Bot 跳一下 + wide；点击 = 戳；仍然 aria-hidden |
+| 进首页（每份文档一次） | 球池里的 Bot 从上面掉下来，约 2 秒落定；之后再回到首页直接摆好（§2.2） |
+| 球池里的 Bot | 悬停：wide + 跳一下，停住冒出名片；点击 = 戳 + 名片；能抓起来扔；键盘可达。详见 §2.2 |
 | 点首屏搜索框、按 ⌘K / Ctrl+K、「/」 | 打开搜索命令面板（`SearchPalette`）；关闭后焦点回到原处 |
 | 点分组切换里的某一项 | 列表只留这一组并全部展开，计数跟着变，列表淡入 200ms，地址栏写上 `?role=`；主推、专题不变（§2.5） |
 | 点专题卡 | 按这个专题筛选，滚到「全部 Bot」，焦点到它的标题，地址栏写上 `?c=`（§2.3b） |
-| 组头里的分组吉祥物 | 和 Hero 的一样：悬停跳一下 + wide，点击 = 戳（历史记在 `mascot:<分组名>` 下）；仍然 aria-hidden |
+| 组头里的分组吉祥物 | 悬停跳一下 + wide，点击 = 戳（历史记在 `mascot:<分组名>` 下）；仍然 aria-hidden |
 | 空货架 / 筛选无结果 | 一只睡着的 Bot（96px），rest=sleep，无灰度滤镜 |
 | 404 页 | not-found Layout 插槽；120px 头像砖里的 Bot 先 exclaim、再常驻 rest=thinking；「这一页走丢了」+ href=/「回货架看看」，没有说明句（版式见 §10） |
 | 触摸 | 点按 = 戳 + 气泡显示 4 秒；点别处关闭；不跟随视线 |
@@ -387,7 +417,7 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 
 `live/reactions.ts` 仅挂一组 capture/passive 全局输入监听：pointermove、pointerdown、keydown、wheel、scroll、touchstart。URL 的 `?bz-idle=<毫秒>` 仅在客户端首次注册时读取一次，只接受 200–600000 的整数；默认代码值 `30_000`。若演示短阈值遇到未播完的戳/惊醒/入场，整波睡眠每秒检查一次、等临时动作完成后再睡，避免打断反馈；不增加每只 Bot 的计时循环。最后一个 Bot 卸载清理监听和计时器。
 
-Hero 首次首页挂载在 sessionStorage 记 `bz-hero-entered`；仅会动的头像依次入场，间隔 120ms；存储不可用则退化为当前文档一次。卸载取消待入场计时器，减少动效不记标记、不播放。悬停在 `.hero-portrait` 上跳一次（动画加在里面的 `.hero-bot` 上），离开释放 wide；戳不弹气泡、不进入 Tab 顺序。
+球池的掉落每份文档只演一次（标记在 `window` 上，不写 sessionStorage，整页刷新会再演），减少动效不演；戳球池里的 Bot 不弹台词气泡，只出名片。
 
 气泡打字消费共享时钟，完成、关闭或失去全页唯一所有权时注销；减少动效时立即显示全文（包括中途切换）。卡片/详情以 provide/inject 把动作按钮接到自身头像，复制失败不 wink。
 
@@ -531,7 +561,7 @@ DOM 顺序：「返回货架」→ `.detail-layout`（头部 `header.detail-head
 
 ## 11. 减少动效与深色模式
 
-`prefers-reduced-motion: reduce` 下保持 SSR 静态帧；无 rAF、跟随、变身、睡醒、入场、跳动、砖上浮、列表淡入、展开时的卡片淡入、展开箭头的旋转过渡、点专题后的平滑滚动（直接到位）、极光流动、排序滑块过渡，页面上没有任何在跑的 CSS 动画；气泡仍能开关，去位移缩放，只保留 120ms 透明度淡入淡出（覆盖 VitePress 全局 0s 规则）。
+`prefers-reduced-motion: reduce` 下保持 SSR 静态帧；无 rAF、跟随、变身、睡醒、入场、跳动、砖上浮、列表淡入、展开时的卡片淡入、展开箭头的旋转过渡、点专题后的平滑滚动（直接到位）、球池的掉落和拖动（直接摆在落定的位置）、排序滑块过渡，页面上没有任何在跑的 CSS 动画；气泡仍能开关，去位移缩放，只保留 120ms 透明度淡入淡出（覆盖 VitePress 全局 0s 规则）。
 
 主题跟随系统，也可以用导航条上的开关切换；按 §1 token 切换，Bot 颜色、按钮色与柔光按 darkSwap 规则适配。浅深主题都验对比度，切换不用 JS 监听。
 

@@ -79,15 +79,11 @@ describe('发呆与入场（浏览器接口全 mock）', () => {
     vi.advanceTimersByTime(400)
     expect(a.state()).toBe('exclaim')
   })
-  it('减少动效不睡、不入场；队列最后卸载清理且 URL 只读一次', () => {
+  it('减少动效不睡；队列最后卸载清理且 URL 只读一次', () => {
     reduced = true
     const a = bot()
     vi.advanceTimersByTime(2000)
     expect(a.play).not.toHaveBeenCalled()
-    const svg = new EventTarget(), play = vi.fn()
-    svg.addEventListener('bz-play', play)
-    disposers.push(reactions.enterHero([svg]))
-    expect(play).not.toHaveBeenCalled()
     disposers.splice(0).forEach((release) => release())
     reduced = false
     window.location.search = '?bz-idle=200'
@@ -96,20 +92,5 @@ describe('发呆与入场（浏览器接口全 mock）', () => {
     expect(b.play).not.toHaveBeenCalled()
     vi.advanceTimersByTime(1)
     expect(b.state()).toBe('sleep')
-  })
-  it('Hero 间隔 120ms，一会话一次，卸载清理剩余入场', () => {
-    const portraits = [new EventTarget(), new EventTarget(), new EventTarget()]
-    const play = vi.fn()
-    portraits.forEach((el) => el.addEventListener('bz-play', play))
-    const release = reactions.enterHero(portraits)
-    vi.advanceTimersByTime(0)
-    expect(play).toHaveBeenCalledTimes(1)
-    vi.advanceTimersByTime(120)
-    expect(play).toHaveBeenCalledTimes(2)
-    expect(play.mock.lastCall[0].detail.state).toBe('swirl')
-    release()
-    reactions.enterHero(portraits)()
-    vi.advanceTimersByTime(1000)
-    expect(play).toHaveBeenCalledTimes(2)
   })
 })

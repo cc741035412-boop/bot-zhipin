@@ -9,8 +9,8 @@ export const SITE = {
   branch: 'main',
 }
 
-// 品牌招牌独立于货架与排序：前 5 只站上排（橙色居中），后 4 只站下排并错开半格。
-// 上下左右和斜向相邻的砖都不同色系（暖橙 / 粉红 / 蓝紫 / 绿）。
+// 九只吉祥物：每个分组配一只（theme/color.ts 的 CATEGORY_MASCOTS，单测保证一一对应），标签页图标的颜色也从这里取。
+// 它们原先站在首屏的砖墙上；首屏换成球池（货架上的真 Bot）以后不再出现在首屏。顺序别动：单测按这个顺序检查相邻不撞色。
 export const HERO_MASCOTS = [
   { key: 'amber', shape: 'hex', color: '#f5a623' },
   { key: 'teal', shape: 'star', color: '#14b8a6' },

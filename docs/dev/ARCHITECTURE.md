@@ -35,8 +35,8 @@
 | `site/.vitepress/theme/styles/` | 全站视觉，按区域分七个文件：`tokens.css`（token）、`base.css`（基础部件：按钮、标签、头像砖、区块标题、分段控件、气泡、焦点）、`nav.css`（导航条）、`hero.css`（首屏）、`home.css`（首页区块和卡片）、`detail.css`（详情页）、`misc.css`（404、空状态、弹窗）；`theme/index.ts` 按这个顺序引入。规格见 `INTERACTION.md` §1、§1b | 维护者 |
 | `site/.vitepress/theme/icons.ts` + `components/BzIcon.vue` | 全站唯一一套线性图标：路径数据 + 渲染组件 | 维护者 |
 | `site/.vitepress/theme/enums.data.mjs` | 构建时用 `loadEnums()` 读 schema，把分组枚举（含顺序）给到浏览器；首页分组筛选用 | 维护者 |
-| `site/.vitepress/theme/components/BotShelf.vue` | 首页：极光、砖墙、标题、搜索入口、精选、排序 + 分组筛选、列表、空状态 | 维护者 |
-| `site/.vitepress/theme/components/HeroPortrait.vue` | 砖墙里的一块玻璃砖 + 一只吉祥物（数据在 `meta.mjs` 的 `HERO_MASCOTS`） | 维护者 |
+| `site/.vitepress/theme/components/BotShelf.vue` | 首页骨架：读屏播报区、首屏（`HeroBallpit`）、首屏以下的区块（`HomeSections`） | 维护者 |
+| `site/.vitepress/theme/components/HeroBallpit.vue` + `theme/ballpit-physics.ts` | 首屏球池：货架上的真 Bot 掉下来堆在地板上，站名和搜索框是碰撞体；名片点进详情。物理是不碰 DOM 的纯模块（规格见 INTERACTION.md §2.2） | 维护者 |
 | `site/.vitepress/theme/components/FeaturedCard.vue` | 精选大卡：活 Bot、名字、介绍、作者、热度、导入；不带气泡 | 维护者 |
 | `site/.vitepress/theme/components/SearchTrigger.vue` | 长得像输入框的按钮（首屏和工具栏各一个），只负责派发 `bz-search-open` | 维护者 |
 | `site/.vitepress/theme/components/SearchPalette.vue` + `theme/search.ts` | 搜索命令面板和它的匹配、排序规则；挂在 Layout 的 `layout-bottom` 插槽，全站可用 | 维护者 |
