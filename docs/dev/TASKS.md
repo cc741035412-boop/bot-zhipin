@@ -11,10 +11,12 @@
 | P1 | `npm run validate` 全部规则 + 中文报错 + 样例测试 | 编码 agent | H1 | `scripts/validate.mjs`、`scripts/lib/validate/`、`tests/unit/validate*`、`tests/fixtures/` | ✅ |
 | P2 | 站点功能：首页货架、排序、详情页、两个按钮、复制提示词、默认头像 | 编码 agent | H1 | `site/`（除 vendor）、`tests/e2e/site*` | ✅ |
 | P3 | 计数后端：Functions + D1 迁移 + 去重 + 测试 | 编码 agent | H1 | `functions/`、`migrations/`、`tests/unit/api*`、`scripts/accept-click.sh` | ✅ |
-| P4 | 交互实现（按 M3），单独成任务 | 编码 agent | P2、M3 | `site/.vitepress/theme/`、`tests/e2e/interaction*` | 🟡 |
+| P4 | 交互实现（按 M3），单独成任务 | 编码 agent | P2、M3 | `site/.vitepress/theme/`、`tests/e2e/interaction*` | ✅ |
 | P5 | 投稿流程实测：零上下文 agent 只拿 README 提示词，照 AGENTS.md 做示例 Bot | 编码 agent | P1、M2 | `bots/<示例>/`（验收后删除） | ✅ |
-| P6 | 集成验收 1–3 + 独立代码审查 + 交付清单 | 维护者 | 全部 | — | 🟡 |
-| P7 | 真实用户测试：上线后用真实 Grok Bot 走完「从货架导入 / 复制提示词安装」和「让 Bot 替我投稿上架」两条路径 | 维护者 | P6、上线 | — | ⬜ |
+| P6 | 集成验收 1–3 + 独立代码审查 + 交付清单 | 维护者 | 全部 | — | ✅ |
+| S1 | 安全加固（独立代码审查的 12 条） | 编码 agent | P1–P3 | 见 PR #1 | ✅ |
+| S2 | 一链接投稿：Issue 表单自动转 PR，详情页下架兜底 | 编码 agent + 维护者 | P7 | 见 PR #4、#6 | ✅ |
+| P7 | 真实用户测试：上线后用真实 Grok Bot 走完「从货架导入 / 复制提示词安装」和「让 Bot 替我投稿上架」两条路径 | 维护者 | P6、上线 | — | ✅ |
 
 ## 第一期验收（来自需求）
 
