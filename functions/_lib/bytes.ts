@@ -14,6 +14,8 @@ export function toBase64Url(bytes: Uint8Array): string {
 }
 
 export function fromBase64(value: string): Uint8Array {
+  const native = (Uint8Array as typeof Uint8Array & { fromBase64?: (value: string) => Uint8Array }).fromBase64
+  if (typeof native === 'function') return native.call(Uint8Array, value)
   // atob is a native decoder; this copies its output, it is not a JS base64 codec.
   return Uint8Array.from(atob(value), (character) => character.charCodeAt(0))
 }

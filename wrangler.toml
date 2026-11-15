@@ -2,6 +2,7 @@
 name = "bot-zhipin"
 pages_build_output_dir = "site/.vitepress/dist"
 compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"] # 截图 base64 只用原生 API / Buffer
 
 [vars]
 SUBMIT_REPO = "jakob52123/bot-zhipin" # 投稿目标 owner/repo，不是密钥

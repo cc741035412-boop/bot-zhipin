@@ -5,8 +5,22 @@ const encoder = new TextEncoder()
 const SESSION_MS = 2 * 60 * 60 * 1000
 export interface SessionUser { id: number; login: string }
 
-async function hmacKey(secret: string, usage: 'sign' | 'verify') {
-  return crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [usage])
+// Bounded isolate-local cache: a 25-receipt submission must not import the same
+// HMAC key 25 times. Keep current/previous keys for both native usages.
+const hmacKeys = new Map<string, Map<string, Promise<CryptoKey>>>()
+function hmacKey(secret: string, usage: 'sign' | 'verify') {
+  let usages = hmacKeys.get(secret)
+  if (!usages) {
+    if (hmacKeys.size >= 4) hmacKeys.delete(hmacKeys.keys().next().value!)
+    usages = new Map()
+    hmacKeys.set(secret, usages)
+  }
+  let key = usages.get(usage)
+  if (!key) {
+    key = crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, [usage])
+    usages.set(usage, key)
+  }
+  return key
 }
 
 export async function sign(secret: string, payload: object): Promise<string> {
@@ -69,7 +83,7 @@ export function isSessionUser(user: unknown): user is SessionUser {
 export async function readSession(request: Pick<Request, 'headers'>, env: Env, now: number): Promise<SessionUser | null> {
   const token = parseCookies(request.headers.get('Cookie'))[cookieNames(env).session]
   const payload = await verify([env.SESSION_SECRET, env.SESSION_SECRET_PREV], token, now)
-  if (!payload || payload.v !== 1 || !isSessionUser(payload)
+  if (!payload || payload.t !== 's' || payload.v !== 1 || !isSessionUser(payload)
     || typeof payload.iat !== 'number' || !Number.isFinite(payload.iat)
     || payload.iat > now || Number(payload.exp) - payload.iat !== SESSION_MS) return null
   return { id: payload.id, login: payload.login }
@@ -81,13 +95,13 @@ function setCookie(env: Env, name: string, value: string, maxAge: number, sameSi
 
 export async function sessionSetCookie(env: Env, user: SessionUser, now: number): Promise<string> {
   if (!env.SESSION_SECRET || !isSessionUser(user)) throw new Error('Invalid session configuration')
-  const value = await sign(env.SESSION_SECRET, { v: 1, id: user.id, login: user.login, iat: now, exp: now + SESSION_MS })
+  const value = await sign(env.SESSION_SECRET, { t: 's', v: 1, id: user.id, login: user.login, iat: now, exp: now + SESSION_MS })
   return setCookie(env, cookieNames(env).session, value, SESSION_MS / 1000, 'Strict')
 }
 
 export async function oauthSetCookie(env: Env, state: string, verifier: string, now: number): Promise<string> {
   if (!env.SESSION_SECRET) throw new Error('Invalid session configuration')
-  const value = await sign(env.SESSION_SECRET, { state, verifier, exp: now + 600_000 })
+  const value = await sign(env.SESSION_SECRET, { t: 'o', state, verifier, exp: now + 600_000 })
   return setCookie(env, cookieNames(env).oauth, value, 600, 'Lax')
 }
 

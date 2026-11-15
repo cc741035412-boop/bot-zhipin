@@ -63,7 +63,7 @@ describe('HMAC 会话和 cookie', () => {
     expect(cookie.split('; ').slice(1)).toEqual(['Max-Age=7200', 'Path=/', 'HttpOnly', 'Secure', 'SameSite=Strict'])
     expect(cookie).not.toMatch(/Domain=/i)
     const token = parseCookies(cookie)['__Host-bz_s']
-    expect(await verify([secret], token, now)).toEqual({ v: 1, ...user, iat: now, exp: now + 7_200_000 })
+    expect(await verify([secret], token, now)).toEqual({ t: 's', v: 1, ...user, iat: now, exp: now + 7_200_000 })
     expect(await readSession(request(cookie), env, now)).toEqual(user)
   })
 
@@ -71,7 +71,7 @@ describe('HMAC 会话和 cookie', () => {
     const cookie = await oauthSetCookie(env, 'state', 'verifier', now)
     expect(cookie.split('; ').slice(1)).toEqual(['Max-Age=600', 'Path=/', 'HttpOnly', 'Secure', 'SameSite=Lax'])
     expect(cookie.startsWith('__Host-bz_oauth=')).toBe(true)
-    expect(await verify([secret], parseCookies(cookie)['__Host-bz_oauth'], now)).toEqual({ state: 'state', verifier: 'verifier', exp: now + 600_000 })
+    expect(await verify([secret], parseCookies(cookie)['__Host-bz_oauth'], now)).toEqual({ t: 'o', state: 'state', verifier: 'verifier', exp: now + 600_000 })
   })
 
   it('仅字符串 1 启用本地 cookie；clear 保留对应 SameSite 并 Max-Age=0', async () => {
@@ -102,7 +102,7 @@ describe('HMAC 会话和 cookie', () => {
   })
 
   it.each([{ v: 2 }, { id: 0 }, { id: '123' }, { login: 'bad/name' }, { iat: now + 1 }, { exp: now + 1 }])('拒绝签过但结构错误的会话 %j', async (override) => {
-    const token = await sign(secret, { v: 1, ...user, iat: now, exp: now + 7_200_000, ...override })
+    const token = await sign(secret, { t: 's', v: 1, ...user, iat: now, exp: now + 7_200_000, ...override })
     expect(await readSession(request(`__Host-bz_s=${token}`), env, now)).toBeNull()
   })
 })

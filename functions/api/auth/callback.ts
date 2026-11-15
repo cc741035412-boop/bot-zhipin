@@ -20,7 +20,7 @@ export const onRequestGet: PagesFunction<Env> = (context) => handleSubmitApi(con
   } else if (error === null) {
     const token = parseCookies(request.headers.get('Cookie'))[cookieNames(env).oauth]
     const oauth = await verify([env.SESSION_SECRET, env.SESSION_SECRET_PREV], token, now)
-    if (!oauth || typeof oauth.state !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(oauth.state)
+    if (!oauth || oauth.t !== 'o' || typeof oauth.state !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(oauth.state)
       || typeof oauth.verifier !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(oauth.verifier)
       || oauth.state !== state) {
       result = 'expired'

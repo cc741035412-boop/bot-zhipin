@@ -20,6 +20,19 @@ interface TokenCache {
 const tokens = new Map<string, TokenCache>()
 const pendingTokens = new Map<string, { scope: string; promise: Promise<string> }>()
 
+function noRedirectMode(): RequestRedirect {
+  // workerd rejects `error` while constructing a Request. Feature detection is
+  // local (no fetch); manual + the non-2xx check below has the same no-follow
+  // security boundary. Never retry an actual credential-bearing request.
+  try {
+    new Request('https://redirect-policy.invalid', { redirect: 'error' })
+    return 'error'
+  } catch {
+    return 'manual'
+  }
+}
+const redirectMode = noRedirectMode()
+
 function endpointBase(value: string): string {
   try {
     const url = new URL(value)
@@ -103,7 +116,7 @@ export function createGitHub(env: Env) {
     try {
       const response = await globalThis.fetch(url.toString(), {
         method,
-        redirect: 'error', // Never forward credentials to a redirect target, even an otherwise allowed one.
+        redirect: redirectMode, // Never forward credentials to any redirect target.
         headers: {
           Accept: oauth ? 'application/json' : 'application/vnd.github+json',
           'X-GitHub-Api-Version': '2022-11-28',

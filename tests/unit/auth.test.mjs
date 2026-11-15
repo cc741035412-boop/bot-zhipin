@@ -123,7 +123,7 @@ describe('GitHub 登录流程（所有外部请求均为 mock）', () => {
     expect(calls[2].headers.get('Authorization').startsWith('Basic ')).toBe(true)
     const cookie = sessionCookie(response)
     expect(cookie.split('; ').slice(1)).toEqual(['Max-Age=7200', 'Path=/', 'HttpOnly', 'SameSite=Strict'])
-    expect(await verify([env.SESSION_SECRET], parseCookies(cookie).bz_s, now)).toEqual({ v: 1, id: 123, login: 'Alice', iat: now, exp: now + 7_200_000 })
+    expect(await verify([env.SESSION_SECRET], parseCookies(cookie).bz_s, now)).toEqual({ t: 's', v: 1, id: 123, login: 'Alice', iat: now, exp: now + 7_200_000 })
     expect(oauthCookie(response)).toContain('Max-Age=0')
     expect(await response.text()).toBe('')
     secure(response)
