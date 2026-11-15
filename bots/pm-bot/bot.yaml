@@ -1,10 +1,11 @@
-# 外部收录：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
 slug: pm-bot
 name: PM bot
 tagline: 把模糊需求写成带日期和验收标准的需求切片，你批了才开工
 category: 定义
 author:
   name: Ulysses Ng
+  url: https://x.ai/bot/marketplace/bots/pm-bot
 templateUrl: https://x.ai/bot/FeeqMRMJr2jwixCROZcIh
 addedAt: 2026-11-15
 prerequisites:

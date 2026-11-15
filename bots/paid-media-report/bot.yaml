@@ -1,0 +1,18 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: paid-media-report
+name: "Paid Media Report"
+tagline: "把各广告平台的导出表合成一份带解读的投放周报"
+category: 日常
+author:
+  name: "Miguel Cruz"
+  url: https://x.ai/bot/marketplace/bots/tally
+templateUrl: https://x.ai/bot/qBFjPRQ3IbHG69qIFHblE
+addedAt: 2026-11-15
+prerequisites:
+  - "各广告平台的导出表，每周给它新的"
+  - "盯 Slack 提问的任务每小时跑一次，很烧额度，建议只开周报和月报"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

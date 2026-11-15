@@ -1,0 +1,20 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: market-researcher
+name: "Market Researcher"
+tagline: "每周盯竞品的广告、落地页和定价，告诉你怎么应对"
+category: 调研
+author:
+  name: "Josh Kim"
+  url: https://x.ai/bot/marketplace/bots/market-researcher
+templateUrl: https://x.ai/bot/xzkXiUbdYfPd7g30OhLGf
+addedAt: 2026-11-15
+prerequisites:
+  - "你的官网地址和一两个竞品名"
+  - "数据来自谷歌、Meta、LinkedIn 的公开广告库和 X，国内平台的投放看不到"
+  - "周报要截大量图，单次很耗额度；定时任务默认关"
+quotaCost: 高
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true

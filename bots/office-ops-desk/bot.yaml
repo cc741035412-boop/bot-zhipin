@@ -1,0 +1,20 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: office-ops-desk
+name: "Office Ops Desk"
+tagline: "帮行政盯快递、报修和同事生日，按时出日报周报"
+category: 日常
+author:
+  name: "Erika Cabrera"
+  url: https://x.ai/bot/marketplace/bots/office-ops-desk
+templateUrl: https://x.ai/bot/afZj-XnYkThA4MB7GfZK6
+addedAt: 2026-11-15
+prerequisites:
+  - "一份快递、报修或同事生日清单，粘贴或表格都行"
+  - "同事生日和收货地址会存在共享云电脑上"
+  - "国内快递能不能查到没有保证"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true

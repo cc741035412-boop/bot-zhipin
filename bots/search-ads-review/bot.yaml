@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: search-ads-review
+name: "Search Ads Review"
+tagline: "按目标安装成本复盘苹果搜索广告，列出该改的词和出价"
+category: 评审
+author:
+  name: "Chris Everett"
+  url: https://x.ai/bot/marketplace/bots/apple-search-ads-review
+templateUrl: https://x.ai/bot/gadc3bVOsg9iIwmzAGRve
+addedAt: 2026-11-15
+prerequisites:
+  - "Apple Search Ads 账户，能导出 14 到 30 天的报表"
+  - "先想好目标单次安装成本"
+  - "苹果搜索广告不覆盖中国大陆应用商店，适合出海 App"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

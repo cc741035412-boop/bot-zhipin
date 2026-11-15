@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: product-marketer
+name: "Product Marketer"
+tagline: "先帮你定产品定位，再照着写落地页和广告文案"
+category: 定义
+author:
+  name: "Josh Kim"
+  url: https://x.ai/bot/marketplace/bots/product-marketer
+templateUrl: https://x.ai/bot/nXp4Rp2trKV8AK-RC1Ohf
+addedAt: 2026-11-15
+prerequisites:
+  - "产品官网链接，和三五段你认可的文案"
+  - "文案规则按英文写的（禁用词、广告字数），写中文要自己补中文禁用词和平台字数"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true

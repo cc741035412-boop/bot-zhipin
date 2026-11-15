@@ -1,5 +1,7 @@
 import { SITE } from '../../site/.vitepress/meta.mjs'
 
+const OFFICIAL_MARKETPLACE_PREFIX = 'https://x.ai/bot/marketplace/bots/'
+
 export function summarizeBot(bot, { asset, names = new Map() } = {}) {
   const data = bot.data || {}
   const source = `${SITE.repo}/blob/${SITE.branch}/bots/${bot.slug}`
@@ -25,6 +27,7 @@ export function summarizeBot(bot, { asset, names = new Map() } = {}) {
     forkedFrom: data.forkedFrom || null,
     forkedFromName: names.get(data.forkedFrom) || data.forkedFrom || null,
     external: data.external === true,
+    official: data.external === true && typeof author.url === 'string' && author.url.startsWith(OFFICIAL_MARKETPLACE_PREFIX),
     avatar: bot.avatar ? asset('avatar.png') : null,
     screenshots: bot.screenshots.filter((shot) => shot.isImage).map((shot) => asset(shot.file)),
     skills: bot.skills.filter((skill) => skill.exists).map((skill) => ({

@@ -21,7 +21,7 @@ defineProps({ bot: { type: Object, required: true } })
     <h2><a data-testid="detail-link" :href="preview ? '#submit-preview-detail' : bot.detailUrl" :target="preview ? '_self' : undefined" @click="preview && ($event.preventDefault(), showDetail())">{{ bot.name }}</a></h2>
     <div class="bot-meta">
       <span class="bot-tag category-tag" :style="categoryStyle(bot.category)">{{ bot.category }}</span>
-      <span v-if="bot.external" class="bot-tag external-tag">外部收录</span>
+      <span v-if="bot.external" class="bot-tag external-tag">{{ bot.official ? '官方市场' : '外部收录' }}</span>
       <span v-if="preview">by {{ bot.author.name }}</span>
       <a v-else data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
     </div>

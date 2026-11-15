@@ -1,0 +1,18 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: alfred
+name: "Alfred"
+tagline: "给你的多 Bot 团队做架构设计、定期体检和分享前审查"
+category: 基础设施
+author:
+  name: "Robin Delta"
+  url: https://x.ai/bot/marketplace/bots/alfred
+templateUrl: https://x.ai/bot/p7Gh6HIrfv4AGzIow6-9X
+addedAt: 2026-11-15
+prerequisites:
+  - "已经有几个 Bot 在用时最有价值"
+  - "自带每周、每月、每季三个巡检，没变化也会发报告；导入后看一下开没开，用不上就暂停"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

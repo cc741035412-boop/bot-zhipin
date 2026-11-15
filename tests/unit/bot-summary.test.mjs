@@ -14,9 +14,19 @@ it('摘要完整字段和默认值稳定', () => {
     slug: 'demo', name: '示例', tagline: '一句真实介绍', category: undefined,
     author: { name: '作者', github: 'demo', url: null, link: 'https://github.com/demo' },
     templateUrl: 'https://x.ai/bot/demo', addedAt: undefined, prerequisites: ['无'], quotaCost: undefined,
-    permissions: [], pitch: null, forkedFrom: null, forkedFromName: null, external: false,
+    permissions: [], pitch: null, forkedFrom: null, forkedFromName: null, external: false, official: false,
     avatar: null, screenshots: [], skills: [], hasRoutines: false, routinesUrl: null, detailUrl: '/bots/demo',
   })
+})
+it.each([
+  ['官方市场外部收录', true, 'https://x.ai/bot/marketplace/bots/demo', true],
+  ['其他域名', true, 'https://example.com/bot/marketplace/bots/demo', false],
+  ['无作者网址', true, undefined, false],
+  ['非外部收录', false, 'https://x.ai/bot/marketplace/bots/demo', false],
+  ['未标记外部收录', undefined, 'https://x.ai/bot/marketplace/bots/demo', false],
+  ['普通模板链接', true, 'https://x.ai/bot/demo', false],
+])('official 判定：%s', (_label, external, url, expected) => {
+  expect(summarizeBot(model({ external, author: { name: '作者', url } })).official).toBe(expected)
 })
 it('所有现有 Bot 和 fixtures 的 wrapper 与共享摘要逐字相同', () => {
   for (const bots of [readBots(), loadAllBots('tests/fixtures/bots')]) {

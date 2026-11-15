@@ -1,0 +1,19 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: event-request-desk
+name: "Event Request Desk"
+tagline: "给活动、赞助和演讲邀约打分，起草答应或婉拒的回复"
+category: 日常
+author:
+  name: "Emma Weyrauch"
+  url: https://x.ai/bot/marketplace/bots/event-request-desk
+templateUrl: https://x.ai/bot/hp7QlVUPuYUp09kc6IFAA
+addedAt: 2026-11-15
+prerequisites:
+  - "最近收到的几条邀约，粘贴、转发或截图都行"
+  - "先说清你的取舍标准和单场花费上限，不说就用默认的 5 项打分"
+  - "它不会主动告诉你文件存在哪，想留底就让它把队列导出给你"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

@@ -1,0 +1,18 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: lead-pipeline-desk
+name: "Lead Pipeline Desk"
+tagline: "给销售线索打分去重、分配跟进人、盯住超时没跟的"
+category: 日常
+author:
+  name: "Miguel Cruz"
+  url: https://x.ai/bot/marketplace/bots/leadsworth
+templateUrl: https://x.ai/bot/oPDkINUfpUXhJDdsfRZht
+addedAt: 2026-11-15
+prerequisites:
+  - "一份线索表（导出、表格或直接贴），再说清什么样的线索算好"
+  - "名单含客户个人信息，会存在共享云电脑上"
+quotaCost: 低
+permissions:
+  - 云电脑文件
+  - 定时自动运行
+external: true

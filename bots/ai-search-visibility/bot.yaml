@@ -1,0 +1,20 @@
+# 外部收录（xAI 官方 Bot 市场）：只收录链接，介绍由本站撰写；权限、额度和准备事项是本站读过模板完整配置后做的判断。
+slug: ai-search-visibility
+name: "AI Search Visibility"
+tagline: "查 AI 助手和搜索推不推荐你的产品、推了谁、怎么补"
+category: 调研
+author:
+  name: "Adam Tanguay"
+  url: https://x.ai/bot/marketplace/bots/ai-search-visibility
+templateUrl: https://x.ai/bot/BFiw9Y7BzTQ-3jFBAro1X
+addedAt: 2026-11-15
+prerequisites:
+  - "你的官网地址或一句话介绍，最好再准备几个竞品名字"
+  - "要登录才能用的 AI 助手它不会自己登，要你把那边的回答粘贴给它；国内的助手多半只能这样"
+  - "周报和抽查默认关，开之前告诉它你的时区"
+quotaCost: 中
+permissions:
+  - 云电脑文件
+  - 联网
+  - 定时自动运行
+external: true

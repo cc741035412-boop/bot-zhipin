@@ -1,7 +1,42 @@
 {
+  "account-research": {
+    "color": "#1084fe",
+    "shape": "dome",
+    "fetchedAt": "2026-11-15"
+  },
+  "ad-spend-watch": {
+    "color": "#000000",
+    "shape": "blob",
+    "fetchedAt": "2026-11-15"
+  },
+  "ai-search-visibility": {
+    "color": "#1084fe",
+    "shape": "crystal",
+    "fetchedAt": "2026-11-15"
+  },
+  "alfred": {
+    "color": "#ff6700",
+    "shape": "squircle",
+    "fetchedAt": "2026-11-15"
+  },
+  "call-follow-ups": {
+    "color": "#00bca6",
+    "shape": "capsule",
+    "fetchedAt": "2026-11-15"
+  },
+  "clip-bot": {
+    "color": "#00bca6",
+    "shape": "wedge",
+    "fetchedAt": "2026-11-15"
+  },
   "competitor-watch": {
     "color": "#777777",
     "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
+  "copy-humanizer": {
+    "color": "#9159fe",
+    "shape": "tablet",
     "fetchedAt": "2026-11-15"
   },
   "critiquito": {
@@ -9,9 +44,29 @@
     "shape": "squircle",
     "fetchedAt": "2026-11-15"
   },
+  "customer-proof-desk": {
+    "color": "#ff6700",
+    "shape": "crystal",
+    "fetchedAt": "2026-11-15"
+  },
   "dr-eggbot": {
     "color": "#ff263c",
     "shape": "teardrop",
+    "fetchedAt": "2026-11-15"
+  },
+  "engineering-lead": {
+    "color": "#ff263c",
+    "shape": "shield",
+    "fetchedAt": "2026-11-15"
+  },
+  "event-producer": {
+    "color": "#00c972",
+    "shape": "cloud",
+    "fetchedAt": "2026-11-15"
+  },
+  "event-request-desk": {
+    "color": "#777777",
+    "shape": "wedge",
     "fetchedAt": "2026-11-15"
   },
   "feishu-app-keeper": {
@@ -19,9 +74,44 @@
     "shape": "hex",
     "fetchedAt": "2026-11-15"
   },
+  "figma-bro": {
+    "color": "#ff309b",
+    "shape": "gem",
+    "fetchedAt": "2026-11-15"
+  },
+  "flora": {
+    "color": "#00c972",
+    "shape": "leaf",
+    "fetchedAt": "2026-11-15"
+  },
+  "game-art-director": {
+    "color": "#9159fe",
+    "shape": "teardrop",
+    "fetchedAt": "2026-11-15"
+  },
   "idea-stress-test": {
     "color": "#1084fe",
     "shape": "squircle",
+    "fetchedAt": "2026-11-15"
+  },
+  "last30days": {
+    "color": "#9159fe",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
+  "lead-pipeline-desk": {
+    "color": "#00c972",
+    "shape": "capsule",
+    "fetchedAt": "2026-11-15"
+  },
+  "market-researcher": {
+    "color": "#9159fe",
+    "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
+  "marketing-analyst": {
+    "color": "#00c972",
+    "shape": "blob",
     "fetchedAt": "2026-11-15"
   },
   "media-downloader": {
@@ -29,9 +119,44 @@
     "shape": "pebble",
     "fetchedAt": "2026-11-15"
   },
+  "meeting-recap-deck": {
+    "color": "#1084fe",
+    "shape": "blob",
+    "fetchedAt": "2026-11-15"
+  },
   "memory-keeper": {
     "color": "#777777",
     "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
+  "office-ops-desk": {
+    "color": "#ff6700",
+    "shape": "squircle",
+    "fetchedAt": "2026-11-15"
+  },
+  "outbound-prospecting": {
+    "color": "#ff309b",
+    "shape": "pebble",
+    "fetchedAt": "2026-11-15"
+  },
+  "overheard": {
+    "color": "#ff6700",
+    "shape": "teardrop",
+    "fetchedAt": "2026-11-15"
+  },
+  "paid-media-report": {
+    "color": "#00c972",
+    "shape": "blob",
+    "fetchedAt": "2026-11-15"
+  },
+  "pfp-bot": {
+    "color": "#ff309b",
+    "shape": "blob",
+    "fetchedAt": "2026-11-15"
+  },
+  "pitch-deck-coach": {
+    "color": "#00c972",
+    "shape": "cloud",
     "fetchedAt": "2026-11-15"
   },
   "pm-bot": {
@@ -39,14 +164,99 @@
     "shape": "hex",
     "fetchedAt": "2026-11-15"
   },
+  "product-marketer": {
+    "color": "#00bca6",
+    "shape": "squircle",
+    "fetchedAt": "2026-11-15"
+  },
+  "project-manager": {
+    "color": "#00bca6",
+    "shape": "cloud",
+    "fetchedAt": "2026-11-15"
+  },
+  "projects-manager": {
+    "color": "#ff309b",
+    "shape": "teardrop",
+    "fetchedAt": "2026-11-15"
+  },
+  "proto-bot": {
+    "color": "#9159fe",
+    "shape": "crystal",
+    "fetchedAt": "2026-11-15"
+  },
   "quota-saver": {
     "color": "#ff9800",
     "shape": "tablet",
     "fetchedAt": "2026-11-15"
   },
+  "sales-call-coach": {
+    "color": "#ff6700",
+    "shape": "shield",
+    "fetchedAt": "2026-11-15"
+  },
+  "search-ads-review": {
+    "color": "#00c972",
+    "shape": "blob",
+    "fetchedAt": "2026-11-15"
+  },
+  "sell-bot": {
+    "color": "#ff6700",
+    "shape": "capsule",
+    "fetchedAt": "2026-11-15"
+  },
+  "seo-aeo-desk": {
+    "color": "#00c972",
+    "shape": "hex",
+    "fetchedAt": "2026-11-15"
+  },
+  "sequencer": {
+    "color": "#00bca6",
+    "shape": "tablet",
+    "fetchedAt": "2026-11-15"
+  },
+  "startup-qa-bot": {
+    "color": "#00c972",
+    "shape": "shield",
+    "fetchedAt": "2026-11-15"
+  },
+  "stills-clips-desk": {
+    "color": "#ff309b",
+    "shape": "cylinder",
+    "fetchedAt": "2026-11-15"
+  },
+  "talent-discovery": {
+    "color": "#ff9800",
+    "shape": "dome",
+    "fetchedAt": "2026-11-15"
+  },
   "the-interviewer": {
     "color": "#ff9800",
     "shape": "blob",
+    "fetchedAt": "2026-11-15"
+  },
+  "video-edit-desk": {
+    "color": "#ff309b",
+    "shape": "pebble",
+    "fetchedAt": "2026-11-15"
+  },
+  "video-editor": {
+    "color": "#1084fe",
+    "shape": "cloud",
+    "fetchedAt": "2026-11-15"
+  },
+  "website-ops": {
+    "color": "#ff263c",
+    "shape": "squircle",
+    "fetchedAt": "2026-11-15"
+  },
+  "writing-bot": {
+    "color": "#00bca6",
+    "shape": "squircle",
+    "fetchedAt": "2026-11-15"
+  },
+  "x-brief": {
+    "color": "#000000",
+    "shape": "cloud",
     "fetchedAt": "2026-11-15"
   }
 }
