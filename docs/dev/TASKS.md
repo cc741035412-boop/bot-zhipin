@@ -54,9 +54,11 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | L2a | GitHub 登录、会话、限流、GitHub 客户端 | 编码 agent | M1 | `functions/`、`migrations/0002` | ✅ |
 | L2b | 截图上传、提交、状态接口 | 编码 agent | L1、L2a | `functions/api/submit/` | ✅ |
 | L3 | 投稿页浏览器端逻辑 | 编码 agent | L1 | `site/.vitepress/theme/submit/`、`scripts/lib/` | ✅ |
-| L4 | 投稿页界面（独立交互任务，真浏览器截图验收） | 编码 agent | M2、L3、界面改版合入 | `site/submit.md`、`Submit*.vue` | 🟡 |
+| L4 | 投稿页界面（独立交互任务，真浏览器截图验收） | 编码 agent | M2、L3、界面改版合入 | `site/submit.md`、`Submit*.vue` | ✅ |
 | L5 | 命令行改出网站链接、Issue 链路自动补作者、站点配置 | 编码 agent | L1 | `scripts/make-submission-link.mjs`、`meta.mjs` | ✅ |
 | L6 | 上线通知工作流、范围检查禁止改作者、CODEOWNERS | 编码 agent | M1 | `.github/`、`scripts/announce-live.mjs` | ✅ |
 | M3 | GitHub App、OAuth App、Cloudflare 加密变量 | 维护者 | — | 后台 | ✅ |
-| M4 | 投稿文档：AGENTS、README、CONTRIBUTING；MAINTAINING 待联调后改 | 维护者 | L5 | 根目录文档 | 🟡 |
-| M5 | 联调：仓库设置（自动合并、规则集）、真实全程、CPU 实测、真实 Grok Bot | 维护者 | 全部 | — | ⬜ |
+| M4 | 投稿文档：AGENTS、README、CONTRIBUTING、MAINTAINING | 维护者 | L5 | 根目录文档 | ✅ |
+| SEC | 上线前加固（独立安全审查必修项）：状态缓存、服务端只收明文、校验防超时、额度后扣、按数字 id 绑定归属 | 编码 agent | L2b | `functions/`、`scripts/lib/`、`migrations/0003` | ✅ |
+| M5 | 联调：仓库设置（自动合并、规则集）、线上真实全程（新增 + 更新）、CPU 实测 | 维护者 | 全部 | — | ✅ |
+| M6 | 待办：真实 Grok Bot 按新版 AGENTS.md 走一遍；学员实测；Workers 套餐决定；安全审查「上线后跟进」各项 | 维护者 | M5 | — | ⬜ |
