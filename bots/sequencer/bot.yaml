@@ -19,3 +19,4 @@ permissions:
   - 定时自动运行
   - 外部账号
 external: true
+pitch: "今天该跟进谁，我每天给你列好。"

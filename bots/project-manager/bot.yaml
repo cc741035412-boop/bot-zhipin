@@ -18,3 +18,4 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
+pitch: "告诉我哪天上线，我从那天往回排。"

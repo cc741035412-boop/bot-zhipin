@@ -16,3 +16,4 @@ permissions:
   - 外部账号
   - 联网
 external: true
+pitch: "给你每个 Bot 办张飞书工牌，以后飞书里直接喊。"

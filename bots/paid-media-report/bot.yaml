@@ -16,3 +16,4 @@ permissions:
   - 云电脑文件
   - 定时自动运行
 external: true
+pitch: "各家导出的表丢给我，我拼成一份周报。"

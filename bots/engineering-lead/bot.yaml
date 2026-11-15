@@ -18,3 +18,4 @@ permissions:
   - 定时自动运行
   - 外部账号
 external: true
+pitch: "需求给我，我拆了派出去，能合了再叫你。"

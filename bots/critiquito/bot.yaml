@@ -15,3 +15,4 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
+pitch: "截图发来，我只挑最影响用的那几处。"

@@ -18,3 +18,4 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
+pitch: "一小时的播客，哪几段值得剪，我先挑好。"

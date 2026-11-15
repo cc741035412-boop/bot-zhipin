@@ -21,3 +21,4 @@ permissions:
   - 外部账号
   - 代我发消息
 external: true
+pitch: "跟进邮件我先写好，你说发，我才发。"

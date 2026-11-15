@@ -18,3 +18,4 @@ permissions:
   - 联网
   - 定时自动运行
 external: true
+pitch: "别人问 AI 该买谁，它提没提你？我去问问。"
