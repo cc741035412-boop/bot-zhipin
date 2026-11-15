@@ -1,4 +1,6 @@
 <script setup>
+import { avatarColor } from '../avatar'
+import { botPalette } from '../color'
 import BotAvatar from './BotAvatar.vue'
 import BotActions from './BotActions.vue'
 import BotHeat from './BotHeat.vue'
@@ -7,7 +9,7 @@ defineProps({ bot: { type: Object, required: true } })
 </script>
 
 <template>
-  <article class="bot-card" data-testid="bot-card" :data-slug="bot.slug">
+  <article class="bot-card bz-bot-scope" :style="botPalette(bot.avatar ? '#8a8a93' : avatarColor(bot.slug))" data-testid="bot-card" :data-slug="bot.slug">
     <BotAvatar :bot="bot" />
     <h2><a data-testid="detail-link" :href="bot.detailUrl">{{ bot.name }}</a></h2>
     <div class="bot-meta">

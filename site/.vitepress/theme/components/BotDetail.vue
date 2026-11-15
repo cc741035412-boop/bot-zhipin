@@ -1,5 +1,7 @@
 <script setup>
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
+import { avatarColor } from '../avatar'
+import { botPalette } from '../color'
 import BotAvatar from './BotAvatar.vue'
 import BotActions from './BotActions.vue'
 import { loadHeat } from '../heat'
@@ -7,19 +9,20 @@ import BotHeat from './BotHeat.vue'
 import ExternalHint from './ExternalHint.vue'
 import LiveAnnouncer from './LiveAnnouncer.vue'
 import BotScreenshot from './BotScreenshot.vue'
-defineProps({
+const props = defineProps({
   bot: { type: Object, required: true },
   copy: { type: Object, required: true },
   designHtml: { type: String, default: '' },
 })
+const palette = computed(() => botPalette(props.bot.avatar ? '#8a8a93' : avatarColor(props.bot.slug)))
 onMounted(loadHeat)
 </script>
 
 <template>
-  <main class="shelf-page bot-detail" data-testid="bot-detail">
+  <main class="shelf-page bot-detail bz-bot-scope" :style="palette" data-testid="bot-detail">
     <LiveAnnouncer />
     <a class="back-link" href="/">← 返回货架</a>
-    <header class="detail-header">
+    <header class="detail-header bz-bot-scope" :style="palette">
       <BotAvatar :bot="bot" />
       <div class="detail-info">
       <h1>{{ bot.name }}</h1>
