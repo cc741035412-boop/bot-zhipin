@@ -8,16 +8,34 @@ export const SITE = {
   branch: 'main',
 }
 
-// 品牌招牌独立于货架与排序；从左到右，橙色居中，窄屏只隐藏两端。
+// 品牌招牌独立于货架与排序：前 5 只站上排（橙色居中），后 4 只站下排并错开半格。
+// 上下左右和斜向相邻的砖都不同色系（暖橙 / 粉红 / 蓝紫 / 绿）。
 export const HERO_MASCOTS = [
   { key: 'amber', shape: 'hex', color: '#f5a623' },
-  { key: 'violet', shape: 'tablet', color: '#8b5cf6' },
   { key: 'teal', shape: 'star', color: '#14b8a6' },
   { key: 'orange', shape: 'blob', color: '#ff6a13' },
   { key: 'pink', shape: 'sparkle', color: '#ff2e93' },
+  { key: 'blue', shape: 'cloud', color: '#3b82f6' },
+  { key: 'rose', shape: 'heart', color: '#f43f5e' },
+  { key: 'violet', shape: 'tablet', color: '#8b5cf6' },
   { key: 'mint', shape: 'teardrop', color: '#34d399' },
   { key: 'brown', shape: 'pebble', color: '#9a6a3a' },
 ]
+
+// 首页货架的固定文案；搜索占位字和搜索面板里的输入框保持一致。
+export const SHELF_COPY = {
+  searchPlaceholder: '搜 Bot：名字、分类、作者…',
+  searchLabel: '搜索 Bot',
+  contribute: '我要投稿',
+  sectionTitle: '逛逛货架',
+  sectionSub: '每一只都是活的：鼠标移过去听听自荐，戳一下还有惊喜。',
+  featuredTitle: '精选',
+  featuredSub: '热度最高的三位',
+  allCategories: '全部',
+  filterLabel: '按分类筛选',
+  emptyFilter: '这个分类下暂时没有 Bot',
+  showAll: '看看全部',
+}
 
 export const POKE_PITCHES = ['哎，痒！', '再戳我就变形了', '好啦好啦，我在呢', '你找我呀？']
 export const ANGRY_PITCH = '别戳啦！'

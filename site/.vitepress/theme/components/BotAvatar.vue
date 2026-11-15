@@ -113,15 +113,18 @@ defineExpose({ enter, leave, play })
 </script>
 
 <template>
-  <div ref="root" class="avatar-stage" @pointerenter="!wholeCard && enter($event)" @pointerleave="!wholeCard && leave($event)">
-    <button
-      ref="button" type="button" class="bot-avatar" data-testid="avatar"
-      :aria-label="`听听${bot.name}的自荐`" :aria-describedby="open ? bubbleId : undefined"
-      @pointerdown="pointerFocus = true"
-      @focus="focus" @blur="close" @click="click"
-    >
-      <BotPortrait ref="portrait" :bot="bot" :rest="hovered ? 'wide' : 'idle'" />
-    </button>
+  <div ref="root" class="avatar-root">
+    <!-- 外层在卡片里不占盒子：玻璃砖和气泡各自落进卡片网格；详情页里它是气泡的定位容器。 -->
+    <div class="avatar-stage bz-tile" @pointerenter="!wholeCard && enter($event)" @pointerleave="!wholeCard && leave($event)">
+      <button
+        ref="button" type="button" class="bot-avatar" data-testid="avatar"
+        :aria-label="`听听${bot.name}的自荐`" :aria-describedby="open ? bubbleId : undefined"
+        @pointerdown="pointerFocus = true"
+        @focus="focus" @blur="close" @click="click"
+      >
+        <BotPortrait ref="portrait" :bot="bot" :rest="hovered ? 'wide' : 'idle'" />
+      </button>
+    </div>
     <p ref="bubble" data-testid="pitch-bubble" :data-open="String(open)" :data-text="text" aria-hidden="true" class="pitch-bubble" role="tooltip">
       <i v-if="typing" data-testid="typing" class="typing" aria-hidden="true"><i /><i /><i /></i>
       <span>{{ visibleText }}</span>
