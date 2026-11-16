@@ -203,7 +203,7 @@ npm run validate
 node scripts/make-submission-link.mjs bots/<slug>
 ```
 
-它会再校验一遍，输出一个以 `https://bot-zhipin.pages.dev/submit#` 开头的链接。把链接原样发给用户，告诉他：
+它会再校验一遍，输出一个以 `https://bot.jiachengbo.com/submit#` 开头的链接。把链接原样发给用户，告诉他：
 
 ```text
 准备好了！点开这个链接，照页面提示做就行：
@@ -213,7 +213,7 @@ node scripts/make-submission-link.mjs bots/<slug>
 之后页面上会显示进度，审核通过上线时 GitHub 会给你发邮件。
 ```
 
-如果脚本提示链接太长，会改为输出 `https://bot-zhipin.pages.dev/submit` 加一整行投稿包：让用户打开这个地址，把那一行粘进页面上的「已有投稿包」输入框。
+如果脚本提示链接太长，会改为输出 `https://bot.jiachengbo.com/submit` 加一整行投稿包：让用户打开这个地址，把那一行粘进页面上的「已有投稿包」输入框。
 
 **提交之后会发生什么**：
 
@@ -227,7 +227,7 @@ node scripts/make-submission-link.mjs bots/<slug>
 
 **投稿页打不开或提示「网站投稿暂时关闭」时**：运行 `node scripts/make-submission-link.mjs bots/<slug> --issue`，生成 GitHub Issue 投稿链接。用户点开后，在 GitHub 表单里勾授权，点 **Create**。一两分钟内 Issue 下会出现自动回复：通过了就附上 PR 链接；没通过就列出错误，用户把回复整段发给你，你改好后生成新链接。
 
-**没有 Node 时**：按下面的格式手写投稿包（每个文件一段），让用户打开 `https://bot-zhipin.pages.dev/submit`，把整段粘进「已有投稿包」输入框：
+**没有 Node 时**：按下面的格式手写投稿包（每个文件一段），让用户打开 `https://bot.jiachengbo.com/submit`，把整段粘进「已有投稿包」输入框：
 
 ```text
 BOT-ZHIPIN-BUNDLE v1

@@ -8,14 +8,14 @@
 
 ### 方式一：让 AI 帮你投稿（推荐）
 
-打开 https://bot-zhipin.pages.dev/submit ，点「复制投稿提示词」，发给你的 AI 助手（你的 Grok Bot，或者 Codex、Claude Code 这类能在你电脑上操作的编程 AI）。提示词全文：
+打开 https://bot.jiachengbo.com/submit ，点「复制投稿提示词」，发给你的 AI 助手（你的 Grok Bot，或者 Codex、Claude Code 这类能在你电脑上操作的编程 AI）。提示词全文：
 
 ```text
 请帮我把我做的 Grok Bot 投稿到「Bot 直聘」：https://github.com/jakob52123/bot-zhipin
 1. 先完整读一遍仓库根目录的 AGENTS.md，严格按它的步骤做。
 2. 能从你自己（或我的 Bot 配置）里查到的信息直接用，查不到的再一次问清我；不要编造效果。
 3. 不要向我要 GitHub 令牌或密码。
-4. 最后给我一个 https://bot-zhipin.pages.dev/submit 开头的投稿链接。
+4. 最后给我一个 https://bot.jiachengbo.com/submit 开头的投稿链接。
 ```
 
 AI 会先把能查到的信息整理成一份草稿让你确认，再聊几句设计说明（那是写给你自己的作品，请照实说）。准备好以后，它会发给你**一个链接**：

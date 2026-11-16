@@ -175,7 +175,7 @@ valid ─► 登录 ─► 授权 ─► 提交 submitting ─┬─► 成功 s
 1. 先完整读一遍仓库根目录的 AGENTS.md，严格按它的步骤做。
 2. 能从你自己（或我的 Bot 配置）里查到的信息直接用，查不到的再一次问清我；不要编造效果。
 3. 不要向我要 GitHub 令牌或密码。
-4. 最后给我一个 https://bot-zhipin.pages.dev/submit 开头的投稿链接。
+4. 最后给我一个 https://bot.jiachengbo.com/submit 开头的投稿链接。
 ```
 
 仓库地址和站点地址要拼进去，分别取自 `SITE.repo` 和 `SITE.url`（M1 新增），不要写死在组件里。README、CONTRIBUTING 里的投稿提示词改成和这里一字不差。
@@ -432,7 +432,7 @@ valid ─► 登录 ─► 授权 ─► 提交 submitting ─┬─► 成功 s
 | `bad_request` | 提交 | 「页面状态有点乱，刷新一下再试。」 | 「刷新页面」按钮 |
 | `unauthenticated` | 上传、提交、状态 | 按 §7「会话过期」处理 | ② 回到未登录，焦点到「用 GitHub 登录」 |
 | `session_expired` | 同上 | 同上 | 同上 |
-| `forbidden_origin` | 提交、上传 | 「请直接在 bot-zhipin.pages.dev 上打开投稿页再提交。」 | 「复制本页链接」（复制 `/submit#` 加当前令牌） |
+| `forbidden_origin` | 提交、上传 | 「请直接在 bot.jiachengbo.com 上打开投稿页再提交。」 | 「复制本页链接」（复制 `/submit#` 加当前令牌） |
 | `license_required` | 提交 | 「先勾选上面的授权，再提交。」 | 焦点移到 `license-checkbox` |
 | `not_found` | 状态查询 | 「找不到这个投稿记录了，可能已经被关闭。」 | 「查看 PR ↗」（有 PR 号时） |
 | `slug_taken` | 提交（也会在 §5.4 提前出现） | 「这个英文短名（slug：{slug}）已经被别人用了。」 | 「复制给 AI」，复制内容：「投稿页提示 slug「{slug}」已经被别人用了。请换一个新的英文短名，同步修改文件夹名和 bot.yaml 里的 slug，再生成新的投稿链接给我。」 |
@@ -608,7 +608,7 @@ valid ─► 登录 ─► 授权 ─► 提交 submitting ─┬─► 成功 s
 10. `GET /api/submit/status?pr=<号>` 的 `state` 取值固定为 `checking | waiting_review | approved | merged | live | failed | closed`，另外返回 `url`、`slug`、`liveUrl`。
 11. `submit-context.json` 的 `index[]` 要有 `authorGithub` 和 `addedAt`，用来在 §5.4 提前判断 slug 是否被占，以及在预览里显示原上架日期。另外要把截图张数上限需要的 `LIMITS.files` 暴露出来（放进 context，或者让浏览器端从纯内核 import）。
 12. 浏览器端要能编码：「改用 Issue 投稿」要在浏览器里生成 BZB1 令牌（`CompressionStream('gzip')`），生成的令牌必须能被 Node 端的 `decode` 解开；URL 长度阈值 7500 要和 CLI 共用一个常量。
-13. `meta.mjs` 新增 `SITE.url = 'https://bot-zhipin.pages.dev'` 和 `submitPrompt()`（全文见 §4.2）；网站上「我要投稿」和空状态里「做第一个投稿的人」都改成链到 `/submit`（站内链接，去掉 ↗）。
+13. `meta.mjs` 新增 `SITE.url = 'https://bot.jiachengbo.com'` 和 `submitPrompt()`（全文见 §4.2）；网站上「我要投稿」和空状态里「做第一个投稿的人」都改成链到 `/submit`（站内链接，去掉 ↗）。
 14. `/submit` 的 CSP 要放行：`img-src 'self' blob: data: https://avatars.githubusercontent.com`；`connect-src 'self'`；`form-action 'self'`；`/api/auth/start` 是整页跳转，不受 `connect-src` 限制。
 15. `announce.ts` 要加通用的 `announce(text)`，归 L4 的写入范围。
 16. 服务端在新投稿时把 `addedAt` 改写为北京时间当天。预览里也按这个规则显示日期，两边要一致。

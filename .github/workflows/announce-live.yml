@@ -30,6 +30,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
-          SITE_URL: https://bot-zhipin.pages.dev
+          SITE_URL: https://bot.jiachengbo.com
           APP_BOT_LOGIN: ${{ vars.SUBMIT_APP_BOT_LOGIN }}
         run: node scripts/announce-live.mjs

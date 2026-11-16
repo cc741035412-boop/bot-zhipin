@@ -15,6 +15,9 @@ export default defineConfig({
     ['link', { rel: 'icon', href: '/favicon.ico', sizes: '32x32' }],
     ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
     ['link', { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' }],
+    // 旧地址（*.pages.dev）打开时立刻换到正式域名，路径、参数、#后面的投稿包都带上。放在页面头部、渲染之前跑。
+    // 不用 Functions 做 301：那样每个静态请求都要过一次函数，占免费额度。投稿页的 CSP 会自动给它算哈希（gen-headers.mjs）。
+    ['script', {}, `if(location.hostname===${JSON.stringify(SITE.legacyHost)})location.replace(${JSON.stringify(SITE.url)}+location.pathname+location.search+location.hash)`],
   ],
   appearance: true,
   vite: { plugins: [botWatch()] },

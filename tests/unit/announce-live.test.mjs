@@ -227,7 +227,7 @@ it('工作流仅 main push、可信 checkout、限定权限，新增 run 不插�
   expect(job.steps[1]).toEqual({ uses: 'actions/setup-node@v5', with: { 'node-version-file': '.nvmrc' } })
   const step = job.steps[2]
   expect(step.run).toBe('node scripts/announce-live.mjs')
-  expect(step.env).toEqual({ GH_TOKEN: '${{ github.token }}', SHA: '${{ github.sha }}', REPO: '${{ github.repository }}', SITE_URL: 'https://bot-zhipin.pages.dev', APP_BOT_LOGIN: '${{ vars.SUBMIT_APP_BOT_LOGIN }}' })
+  expect(step.env).toEqual({ GH_TOKEN: '${{ github.token }}', SHA: '${{ github.sha }}', REPO: '${{ github.repository }}', SITE_URL: 'https://bot.jiachengbo.com', APP_BOT_LOGIN: '${{ vars.SUBMIT_APP_BOT_LOGIN }}' })
   const ci = YAML.parse(readFileSync(new URL('../../.github/workflows/ci.yml', import.meta.url), 'utf8'))
   const debug = ci.jobs['validate-and-build'].steps[1]
   expect(debug.name).toBe('打印 PR 作者关联（联调用）')

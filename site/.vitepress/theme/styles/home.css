@@ -250,8 +250,8 @@ img.bot-still { display: block; flex: none; border-radius: 50%; object-fit: cove
 /* ---------- 8. 筛选为空、页尾 ---------- */
 .empty-state { display: flex; flex-direction: column; align-items: center; gap: var(--bz-sp-4); padding: var(--bz-sp-8) var(--bz-sp-4); border: 1px dashed var(--bz-border-strong); border-radius: var(--bz-r-card); background: var(--bz-surface-2); text-align: center; }
 .shelf-page .empty-state p { font-size: var(--bz-fs-body); line-height: 1.6; color: var(--bz-text-2); }
-/* 页尾只有一枚「我要投稿」，居中放在细线下面 */
-.shelf-footer { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: var(--bz-sp-9); padding-top: var(--bz-sp-7); border-top: 1px solid var(--bz-hairline); }
+/* 页尾只有一枚「我要投稿」，居中；下面紧跟全站页脚（它自带一条细线），这里不再画线 */
+.shelf-footer { position: relative; z-index: 1; display: flex; justify-content: center; margin-top: var(--bz-sp-9); }
 
 /* ---------- 9. 投稿预览复用列表卡：把 submit.css 里旧版式留下的偏移归零 ---------- */
 .submit-preview .bot-card.bot-card { padding: 0; }

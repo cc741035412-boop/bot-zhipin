@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { CONTRIBUTE_URL, DEFAULT_PITCHES, installPrompt } from '../../site/.vitepress/meta.mjs'
+import { CONTRIBUTE_URL, DEFAULT_PITCHES, FOOTER, SITE, installPrompt } from '../../site/.vitepress/meta.mjs'
 import { renderDesigns } from '../../site/.vitepress/data/design-renderer.mjs'
 
 const weekly = 'demo-weekly-digest'
@@ -351,4 +351,21 @@ test('手机无横向滚动、深色模式与可选交付截图', async ({ page 
   await page.evaluate(() => document.documentElement.classList.add('dark'))
   await expect(page.getByTestId('bot-detail')).toBeVisible()
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+})
+
+test('每一页底部都有页脚：创建人、开源仓库、鸣谢', async ({ page }) => {
+  for (const path of ['/', `/bots/${weekly}`, '/submit']) {
+    await page.goto(path)
+    const footer = page.getByTestId('site-footer')
+    await expect(footer).toHaveCount(1)
+    await expect(footer.getByTestId('footer-creator')).toHaveText(`${FOOTER.creatorLabel}：${FOOTER.creator} · ${FOOTER.org}`)
+    await expect(footer.getByTestId('footer-repo')).toHaveAttribute('href', SITE.repo)
+    await expect(footer.getByTestId('footer-repo')).toHaveAttribute('target', '_blank')
+    await expect(footer.getByTestId('footer-thanks')).toHaveText(FOOTER.thanks)
+  }
+  // 手机宽度：页脚不撑出横向滚动
+  await page.setViewportSize({ width: 320, height: 700 })
+  await page.goto('/')
+  await page.getByTestId('site-footer').scrollIntoViewIfNeeded()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0)
 })

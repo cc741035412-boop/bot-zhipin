@@ -170,9 +170,9 @@
 
 ## 2. 首页布局
 
-内容区最大宽 1140px，左右留白 32px（<680px 时 16px）；`.shelf-page` 自己铺满视口宽，用内边距把内容收进 1140，所以球池这类铺满视口的层可以出血到视口边缘而不产生横向滚动（`overflow-x: clip`）。自上而下：悬浮导航条 → 首屏（球池：站名、搜索框、掉下来的 Bot）→ 「本周主推」→ 「小队」→ 「专题」→ 「全部 Bot」（工具栏 + 按分组分段的列表）→ 页尾的「我要投稿」。区块之间 96px（<680px 64px）。
+内容区最大宽 1140px，左右留白 32px（<680px 时 16px）；`.shelf-page` 自己铺满视口宽，用内边距把内容收进 1140，所以球池这类铺满视口的层可以出血到视口边缘而不产生横向滚动（`overflow-x: clip`）。自上而下：悬浮导航条 → 首屏（球池：站名、搜索框、掉下来的 Bot）→ 「本周主推」→ 「小队」→ 「专题」→ 「全部 Bot」（工具栏 + 按分组分段的列表）→ 页尾的「我要投稿」→ 全站页脚。区块之间 96px（<680px 64px）。
 
-组件怎么分：`BotShelf.vue` 只管页面骨架；首屏是 `HeroBallpit.vue`（§2.2）；首屏以下全部在 `HomeSections.vue` 里（主推、`HomeSquads`、`HomeCollections`、工具栏 `ShelfToolbar`、分组 `RoleGroup`、页尾）。排序、分组、地址栏读写是纯函数，在 `theme/shelf.ts`（有单测）。
+组件怎么分：`BotShelf.vue` 只管页面骨架；首屏是 `HeroBallpit.vue`（§2.2）；首屏以下全部在 `HomeSections.vue` 里（主推、`HomeSquads`、`HomeCollections`、工具栏 `ShelfToolbar`、分组 `RoleGroup`、页尾）。全站页脚 `SiteFooter` 挂在主题 Layout 的 `layout-bottom` 插槽里（§2.6）。排序、分组、地址栏读写是纯函数，在 `theme/shelf.ts`（有单测）。
 
 ### 2.1 悬浮玻璃导航条
 
@@ -298,7 +298,13 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 
 **筛选为空**（地址栏写了一个货架上还没有 Bot 的分组）：见 §10。
 
-- **页尾** `.shelf-footer`（货架为空时不显示）：到列表 96px（<680px 64px），顶上一条 `--bz-hairline` 细线，线下 48px 处居中放一枚「我要投稿」`[data-testid="contribute-link"]`（`.bz-btn`，`plus` 图标 + 文字，链到 `/submit`）。没有引导语。
+- **页尾** `.shelf-footer`（货架为空时不显示）：到列表 96px（<680px 64px），居中放一枚「我要投稿」`[data-testid="contribute-link"]`（`.bz-btn`，`plus` 图标 + 文字，链到 `/submit`）。没有引导语，也不画分隔线（下面的全站页脚自带一条，§2.6）。
+
+### 2.6 全站页脚
+
+用户要求加（2026-11-15，决策 44）：每页底部写创建人、开源仓库和鸣谢。文字都在 `meta.mjs` 的 `FOOTER`，改字只改那里。
+
+`SiteFooter.vue`，`[data-testid="site-footer"]`：顶上一条 `--bz-hairline` 细线，上下内边距 48 / 64，和内容区同宽（1140，左右留白 32，<680px 16）。左边：20px 橙色站标 + 站名（16px/600 圆体，墨色），下一行「创建人：贾程博 · 深圳且曼学院」`[data-testid="footer-creator"]`；右边两行（窄屏落到左边下面）：「开源项目」+ 仓库链接 `[data-testid="footer-repo"]`（新标签页打开，`arrow-up-right` 小图标）+「· MIT 许可」；「鸣谢」+「且曼学院」`[data-testid="footer-thanks"]`。13px，标签三级灰、内容二级灰，链接悬停变墨色。
 
 ## 3. 卡片、玻璃砖和气泡
 
@@ -444,7 +450,7 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 | 点「导入」（列表、主推）或「一键导入」（详情） | 该卡 Bot 播 comet（「嗖」一下），新标签打开模板页 |
 | 复制成功 | wink |
 | 30 秒没有任何输入（减少动效时不触发） | data-running=true 的 Bot 依次进入 sleep，整波次错开 0–800ms；一个全局超时器管理整波 |
-| 睡着后有任何输入 | 取消待睡队列，所有 sleep Bot 立即 exclaim，按 2 秒 duration 回 rest |
+| 睡着后有任何输入 | 取消待睡队列；睡着的 Bot 里只有离输入点最近的一只 exclaim（键盘、滚动这类没坐标的输入取第一只），按 2 秒 duration 回 rest；其余的安静睁眼（`idle`、hold 0，下一帧回 rest）。不让全体一起冒感叹号：满屏感叹号太瘆人（用户 2026-11-15） |
 | 进首页（每份文档一次） | 球池里的 Bot 从上面掉下来，约 2 秒落定；之后再回到首页直接摆好（§2.2） |
 | 球池里的 Bot | 悬停：wide + 跳一下，停住冒出名片；点击 = 戳 + 名片；能抓起来扔；键盘可达。详见 §2.2 |
 | 点首屏搜索框、按 ⌘K / Ctrl+K、「/」 | 打开搜索命令面板（`SearchPalette`）；关闭后焦点回到原处 |
@@ -593,7 +599,7 @@ DOM 顺序：「返回货架」→ `.detail-layout`（头部 `header.detail-head
 
 | 情况 | 表现 |
 |---|---|
-| 无 Bot | 虚线框（`1px dashed var(--bz-border-strong)`、圆角 12、上下内边距 48）里居中：96px sleep Bot +「货架上还没有 Bot」（16px/600）+「做第一个投稿的人」（次级按钮，前面一个 `plus` 图标）；data-testid=empty-state；不显示主推、工具栏、计数和页尾 |
+| 无 Bot | 虚线框（`1px dashed var(--bz-border-strong)`、圆角 12、上下内边距 48）里居中：96px sleep Bot +「货架上还没有 Bot」（16px/600）+「做第一个投稿的人」（次级按钮，前面一个 `plus` 图标）；data-testid=empty-state；不显示主推、工具栏、计数和页尾（全站页脚照常） |
 | 筛选无结果 | 同样式：96px sleep Bot +「这个分组还没有 Bot」+「看看全部」按钮（前面一个 `grid` 图标，点了回到「全部」）；data-testid=empty-filter。分组切换只列货架上有 Bot 的分组，所以只有从地址栏直接打开一个还空着的分组（`?role=学习` 这类）才会看到；这时计数是「共 0 个」，分组切换里没有选中项 |
 | 搜索无结果 | 搜索面板里一只睡着的 Bot +「没找到，换个词试试」（货架为空时是「货架上还没有 Bot」） |
 | 404 | 上下各留 96px，内容居中：120px 头像砖（`.bz-tile.s120`，砖背后一小团这只 Bot 颜色的光）里的 Bot 先 exclaim、再循环 thinking → 小字「404」（12px/600，`--bz-text-3`，`aria-hidden`）→「这一页走丢了」（h1 档 32px）→「← 回货架看看」（次级按钮，染这只 Bot 的颜色，前面一个 `arrow-left` 图标，到标题 32）。只有标题和返回按钮，没有说明句 |

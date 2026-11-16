@@ -7,7 +7,7 @@ export const errorCopy: Record<string, ErrorCopy> = {
   bad_request: { message: '页面状态有点乱，刷新一下再试。', next: '刷新页面', action: 'reload' },
   unauthenticated: expired,
   session_expired: expired,
-  forbidden_origin: { message: '请直接在 bot-zhipin.pages.dev 上打开投稿页再提交。', next: '复制本页链接', action: 'copy-link' },
+  forbidden_origin: { message: '请直接在 bot.jiachengbo.com 上打开投稿页再提交。', next: '复制本页链接', action: 'copy-link' },
   license_required: { message: '先勾选上面的授权，再提交。', next: '勾选授权', action: 'license-checkbox' },
   not_found: { message: '找不到这个投稿记录了，可能已经被关闭。', next: '查看 PR ↗', action: 'view-pr' },
   slug_taken: { message: '这个英文短名（slug：{slug}）已经被别人用了。', next: '复制给 AI', action: 'copy-ai', aiText: '投稿页提示 slug「{slug}」已经被别人用了。请换一个新的英文短名，同步修改文件夹名和 bot.yaml 里的 slug，再生成新的投稿链接给我。' },
