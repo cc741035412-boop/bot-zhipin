@@ -1,7 +1,7 @@
 import { relative } from 'node:path'
 import { ROOT } from '../../../scripts/lib/load-bots.mjs'
-import { PROMPTS_DIR, SKILLS_DIR, loadAllPrompts, loadAllSkills } from '../../../scripts/lib/load-library.mjs'
-import { isPublicEntry, listPrompt, listSkill, sortEntries, summarizePrompt, summarizeSkill } from '../../../scripts/lib/library-summary.mjs'
+import { PROMPTS_DIR, SKILLS_DIR, loadAllPrompts, loadAllSkills } from '../../../scripts/lib/load-prompts-skills.mjs'
+import { isPublicEntry, listPrompt, listSkill, sortEntries, summarizePrompt, summarizeSkill } from '../../../scripts/lib/entry-summary.mjs'
 
 // 收录的 Prompt 和 Skill：一条一个 YAML 文件（prompts/<slug>.yaml、skills/<slug>.yaml）。
 // 解析不了、slug 和文件名对不上的跳过并警告；正常构建前 npm run validate 已经拦住这类错误。

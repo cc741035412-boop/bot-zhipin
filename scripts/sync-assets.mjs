@@ -14,8 +14,8 @@ import { LIMITS } from './submission/bundle-core.mjs'
 import { explanations, shelfData } from '../site/.vitepress/data/bots.mjs'
 import { isPublicBot, isPublicSquad } from './lib/public-bot.mjs'
 import { loadAllSquads, squadsDirFor } from './lib/load-squads.mjs'
-import { libraryDirFor, loadEntries } from './lib/load-library.mjs'
-import { isPublicEntry } from './lib/library-summary.mjs'
+import { promptsDirFor, skillsDirFor, loadEntries } from './lib/load-prompts-skills.mjs'
+import { isPublicEntry } from './lib/entry-summary.mjs'
 
 const OUT = join(ROOT, 'site', 'public', 'bot-assets')
 const API_DATA = join(ROOT, 'site', 'public', 'api-data')
@@ -31,7 +31,7 @@ function safeFile(root, file) {
 }
 
 export function syncAssets({
-  botsDir = BOTS_DIR, squadsDir = squadsDirFor(botsDir), promptsDir = libraryDirFor('prompt', botsDir), skillsDir = libraryDirFor('skill', botsDir),
+  botsDir = BOTS_DIR, squadsDir = squadsDirFor(botsDir), promptsDir = promptsDirFor(botsDir), skillsDir = skillsDirFor(botsDir),
   out = OUT, apiData = API_DATA,
 } = {}) {
   rmSync(out, { recursive: true, force: true })
@@ -42,10 +42,10 @@ export function syncAssets({
   const squads = shelfData(bots, { squads: loadAllSquads(squadsDir).filter(isPublicSquad), curation: {} }).squads.map((squad) => squad.slug)
   writeFileSync(join(apiData, 'squad-slugs.json'), JSON.stringify(squads) + '\n')
   // 收录的 Prompt 和 Skill：和网站生成页面同一个口径（isPublicEntry），有页面的才进清单。
-  const library = {}
+  const slugsByKind = {}
   for (const [kind, dir] of [['prompt', promptsDir], ['skill', skillsDir]]) {
-    library[kind] = loadEntries(kind, dir).filter(isPublicEntry).map((entry) => entry.slug)
-    writeFileSync(join(apiData, `${kind}-slugs.json`), JSON.stringify(library[kind]) + '\n')
+    slugsByKind[kind] = loadEntries(kind, dir).filter(isPublicEntry).map((entry) => entry.slug)
+    writeFileSync(join(apiData, `${kind}-slugs.json`), JSON.stringify(slugsByKind[kind]) + '\n')
   }
   let commit = process.env.CF_PAGES_COMMIT_SHA
   if (!commit) {
@@ -80,7 +80,7 @@ export function syncAssets({
       n++
     }
   }
-  return { bots: bots.length, squads: squads.length, prompts: library.prompt.length, skills: library.skill.length, images: n }
+  return { bots: bots.length, squads: squads.length, prompts: slugsByKind.prompt.length, skills: slugsByKind.skill.length, images: n }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {

@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 import { libraryMarks } from '../../site/.vitepress/theme/library-marks.ts'
-import { loadLibraryEnums } from '../../scripts/lib/load-library.mjs'
+import { loadLibraryEnums } from '../../scripts/lib/load-prompts-skills.mjs'
 
 it.each(['prompt', 'skill'])('%s 每个 schema 分类恰有一份配色和图形', (kind) => {
   const marks = libraryMarks[kind]

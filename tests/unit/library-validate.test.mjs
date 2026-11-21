@@ -2,9 +2,9 @@ import { expect, it } from 'vitest'
 import { join } from 'node:path'
 import YAML from 'yaml'
 import { ROOT } from '../../scripts/lib/load-bots.mjs'
-import { loadEntries, loadLibraryEnums } from '../../scripts/lib/load-library.mjs'
+import { loadEntries, loadLibraryEnums } from '../../scripts/lib/load-prompts-skills.mjs'
 import { buildEntryModel } from '../../scripts/lib/library-model.mjs'
-import { summarizePrompt } from '../../scripts/lib/library-summary.mjs'
+import { summarizePrompt } from '../../scripts/lib/entry-summary.mjs'
 import { validateLibrary } from '../../scripts/lib/validate/library.mjs'
 
 const fixtures = (kind) => loadEntries(kind, join(ROOT, 'tests/fixtures', `${kind}s`))

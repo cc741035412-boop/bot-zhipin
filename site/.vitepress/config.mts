@@ -14,7 +14,7 @@ import { botWatch } from './bot-watch.mjs'
 import { fullName } from '../../scripts/lib/bot-name.mjs'
 
 // 收录条目的网页标题：中文标题在前，原标题（Prompt 的 titleOriginal、Skill 的原名）放括号里。
-function libraryHead(item: { title: string, purpose: string, titleOriginal?: string | null, name?: string }) {
+function entryHead(item: { title: string, purpose: string, titleOriginal?: string | null, name?: string }) {
   const original = item.titleOriginal || (item.name && item.name !== item.title ? item.name : null)
   return { title: original ? `${item.title}（${original}）` : item.title, description: item.purpose }
 }
@@ -86,7 +86,7 @@ export default defineConfig({
       pageData.description = bot ? share.botDescription(bot) : squad.tagline
       delete pageData.frontmatter.description
     } else if (prompt || skill) {
-      const { title, description } = libraryHead(prompt || skill)
+      const { title, description } = entryHead(prompt || skill)
       pageData.title = pageData.frontmatter.title = title
       pageData.description = description
       delete pageData.frontmatter.description

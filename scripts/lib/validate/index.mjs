@@ -6,7 +6,7 @@ import { curationFileFor, loadCuration } from '../load-curation.mjs'
 import { isPublicBot } from '../public-bot.mjs'
 import { validateModels } from './core.mjs'
 import { validateCuration, validateSquads } from './squads.mjs'
-import { loadEntries, libraryDirFor } from '../load-library.mjs'
+import { loadEntries, libraryDirFor } from '../load-prompts-skills.mjs'
 import { validateLibrary } from './library.mjs'
 export { formatResult } from './core.mjs'
 
@@ -33,7 +33,7 @@ export function validateBots({ botsDir = BOTS_DIR, now = new Date() } = {}) {
  * 全量校验：Bot + 小队 + 策展 + 收录的 Prompt 和 Skill，`npm run validate` 用它。
  * 小队和策展引用的 slug 必须在货架上；「在货架上」的口径和网站一致（isPublicBot）。
  * 不传 squadsDir / curationFile / promptsDir / skillsDir 时，跟着 botsDir 取兄弟目录
- * （见 load-squads.mjs、load-curation.mjs、load-library.mjs）。
+ * （见 load-squads.mjs、load-curation.mjs、load-prompts-skills.mjs）。
  */
 export function validateAll({ botsDir = BOTS_DIR, squadsDir, curationFile, promptsDir, skillsDir, now = new Date() } = {}) {
   const result = validateBots({ botsDir, now })

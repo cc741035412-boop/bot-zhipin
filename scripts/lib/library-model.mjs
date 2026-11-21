@@ -1,4 +1,4 @@
-// 与存储无关的收录条目模型（Prompt、Skill）：一条一个 YAML 文件，只解析不读盘。读盘在 load-library.mjs。
+// 与存储无关的收录条目模型（Prompt、Skill）：一条一个 YAML 文件，只解析不读盘。读盘在 load-prompts-skills.mjs。
 import { parseMapping } from './squad-model.mjs'
 
 // 一条 Prompt 的正文最多 6000 字（中文约 18KB），留出其他字段的余量；Skill 不收正文。

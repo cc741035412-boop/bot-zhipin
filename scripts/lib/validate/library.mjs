@@ -1,4 +1,4 @@
-// 收录条目（Prompt、Skill）的校验内核：纯函数，不读盘。读盘在 load-library.mjs。
+// 收录条目（Prompt、Skill）的校验内核：纯函数，不读盘。读盘在 load-prompts-skills.mjs。
 // 许可证规矩（PS 契约 §2.4）：只有 schema 里 $defs.reusableLicense 列出的许可证才能放正文 body，其余只写 summary + 链接。
 import { validate as checkPrompt, schema as promptSchema } from './generated/prompt-schema.mjs'
 import { validate as checkSkill, schema as skillSchema } from './generated/skill-schema.mjs'
@@ -55,7 +55,7 @@ function reportStray(entry, dir, report) {
 }
 
 /**
- * kind：prompt 或 skill；entries：buildEntryModel 的结果（load-library.mjs 的 loadEntries）。
+ * kind：prompt 或 skill；entries：buildEntryModel 的结果（load-prompts-skills.mjs 的 loadEntries）。
  * 返回 { errors, warnings }，每条是 { file, where, problem, fix }，和 Bot、小队同一个口径。
  */
 export function validateLibrary(kind, entries, { now = new Date() } = {}) {
