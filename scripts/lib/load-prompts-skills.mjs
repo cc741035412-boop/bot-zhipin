@@ -9,7 +9,7 @@ export const SKILL_SCHEMA_PATH = join(ROOT, 'schema', 'skill.schema.json')
 
 /**
  * 分类、正文语言、agents、许可证的取值和顺序只认 schema（和 loadEnums() 读 bot.schema.json 一个办法）。
- * reusable：允许放正文（body）的许可证。
+ * reusable：放正文时应附许可链接的可转载许可证。
  */
 export function loadLibraryEnums() {
   const prompt = JSON.parse(readFileSync(PROMPT_SCHEMA_PATH, 'utf8'))

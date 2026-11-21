@@ -2,7 +2,6 @@
 // 详情页拿完整的一条（路由参数）；本库列表与筛选用去掉长文字的列表版，控制每个页面要加载的数据量。
 import { schema as promptSchema } from './validate/generated/prompt-schema.mjs'
 import { schema as skillSchema } from './validate/generated/skill-schema.mjs'
-import { isReusable } from './validate/library.mjs'
 
 const SCHEMAS = { prompt: promptSchema, skill: skillSchema }
 const str = (value) => typeof value === 'string' && value.trim() !== '' ? value : null
@@ -36,20 +35,17 @@ function common(data, kind) {
   }
 }
 
-/**
- * 一条 Prompt 的完整数据（详情页用）。
- * 许可证不允许转载时，就算文件里写了 body 也不输出：校验会拦住，这里再兜一层底，正文绝不出现在页面上。
- */
+/** 详情页保留原文和本站译文，两者的换行和缩进都不改。 */
 export function summarizePrompt(entry) {
   const data = entry.data
-  const base = common(data, 'prompt')
-  const body = isReusable(base.license) ? str(data.body) : null
+  const body = str(data.body)
   return {
-    ...base,
+    ...common(data, 'prompt'),
     titleOriginal: str(data.titleOriginal),
     lang: str(data.lang),
     copyright: str(data.copyright),
     body,
+    bodyZh: str(data.bodyZh),
     hasBody: body !== null,
     summary: block(data.summary),
     usage: block(data.usage),
@@ -71,8 +67,8 @@ export function summarizeSkill(entry) {
   }
 }
 
-/** 列表版：去掉只有详情页才用的长文字（Prompt 的正文、摘要、用法；Skill 的摘要、安装和依赖）。 */
-export const listPrompt = ({ body, summary, usage, copyright, ...item }) => item
+/** 列表版：去掉只有详情页才用的长文字（Prompt 的原文、译文、摘要、用法；Skill 的摘要、安装和依赖）。 */
+export const listPrompt = ({ body, bodyZh, summary, usage, copyright, ...item }) => item
 export const listSkill = ({ summary, install, requires, ...item }) => item
 
 // FNV-1a 32：slug 只含 ASCII，按无符号整数比较。

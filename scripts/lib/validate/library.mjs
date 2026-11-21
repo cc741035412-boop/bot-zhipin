@@ -1,5 +1,5 @@
 // 收录条目（Prompt、Skill）的校验内核：纯函数，不读盘。读盘在 load-prompts-skills.mjs。
-// 许可证规矩（PS 契约 §2.4）：只有 schema 里 $defs.reusableLicense 列出的许可证才能放正文 body，其余只写 summary + 链接。
+// Prompt 可照录原文，须注明版权；可转载许可证还应附许可链接。
 import { validate as checkPrompt, schema as promptSchema } from './generated/prompt-schema.mjs'
 import { validate as checkSkill, schema as skillSchema } from './generated/skill-schema.mjs'
 import { reportSchemaErrors } from './schema.mjs'
@@ -35,7 +35,7 @@ function checkQuotes(data, say) {
     const quotes = data[field].matchAll(/“([^”]*)”|「([^」]*)」|"([^"\n]*)"|^\s*>\s*(.+)$/gm)
     let length = 0
     for (const match of quotes) length += [...match.slice(1).find((part) => part !== undefined)].length
-    if (length > 30) say(field, '不允许转载正文的条目，标明的引用超过 30 字', `缩短 ${field} 中的引文，用自己的话介绍并保留 source.url。`)
+    if (length > 30) say(field, '非可转载许可的条目，摘要或用法中标明的引用超过 30 字', `缩短 ${field} 中的引文，用自己的话介绍并保留 source.url。`)
   }
 }
 
@@ -102,14 +102,14 @@ export function validateLibrary(kind, entries, { now = new Date() } = {}) {
       if (kind === 'prompt') {
         const body = Object.hasOwn(data, 'body')
         if (body && !filled(data.copyright)) {
-          say('copyright', '转载正文缺少原版权行', '将原许可证中的版权行原样填入 copyright（单行，1～200 字）；无法核实就删掉 body，改写摘要。')
+          say('copyright', '转载正文缺少原版权行', '照原文页面写版权行，比如「© 作者名，保留所有权利」；原页没写就写「版权归原作者，原页未声明许可」。')
         }
-        if (body && !isReusable(data.license)) {
-          say('body', `许可证是「${data.license}」，不允许转载正文；只有 ${REUSABLE_LICENSES.join('、')} 可以放 body`,
-            `删掉 body，改写 summary（本站自己写的中文摘要，40～300 字，引用原文不超过 30 字），让人点 source.url 看原文；如果原作者其实用的是上面这些许可证之一，把 license 改成实际的许可证，licenseUrl 写许可证原文链接。`)
-        }
+        const translated = Object.hasOwn(data, 'bodyZh')
+        if (translated && !body) say('bodyZh', '有中文译文却没有 body 原文', '补上 body 原文；只收摘要时删掉 bodyZh。')
+        if (translated && data.lang === 'zh') say('bodyZh', '中文原文不需要另写中文译文', '保留 body 里的中文原文，删掉 bodyZh。')
+        if (body && data.lang === 'en' && !translated) say('bodyZh', '英文原文尚无中文译文', '在 bodyZh 填写本站中文译文，保留 body 里的英文原文。', true)
         if (!filled(data.body) && !filled(data.summary)) {
-          say('summary', '既没有 body（正文）也没有 summary（摘要），页面上什么内容都没有', '许可证允许转载就写 body（原样照抄）；不允许就写 summary（本站自己写的中文，40～300 字）。两个都写也可以。')
+          say('summary', '既没有 body（正文）也没有 summary（摘要），页面上什么内容都没有', '写入 body 原文，或填写 summary（本站自己写的中文，40～300 字）。两个都写也可以。')
         }
         if (body && isReusable(data.license) && !filled(data.licenseUrl)) {
           say('licenseUrl', '放了正文，但没写许可证原文链接', '在 licenseUrl 写上许可证原文的地址（仓库里的 LICENSE 文件或许可证页面），转载正文要能查到授权依据。', true)
