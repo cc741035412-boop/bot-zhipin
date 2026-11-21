@@ -41,7 +41,7 @@ const text = (value) => typeof value === 'string' && value ? value : ''
 const about = computed(() => props.bot.about && typeof props.bot.about === 'object' ? props.bot.about : {})
 const intro = computed(() => text(about.value.intro))
 const does = computed(() => list(about.value.does))
-const starters = computed(() => list(about.value.starters))
+const starters = computed(() => [text(about.value.trial), ...list(about.value.starters)].filter(Boolean))
 const routines = computed(() => list(about.value.routines).filter((item) => item && (item.what || item.when)))
 const prerequisites = computed(() => list(props.bot.prerequisites))
 const permissions = computed(() => list(props.bot.permissions))
