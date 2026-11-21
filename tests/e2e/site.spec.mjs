@@ -86,12 +86,11 @@ test('热度更新不跳位、切换后重排、复制反馈与导入上报', as
   const link = card(page, reviewer).getByTestId('btn-import')
   await expect(link).toHaveAttribute('target', '_blank')
   await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-  const popupPromise = context.waitForEvent('page')
+  const shelfURL = page.url()
   await link.click()
-  const popup = await popupPromise
-  await popup.waitForLoadState()
-  await popup.close()
   await expect.poll(() => clicks).toContainEqual({ slug: reviewer, kind: 'import' })
+  await expect(page).toHaveURL(shelfURL)
+  expect(context.pages()).toEqual([page])
   await expect(card(page, weekly).getByTestId('btn-prompt')).toHaveText('复制安装提示词')
   await expect(card(page, weekly).getByTestId('btn-prompt').locator('svg')).toHaveAttribute('data-icon', 'copy')
 })
@@ -284,17 +283,17 @@ test('整张卡可点进详情；头像、作者、导入、复制在它上面�
   await bot.getByTestId('btn-prompt').click()
   await expect(bot.getByTestId('btn-prompt')).toHaveText('已复制')
   await expect(page).toHaveURL(/\/$/)
-  // 点导入开新标签页，本页不动。
-  const popup = context.waitForEvent('page')
+  // 桌面点导入触发该卡的上报，不跟随整卡链接。
+  const request = page.waitForRequest((r) => r.url().endsWith('/api/click') && r.postDataJSON().kind === 'import')
   await bot.getByTestId('btn-import').click()
-  await (await popup).close()
-  await expect(page).toHaveURL(/\/$/)
+  expect((await request).postDataJSON()).toEqual({ slug: weekly, kind: 'import' })
+  await expect(page).toHaveURL('/')
   // 点介绍那一块（不是名字）进详情。
   const tagline = await bot.locator('.bot-tagline').boundingBox()
   await page.mouse.click(tagline.x + tagline.width / 2, tagline.y + tagline.height / 2)
   await expect(page).toHaveURL(new RegExp(`/bots/${weekly}$`))
   await expect(page.getByTestId('bot-detail')).toBeVisible()
-  // 主推卡同样整卡可点：点介绍进详情，点砖是戳、点导入开新标签页。
+  // 主推卡同样整卡可点：点介绍进详情，点砖是戳，导入按钮不被整卡链接盖住。
   await page.goto('/')
   const featured = page.locator(`[data-testid="featured-card"][data-slug="${reviewer}"]`)
   await featured.scrollIntoViewIfNeeded()
@@ -368,4 +367,18 @@ test('每一页底部都有页脚：创建人、开源仓库、鸣谢', async ({
   await page.goto('/')
   await page.getByTestId('site-footer').scrollIntoViewIfNeeded()
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0)
+})
+
+test('触屏导入在新页面打开 x.ai 模板', async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ hasTouch: true, isMobile: true, baseURL })
+  try {
+    await context.route('https://x.ai/**', r => r.fulfill({ body: 'ok' }))
+    const page = await context.newPage()
+    await page.goto(`/bots/${reviewer}`)
+    const popup = page.waitForEvent('popup')
+    await page.getByTestId('btn-import').tap()
+    await expect(await popup).toHaveURL(/^https:\/\/x\.ai\/bot\/demo-prd-reviewer-000/)
+  } finally {
+    await context.close()
+  }
 })
