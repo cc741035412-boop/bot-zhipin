@@ -19,8 +19,12 @@
 | `scripts/lib/load-squads.mjs`、`load-curation.mjs` | 读取小队和策展（只读不校验，不跟随符号链接）；目录怎么定见下面「约定」 | 维护者 |
 | `scripts/lib/bot-summary.mjs`、`squad-summary.mjs`、`curation-summary.mjs` | 网站用的数据形状，纯函数：Bot 摘要及其装饰、小队摘要、策展整理 | 维护者，改了影响所有页面 |
 | `scripts/lib/bot-name.mjs` + `site/.vitepress/theme/components/BotName.vue` | Bot 怎么称呼：`name` 是原名，`nameZh` 是可选的中文叫法。`displayName` / `originalName` / `fullName` 三个纯函数定规矩（构建脚本和页面共用），`BotName.vue` 负责画（中文叫法为主、原名跟在后面）。页面上要写 Bot 名字一律用它，规格见 `INTERACTION.md` §3.4 | 维护者 |
+| `scripts/lib/share.mjs` | 站内绝对地址、Bot 页面标题和描述、分享图地址及版本号的共享规则 | 维护者 |
+| `scripts/lib/catalog.mjs` | 将完整货架摘要整理成按 slug 排序的 catalog.json | 维护者 |
+| `scripts/lib/llms.mjs` | 将完整货架摘要按 schema 分组顺序排成 llms.txt | 维护者 |
 | `scripts/validate.mjs` + `scripts/lib/validate/` | `npm run validate`：Bot、小队、策展及两个收录库的全量校验；`validate/squads.mjs` 是小队和策展的校验内核 | 维护者 |
 | `scripts/gen-schema-validator.mjs` | `npm run gen:schema`：把五份 schema 各预编译成 `scripts/lib/validate/generated/<名字>-schema.mjs` | 维护者 |
+| `scripts/og/` | 构建结束时用本地字体子集生成 Bot、小队和全站的 PNG 分享图 | 维护者 |
 | `scripts/sync-assets.mjs` | 构建前把截图、头像复制到 `site/public/bot-assets/`，并生成 `site/public/api-data/slugs.json`、`squad-slugs.json` | 维护者 |
 | `site/` | VitePress 站点根目录；`site/.vitepress/meta.mjs` 放站名、仓库地址、安装提示词、默认台词、每个分组的一句说明（`CATEGORY_COPY`） | 维护者 |
 | `site/.vitepress/data/` | 数据加载器：`bots.data`（列表数据：Bot 摘要 + 装饰，不带 `about` 全文）、`squads.data`（小队摘要）、`curation.data`（策展）；三份都由 `bots.mjs` 的 `shelfData()` 一次算出，保证对得上 | 维护者 |
@@ -52,6 +56,8 @@
 | `migrations/` | D1 表结构 | 维护者 |
 | `tests/unit/` | vitest 单元测试；`tests/fixtures/` 校验器样例；`tests/e2e/` Playwright 真浏览器 | 维护者 |
 | `docs/dev/` | 维护者文档 | 维护者 |
+| `library/` | 资源库原料：从开源仓库收的分享链接、岗位设定、提示词、技能、定时任务、团队、配方，混合许可（`library/LICENSES.md`）；**不进站点构建**，报告见 `INGEST.md` | 维护者跑 `scripts/ingest/run.mjs` 生成；`annotations/` 是写作模型产出 |
+| `scripts/ingest/` | 入库管线：每个来源一个适配器（`adapters/`），`run.mjs` 去重、许可回溯、安全标记、国内适配、写盘；来源仓库和提交在 `sources.json` | 维护者 |
 
 ## 数据流
 
@@ -124,6 +130,7 @@ Prompt 的 `copyright` 是单行原版权行（1–200 字），有 `body` 必�
 - 本地：`npm run dev`（只有页面）、`npm run dev:full`（页面 + 计数接口 + 本地 D1）
 - PR：GitHub Actions `.github/workflows/ci.yml`，跑 validate、test、build，不带密钥
 - 上线：Cloudflare Pages 的 Git 集成，main 有新提交就自动构建部署。构建命令 `npm run build`，输出 `site/.vitepress/dist`，绑定以 `wrangler.toml` 为准
+- 产物根目录还包含 sitemap.xml（页面索引）、catalog.json（结构化 Bot 数据）和 llms.txt（分组目录及引用说明）。
 - **不要**在构建产物里放 `_worker.js`：有它时 Pages 会忽略 `functions/`
 
 ## 约定

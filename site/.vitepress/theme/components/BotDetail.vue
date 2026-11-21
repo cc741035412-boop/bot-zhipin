@@ -168,7 +168,7 @@ onBeforeUnmount(() => watcher?.disconnect())
 
         <section v-if="starters.length" data-testid="section-starters">
           <h2>开场白</h2>
-          <DetailStarters :lines="starters" />
+          <DetailStarters :slug="bot.slug" :lines="starters" />
         </section>
 
         <!-- 截图可选（DECISIONS 第 43 条）：投稿不收截图，只有仓库里放了截图的 Bot 才显示这一区。 -->

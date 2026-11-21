@@ -63,3 +63,27 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | M5 | 联调：仓库设置（自动合并、规则集）、线上真实全程（新增 + 更新）、CPU 实测 | 维护者 | 全部 | — | ✅ |
 | M6 | 待办：真实 Grok Bot 按新版 AGENTS.md 走一遍；学员实测；Workers 套餐决定；安全审查「上线后跟进」各项 | 维护者 | M5 | — | ⬜ |
 | NS | 去掉截图（DECISIONS 第 43 条）：校验不再要求截图、DESIGN 引用不存在的截图报错；投稿页去掉「放截图」一步；后端接受空回执；Issue 表单去掉截图栏；AGENTS.md 改为摘 Bot 真实输出；文档同步。遗留：`submit.css` 里截图槽位的样式没删（改版线 `feat/shelf-v5` 重写了这个文件，等它合并后一起清）；改版线合并时，`INTERACTION.md` §9.5 里「截图 1（待放入）」「暂无截图。」两处要去掉 | Claude | — | `scripts/`、`functions/`、`site/.vitepress/theme/`、`.github/`、根目录与 `docs/dev/` 文档 | ✅ |
+
+# 资源库 library/（给 Prompt、Skills 板块补原料）
+
+决策 49–55，报告 `INGEST.md`，竞品交互 `COMPETITOR-UX.md`。契约和验收脚本在维护者本地 `2026-11-20-bot-zhipin-library/`。
+
+| # | 任务 | 执行 | 写入范围 | 状态 |
+|---|---|---|---|---|
+| LI1 | 7 个来源的适配器 + 单测（含 kydlikebtc 照抄分享页摘要的过滤、GrokBotDev 策展署名） | 编码 agent | `scripts/ingest/adapters/`、`tests/unit/ingest-adapter-*`、`tests/fixtures/ingest/` | ✅ |
+| LI2 | 管线：去重、许可回溯、跨来源剔除分享页原文、已上架、needsReview、cnFit、注释合并、前 50、写盘 | 编码 agent | `scripts/ingest/`、`tests/unit/ingest-pipeline*`、`ingest-review*` | ✅ |
+| LI3 | 中文三项、严格五项评分、前 50 首个任务 | 写作模型 | `library/annotations/` | ✅ |
+| LI4 | 许可落实：`library/LICENSES.md`、`THIRD_PARTY_NOTICES.md`；INGEST 报告；COMPETITOR-UX | 维护者 | 文档 | ✅ |
+| LI5 | 用户看 INGEST.md 点头 → 推送开 PR | 维护者 | — | 🟡 PR #23 已开，等合并授权 |
+| LI6 | 页面（Prompt、Skills 板块从 library 挑条目；交互单独做） | — | — | ⬜ 等用户定 |
+
+# 被搜到、被转发、被机器读到（2026-11-21）
+
+目标：sitemap、Bot 详情页标题和描述、分享卡片（og 标签 + 构建时出图）、`/catalog.json` 和 `/llms.txt`、点击接口加 `starter` / `kickoff`。决策 56–60。任务书和验收脚本在维护者本地的派活目录。
+
+| # | 任务 | 执行 | 前置 | 写入范围 | 状态 |
+|---|---|---|---|---|---|
+| A | 标题和描述、canonical 和分享标签、sitemap、robots、catalog.json、llms.txt | 编码 agent | — | `site/.vitepress/config.mts`、`scripts/lib/{share,catalog,llms}.mjs`、`site/public/robots.txt` | ✅ |
+| B | 构建时出分享图：Bot、小队、全站各一张，Noto Sans SC 子集；换行标点优先、行宽均衡 | 编码 agent | — | `scripts/og/`、`scripts/gen-og-fonts.mjs`、依赖 | ✅ |
+| C | 计数加 starter / kickoff：迁移 0004、接口、前端、测试、文档 | 编码 agent | — | `functions/`、`migrations/0004`、`heat.ts`、三个组件 | ✅ |
+| M | 集成、复跑验收、目视分享图；线上 D1 先备份再迁移，然后合并 | 维护者 | A、B、C | — | ✅ |

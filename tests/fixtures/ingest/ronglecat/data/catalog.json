@@ -1,0 +1,13 @@
+{
+  "sections": [
+    {"id": "garden", "items": [
+      {"title": "Reading list", "url": "https://example.org/books"},
+      {"title": "Tray counter", "url": "https://x.ai/bot/123456789012345678901?preview=1", "blurb": {"en": "Counts trays", "zh": "清点育苗盘"}},
+      {"title": "Not a bot", "url": "https://x.ai/bot/marketplace"}
+    ]},
+    {"id": "notes", "items": [
+      {"title": "Tool shed", "url": "https://example.org/shed"},
+      {"title": "Seed notes", "url": "https://x.ai/bot/aaaaaaaaaaaaaaaaaaaaa"}
+    ]}
+  ]
+}

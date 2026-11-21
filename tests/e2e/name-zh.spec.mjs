@@ -166,7 +166,7 @@ test.describe('详情页', () => {
     const heading = page.getByTestId('bot-detail').locator('h1')
     await expect(heading).toHaveText('示例·周报整理员')
     await expect(heading.locator('.bz-name')).toHaveCount(0)
-    await expect(page).toHaveTitle(/^示例·周报整理员 \|/)
+    await expect(page).toHaveTitle('示例·周报整理员怎么用、值不值得装 | Bot 直聘')
     await expect(page.getByTestId('forked-from').locator('a')).toHaveText('示例·PRD 评审员')
   })
 

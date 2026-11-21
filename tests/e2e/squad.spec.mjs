@@ -15,8 +15,8 @@ const running = (page) => page.evaluate(() => document.getAnimations().filter((i
 
 test.beforeEach(async ({ context, page }) => {
   await context.route('https://x.ai/**', (route) => route.fulfill({ contentType: 'text/html', body: '<p>模拟导入页面</p>' }))
-  await page.route('**/api/stats', (route) => route.fulfill({ json: { ok: true, heat: {}, byKind: {} } }))
-  await page.route('**/api/click', (route) => route.fulfill({ json: { ok: true, counted: true, heat: 1 } }))
+  await page.route('**/api/stats', (route) => route.fulfill({ json: { ok: true, heat: {}, byKind: {}, squads: {} } }))
+  await page.route('**/api/click', (route) => route.fulfill({ json: { ok: true, counted: true, heat: route.request().postDataJSON().kind === 'kickoff' ? 0 : 1 } }))
 })
 
 test.describe('首页的小队区块', () => {
@@ -234,14 +234,31 @@ test.describe('小队详情页', () => {
     await expect.poll(() => page.getByTestId('squad-setup').evaluate((el) => Math.round(el.getBoundingClientRect().top))).toBeLessThan(200)
     await expect(page).toHaveURL(/#setup$/)
 
+    const clicks = []
+    await page.route('**/api/click', (route) => {
+      clicks.push(route.request().postDataJSON())
+      return route.fulfill({ json: { ok: true, counted: true, heat: 0 } })
+    })
     const button = page.getByTestId('copy-kickoff')
     await expect(button).toHaveText(SQUAD_COPY.copy)
     await button.click()
     await expect(button).toHaveText(SQUAD_COPY.copied)
     await expect(button.locator('svg')).toHaveAttribute('data-icon', 'check')
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(kickoff)
+    await expect.poll(() => clicks).toEqual([{ slug: squad, kind: 'kickoff' }])
     await page.getByTestId('copy-tryout').click()
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('帮我看看这份 PRD，评审意见顺手记进本周周报。')
+    expect(clicks).toEqual([{ slug: squad, kind: 'kickoff' }])
+  })
+
+  test('剪贴板被拒时选中口令，仍按小队 slug 上报', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, 'clipboard', { value: { writeText: async () => { throw new Error('模拟拒绝') } } })
+    })
+    await page.goto(`/squads/${squad}`)
+    const [request] = await Promise.all([page.waitForRequest('**/api/click'), page.getByTestId('copy-kickoff').click()])
+    expect(request.postDataJSON()).toEqual({ slug: squad, kind: 'kickoff' })
+    await expect.poll(() => page.evaluate(() => String(getSelection()))).toBe(kickoff)
   })
 
   test('点舞台和阵容里的 Bot 是戳；整行点进这个成员的详情页', async ({ page }) => {

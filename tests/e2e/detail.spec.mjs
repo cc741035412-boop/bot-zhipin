@@ -13,7 +13,9 @@ const box = (locator) => locator.boundingBox()
 
 test.beforeEach(async ({ context, page }) => {
   await context.route('https://x.ai/**', (route) => route.fulfill({ contentType: 'text/html', body: '<p>模拟导入页面</p>' }))
-  await page.route('**/api/stats', (route) => route.fulfill({ json: { ok: true, heat: { [reviewer]: 7 }, byKind: {} } }))
+  await page.route('**/api/stats', (route) => route.fulfill({ json: {
+    ok: true, heat: { [reviewer]: 7 }, byKind: { [reviewer]: { import: 7, prompt: 0, starter: 0 } }, squads: {},
+  } }))
   await page.route('**/api/click', (route) => route.fulfill({ json: { ok: true, counted: true, heat: 8 } }))
 })
 
@@ -107,7 +109,7 @@ test('侧栏：导入、三项属性、作者来源上架热度；宽屏两栏�
   const peek = rail.getByTestId('rail-peek')
   await expect(peek).toHaveAttribute('data-show', 'false')
   await page.getByTestId('section-design').scrollIntoViewIfNeeded()
-  // wheel() 只派发输入，不等合成器滚完；迟到的滚动会盖掉下面的回顶操作。
+  // 不用 mouse.wheel：它触发的平滑滚动在返回后还会继续，和下面的回顶抢，偶发失败。这里测的是滚动位置，不是滚轮输入。
   await page.evaluate(() => window.scrollBy({ top: 600, behavior: 'instant' }))
   await expect(peek).toHaveAttribute('data-show', 'true')
   expect((await box(rail)).y).toBe(88 + 16)
@@ -152,12 +154,11 @@ test('开场白点一下复制：反馈、读屏播报；键盘也能复制', as
   await expect(second).toBeFocused()
   await expect(page.locator('.starter.copied')).toHaveCount(0, { timeout: 3000 })
   await expect(second.locator('svg')).toHaveAttribute('data-icon', 'copy')
-  // 没有上报点击：开场白不算热度。
-  let reported = false
-  page.on('request', (request) => { if (request.url().endsWith('/api/click')) reported = true })
-  await first.click()
+  // 再点第一条仍有反馈；上报开场白，但不能用点击响应里的 8 覆盖热度。
+  const [request] = await Promise.all([page.waitForRequest('**/api/click'), first.click()])
   await expect(first).toHaveClass(/copied/)
-  expect(reported).toBe(false)
+  expect(request.postDataJSON()).toEqual({ slug: reviewer, kind: 'starter' })
+  await expect(page.getByTestId('heat')).toHaveText('7')
 })
 
 test('剪贴板用不了时：把这句话选中，不报页面错误', async ({ page }) => {
@@ -169,7 +170,8 @@ test('剪贴板用不了时：把这句话选中，不报页面错误', async ({
   })
   await page.goto(`/bots/${reviewer}`)
   const first = page.getByTestId('starter').first()
-  await first.click()
+  const [request] = await Promise.all([page.waitForRequest('**/api/click'), first.click()])
+  expect(request.postDataJSON()).toEqual({ slug: reviewer, kind: 'starter' })
   await expect.poll(() => page.evaluate(() => String(getSelection()))).toBe('帮我评审这份 PRD：（贴正文或文档链接）')
   await expect(first).not.toHaveClass(/copied/)
   expect(errors).toEqual([])
@@ -249,7 +251,7 @@ test('手机触摸：导入按钮和开场白的点按高度都不小于 44', as
   const context = await browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
   try {
     const page = await context.newPage()
-    await page.route('**/api/stats', (route) => route.fulfill({ json: { ok: true, heat: {}, byKind: {} } }))
+    await page.route('**/api/stats', (route) => route.fulfill({ json: { ok: true, heat: {}, byKind: {}, squads: {} } }))
     await page.goto(`/bots/${reviewer}`)
     for (const control of [...await page.getByTestId('starter').all(), page.getByTestId('btn-import'), page.getByTestId('btn-prompt')]) {
       expect((await box(control)).height).toBeGreaterThanOrEqual(44)
