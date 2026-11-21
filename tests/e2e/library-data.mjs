@@ -7,7 +7,7 @@ const load = (dir) =>
     .filter((s) => s.endsWith('.yaml'))
     .map((s) => YAML.parse(readFileSync(`${dir}/${s}`, 'utf8')))
     .sort((a, b) => b.addedAt.localeCompare(a.addedAt) || hash(a.slug) - hash(b.slug))
-export const db = { prompts: load('prompts'), skills: load('skills') }
+export const db = { prompts: load('tests/fixtures/prompts'), skills: load('tests/fixtures/skills') }
 export const categories = (dir) =>
   JSON.parse(readFileSync(`schema/${dir.slice(0, -1)}.schema.json`, 'utf8')).properties.category.enum.filter((c) =>
     db[dir].some((i) => i.category === c),

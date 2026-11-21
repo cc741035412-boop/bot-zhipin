@@ -10,12 +10,12 @@ import { summary, skill } from './library-data.mjs'
 // 真实库没有双命令与缺 usage 的记录。在临时目录造差异，不改源 YAML 或生产页面。
 export async function exerciseEdges(page, copy) {
   const root = await mkdtemp(join(tmpdir(), 'library-edge-'))
-  const sentinel = 'UNPUBLISHABLE_BODY_SENTINEL'
+  const sentinel = 'DETAIL_BODY_SENTINEL'
   const p = {
     ...summary,
     titleOriginal: undefined,
     usage: undefined,
-    copyright: undefined,
+    copyright: '版权归原作者，原页未声明许可',
     author: { name: '匿名' },
     license: '未声明',
     licenseUrl: undefined,
@@ -77,9 +77,12 @@ export async function exerciseEdges(page, copy) {
     })
     await page.goto(`${base}/prompts/${p.slug}`)
     await expect(page.locator('.ix-title h1')).toHaveText(p.title)
-    await expect(page.locator('.ix-orig,.copy,#body,.lib-page dd a,.ix-meta small')).toHaveCount(0)
-    await expect(page.locator('.ix-body h2')).toHaveText(['摘要', '适用场景'])
-    expect((await Promise.all(resources)).join('')).not.toContain(sentinel)
+    await expect(page.locator('.ix-orig,.lib-page dd a')).toHaveCount(0)
+    await expect(page.locator('.ix-meta small')).toHaveText(p.copyright)
+    await expect(page.locator('#body')).toHaveText(sentinel)
+    await expect(page.locator('.copy')).toHaveCount(2)
+    await expect(page.locator('.ix-body h2')).toHaveText(['摘要', '适用场景', '正文', '来源'])
+    expect((await Promise.all(resources)).join('')).toContain(sentinel)
     await page.goto(`${base}/skills/${s.slug}`)
     const buttons = page.locator('.copy')
     await expect(buttons).toHaveCount(2)
