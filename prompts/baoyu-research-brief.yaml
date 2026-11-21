@@ -1,0 +1,19 @@
+slug: baoyu-research-brief
+title: 给深度研究 AI 写任务说明
+category: 分析
+purpose: 把你已知的、要查的、要什么格式分开写清，交给深度研究工具去查
+scenarios:
+- 带着手头的零散笔记让研究模型深挖一个陌生课题
+- 横向对比几款备选工具前先列清要核实的问题和来源
+- 写综述或调研报告前给模型划定资料范围与交付格式
+lang: zh
+summary: 既手头有内部笔记、又要让研究模型检索外部资料时，很容易把两边混成结论。这份模板以研究工具使用手册为例，让你把自己的已有经验、要查的对象与问题、优先读取的来源类别，以及报告写给谁、按什么格式交付分开交代清楚。
+usage: 从原文示例起步，换成自己的研究对象与背景材料。列出两三个必须回答的问题，指定来源范围、成稿语言；拿到报告后逐条点开关键引文。
+source:
+  url: https://baoyu.io/blog/deep-research-prompt-templates
+  name: Deep Research 提示词模板参考
+author:
+  name: 宝玉
+  url: https://baoyu.io
+license: 保留所有权利
+addedAt: '2026-11-20'

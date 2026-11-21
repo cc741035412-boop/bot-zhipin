@@ -1,0 +1,24 @@
+slug: ux-copy
+title: 改按钮和提示文字
+name: ux-copy
+category: 写作
+purpose: 按用户下一步要做什么，改写按钮、报错和空白页上的文字
+scenarios:
+- 改写支付失败后的提示
+- 给尚未导入知识的页面写引导语
+agents:
+- Claude Code
+summary: 按界面场景改写按钮、报错和空状态等短文案，比如把「还没上传过」和「搜索没命中」拆成不同的引导语，避免统统只写一句暂无数据。使用时先交代当前状态、用户意图和下一步可选动作；目录里带有文案模式供参照，定稿前要放回真实组件里检查中文长度。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install design@knowledge-work-plugins
+  note: 在终端运行，装的是整个 design 插件，只需装一次。会登记 9 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/design/skills/ux-copy
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/LICENSE
+addedAt: '2026-11-20'

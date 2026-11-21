@@ -1,0 +1,32 @@
+slug: verification-before-completion
+title: 说做完之前先真跑一遍
+name: verification-before-completion
+category: 测试
+purpose: 让 AI 宣布完成前先现场跑测试，用这次的结果证明真的做完了
+scenarios:
+- 核对助手声称已修好的回归问题
+- 提交课堂项目之前检查构建状态
+agents:
+- Claude Code
+- Codex
+- Cursor
+summary: 把每一项「已完成」的结论逐条对应到构建命令或回归测试上，让助手现场跑一遍并核对本次退出状态与完整输出，没跑过的单列进待验清单。核对时必须看本次运行结果，不能拿旧截图或上次成功的记录顶替。安装会装上整套 Superpowers：15 个技能加一个会话启动钩子。以后每次开会话，助手都会先查该用哪个技能。用 Claude Code 时，想只对当前项目生效，可在安装命令末尾加 --scope project。
+install:
+- agent: Claude Code
+  command: claude plugin install superpowers@claude-plugins-official
+  note: 在终端运行。第一次打开交互式 claude 会自动添加官方市场；全新机器也可先运行 claude plugin marketplace add anthropics/claude-plugins-official。
+- agent: Codex
+  command: /plugins
+  note: 在 Codex CLI 输入，搜索 superpowers，选 Install Plugin；在 Codex App 里可到侧栏 Plugins 点 +。装完新开会话。
+- agent: Cursor
+  command: /add-plugin superpowers
+  note: 在 Cursor 的 Agent 对话框输入。
+source:
+  url: https://github.com/obra/superpowers/tree/22f0b463e7a5e579904dd6211a520321035526f7/skills/verification-before-completion
+  name: obra/superpowers
+author:
+  name: Jesse Vincent
+  url: https://github.com/obra
+license: MIT
+licenseUrl: https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/LICENSE
+addedAt: '2026-11-20'

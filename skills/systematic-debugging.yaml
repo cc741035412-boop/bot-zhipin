@@ -1,0 +1,32 @@
+slug: systematic-debugging
+title: 一步步找出程序 bug
+name: systematic-debugging
+category: 开发
+purpose: 给能复现问题的步骤，它顺着数据一步步找到出错的地方再改
+scenarios:
+- 查找数据导入后列表为空的原因
+- 定位只在第二次搜索时出现的错误
+agents:
+- Claude Code
+- Codex
+- Cursor
+summary: 适合排查常规功能故障。开始前先提供能稳定复现问题的输入和预期输出，它会顺着数据流检查问题最早出现在哪，对比正常案例，每次只验证一个具体假设，避免同时在多个文件里乱改而断了线索。安装会装上整套 Superpowers：15 个技能加一个会话启动钩子。以后每次开会话，助手都会先查该用哪个技能。用 Claude Code 时，想只对当前项目生效，可在安装命令末尾加 --scope project。
+install:
+- agent: Claude Code
+  command: claude plugin install superpowers@claude-plugins-official
+  note: 在终端运行。第一次打开交互式 claude 会自动添加官方市场；全新机器也可先运行 claude plugin marketplace add anthropics/claude-plugins-official。
+- agent: Codex
+  command: /plugins
+  note: 在 Codex CLI 输入，搜索 superpowers，选 Install Plugin；在 Codex App 里可到侧栏 Plugins 点 +。装完新开会话。
+- agent: Cursor
+  command: /add-plugin superpowers
+  note: 在 Cursor 的 Agent 对话框输入。
+source:
+  url: https://github.com/obra/superpowers/tree/22f0b463e7a5e579904dd6211a520321035526f7/skills/systematic-debugging
+  name: obra/superpowers
+author:
+  name: Jesse Vincent
+  url: https://github.com/obra
+license: MIT
+licenseUrl: https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/LICENSE
+addedAt: '2026-11-20'

@@ -1,0 +1,18 @@
+slug: english-reply-clinic
+title: 练英文对话顺便纠错
+category: 学习
+purpose: 你说一句英文，它帮你改得更地道，再像真人一样接着聊
+scenarios:
+- 英语面试或口语练习时边对答边改不自然的句子
+- 排练给海外用户或外国同事的英文回复
+- 和外国朋友日常聊天前热身怎么接话
+lang: zh
+summary: 交出自己实际会说的一句英文，既能看到改法，也能读到对方可能怎样接话。这样可以把语言纠错和一问一答放在同一轮练习里。
+usage: 先不借助翻译写一句英文，看完修改后关掉答案重说一次，再继续下一轮对话。
+source:
+  url: https://www.aishort.top/prompt/203
+  name: AI Short
+author:
+  name: wxhzhwxhzh
+license: 未声明
+addedAt: '2026-11-20'

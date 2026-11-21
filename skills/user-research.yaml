@@ -1,0 +1,24 @@
+slug: user-research
+title: 做用户调研该用什么方法
+name: user-research
+category: 研究
+purpose: 按想弄清的问题选调研方法，附访谈提纲和整理结果的办法
+scenarios:
+- 第一次做用户访谈前排提纲
+- 在访谈、问卷和卡片分类之间选方法
+agents:
+- Claude Code
+summary: 这一页列了六种方法各适合问什么、找多少人、要花多久。做访谈时，可以按暖场、了解现状、深挖、看方案反应、收尾来排提纲。整理发现时，可参考亲和图、影响与成本矩阵、旅程图和 JTBD。末尾列出研究计划、提纲和报告该交什么；它不会替你把诱导性问题改成开放题。访谈后的材料可交给「访谈证据归纳」。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install design@knowledge-work-plugins
+  note: 在终端运行，装的是整个 design 插件，只需装一次。会登记 9 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/design/skills/user-research
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/LICENSE
+addedAt: '2026-11-20'

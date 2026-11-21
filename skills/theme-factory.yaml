@@ -1,0 +1,24 @@
+slug: theme-factory
+title: 给 PPT 统一配色和字体
+name: theme-factory
+category: 设计
+purpose: 给现成的演示材料挑一套统一的配色和字体，也能按要求另配一套
+scenarios:
+- 合并几位老师的课件后，统一标题和正文的字体
+- 给摄影讲座的幻灯片试两套配色，再挑一套用到底
+agents:
+- Claude Code
+summary: 给现成材料套用统一的配色方案和标题、正文字体，也可以按你的要求另拟一套主题。目录里带主题预览 PDF 和各套颜色、字体说明，方便先挑再套用。用之前先自己定好内容和论证顺序，它只负责统一各页视觉样式。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/skills && claude plugin install example-skills@anthropic-agent-skills
+  note: 在终端运行，先添加插件市场，再安装包含这个技能的 example-skills 插件。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/theme-factory
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/theme-factory/LICENSE.txt
+addedAt: '2026-11-20'

@@ -1,0 +1,18 @@
+slug: baoyu-subtitle-proof
+title: 用讲稿修正自动字幕
+category: 写作
+purpose: 给讲稿和自动生成的字幕，它照讲稿改掉认错的字，时间轴不动
+scenarios:
+- 修产品演示里的英文术语
+- 给录播课程校对人名
+lang: zh
+summary: 手里已经有校对好的讲稿时，不用重做字幕时间轴。把讲稿和自动生成的 SRT 或 VTT 字幕分开填进模板，让模型对照讲稿修正字幕里识别错的专名、术语或错词，只交回修好的字幕。注意两份材料必须截取同一段，否则一旦错位，比拼写错误更难排查。
+usage: 到原文选中英文示例之一，把同一段的讲稿和 SRT 或 VTT 字幕分别填入。先试一小段，对比修订前后的条数、时间码和专名。
+source:
+  url: https://baoyu.io/blog/prompt-engineering/qa-how-to-correct-subtitle-with-text
+  name: 问答：有校对好的视频文稿如何用文稿纠正字幕错误？
+author:
+  name: 宝玉
+  url: https://baoyu.io
+license: 保留所有权利
+addedAt: '2026-11-20'

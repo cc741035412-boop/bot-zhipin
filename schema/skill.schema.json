@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jakob52123/bot-zhipin/schema/skill.schema.json",
+  "title": "skills/<slug>.yaml",
+  "description": "收录的一个 agent skill。文件名就是 slug。不收 SKILL.md 全文，只放本站写的摘要、安装命令和链接。分类、能用在哪（agents）、许可证的取值只在这里定义。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["slug", "title", "name", "category", "purpose", "scenarios", "agents", "summary", "install", "source", "author", "license", "addedAt"],
+  "properties": {
+    "slug": {
+      "description": "和文件名相同（不含 .yaml）。只能用小写字母、数字和短横线，3 到 40 个字符，全库唯一",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "minLength": 3,
+      "maxLength": 40
+    },
+    "title": { "description": "中文标题，像名字不像句子", "type": "string", "minLength": 2, "maxLength": 24, "pattern": "\\p{Script=Han}" },
+    "name": { "description": "skill 原名（SKILL.md frontmatter 里的 name）", "type": "string", "minLength": 1, "maxLength": 64 },
+    "category": {
+      "description": "分类",
+      "enum": ["文档", "开发", "测试", "设计", "数据", "写作", "研究", "工具"]
+    },
+    "purpose": { "description": "一句话用途，本站自己写", "type": "string", "minLength": 8, "maxLength": 60 },
+    "scenarios": {
+      "description": "适用场景，2 到 4 条，本站自己写",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": { "type": "string", "minLength": 4, "maxLength": 40 }
+    },
+    "tags": {
+      "description": "标签，最多 5 个",
+      "type": "array",
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 10 }
+    },
+    "agents": {
+      "description": "能用在哪，只写确认过的",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/agent" }
+    },
+    "summary": {
+      "description": "本站用中文自己写：它会做什么、附带哪些脚本或资源、要注意什么",
+      "type": "string",
+      "minLength": 60,
+      "pattern": "\\p{Script=Han}",
+      "maxLength": 400
+    },
+    "install": {
+      "description": "安装方式，1 到 3 条，按推荐顺序",
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["agent", "command"],
+        "properties": {
+          "agent": { "$ref": "#/$defs/agent" },
+          "command": { "description": "能直接复制运行的命令", "type": "string", "minLength": 1, "maxLength": 300, "pattern": "\\S" },
+          "note": { "description": "补充说明", "type": "string", "minLength": 1, "maxLength": 120 }
+        }
+      }
+    },
+    "requires": {
+      "description": "运行依赖，最多 5 个，每项最多 80 字",
+      "type": "array",
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 80 }
+    },
+    "source": { "$ref": "#/$defs/source" },
+    "author": { "$ref": "#/$defs/author" },
+    "license": { "$ref": "#/$defs/license" },
+    "licenseUrl": { "$ref": "#/$defs/licenseUrl" },
+    "addedAt": {
+      "description": "收录日期，YYYY-MM-DD",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    }
+  },
+  "$defs": {
+    "agent": {
+      "description": "能用在哪个 agent；通用 = 任何读 SKILL.md 的 agent 都能用",
+      "enum": ["Claude Code", "Claude.ai", "Codex", "Gemini CLI", "Cursor", "通用"]
+    },
+    "license": {
+      "description": "许可证：SPDX 标识；查不到写「未声明」，作者明确禁止转载写「保留所有权利」。取值和 prompt.schema.json 的同名定义一致（单测核对）",
+      "enum": [
+        "CC0-1.0", "MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "Unlicense",
+        "CC-BY-4.0", "CC-BY-SA-4.0", "CC-BY-NC-4.0", "CC-BY-NC-SA-4.0", "CC-BY-ND-4.0",
+        "未声明", "保留所有权利"
+      ]
+    },
+    "licenseUrl": {
+      "description": "许可证原文链接，以 https:// 开头；未声明时留空或不写",
+      "type": ["string", "null"],
+      "pattern": "^(https://\\S+)?$",
+      "maxLength": 500
+    },
+    "source": {
+      "description": "原始出处",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "name"],
+      "properties": {
+        "url": { "description": "精确到这个 skill 的目录，以 https:// 开头", "type": "string", "pattern": "^https://\\S+$", "maxLength": 500 },
+        "name": { "description": "仓库名", "type": "string", "minLength": 1, "maxLength": 120 }
+      }
+    },
+    "author": {
+      "description": "原作者",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "description": "原作者名字", "type": "string", "minLength": 1, "maxLength": 80 },
+        "url": { "description": "作者主页，以 https:// 开头", "type": "string", "pattern": "^https://\\S+$", "maxLength": 500 }
+      }
+    }
+  }
+}

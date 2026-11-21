@@ -186,9 +186,12 @@ function onKeydown(event: KeyboardEvent) {
     return
   }
   if (!open.value) {
-    if (event.key === '/' && !mod && !event.altKey && !isTyping(event.target)) {
+    if (event.key === '/' && !mod && !event.shiftKey && !event.altKey && !isTyping(event.target)) {
+      if (document.querySelector('.VPNavBar.screen-open, [aria-modal="true"], dialog[open]')) return
       event.preventDefault()
-      show()
+      const localSearch = document.querySelector<HTMLInputElement>('#library-search')
+      if (localSearch) localSearch.focus()
+      else show()
     }
     return
   }

@@ -27,6 +27,23 @@
 }
 @media (hover: hover) { .Layout .VPNavBarTitle .title:hover::before { transform: rotate(-10deg) scale(1.12); } }
 
+.module-nav { display: flex; align-items: center; gap: 4px; margin: 0 auto 0 var(--bz-sp-6); }
+.module-nav a { display: grid; place-items: center; min-height: 36px; padding: 0 12px; border-radius: var(--bz-r-control); font-size: var(--bz-fs-btn); font-weight: 500; color: var(--bz-text-2); }
+.module-nav a:hover { color: var(--bz-ink); background: var(--bz-surface-3); }
+.module-nav a[aria-current] { color: var(--bz-ink); background: var(--bz-seg-active); box-shadow: var(--bz-seg-shadow); font-weight: 650; }
+@media (prefers-reduced-motion: no-preference) { .module-nav a:active { transform: scale(.98); } }
+@media (max-width: 767px) {
+  .module-nav { margin-left: 8px; gap: 0; }
+  .module-nav a { min-width: 44px; height: 44px; padding: 0 8px; font-size: var(--bz-fs-sm); }
+}
+@media (min-width: 768px) {
+  .Layout .VPNavBar .content-body > :is(.appearance,.social-links) { display: flex; }
+  .Layout .VPNavBar .content-body > .extra { display: none; }
+}
+@media (max-width: 359px) {
+  .Layout .VPNavBarTitle a.title { font-size: 0; width: 44px; justify-content: center; }
+  .Layout .VPNavBarTitle a.title::before { margin: 0; }
+}
 /* 「我要投稿」：和 .bz-btn.sm 同一套数（高 32、左右 12、13px / 600、圆角 8、中性玻璃） */
 .Layout .VPNavBar .VPNavBarMenu { align-items: center; margin-right: var(--bz-sp-1); }
 .Layout .VPNavBar .VPNavBarMenuLink, .Layout .VPNavBar .VPNavBarMenuLink.active {
@@ -78,7 +95,12 @@
 .Layout .VPNav .VPNavScreenAppearance { border-radius: var(--bz-r-control); background-color: var(--bz-surface-2); }
 .Layout .VPNav .VPNavScreenAppearance .text { font-size: var(--bz-fs-sm); }
 @media (max-width: 767px) {
-  .Layout .VPNavBar .wrapper { padding: 0 var(--bz-sp-1) 0 var(--bz-sp-4); }
+  .Layout .VPNavBar .wrapper { padding: 0 var(--bz-sp-1) 0 var(--bz-sp-3); }
+  .Layout .VPNav .VPNavScreen { padding: 12px; }
+  .Layout .VPNav .VPNavScreen .container { display: flex; align-items: center; gap: 8px; padding: 0; }
+  .Layout .VPNav .VPNavScreenAppearance, .Layout .VPNav .VPNavScreenSocialLinks { padding: 0; margin: 0; background: none; }
+  .Layout .VPNav .VPNavScreenAppearance .text { display: none; }
+  .Layout .VPNav .VPNavScreenMenuLink { min-height: 44px; padding: 0 12px; border: 1px solid var(--bz-border-strong); border-radius: var(--bz-r-control); background: var(--bz-surface-2); }
 }
 @media (pointer: coarse) {
   .Layout .VPNavBar .VPNavBarMenuLink, .Layout .VPNavBar .VPNavBarMenuLink.active { height: 44px; line-height: 42px; }

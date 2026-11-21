@@ -1,0 +1,36 @@
+slug: hv-analysis
+title: 联网调研一个产品的历史和对手
+name: hv-analysis
+category: 研究
+purpose: 给一个产品、公司或概念，它联网查历史、对比同行和用户评价，推测走向
+scenarios:
+- 弄清某款助手为什么从插件改做独立应用
+- 写行业专栏前，梳理一家出版社转向数字出版的经过
+- 做读书报告时，对照两个近似概念各自的来历
+agents:
+- Claude Code
+- Codex
+- Gemini CLI
+- Cursor
+summary: 丢给它一个产品、公司或概念，它分三条线联网取证：从诞生到今天的关键转向、当下的竞品对照、社区里的真实用户声音，最后把纵横两条线叠起来下判断，并给出最可能、最危险、最乐观三种走向。默认交付 1 万到 3 万字的长报告，耗时和额度都不少，可以先说好篇幅。成稿默认存成 Markdown 和 PDF，排版脚本同时生成 HTML；出 PDF 要 WeasyPrint 和 Pango，它会在 ~/.cache/khazix-skills/ 下建 Python 虚拟环境装依赖，只要 Markdown 就不用装。
+install:
+- agent: Claude Code
+  command: git clone --depth 1 https://github.com/KKKKhazix/khazix-skills.git /tmp/khazix-skills && mkdir -p ~/.claude/skills && cp -R /tmp/khazix-skills/hv-analysis ~/.claude/skills/
+  note: 终端执行，只装这一个技能，连同 scripts 和 references 一起拷。
+- agent: Codex
+  command: git clone --depth 1 https://github.com/KKKKhazix/khazix-skills.git /tmp/khazix-skills && mkdir -p ~/.agents/skills && cp -R /tmp/khazix-skills/hv-analysis ~/.agents/skills/
+  note: 终端执行，README 写明 Codex 读这个目录。装完新开会话。
+requires:
+- 联网搜索与网页读取
+- Python 3、Markdown（转 HTML 或 PDF）
+- WeasyPrint、Pango（转 PDF）
+- 可写的输出目录
+source:
+  url: https://github.com/KKKKhazix/khazix-skills/tree/76fc0f8e8245b40a809d8eed89b27f04cbcf81bb/hv-analysis
+  name: KKKKhazix/khazix-skills
+author:
+  name: 数字生命卡兹克
+  url: https://github.com/KKKKhazix
+license: MIT
+licenseUrl: https://github.com/KKKKhazix/khazix-skills/blob/76fc0f8e8245b40a809d8eed89b27f04cbcf81bb/LICENSE
+addedAt: '2026-11-20'

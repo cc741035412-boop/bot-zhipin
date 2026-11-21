@@ -1,0 +1,24 @@
+slug: metrics-review
+title: 复盘一段时间的业务数据
+name: metrics-review
+category: 数据
+purpose: 给指标、目标和对比时间段，它整理涨跌变化，列出接下来要查的问题
+scenarios:
+- 为导师解释本周激活率变化
+- 复盘新版上线前后的留存趋势
+agents:
+- Claude Code
+summary: 给它指标口径、目标值和对比时段，它会把核心指标与拆解指标的涨跌理成一份复盘记录，并列出下一步要排查的问题。没接数据源时，直接贴汇总数字就能用。注意指标波动刚好出现在发版后，未必就是发版引起的。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install product-management@knowledge-work-plugins
+  note: 在终端运行，装的是整个 product-management 插件，只需装一次。会登记 16 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/skills/metrics-review
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/LICENSE
+addedAt: '2026-11-20'

@@ -1,0 +1,31 @@
+slug: beachhead-segment
+title: 决定先把产品卖给谁
+name: beachhead-segment
+category: 研究
+purpose: 列出几类候选客户，它按需求急不急、肯不肯付钱打分，帮你选出第一批
+scenarios:
+- 客服助手先卖给电商还是软件公司
+- 首批试点只能服务一种客户时做取舍
+agents:
+- Claude Code
+- Codex
+- Gemini CLI
+- Cursor
+summary: 先列出候选客群（按行业、公司规模、岗位、地区等切），再按四条标准逐一打分：痛点够不够急、有没有预算和付费意愿、能不能在 3 到 18 个月里拿下这个细分市场六到七成份额、客户会不会主动推荐给同行。最后推荐一个首发客群，并给出份额和收入预估、90 天获客计划和之后往哪扩张。原文要求每条标准至少访谈 10 个客户来验证；没有访谈和报价支撑的打分和收入数字，只能当待验证的假设。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add phuryn/pm-skills && claude plugin install pm-go-to-market@pm-skills
+  note: 终端执行，装的是整个 pm-go-to-market（6 个技能）。已添加市场时只运行 && 后面的部分。
+- agent: Codex
+  command: codex plugin marketplace add phuryn/pm-skills && codex plugin add pm-go-to-market@pm-skills
+  note: 终端执行。Codex 不认插件里的斜杠命令，直接用中文说要做什么。旧版 Codex CLI 没有 plugin 子命令，先升级。
+requires: []
+source:
+  url: https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-go-to-market/skills/beachhead-segment
+  name: phuryn/pm-skills
+author:
+  name: Paweł Huryn
+  url: https://github.com/phuryn
+license: MIT
+licenseUrl: https://github.com/phuryn/pm-skills/blob/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/LICENSE
+addedAt: '2026-11-20'

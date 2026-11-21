@@ -1,0 +1,33 @@
+slug: pre-mortem
+title: 上线前先想想会怎么失败
+name: pre-mortem
+category: 研究
+purpose: 假设项目已经失败，倒推原因，列出现在就要处理的风险
+scenarios:
+- 决定试点能不能按期开放
+- 评审会上没人提出反对意见时查盲点
+agents:
+- Claude Code
+- Codex
+- Gemini CLI
+- Cursor
+summary: 把 PRD 或上线计划交给它，它先假设两周后上线、结果失败，倒推原因，再把风险分成三类：有依据的真问题、被夸大的担心、大家心里有数却没人提的事。真问题再分三档：上线前必须解决、上线后 30 天内补、先观察。挡住上线的每一条都配缓解办法、负责人和截止日期。结论存成 PreMortem-产品名-日期.md；需要了解竞争或市场情况时会联网查。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add phuryn/pm-skills && claude plugin install pm-execution@pm-skills
+  note: 终端执行，装的是整个 pm-execution（18 个技能）。已添加市场时只运行 && 后面的部分。
+- agent: Codex
+  command: codex plugin marketplace add phuryn/pm-skills && codex plugin add pm-execution@pm-skills
+  note: 终端执行。Codex 不认插件里的斜杠命令，直接用中文说要做什么。旧版 Codex CLI 没有 plugin 子命令，先升级。
+requires:
+- 可写的输出目录
+- 网页搜索（补市场背景时）
+source:
+  url: https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-execution/skills/pre-mortem
+  name: phuryn/pm-skills
+author:
+  name: Paweł Huryn
+  url: https://github.com/phuryn
+license: MIT
+licenseUrl: https://github.com/phuryn/pm-skills/blob/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/LICENSE
+addedAt: '2026-11-20'

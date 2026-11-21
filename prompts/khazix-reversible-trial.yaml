@@ -1,0 +1,18 @@
+# 原文署名：>/ 作者：卡兹克
+slug: khazix-reversible-trial
+title: 拿不定主意时先小范围试试
+category: 产品
+purpose: 说出你犹豫的选择，它帮你设计一个花钱少、随时能停的小试验
+scenarios:
+- 改用错题卡复习前，先拿一章试几天
+- 读书会想改成轮流领读，先试一场再问大家要不要继续
+lang: zh
+summary: 拿不准要不要做客服摘要，不一定得先排开发。它先挑出最值得花力气验证的那件事，再围绕它安排短期试做，让你事先知道要看哪种反馈，以及何时该停。
+usage: 去原文「决策」的第二条，把纠结的选择和能留给试做的天数填进去。比如只借得到一位客服半天，就写明这个限制，看返回的第一步能否明天开工。
+source:
+  url: https://mp.weixin.qq.com/s/NAdhdFrUq9-BKelqzqpwBQ
+  name: 都Agent时代了，我还是想分享给你这12个我最常用的Prompt。
+author:
+  name: 数字生命卡兹克
+license: 保留所有权利
+addedAt: '2026-11-20'

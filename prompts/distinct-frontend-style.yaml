@@ -1,0 +1,40 @@
+slug: distinct-frontend-style
+title: 让网页设计不再千篇一律
+titleOriginal: 'Frontend Aesthetics: A Prompting Guide — The Prompt'
+category: 编程
+purpose: 接在网页需求后面，让 AI 换掉默认字体和配色，做出有个性的页面
+scenarios:
+- 给个人网站换掉白底紫渐变的模板配色
+- 比较同一页面在不同风格下的实现
+lang: en
+body: |-
+  <frontend_aesthetics>
+  You tend to converge toward generic, "on distribution" outputs. In frontend design, this creates what users call the "AI slop" aesthetic. Avoid this: make creative, distinctive frontends that surprise and delight. Focus on:
+
+  Typography: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics.
+
+  Color & Theme: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes. Draw from IDE themes and cultural aesthetics for inspiration.
+
+  Motion: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions.
+
+  Backgrounds: Create atmosphere and depth rather than defaulting to solid colors. Layer CSS gradients, use geometric patterns, or add contextual effects that match the overall aesthetic.
+
+  Avoid generic AI-generated aesthetics:
+  - Overused font families (Inter, Roboto, Arial, system fonts)
+  - Clichéd color schemes (particularly purple gradients on white backgrounds)
+  - Predictable layouts and component patterns
+  - Cookie-cutter design that lacks context-specific character
+
+  Interpret creatively and make unexpected choices that feel genuinely designed for the context. Vary between light and dark themes, different fonts, different aesthetics. You still tend to converge on common choices (Space Grotesk, for example) across generations. Avoid this: it is critical that you think outside the box!
+  </frontend_aesthetics>
+summary: 把这段指令接在具体的页面需求后面，让模型避开 Inter、Arial 等常见字体和白底紫渐变的配色。它建议用 CSS 变量统一主色，配上对比鲜明的点缀色；背景可以叠几层渐变或用几何图案，首屏内容则错开时间入场。它只管视觉样式，不能替代无障碍检查。想安装按页面内容做设计的技能，可以看 Skills 页的「做出有设计感的网页」。
+usage: 追加在页面需求后。已有品牌规范时优先给出品牌色、字体授权和减弱动效要求。
+source:
+  url: https://github.com/anthropics/claude-cookbooks/blob/8ad5de647d4f0f50c95d74aabc8aa20a3f70cdd3/coding/prompting_for_frontend_aesthetics.ipynb#The-Prompt
+  name: anthropics/claude-cookbooks
+author:
+  name: Prithvi Rajasekaran
+license: MIT
+licenseUrl: https://github.com/anthropics/claude-cookbooks/blob/8ad5de647d4f0f50c95d74aabc8aa20a3f70cdd3/LICENSE
+copyright: Copyright (c) 2023 Anthropic
+addedAt: '2026-11-20'

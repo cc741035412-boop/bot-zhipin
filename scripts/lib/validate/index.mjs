@@ -6,6 +6,8 @@ import { curationFileFor, loadCuration } from '../load-curation.mjs'
 import { isPublicBot } from '../public-bot.mjs'
 import { validateModels } from './core.mjs'
 import { validateCuration, validateSquads } from './squads.mjs'
+import { loadEntries, libraryDirFor } from '../load-prompts-skills.mjs'
+import { validateLibrary } from './library.mjs'
 export { formatResult } from './core.mjs'
 
 function portable(bot) {
@@ -28,18 +30,24 @@ export function validateBots({ botsDir = BOTS_DIR, now = new Date() } = {}) {
 }
 
 /**
- * 全量校验：Bot + 小队 + 策展，`npm run validate` 用它。
+ * 全量校验：Bot + 小队 + 策展 + 收录的 Prompt 和 Skill，`npm run validate` 用它。
  * 小队和策展引用的 slug 必须在货架上；「在货架上」的口径和网站一致（isPublicBot）。
- * 不传 squadsDir / curationFile 时，跟着 botsDir 取兄弟目录（见 load-squads.mjs、load-curation.mjs）。
+ * 不传 squadsDir / curationFile / promptsDir / skillsDir 时，跟着 botsDir 取兄弟目录
+ * （见 load-squads.mjs、load-curation.mjs、load-prompts-skills.mjs）。
  */
-export function validateAll({ botsDir = BOTS_DIR, squadsDir, curationFile, now = new Date() } = {}) {
+export function validateAll({ botsDir = BOTS_DIR, squadsDir, curationFile, promptsDir, skillsDir, now = new Date() } = {}) {
   const result = validateBots({ botsDir, now })
   const squads = loadAllSquads(squadsDir ? resolve(squadsDir) : squadsDirFor(botsDir))
   const curation = loadCuration(curationFile ? resolve(curationFile) : curationFileFor(botsDir))
+  const prompts = loadEntries('prompt', promptsDir ? resolve(promptsDir) : libraryDirFor('prompt', botsDir))
+  const skills = loadEntries('skill', skillsDir ? resolve(skillsDir) : libraryDirFor('skill', botsDir))
   const botSlugs = result.bots.filter(isPublicBot).map((bot) => bot.slug)
-  const parts = [validateSquads(squads, { botSlugs, now }), validateCuration(curation, { botSlugs })]
+  const parts = [
+    validateSquads(squads, { botSlugs, now }), validateCuration(curation, { botSlugs }),
+    validateLibrary('prompt', prompts, { now }), validateLibrary('skill', skills, { now }),
+  ]
   return {
-    ...result, squads, curation,
+    ...result, squads, curation, prompts, skills,
     errors: [...result.errors, ...parts.flatMap((part) => part.errors)],
     warnings: [...result.warnings, ...parts.flatMap((part) => part.warnings)],
   }

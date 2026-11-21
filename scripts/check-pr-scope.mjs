@@ -42,6 +42,10 @@ export function checkPrScope({ base, head, association }) {
     const status = entries[i], file = entries[i + 1]
     const slug = file.split('/')[1] || ''
     const validLength = slug.length >= 2 && slug.length <= 40
+    if (/^(prompts|skills)\//.test(file)) {
+      errors.push(`越界文件：${JSON.stringify(file)}；prompts/、skills/ 只由维护者修改。`)
+      continue
+    }
     if (file.startsWith('squads/')) {
       if (!squadFile.test(file) || !validLength) {
         errors.push(`越界文件：${JSON.stringify(file)}；投稿小队只能新增或修改 squads/<slug>/squad.yaml 这一个文件，小队文件夹里不能放别的东西。`)

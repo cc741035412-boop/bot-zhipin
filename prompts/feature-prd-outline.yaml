@@ -1,0 +1,22 @@
+slug: feature-prd-outline
+title: 写产品需求文档初稿
+titleOriginal: Product Manager
+category: 产品
+purpose: 说出要做的功能，它按十个章节写出一份需求文档（PRD）初稿
+scenarios:
+- 练习写求职作品集里的首份需求文档
+- 在立项讨论前列出待补的信息
+lang: en
+body: |-
+  Please acknowledge my following request. Please respond to me as a product manager. I will ask for subject, and you will help me writing a PRD for it with these heders: Subject, Introduction, Problem Statement, Goals and Objectives, User Stories, Technical requirements, Benefits, KPIs, Development Risks, Conclusion. Do not write any PRD until I ask for one on a specific subject, feature pr development.
+summary: 先发指令让模型待命，等你报出具体功能主题后，它会按十个固定章节拉出一份 PRD 初稿，重点覆盖问题陈述、目标、用户故事、技术要求、KPI 和开发风险等内容。拿到的更像摆上评审桌的第一版底稿，方便你对照排查哪些章节还缺真实数据或技术边界。
+usage: 第二轮再说功能和边界。例如只讨论首次注册，不讨论整个增长体系；未知指标保持待定。
+source:
+  url: https://github.com/f/prompts.chat/blob/078df58ab884d730740cad1bd503d9e104873357/README.md#act-as-a-product-manager
+  name: f/prompts.chat（2024-12-23 版）
+author:
+  name: OriNachum
+license: CC0-1.0
+licenseUrl: https://github.com/f/prompts.chat/blob/078df58ab884d730740cad1bd503d9e104873357/LICENSE
+copyright: CC0 1.0，作者 OriNachum
+addedAt: '2026-11-20'

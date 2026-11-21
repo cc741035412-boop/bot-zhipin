@@ -15,7 +15,7 @@ it('导出的 schema 和 SHA256 对应唯一真源文件', () => {
   expect(schema).toEqual(JSON.parse(text))
   expect(SCHEMA_SHA256).toBe(createHash('sha256').update(text).digest('hex'))
 })
-it.each(['bot', 'squad', 'curation'])('%s：生成文件导出的 schema 和 SHA256 对应各自的真源文件，standalone 与运行时结论一致', async (name) => {
+it.each(['bot', 'squad', 'curation', 'prompt', 'skill'])('%s：生成文件导出的 schema 和 SHA256 对应各自的真源文件，standalone 与运行时结论一致', async (name) => {
   const text = readFileSync(join(ROOT, `schema/${name}.schema.json`), 'utf8')
   const generated = await import(`../../scripts/lib/validate/generated/${name}-schema.mjs`)
   expect(generated.schema).toEqual(JSON.parse(text))

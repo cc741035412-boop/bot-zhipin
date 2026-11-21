@@ -1,0 +1,24 @@
+slug: write-spec
+title: 写功能需求文档
+name: write-spec
+category: 写作
+purpose: 把一个功能想法写成有目标、范围和验收标准的需求文档
+scenarios:
+- 为聊天助手的引用展示准备评审
+- 说明本期知识库导入不做什么
+agents:
+- Claude Code
+summary: 从用户遇到的问题出发，产出一份供团队讨论的第一版需求说明，里面会分清目标与不做事项，写明用户故事、优先级和可检查的验收条件。如果还缺基准数据或时间约束，会先单列为待确认项；它用来对齐需求范围，具体排期仍要评审后再定。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install product-management@knowledge-work-plugins
+  note: 在终端运行，装的是整个 product-management 插件，只需装一次。会登记 16 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/skills/write-spec
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/LICENSE
+addedAt: '2026-11-20'

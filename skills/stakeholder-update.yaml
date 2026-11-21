@@ -1,0 +1,24 @@
+slug: stakeholder-update
+title: 写项目进展汇报
+name: stakeholder-update
+category: 写作
+purpose: 给本期进展，它按汇报对象写出进度、风险和需要拍板的事
+scenarios:
+- 给导师准备一页周进展
+- 让跨部门同事知道延期影响
+agents:
+- Claude Code
+summary: 先给出本期变化和希望收件人做什么。它会根据管理者、同组成员等读者调整细节，把已知事实、尚有风险和待决策项分开。附有不同受众的结构示例；别用计划中的工作充当已经完成的成果。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install product-management@knowledge-work-plugins
+  note: 在终端运行，装的是整个 product-management 插件，只需装一次。会登记 16 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/skills/stakeholder-update
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/LICENSE
+addedAt: '2026-11-20'

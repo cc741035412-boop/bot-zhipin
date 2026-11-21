@@ -1,0 +1,26 @@
+slug: notion-meeting-intelligence
+title: 开会前在 Notion 备好资料
+name: notion-meeting-intelligence
+category: 写作
+purpose: 告诉它谁参会、要定什么，它从 Notion 里整理出议程和会前必读
+scenarios:
+- 编辑部开选题会前，把候选题目的背景页放进议程
+- 筹备义卖前，从社团的 Notion 页面挑出志愿者要先读的说明
+agents:
+- Codex
+summary: 开会前告诉它参会人和本场要拍板的事，它会从已授权访问的 Notion 页面里抓出相关背景，整理成会议议程和会前必读材料。目录里带了不同会议类型的示例。只负责会前备料，不处理会中录音或会后纪要；页面分享范围仍需会议组织者自己确认。
+install:
+- agent: Codex
+  command: /plugins
+  note: 在 Codex CLI 输入，搜索并安装 Notion。一次装上 4 个 Notion 技能，装完新开会话，首次使用时按提示授权 Notion。
+requires:
+- Notion 账号
+source:
+  url: https://github.com/openai/plugins/tree/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-meeting-intelligence
+  name: openai/plugins
+author:
+  name: Notion Labs, Inc.
+  url: https://www.notion.so
+license: MIT
+licenseUrl: https://github.com/openai/plugins/blob/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-meeting-intelligence/LICENSE.txt
+addedAt: '2026-11-20'

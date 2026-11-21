@@ -12,6 +12,7 @@
 | `bots/_template/` | 投稿模板 | 维护者 |
 | `squads/<slug>/squad.yaml` | 小队：成员（货架上的 Bot）、队长、分工、交接、接线步骤。一支队只有这一个文件 | 投稿者 |
 | `curation/shelf.yaml` | 策展：首页主推、推荐排序、专题、编辑点评 | **只有维护者** |
+| `prompts/<slug>.yaml`、`skills/<slug>.yaml` | Prompt、Skill 收录条目，格式与枚举取自 `schema/{prompt,skill}.schema.json` | **只有维护者** |
 | `schema/bot.schema.json` | bot.yaml 的 JSON Schema，**分组（`category`）、权限、额度的枚举唯一真源** | 维护者 |
 | `schema/squad.schema.json`、`schema/curation.schema.json` | squad.yaml 和 shelf.yaml 的 JSON Schema | 维护者 |
 | `scripts/lib/load-bots.mjs` | 读取 bots/ 的共享代码（只读不校验） | 维护者，改了影响校验器和网站 |
@@ -21,8 +22,8 @@
 | `scripts/lib/share.mjs` | 站内绝对地址、Bot 页面标题和描述、分享图地址及版本号的共享规则 | 维护者 |
 | `scripts/lib/catalog.mjs` | 将完整货架摘要整理成按 slug 排序的 catalog.json | 维护者 |
 | `scripts/lib/llms.mjs` | 将完整货架摘要按 schema 分组顺序排成 llms.txt | 维护者 |
-| `scripts/validate.mjs` + `scripts/lib/validate/` | `npm run validate`：Bot + 小队 + 策展的全量校验；`validate/squads.mjs` 是小队和策展的校验内核 | 维护者 |
-| `scripts/gen-schema-validator.mjs` | `npm run gen:schema`：把三份 schema 各预编译成 `scripts/lib/validate/generated/<名字>-schema.mjs` | 维护者 |
+| `scripts/validate.mjs` + `scripts/lib/validate/` | `npm run validate`：Bot、小队、策展及两个收录库的全量校验；`validate/squads.mjs` 是小队和策展的校验内核 | 维护者 |
+| `scripts/gen-schema-validator.mjs` | `npm run gen:schema`：把五份 schema 各预编译成 `scripts/lib/validate/generated/<名字>-schema.mjs` | 维护者 |
 | `scripts/og/` | 构建结束时用本地字体子集生成 Bot、小队和全站的 PNG 分享图 | 维护者 |
 | `scripts/sync-assets.mjs` | 构建前把截图、头像复制到 `site/public/bot-assets/`，并生成 `site/public/api-data/slugs.json`、`squad-slugs.json` | 维护者 |
 | `site/` | VitePress 站点根目录；`site/.vitepress/meta.mjs` 放站名、仓库地址、安装提示词、默认台词、每个分组的一句说明（`CATEGORY_COPY`） | 维护者 |
@@ -115,6 +116,14 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 `flow` 里的 `from`、`to` 是成员的 slug，或 `you`（代表用户本人）。
 
 **策展**（`curation.data`，对象）：`{ featured: [{ bot, note }], picks: [slug], collections: [{ slug, title, blurb, bots: [slug] }], editorNotes: { slug: 一句话 } }`。里面的 `bot`、`bots` 都是 slug，Bot 的信息按 slug 去 `bots.data` 里取。没有策展文件时四项都是空的。首页的主推读的就是这里的 `featured`（没写主推时退回热度前三）。
+
+### Prompt / Skills 收录库
+
+`prompts/<slug>.yaml`、`skills/<slug>.yaml` 是唯一条目源，分别对应 `schema/{prompt,skill}.schema.json`。`scripts/lib/load-prompts-skills.mjs` 读文件和 schema，`validate/library.mjs` 验证字段、来源、许可及正文边界。测试可用 `PROMPTS_DIR`、`SKILLS_DIR` 指定独立目录，默认跟随 Bot 目录的兄弟目录。
+
+Prompt 的 `copyright` 是单行原版权行（1–200 字），有 `body` 必填，只投影到详情。Skill 的 `requires` 是有序依赖列表，最多 5 项、去重，每项 1–80 字。分类选项取自 schema；`theme/library-marks.ts` 只负责分类名到颜色和 SVG 路径的映射，单测逐库核对键集合。
+
+`entry-summary.mjs` 在构建侧先剔除无转载权的正文，再输出详情和精简列表。`site/.vitepress/data/prompts-skills.mjs` → 列表 data loader / `[slug].paths.mjs` → `site/{prompts,skills}/` 列表和静态详情。浏览器只在本库列表字段上查询；不加载 SKILL.md、不发搜索请求、不接 Bot 热度接口。`sync-assets.mjs` 生成两份 slug 清单，`functions/{prompts,skills}/[slug].ts` 各按自己的清单处理下架地址。
 
 ## 构建与部署
 

@@ -1,0 +1,28 @@
+slug: sketch-feature-inventory
+title: 从草图里列出产品功能
+titleOriginal: Analyze Product Sketch
+category: 产品
+purpose: 上传一张带标注的产品草图，它列出图上能看到的外观和功能
+scenarios:
+- 把纸上原型转成评审输入
+- 对照硬件外观草图检查介绍文案
+lang: en
+body: |-
+  This image contains a sketch of a potential product along with some notes.
+  Given the product sketch, describe the product as thoroughly
+  as possible based on what you see in the image, making sure to note
+  all of the product features.
+
+  Return output in json format.
+summary: 上传一张带标注的产品草图，它会根据图面和旁边标注里能看到的线索，尽可能详细地整理出产品外观特征与功能点，并按 JSON 格式输出。它只基于图上画出来的内容做盘点，不会替设计者脑补没画出来的打算，适合评审前先拉出清单，再对照原图查漏补缺。
+usage: 配支持看图的模型，上传拍清楚的产品草图（先遮掉内部项目编号）再附上这段指令。拿到 JSON 结果后逐项对照原图核实，图上看不出具体用途的地方先标成待确认。
+source:
+  url: https://github.com/google-gemini/cookbook/blob/61250eb5652b90eeefc9d0f5aba5bd55cd21c803/examples/Market_a_Jet_Backpack.ipynb
+  name: google-gemini/cookbook
+author:
+  name: Google LLC
+  url: https://github.com/google-gemini
+license: Apache-2.0
+licenseUrl: https://github.com/google-gemini/cookbook/blob/61250eb5652b90eeefc9d0f5aba5bd55cd21c803/LICENSE
+copyright: Copyright 2026 Google LLC
+addedAt: '2026-11-20'

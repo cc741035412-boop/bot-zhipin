@@ -132,12 +132,10 @@ test('触摸重说与 4 秒计时、点外部关闭、触摸后键盘仍工作',
     await expect(opened(page)).toHaveCount(1)
     await expect(opened(page)).toHaveCount(0, { timeout: 1800 })
     await avatar.tap()
-    // 「点外部」点导航条中间的空白：整张卡是链接以后，卡片旁边 16px 的留白也在触摸的模糊命中范围里
-    // （浏览器会把落在链接边上的点按算给这个链接），点那里等于点卡片、会进详情。
-    const bar = await page.locator('.VPNavBar').boundingBox()
-    await page.touchscreen.tap(bar.x + bar.width / 2, bar.y + bar.height / 2)
+    // 导航岛中间现在是模块入口，不是空白。点非交互标题仍是点气泡外，不应离开首页。
+    await page.locator('.pit-title').tap()
     await expect(opened(page)).toHaveCount(0)
-    await expect(page).toHaveURL(/\/$/)
+    await expect(page).toHaveURL(new URL('/', baseURL).href)
     await page.getByTestId('sort-hot').focus()
     await page.keyboard.press('Tab')
     await expect(opened(page)).toHaveCount(1)

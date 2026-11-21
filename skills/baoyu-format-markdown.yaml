@@ -1,0 +1,33 @@
+slug: baoyu-format-markdown
+title: 整理文章排版和格式
+name: baoyu-format-markdown
+category: 写作
+purpose: 给一篇草稿，它理好标题层级、补齐中英文之间的空格，另存一份排好的稿
+scenarios:
+- 把口述实录排成可发布的文章
+- 交教程前检查中文强调和英文术语间距
+agents:
+- Claude Code
+- Codex
+summary: 把纯文本或 Markdown 草稿交给它，它先把结构分析存成「原文件名-analysis.md」，再补上 frontmatter（标题、slug、一句话摘要和较长的描述）。标题会给 4 到 5 个候选让你挑，摘要直接生成。排版只动标题层级、加粗、列表、表格和代码块，原则上不增删改原文。成稿另存为「原文件名-formatted.md」，已有同名文件先备份；但选「只修排版」时会直接改原文件。正文第一行的一级标题会挪进 frontmatter。排版脚本用 Bun 跑，默认还通过 npx 调用 autocorrect-node 加中英文间距，第一次运行要联网下载。
+install:
+- agent: Claude Code
+  command: npx skills add jimliu/baoyu-skills --skill baoyu-format-markdown -g -a claude-code -y
+  note: 终端执行，只装这一个技能。作者建议按需单装，不必把整组 22 个都装上。
+- agent: Codex
+  command: npx skills add jimliu/baoyu-skills --skill baoyu-format-markdown -g -a codex -y
+  note: 终端执行，装到 ~/.agents/skills，装完新开会话。
+requires:
+- Node.js 22.20 以上（安装用）
+- Bun，或用 npx 临时调用
+- 联网（首次运行下载排版依赖和 autocorrect-node）
+- 可写的输出目录
+source:
+  url: https://github.com/JimLiu/baoyu-skills/tree/bf1ff076e25f8da4a339eb1c8cf03361fea5ea4c/skills/baoyu-format-markdown
+  name: JimLiu/baoyu-skills
+author:
+  name: 宝玉（Jim Liu）
+  url: https://github.com/JimLiu
+license: MIT
+licenseUrl: https://github.com/JimLiu/baoyu-skills/blob/bf1ff076e25f8da4a339eb1c8cf03361fea5ea4c/LICENSE
+addedAt: '2026-11-20'

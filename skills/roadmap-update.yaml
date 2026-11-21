@@ -1,0 +1,24 @@
+slug: roadmap-update
+title: 插进新需求后重排计划
+name: roadmap-update
+category: 写作
+purpose: 给现有计划、人手和新需求，它重排先后顺序，写清哪些要往后推
+scenarios:
+- 把临时需求插入下季度计划
+- 为取消低优先级功能准备调整说明
+agents:
+- Claude Code
+summary: 给出当前路线图、团队可用人力和新需求，它会对比优先级、理清前后依赖，输出调整前后的排期安排。尤其适合拿来讨论需求插队的代价，讲清哪个目标要顺延、谁会受影响。工时估算和负责人要与实际团队核对后再对外发布。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install product-management@knowledge-work-plugins
+  note: 在终端运行，装的是整个 product-management 插件，只需装一次。会登记 16 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/skills/roadmap-update
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/LICENSE
+addedAt: '2026-11-20'

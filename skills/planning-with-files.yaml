@@ -1,0 +1,38 @@
+slug: planning-with-files
+title: 让 AI 记住做到哪一步了
+name: planning-with-files
+category: 工具
+purpose: 把计划和进度写进项目文件，换个对话也能接着上次继续
+scenarios:
+- 分几天写专题文章，把查到的材料和还缺的出处记下来
+- 代码迁移做到一半换会话，先看上次停在哪个文件
+agents:
+- Claude Code
+- Codex
+- Gemini CLI
+- Cursor
+- 通用
+summary: 它把计划、调查所得和进度写进 task_plan.md、findings.md、progress.md，命名任务放在 .planning/<编号>/，旧模式放项目根目录，附模板及初始化、完成度检查脚本。插件版注册 6 个钩子：开会话（含恢复、清空和压缩后）、每次发消息、Read/Write/Edit/Bash/Glob/Grep 执行前、Write/Edit 执行后、上下文压缩前、回合结束时。钩子运行脚本，把计划摘要和近期进度带回上下文，改变助手的工作方式。自动恢复只读项目文件，明确要求才读本机同项目的会话记录。并行跑多个任务或 agent 时，先为每个任务固定 PLAN_ID，免得读错计划。上游几乎每周发版，行为可能随版本变化。
+install:
+- agent: Claude Code
+  command: /plugin marketplace add OthmanAdi/planning-with-files
+  note: 第 1 步，在 Claude Code 中添加市场。已添加可跳过。
+- agent: Claude Code
+  command: /plugin install planning-with-files@planning-with-files
+  note: 第 2 步。插件版带全部 6 个钩子，以及 /plan-goal、/plan-loop 两个命令；用 /plan-zh 调用简体中文版。
+- agent: 通用
+  command: npx skills add OthmanAdi/planning-with-files --skill planning-with-files -g
+  note: 其他 agent 用这条，按提示选 agent。只装技能，不含两个插件命令；钩子要调用过一次才生效。要简体中文版就把技能名换成 planning-with-files-zh。
+requires:
+- 可写的项目目录
+- POSIX shell 或 Windows PowerShell
+- Python 3（会话回查及快速钩子）
+source:
+  url: https://github.com/OthmanAdi/planning-with-files/tree/c37abd73ff25f309a7b1b5991ef2149d5858bc49/skills/planning-with-files
+  name: OthmanAdi/planning-with-files
+author:
+  name: Ahmad Othman Ammar Adi
+  url: https://github.com/OthmanAdi
+license: MIT
+licenseUrl: https://github.com/OthmanAdi/planning-with-files/blob/c37abd73ff25f309a7b1b5991ef2149d5858bc49/LICENSE
+addedAt: '2026-11-20'
