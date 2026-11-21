@@ -1,0 +1,7 @@
+title: Garden Crew
+plugins: [Notebook]
+bots:
+  - label: Seed counter
+    plugins: [Calendar, Notebook]
+  - label: Soil reader
+    plugins: [Weather]

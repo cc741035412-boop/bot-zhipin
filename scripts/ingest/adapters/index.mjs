@@ -1,0 +1,7 @@
+export { adapt as cobus } from './cobus.mjs'
+export { adapt as grokbotdev } from './grokbotdev.mjs'
+export { adapt as botdirectory } from './botdirectory.mjs'
+export { adapt as ronglecat } from './ronglecat.mjs'
+export { adapt as sitin } from './sitin.mjs'
+export { adapt as majiayu } from './majiayu.mjs'
+export { adapt as kydlikebtc } from './kydlikebtc.mjs'

@@ -1,0 +1,40 @@
+{
+  "entries": [
+    {
+      "slug": "active-index",
+      "name": "Active index",
+      "bot_id": "almanac_1234567890123",
+      "author": {
+        "name": "NoteMaker",
+        "url": "https://example.org/notes"
+      },
+      "license": "CC0-1.0",
+      "integrations": [
+        "Notebook"
+      ],
+      "summary": "Index illustrated cards.",
+      "summary_zh": "为图卡编目录。",
+      "category": "paper",
+      "tags": [
+        "cards"
+      ],
+      "first_seen": "2026-01-01",
+      "checked": "2026-01-02",
+      "link_status": "live",
+      "sources": [
+        "Fixture catalog"
+      ],
+      "origin": "fixture",
+      "aka": [
+        "Index v1"
+      ],
+      "official_summary": "The violet paper moon counts forty-seven imaginary ladders."
+    },
+    {
+      "slug": "broken-id",
+      "name": "Broken",
+      "bot_id": "fieldbook_123456789012",
+      "license": "CC0-1.0"
+    }
+  ]
+}

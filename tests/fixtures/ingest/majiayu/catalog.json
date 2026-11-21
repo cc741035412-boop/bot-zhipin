@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {
+      "slug": "seed-log", "name": "Seed Log", "import": "https://x.ai/bot/123456789012345678901", "license": "MIT",
+      "author": {"name": "Juniper", "url": "https://example.org/juniper"},
+      "summary": "Logs seed counts", "summary_zh": "记录种子数量", "category": "garden", "tags": ["seeds"],
+      "shelf": "notebooks", "verified": true, "updated": "2026-05-12", "source": "https://example.org/seed-log",
+      "related": ["tray-map"], "first_safe_task": "Count seeds on paper", "approval_boundary": "Ask before sharing",
+      "connectors": ["Notebook"], "mcp_custom": false
+    },
+    {"slug": "seed-log", "name": "Another Seed Log", "import": "https://x.ai/bot/aaaaaaaaaaaaaaaaaaaaa", "author": {"name": "Rowan"}, "license": "CC0-1.0"},
+    {"slug": "seed-log", "name": "Third Seed Log", "import": "https://x.ai/bot/bbbbbbbbbbbbbbbbbbbbb", "license": "CC0-1.0"},
+    {"slug": "site", "name": "Garden website", "import": "https://example.org/garden", "license": "CC0-1.0"},
+    {"slug": "unknown-license", "name": "Unlicensed card", "import": "https://x.ai/bot/ccccccccccccccccccccc", "license": "unknown"}
+  ]
+}

@@ -9,10 +9,13 @@
 - 环境变量：`IP_SALT`（必填，线上是加密变量，本地在 `.dev.vars`）；`ALLOW_TEST_IP`（只在本地 `.dev.vars` 里设成 `1`，线上不设）
 - 本地完整运行：`npm run dev:full`（构建 → 本地 D1 建表 → `wrangler pages dev`，端口 8788）
 
+### 0004 迁移与上线顺序
+
+**线上要先迁移再合并代码。** 由维护者手动应用 `migrations/0004_click_kinds.sql`，确认成功后再合并触发部署。否则新按钮写入时会被旧表的 CHECK 拒绝。SQLite 不能直接改 CHECK，0004 用四种 kind 的约束重建 `click_counts`，复制全部旧行，再替换原表；保留 `(slug, kind)` 主键和 `WITHOUT ROWID`。不改 `click_dedupe`、其他表或 `IP_SALT`，已经生效的窗口无需重算。
+
 ## 合法 slug 清单
 
-构建时 `scripts/sync-assets.mjs` 生成 `site/public/api-data/slugs.json`，内容是 bot.yaml 可解析、slug 合法且与文件夹名相同的 Bot slug 数组（含外部收录，与网站路由一致），会进入构建产物，线上路径 `/api-data/slugs.json`。
-后端用 `context.env.ASSETS.fetch(new URL('/api-data/slugs.json', request.url))` 读取，不在清单里的 slug 一律 404。可以在模块作用域缓存，单元测试里 mock `ASSETS`。
+构建时 `scripts/sync-assets.mjs` 生成两份与站点路由一致的清单：`/api-data/slugs.json` 列 Bot（含外部收录），`/api-data/squad-slugs.json` 列小队。后端根据下表只用 `ASSETS.fetch` 读本次点击对应的清单，不查另一份兜底。同一个 slug 可以既是 Bot 又是小队。
 
 ## POST /api/click
 
@@ -22,46 +25,58 @@
 { "slug": "my-bot", "kind": "import" }
 ```
 
-- `kind`：`"import"`（一键导入）或 `"prompt"`（复制安装提示词）
+| `kind` | 点击动作 | `slug` 必须在 | 24 小时窗口 | 计入 Bot 热度 |
+|---|---|---|---|---|
+| `import` | 一键导入 | `/api-data/slugs.json` | 与 `prompt` 共用 | 是 |
+| `prompt` | 复制安装提示词 | `/api-data/slugs.json` | 与 `import` 共用 | 是 |
+| `starter` | 复制一条 Bot 开场白 | `/api-data/slugs.json` | 开场白独立，同一 Bot 的各条开场白共用 | 否 |
+| `kickoff` | 复制小队口令 | `/api-data/squad-slugs.json` | 小队口令独立 | 否 |
 
 响应（全部带 `Cache-Control: no-store`，`Content-Type: application/json; charset=utf-8`）：
 
 | 状态 | body | 什么时候 |
 |---|---|---|
-| 200 | `{"ok":true,"counted":true,"heat":12}` | 计入了这次点击；`heat` 是这个 Bot 计入后的总热度 |
-| 200 | `{"ok":true,"counted":false,"heat":11}` | 24 小时内这个 IP 已经给这个 Bot 计过一次，这次不算 |
-| 400 | `{"ok":false,"error":"bad_request"}` | body 不是 JSON、太大、slug 格式不对、kind 不是两者之一 |
+| 200 | `{"ok":true,"counted":true,"heat":12}` | 计入了这次点击；前三种返回这个 Bot 此时的热度，`kickoff` 固定返回 `heat: 0`（即使有同名 Bot） |
+| 200 | `{"ok":true,"counted":false,"heat":11}` | 这个 IP 和 slug 的对应窗口内已计过一次，热度返回规则不变 |
+| 400 | `{"ok":false,"error":"bad_request"}` | body 不是合法 JSON 对象、太大、slug 格式不对或 kind 不在上表 |
 | 403 | `{"ok":false,"error":"forbidden"}` | Origin 与请求 origin 不同（包括 `null`），或 Sec-Fetch-Site 为 cross-site |
 | 415 | `{"ok":false,"error":"unsupported_media_type"}` | Content-Type 缺失或媒体类型不是 application/json |
-| 404 | `{"ok":false,"error":"unknown_slug"}` | slug 不在 slugs.json 里 |
+| 404 | `{"ok":false,"error":"unknown_slug"}` | slug 不在该 kind 的清单里 |
 | 405 | `{"ok":false,"error":"method_not_allowed"}` | 不是 POST（带 `Allow: POST`） |
-| 500 | `{"ok":false,"error":"server_error"}` | 数据库出错，或没配置 `IP_SALT` |
+| 500 | `{"ok":false,"error":"server_error"}` | 数据库或清单读取出错，或没配置 `IP_SALT` |
 
 ## GET /api/stats
 
 ```json
-{ "ok": true, "heat": { "my-bot": 12, "other-bot": 3 }, "byKind": { "my-bot": { "import": 9, "prompt": 3 } } }
+{
+  "ok": true,
+  "heat": { "my-bot": 12, "new-bot": 0 },
+  "byKind": {
+    "my-bot": { "import": 9, "prompt": 3, "starter": 5 },
+    "new-bot": { "import": 0, "prompt": 0, "starter": 1 }
+  },
+  "squads": { "my-squad": { "kickoff": 4 } }
+}
 ```
 
-- 没被点过的 Bot 不出现在里面，前端按 0 处理
+- 有 `import`、`prompt` 或 `starter` 任一计数行的 Bot 同时出现在 `heat` 和 `byKind`；三种按钮都返回数字，缺的补 0。只有开场白的 Bot 热度为 0，没有这三种记录的 Bot 不出现，前端按 0 处理。
+- 有 `kickoff` 行的小队单列在 `squads`，不混入同名 Bot 的统计。没有记录时三个映射都是 `{}`。
 - MVP 不做缓存：`Cache-Control: no-store`
 
 ## 计数规则（产品定稿，改动先问）
 
-- **热度 = 去重后的点击次数**。同一个 IP 对同一个 Bot，24 小时内只算一次，**不分是哪个按钮**。
-- 24 小时是滚动窗口，从上一次「被计入」的时间算起；窗口内的重复点击不计入，也不刷新窗口。
-- 被计入的那次点击按它的 `kind` 记到 `byKind` 里。
-- 只存加盐哈希，不存原始 IP：`ip_hash = hex(HMAC-SHA256(key = IP_SALT, message = normalizeIp(ip) + "|" + slug))`。没有 `IP_SALT` 时直接返回 500，绝不存未加盐的值。
+- **Bot 热度 = 去重后的 `import + prompt`**。这两个按钮共用一个窗口，先点哪个就记在哪个 `kind` 下。`starter`、`kickoff` 各自单独计数，不占用其他窗口，也不影响任何 Bot 的热度或排序。
+- 每个窗口都从这个 IP 对该 slug 上一次「被计入」的时间滚动算 24 小时；窗口内重复不计，也不刷新时间。恰好到边界可以再计。
+- 只存 `ip_hash = hex(HMAC-SHA256(key = IP_SALT, message))`，不存原始 IP。`import/prompt` 的消息仍是 `normalizeIp(ip) + "|" + slug`（与迁移前逐字节相同）；`starter/kickoff` 用 `normalizeIp(ip) + "|" + slug + "|" + kind`。没有盐直接返回 500。
 - IPv4 原值不变。IPv6 在哈希前展开 `::`、统一为小写四位十六进制组，再取前四组（/64），序列化为 `xxxx:xxxx:xxxx:xxxx::/64`；同 /64 的不同接口地址共享 24 小时去重窗口，不同 /64 独立。IPv4 映射地址（如 `::ffff:1.2.3.4`、等价十六进制写法）转换为 `1.2.3.4`，与该 IPv4 共桶。非法 IPv6 回退为 `0.0.0.0`。
 - IP 来源：`CF-Connecting-IP` 请求头（Cloudflare 会覆盖，客户端伪造不了）。只有 `env.ALLOW_TEST_IP === "1"` 时才额外接受 `X-Test-IP`（本地测试模拟不同 IP 用）。两者都没有时按 `0.0.0.0` 处理。
 - 热度只是按钮点击数，不是导入成功数（导入发生在 Grok Bot App 里，拿不到）。
 
 ## 前端怎么用
 
-- 首页挂载时请求一次 `/api/stats`。失败（比如纯 `vitepress dev` 没有后端）时：热度显示「热度 —」，若用户还没手动选过排序，默认切到「最新」。
-- 点按钮时用 `fetch('/api/click', { method: 'POST', keepalive: true, ... })` 发出去，**不等结果**、不阻塞打开链接或复制。收到 200 后把这个 Bot 的热度改成返回的 `heat`。
-- 点击后**数字马上更新，排序不动**；下次进入页面或切换排序时才重排，避免卡片在鼠标底下跳走。
-- 排序：「热门」按 heat 降序，平手按 addedAt 降序，再平手按 name；「最新」按 addedAt 降序，平手按 name。
+- 首页和非预览 Bot 详情页挂载时请求 `/api/stats`，只读 `heat`。接口失败（比如纯 `vitepress dev` 没有后端）时，详情页仍显示「热度 —」，列表卡不显示热度，不强制切换排序。
+- 点按钮时用 `fetch('/api/click', { method: 'POST', keepalive: true, ... })` 发出去，**不等结果**、不阻塞跳转或复制。开场白和口令统计的是点击：成功写入剪贴板或退回选中文字都上报；投稿预览和小队的「试一句」不上报。
+- **只有 `import/prompt` 的成功响应更新热度数字**，不立即重排。`starter/kickoff` 的响应不更新热度状态。下次进入页面或切换排序时，「最热」仍按热度降序，平手按上架日期降序，再按显示名。
 
 ## 后端实现细节与本地验证
 
@@ -70,10 +85,10 @@
 - 1 KB 指 **1024 字节**，边界值可接受；先检查 `Content-Length`，再累计实际读取的请求体字节数（UTF-8），不信任客户端声明。没有该头、声明偏小或分块传输也受限；读取超限立即取消后续读取，返回 400。
 - body 必须是 JSON 对象；slug 长度 2–40，匹配 `^[a-z0-9]+(-[a-z0-9]+)*$`。额外字段不参与计数。
 - 本地显式开启 `ALLOW_TEST_IP === "1"` 时，非空 `X-Test-IP` 优先于 `CF-Connecting-IP`；否则不读取测试头。空头值按缺失处理。
-- `slugs.json` 必须是合法 slug 的 JSON 数组；模块作用域按 ASSETS 绑定和请求 origin 缓存成功结果 60 秒。HTTP 失败、读取失败、JSON/结构错误均返回通用 500，不缓存失败，也不回退到已过期的清单。
-- `GET /api/stats` 为每个出现的 Bot 同时返回 `import`、`prompt` 两个数字，未计入过的按钮为 0；从未点击的 Bot 仍不出现。读库失败返回 `500 {"ok":false,"error":"server_error"}`。
+- 两份清单都必须是合法 slug 的 JSON 数组；模块作用域按 ASSETS 绑定、请求 origin 和清单路径缓存成功结果 60 秒。HTTP 失败、读取失败、JSON/结构错误均返回通用 500，不缓存失败，也不回退到已过期的清单。
+- `GET /api/stats` 用 `Object.create(null)` 建 `heat`、`byKind`、`squads` 三个映射，以支持 `constructor` 等合法 slug。读库失败返回 `500 {"ok":false,"error":"server_error"}`。
 - 两个接口的成功及错误响应都带统一 JSON Content-Type 和 `no-store`。click 非 POST 返回 `Allow: POST`，stats 非 GET 返回 `Allow: GET`，包括 OPTIONS 和 HEAD；HEAD 在 HTTP 传输层不发送响应体。
-- POST 先检查媒体类型（415）、再检查来源（403），拒绝时不读取 body、IP 或 slug 清单、不记录点击。通过请求头检查后，缺失或空 `IP_SALT` 时优先返回 500，不读取 IP、不计算哈希、不记录点击。数据库/资源读取错误的内部详情不写日志、不返回客户端。
+- POST 先检查媒体类型（415）、再检查来源（403），拒绝时不读取 body、IP 或 slug 清单、不记录点击。通过请求头检查后，缺失或空 `IP_SALT` 时优先返回 500，不读取 IP、不计算哈希、不记录点击。盐有效后先校验 body（400），再按 kind 查清单（不在清单内为 404）。数据库/资源读取错误的内部详情不写日志、不返回客户端。
 
 ### 去重、清理与故障边界
 
@@ -85,7 +100,7 @@
 
 ### 运行测试
 
-- `npm test`：`tests/unit/api.test.mjs` 使用 `getPlatformProxy({ persist: false, remoteBindings: false })` 提供的真实本地 D1，配置放在临时目录，不读取开发者的 `.dev.vars`，不用手写数据库替身。ASSETS 在单元测试中 mock；验证时间边界、20 请求并发、D1 changes 语义及错误路径。
-- `bash scripts/accept-click.sh`：复制源码到 `mktemp -d`，生成一次性盐，构建示例 Bot、迁移本地 D1、启动真正的 Pages Functions，以 HTTP 验证响应后查库；不修改现有本地数据库或变量文件。
-- 默认端口 8790 / inspector 9330，可用 `PORT=8792 INSPECTOR_PORT=9332 bash scripts/accept-click.sh` 覆盖。占用端口时直接失败，不清理其他进程；退出时核对 PID/命令，只清理本次启动的独立进程组。
+- `npm test`：`tests/unit/api.test.mjs` 使用 `getPlatformProxy({ persist: false, remoteBindings: false })` 提供的真实本地 D1，配置放在临时目录，不读取开发者的 `.dev.vars`，不用手写数据库替身。按文件名顺序应用 `migrations/*.sql`。ASSETS 在单元测试中 mock；验证旧库升级、三种窗口、时间边界、同名 Bot/小队、20 请求并发、D1 changes 语义及错误路径。
+- `bash scripts/accept-click.sh`：复制源码到 `mktemp -d`，生成一次性盐，构建示例 Bot 和小队、迁移本地 D1、启动真正的 Pages Functions，以 HTTP 验证响应后查库；不修改现有本地数据库或变量文件。
+- 默认端口 8790 / inspector 9330，可用 `PORT=8795 INSPECTOR_PORT=9335 bash scripts/accept-click.sh` 覆盖。占用端口时直接失败，不清理其他进程；退出时核对 PID/命令，只清理本次启动的独立进程组。
 - 响应头探测使用已计入过的测试地址，不增加额外计数。成功清理临时副本并以 `ACCEPT-CLICK OK` 结束；失败保留临时日志路径，但移除一次性 `.dev.vars`。
