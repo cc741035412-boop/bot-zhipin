@@ -156,7 +156,7 @@ Prompt 的 `copyright` 是单行原版权行（1–200 字），有 `body` 必�
 AI 的本地 Bot 目录
   └─ scripts/make-submission-link.mjs（临时副本校验）
        └─ 预填 Issue 链接（过长时给明文投稿包）
-            └─ 学员登录 GitHub → 勾 CC BY 4.0 → 提交（2026-11-15 起表单不再有截图栏，DECISIONS 第 43 条）
+            └─ 投稿人登录 GitHub → 勾 CC BY 4.0 → 提交（2026-11-15 起表单不再有截图栏，DECISIONS 第 43 条）
                  └─ .github/workflows/submission.yml（默认分支的可信代码）
                       ├─ 不通过：编辑/新发一条中文诊断评论
                       └─ 通过：submission/issue-<号>，默认分支之上的一个提交

@@ -57,7 +57,7 @@ about:
       when: 每周五
       default: 关
       quiet: 照发
-  fit: 要跟海外 AI 圈动态的产品经理和从业者
+  fit: 要跟海外 AI 圈或行业动态的开发者、创作者和从业者
   notFit: 想盯微博、即刻等国内平台的人
   cnFit: 一般
   cnNote: 核心靠 X，建议连上 X，不连只能读公开页面；Slack、Notion 都可以不连
