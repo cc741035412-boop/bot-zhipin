@@ -54,20 +54,20 @@ test('身体填色只由根 SVG 的主题变量控制，动画帧不覆盖内联
   await expect(fill).toHaveCSS('fill', 'rgb(241, 239, 233)')
 })
 
-test('详情按钮只驱动本地 Bot，导入上报/新页与复制播报仍正常', async ({ page, context }) => {
+test('详情按钮只驱动本地 Bot，导入上报、App 唤起与复制播报仍正常', async ({ page }) => {
   await page.goto(`/bots/${slug}`)
   // 详情页上还有别的小 Bot（所在小队的成员、侧栏探头的那只）；按钮驱动的是头部舞台上这一只。
   const bot = page.locator('.detail-header').getByTestId('live-bot')
   await page.getByTestId('btn-prompt').click()
   await expect(bot).toHaveAttribute('data-state', 'wink')
   await expect(page.locator('[aria-live="polite"]')).toHaveText('已复制安装提示词')
-  const popup = context.waitForEvent('page')
   const request = page.waitForRequest((r) => r.url().endsWith('/api/click') && r.postDataJSON().kind === 'import')
   await page.getByTestId('btn-import').click()
   await expect(bot).toHaveAttribute('data-state', 'comet')
   expect((await request).postDataJSON()).toEqual({ slug, kind: 'import' })
-  await (await popup).close()
+  await expect(page.locator('body > iframe[src^="grokbot://app/v1/bot-template?id="]')).toHaveCount(1)
   await expect(bot).toHaveAttribute('data-state', 'idle', { timeout: 3500 })
+  await expect(page.getByTestId('get-app')).toBeVisible({ timeout: 5000 })
 })
 
 test('减少动效中途切换：打字立即完成，静态帧不变；恢复后基础状态正确', async ({ page }) => {

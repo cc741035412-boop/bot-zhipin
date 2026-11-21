@@ -266,7 +266,7 @@ describe('网站数据：bots、squads、curation 三份对得上', () => {
     const data = shelfData()
     // 列表数据不带 about 全文（首页和搜索面板每页都加载）；详情页的完整摘要走路由参数。
     const list = bots.default.load()
-    expect(list).toEqual(data.bots.map(({ about, ...bot }) => bot))
+    expect(list).toEqual(data.bots.map(({ about, ...bot }) => ({ ...bot, trial: about?.trial || about?.starters?.[0] || null })))
     expect(list).toEqual(listSummaries())
     for (const bot of list) expect(bot).not.toHaveProperty('about')
     expect(data.bots.some((bot) => bot.about !== null)).toBe(true)

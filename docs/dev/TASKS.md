@@ -74,7 +74,7 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | LI2 | 管线：去重、许可回溯、跨来源剔除分享页原文、已上架、needsReview、cnFit、注释合并、前 50、写盘 | 编码 agent | `scripts/ingest/`、`tests/unit/ingest-pipeline*`、`ingest-review*` | ✅ |
 | LI3 | 中文三项、严格五项评分、前 50 首个任务 | 写作模型 | `library/annotations/` | ✅ |
 | LI4 | 许可落实：`library/LICENSES.md`、`THIRD_PARTY_NOTICES.md`；INGEST 报告；COMPETITOR-UX | 维护者 | 文档 | ✅ |
-| LI5 | 用户看 INGEST.md 点头 → 推送开 PR | 维护者 | — | 🟡 PR #23 已开，等合并授权 |
+| LI5 | 用户看 INGEST.md 点头 → 推送开 PR | 维护者 | — | ✅ |
 | LI6 | 页面（Prompt、Skills 板块从 library 挑条目；交互单独做） | — | — | ⬜ 等用户定 |
 
 # 被搜到、被转发、被机器读到（2026-11-21）

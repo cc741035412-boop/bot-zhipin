@@ -111,11 +111,11 @@ it('about：没写是 null；写了就把缺的数组补成 []、缺的字符串
   expect(summarizeBot(model({ about: '一句话' })).about).toBe(null)
   expect(summarizeBot(model({ about: ['列表'] })).about).toBe(null)
   expect(summarizeBot(model({ about: { intro: '你给它一份文档，它挑出问题交给你。' } })).about).toEqual({
-    intro: '你给它一份文档，它挑出问题交给你。', does: [], starters: [], skills: [], routines: [],
+    intro: '你给它一份文档，它挑出问题交给你。', does: [], trial: null, starters: [], skills: [], routines: [],
     fit: null, notFit: null, cnFit: null, cnNote: null,
   })
   const full = {
-    intro: '你给它一份文档，它挑出问题交给你。', does: ['挑问题', '排顺序'], starters: ['帮我看这份文档'],
+    intro: '你给它一份文档，它挑出问题交给你。', does: ['挑问题', '排顺序'], trial: null, starters: ['帮我看这份文档'],
     skills: [{ name: 'check', does: '逐条检查' }],
     routines: [{ what: '检查更新', when: '每天早上', default: '关', quiet: '不打扰' }],
     fit: '要自查的人', notFit: '还没动笔的人', cnFit: '好', cnNote: '直接贴正文不用连账号',
@@ -123,7 +123,7 @@ it('about：没写是 null；写了就把缺的数组补成 []、缺的字符串
   expect(summarizeBot(model({ about: full })).about).toEqual(full)
   // 坏数据不让摘要报错：数组里只留类型对的，对象里缺的字段是 null。
   expect(summarizeBot(model({ about: { does: '不是列表', starters: ['好的', 3], skills: ['字符串', { name: '只有名字' }], routines: [null, { what: '任务' }] } })).about).toEqual({
-    intro: null, does: [], starters: ['好的'], skills: [{ name: '只有名字', does: null }],
+    intro: null, does: [], trial: null, starters: ['好的'], skills: [{ name: '只有名字', does: null }],
     routines: [{ what: '任务', when: null, default: null, quiet: null }],
     fit: null, notFit: null, cnFit: null, cnNote: null,
   })

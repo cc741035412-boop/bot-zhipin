@@ -27,6 +27,9 @@ about:
     - 简报里引用带来源标签的网友原话
     - 说清这次哪些来源开了、哪些没开
     - 首次带你配来源，每一项都能跳过
+  trial: |-
+    全程中文。装好以后 X 和 ScrapeCreators 都直接跳过，只用不要钥匙的来源，不用再问我。
+    然后查最近 30 天 Reddit 和 Hacker News 上开发者怎么评价 Claude Code，先给我 200 字以内的要点，带两三条网友原话和来源。完整简报等我说了再出。
   starters:
     - X 和 ScrapeCreators 先跳过，只用不要钥匙的来源
     - 最近 30 天开发者怎么评价 Claude Code？正文用中文

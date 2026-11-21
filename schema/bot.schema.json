@@ -85,6 +85,13 @@
           "maxItems": 6,
           "items": { "type": "string", "minLength": 2, "maxLength": 40, "pattern": "^[^<>\"]*$" }
         },
+        "trial": {
+          "description": "试跑句：点导入时复制到剪贴板，进 App 粘贴就能直接出结果的一段话，自带示例材料。可以换行。",
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 300,
+          "pattern": "^[^<>\"]*$"
+        },
         "starters": {
           "description": "导入后可以直接发的第一句话，1 到 3 条",
           "type": "array",
