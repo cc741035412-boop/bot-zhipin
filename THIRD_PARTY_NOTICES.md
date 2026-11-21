@@ -55,3 +55,19 @@ SOFTWARE.
 ### CC0 1.0
 
 RongleCat/awesome-grok-bot（提交 `e50ac2f8dd2f5fe83827bf2a2b9f70e50d893be1`）、majiayu000/awesome-grok-bot（提交 `34ae6ed`，目录数据和配方）、kydlikebtc/awesome-grokbot（提交 `f64dc25af7f823bcc697ad7d5fa675b397934d82`，CC0 行）已放弃权利，不需要署名；本站仍逐条注明来源。
+
+## Noto Sans SC
+
+- 用途：分享图的 Medium 和 Bold 字体（随仓库分发静态 OTF 子集）
+- 来源：https://github.com/notofonts/noto-cjk/releases/tag/Sans2.004 （简体中文 Noto Sans CJK SC）
+- 许可证：OFL-1.1，全文见 `scripts/og/fonts/OFL.txt`
+
+## satori
+
+- 用途：将分享图文字转为 SVG 路径（npm 依赖，不随仓库分发）
+- 许可证：MPL-2.0
+
+## @resvg/resvg-js
+
+- 用途：将分享图 SVG 光栅化为 PNG（npm 依赖，不随仓库分发）
+- 许可证：MPL-2.0
