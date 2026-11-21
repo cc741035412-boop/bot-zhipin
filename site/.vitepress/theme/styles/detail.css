@@ -134,7 +134,7 @@
   -webkit-tap-highlight-color: transparent;
   transition: border-color var(--bz-dur) var(--bz-ease), background-color var(--bz-dur) var(--bz-ease), color var(--bz-dur) var(--bz-ease);
 }
-.starter-text { min-width: 0; }
+.starter-text { min-width: 0; white-space: pre-line; }
 .starter-copy { display: inline-flex; align-items: center; gap: 6px; flex: none; height: 24px; color: var(--bz-text-3); font-size: var(--bz-fs-xs); font-weight: 600; line-height: 1; white-space: nowrap; transition: color var(--bz-dur) var(--bz-ease); }
 .starter.copied, .starter.copied:hover { border-color: color-mix(in srgb, var(--bz-success) 55%, transparent); }
 .starter.copied .starter-copy { color: var(--bz-success); }
