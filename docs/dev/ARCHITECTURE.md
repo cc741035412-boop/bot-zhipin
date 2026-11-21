@@ -55,6 +55,8 @@
 | `migrations/` | D1 表结构 | 维护者 |
 | `tests/unit/` | vitest 单元测试；`tests/fixtures/` 校验器样例；`tests/e2e/` Playwright 真浏览器 | 维护者 |
 | `docs/dev/` | 维护者文档 | 维护者 |
+| `library/` | 资源库原料：从开源仓库收的分享链接、岗位设定、提示词、技能、定时任务、团队、配方，混合许可（`library/LICENSES.md`）；**不进站点构建**，报告见 `INGEST.md` | 维护者跑 `scripts/ingest/run.mjs` 生成；`annotations/` 是写作模型产出 |
+| `scripts/ingest/` | 入库管线：每个来源一个适配器（`adapters/`），`run.mjs` 去重、许可回溯、安全标记、国内适配、写盘；来源仓库和提交在 `sources.json` | 维护者 |
 
 ## 数据流
 

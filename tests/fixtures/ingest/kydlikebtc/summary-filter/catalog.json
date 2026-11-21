@@ -1,0 +1,52 @@
+{
+  "entries": [
+    {
+      "slug": "identical",
+      "name": "Identical summary",
+      "bot_id": "identical_12345678901",
+      "license": "CC0-1.0",
+      "summary": "A silver compass points toward the quietest bakery.",
+      "summary_zh": "按店内音量给面包房排序。",
+      "official_summary": "A silver compass points toward the quietest bakery."
+    },
+    {
+      "slug": "truncated",
+      "name": "Truncated summary",
+      "bot_id": "truncated_12345678901",
+      "license": "CC0-1.0",
+      "summary": "ＭＡＰＳ—  floating islands!",
+      "official_summary": "Maps floating islands for gardeners who travel by balloon."
+    },
+    {
+      "slug": "cross-row",
+      "name": "Copied from retired catalog",
+      "bot_id": "cross_row_12345678901",
+      "license": "CC0-1.0",
+      "summary": "Try this: An origami fox sorts buttons by their shadows."
+    },
+    {
+      "slug": "copied-zh",
+      "name": "Copied Chinese summary",
+      "bot_id": "copied_zh_12345678901",
+      "license": "CC0-1.0",
+      "summary_zh": "这只纸鹤每天清点窗台上的玻璃弹珠，并按落下时的声音记录每一颗弹珠的颜色。",
+      "official_summary": "这只纸鹤每天清点窗台上的玻璃弹珠，并按落下时的声音记录每一颗弹珠的颜色。"
+    },
+    {
+      "slug": "truncated-zh",
+      "name": "Truncated Chinese summary",
+      "bot_id": "zh_prefix_12345678901",
+      "license": "CC0-1.0",
+      "summary_zh": "这只纸鹤每天清点窗台上的玻璃弹珠！"
+    },
+    {
+      "slug": "raw-only",
+      "name": "Raw prefix only",
+      "bot_id": "raw_match_12345678901",
+      "license": "CC0-1.0",
+      "summary": "Note: Drawer label: ----------------thimbles go here.",
+      "summary_zh": "针线柜上的标签是 Drawer label: ----------------顶针放在这里。",
+      "official_summary": "Drawer label: ----------------buttons and beads go here."
+    }
+  ]
+}

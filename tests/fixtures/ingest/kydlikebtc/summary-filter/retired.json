@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "slug": "independent",
+      "name": "Independent summary",
+      "bot_id": "independent_123456789",
+      "license": "CC0-1.0",
+      "summary": "Organizes sewing supplies by silhouette.",
+      "summary_zh": "按轮廓整理针线盒。",
+      "official_summary": "An origami fox sorts buttons by their shadows."
+    }
+  ]
+}
