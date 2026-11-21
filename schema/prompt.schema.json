@@ -37,18 +37,18 @@
     },
     "lang": { "description": "正文语言", "enum": ["zh", "en"] },
     "body": {
-      "description": "正文：照录原文，不改写；超过 6000 字的不收正文",
+      "description": "正文：照录原文，不改写；最多 15000 字",
       "type": "string",
       "minLength": 1,
       "pattern": "\\S",
-      "maxLength": 6000
+      "maxLength": 15000
     },
     "bodyZh": {
       "description": "本站中文译文：body 是英文时提供，页面默认显示和复制它",
       "type": "string",
       "minLength": 10,
       "pattern": "\\S",
-      "maxLength": 6000
+      "maxLength": 15000
     },
     "summary": {
       "description": "本站用中文自己写的摘要；没有 body 时必填",
