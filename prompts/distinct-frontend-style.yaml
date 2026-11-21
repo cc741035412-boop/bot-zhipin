@@ -27,6 +27,26 @@ body: |-
 
   Interpret creatively and make unexpected choices that feel genuinely designed for the context. Vary between light and dark themes, different fonts, different aesthetics. You still tend to converge on common choices (Space Grotesk, for example) across generations. Avoid this: it is critical that you think outside the box!
   </frontend_aesthetics>
+bodyZh: |-
+  <frontend_aesthetics>
+  你做出来的东西往往会落入常见的套路。在前端设计里，这就成了用户所说的那种「一看就是 AI 粗制滥造」的风格。别走这条路：做出有创意、有辨识度的前端界面，让人眼前一亮。重点关注以下几方面：
+
+  字体：选好看、别致、有趣的字体。避开 Arial、Inter 这类随处可见的字体，选择更有特色、能让界面更出彩的字体。
+
+  配色与主题：选定一种风格，并始终保持一致。用 CSS 变量保持样式统一。让主色占主导，再用对比鲜明的颜色点缀，比小心翼翼地把每种颜色用得一样多更有效。可以从 IDE 主题和不同文化的美学风格中寻找灵感。
+
+  动效：用动画实现视觉效果和微交互。对于 HTML 页面，优先采用纯 CSS 方案。对于 React 项目，如果可以使用 Motion 库，就用它。把心思放在最能打动人的时刻：页面加载时，用 animation-delay 让各部分错落有序地呈现，这样一次精心编排的入场，比零散的微交互更让人愉悦。
+
+  背景：用背景营造氛围和纵深感，而不是习惯性地铺一层纯色。可以叠加 CSS 渐变，使用几何图案，或根据具体场景加入与整体风格相配的效果。
+
+  避开 AI 生成的设计里常见的套路：
+  - 用得太多的字体（Inter、Roboto、Arial、系统字体）
+  - 落入俗套的配色（尤其是白底上的紫色渐变）
+  - 看一眼就能猜到的布局和组件样式
+  - 千篇一律、看不出具体使用场景的设计
+
+  创造性地理解需求，做出意料之外却又让人觉得确实是为当前场景量身设计的选择。不同设计可以采用明亮或深色主题，也要变换字体和整体风格。你反复生成设计时，还是容易回到那几种常见的选择上（比如 Space Grotesk）。别再重复这些选择：关键是跳出惯有的思路！
+  </frontend_aesthetics>
 summary: 把这段指令接在具体的页面需求后面，让模型避开 Inter、Arial 等常见字体和白底紫渐变的配色。它建议用 CSS 变量统一主色，配上对比鲜明的点缀色；背景可以叠几层渐变或用几何图案，首屏内容则错开时间入场。它只管视觉样式，不能替代无障碍检查。想安装按页面内容做设计的技能，可以看 Skills 页的「做出有设计感的网页」。
 usage: 追加在页面需求后。已有品牌规范时优先给出品牌色、字体授权和减弱动效要求。
 source:

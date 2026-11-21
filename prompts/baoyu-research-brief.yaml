@@ -7,8 +7,23 @@ scenarios:
 - 横向对比几款备选工具前先列清要核实的问题和来源
 - 写综述或调研报告前给模型划定资料范围与交付格式
 lang: zh
+body: |-
+  <background>
+    {.....}
+  </background>
+  上面是我整理的一些Deep Research 类工具使用经验，，请参考这些经验（其中可能有些错误），帮我整理一份 Deep Research 类产品的使用经验手册，优先考虑 OpenAI Deep Research，同时也考虑 Grok Open Search，Gemini Deep Research等同类产品，重点分析：
+  - Deep Research 产品介绍
+  - Deep Research 提示词使用经验
+  - 注意事项
+  - 技术原理解析
+
+  检索时使用权威信息源，英文为主。
+
+  输出格式：
+  - 深度分析报告
+  - 中文报告
 summary: 既手头有内部笔记、又要让研究模型检索外部资料时，很容易把两边混成结论。这份模板以研究工具使用手册为例，让你把自己的已有经验、要查的对象与问题、优先读取的来源类别，以及报告写给谁、按什么格式交付分开交代清楚。
-usage: 从原文示例起步，换成自己的研究对象与背景材料。列出两三个必须回答的问题，指定来源范围、成稿语言；拿到报告后逐条点开关键引文。
+usage: 把 <background> 里的 {.....} 换成你整理的使用笔记，不确定的经验也标出来，别当成结论。若研究别的题目，把笔记下方的工具名和研究重点一起换掉，列出两三个必须回答的问题，写清优先查哪类来源、用什么语言成稿。开启联网深度研究，把整段发出。读报告时点开关键引文，看来源是否真能支持结论，还是只重复了你的笔记。
 source:
   url: https://baoyu.io/blog/deep-research-prompt-templates
   name: Deep Research 提示词模板参考
@@ -16,4 +31,5 @@ author:
   name: 宝玉
   url: https://baoyu.io
 license: 保留所有权利
+copyright: © 宝玉（baoyu.io），本站原创内容，独家授权赛博禅心公众号发布
 addedAt: '2026-11-20'

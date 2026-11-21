@@ -10,6 +10,8 @@ scenarios:
 lang: en
 body: |-
   I want you to act as a screenwriter. You will develop an engaging and creative script for either a feature length film, or a Web Series that can captivate its viewers. Start with coming up with interesting characters, the setting of the story, dialogues between the characters etc. Once your character development is complete - create an exciting storyline filled with twists and turns that keeps the viewers in suspense until the end. My first request is "I need to write a romantic drama movie set in Paris."
+bodyZh: |-
+  你是一名编剧，要为一部长片或一部网剧写一个有创意、能吸引观众的剧本。先构思有意思的人物、故事背景和人物之间的对白等。等人物塑造好了，再设计一条扣人心弦的故事线，让情节几经转折，把悬念留到最后。我的第一个请求是：「我需要写一部以巴黎为背景的爱情剧情片。」
 summary: 给一个题材和发生地（原例是设在巴黎的爱情片），让它先定下角色设定、场景和人物对白，等人物立住后再铺开带转折和悬念的故事线。比起一上来先排故事大纲，这种先定「谁在哪儿说什么话」的写法，更适合构思靠人物互动推动剧情的电影或网剧剧本。
 usage: 换掉原例中的地点和题材，补上时长和可用场景数；先选中一组人物关系再细化台词。
 source:
