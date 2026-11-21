@@ -86,4 +86,4 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | A | 标题和描述、canonical 和分享标签、sitemap、robots、catalog.json、llms.txt | 编码 agent | — | `site/.vitepress/config.mts`、`scripts/lib/{share,catalog,llms}.mjs`、`site/public/robots.txt` | ✅ |
 | B | 构建时出分享图：Bot、小队、全站各一张，Noto Sans SC 子集；换行标点优先、行宽均衡 | 编码 agent | — | `scripts/og/`、`scripts/gen-og-fonts.mjs`、依赖 | ✅ |
 | C | 计数加 starter / kickoff：迁移 0004、接口、前端、测试、文档 | 编码 agent | — | `functions/`、`migrations/0004`、`heat.ts`、三个组件 | ✅ |
-| M | 集成、复跑验收、目视分享图；线上 D1 先备份再迁移，然后合并 | 维护者 | A、B、C | — | 🟡 |
+| M | 集成、复跑验收、目视分享图；线上 D1 先备份再迁移，然后合并 | 维护者 | A、B、C | — | ✅ |
