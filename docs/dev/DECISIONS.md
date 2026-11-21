@@ -2,6 +2,16 @@
 
 按时间倒序追加。每条写：决定了什么、为什么、放弃了什么。
 
+## 2026-11-20 资源库 library/（编号从 49 起：46–48 已被 feat/prompts-skills 占用）
+
+49. **新增顶层原料仓 `library/`，给 Prompt、Skills 两个板块和 Bot 货架攒原料**（用户 2026-11-20 定：「就是要增加 prompt 跟 skills 的板块，这个属于是补充信息」）。从开源仓库全量收：分享链接、岗位设定、提示词、技能、定时任务、团队、配方，原文保留，另加中文三项、评分、国内适配、安全标记。它不上页面，也不进 `bots.data` 和站点构建；货架（`bots/`、`prompts/`、`skills/`）仍只放点评过的条目，从这里挑。`library/skills/` 收 SKILL.md 全文，和 Prompt/Skills 板块「Skill 不放 SKILL.md 全文」不冲突：那条管的是页面展示。放弃：直接灌进 `prompts/`、`skills/`（几千条没审过的会淹没 30–50 条精选）；只存链接（没有正文就没法去重、评分、写首个任务）。
+50. **收什么、不收什么**。收 7 个开源来源：cobusgreyling/grok-bot-templates（MIT）、ZeroPointRepo/GrokBotDev 的 `content/`（CC BY 4.0）、elie222/botdirectory.ai（MIT）、RongleCat/awesome-grok-bot（CC0）、sit-in/awesome-grokbot-playbooks（MIT）、majiayu000/awesome-grok-bot（CC0）、kydlikebtc/awesome-grokbot（逐行 CC0 / CC BY）。不收：要登录或付费才能看的、闭源站点的文案（麦当 Bot 小镇、Agensi、Grok Bot Wiki；2026-11-20 自媒体区整理的 mdldm 离线包也算，包里的 GitHub 仓库和 x.ai 链接只当线索，回源头按各自许可收）、x.ai 分享页上的配置和介绍原文（沿用第 9 条；kydlikebtc 的 `official_summary` 就是分享页原文，一个字不收）。RongleCat 和本仓库 fork 来源（grok-bot-learn）是同一作者，拿 20 字片段比对，两边重合为 0，所以照收；以后再收他的东西也要先比对。来源仓库克隆在仓库外，只当数据读，不执行其中任何脚本。
+51. **许可以单条为准，逐条落到文件上**。每个全文文件头写 source、sourceUrl（钉在提交上）、author、license、fetchedAt、changes；CC BY 的另写 attribution，changes 写明相对原文改了什么。MIT 来源的版权声明进 `THIRD_PARTY_NOTICES.md`，混合许可的总说明在 `library/LICENSES.md`，不适用 `bots/LICENSE`。**许可回溯**：majiayu000 把目录全标 CC0，但其中有的摘要和 GrokBotDev（CC BY）的文字一样；同一分享链接下文字相同的行，改按 CC BY 署名，不信上游的标注。本站另加的字段随所在条目，按该条的许可发布。
+52. **botdirectory 收不收正文，按它自己 CONTRIBUTING 的定义判断**：`contributor` 是「这套设置是谁的」，`scouted_by` 是「谁找到的」。contributor 是站方账号 BotDirectoryAI 又带 scouted_by 的，算原作者不明；来源链接只认 `sources[]` 和 `added_via`，`grok_share_url`（指向的正是不收全文的分享页）和 `url`（产品官网）不算，站方自己账号的帖子也不算。原作者不明又没有来源链接的，只留标题和链接，清单放 `library/link-only.jsonl`。
+53. **去重**：分享链接按 `x.ai/bot/<21 位 ID>`；全文按去掉所有空白后的 sha256。同一段全文取许可最宽的那份做主记录（CC0 > MIT > CC BY），其余记在 alsoIn；和 `bots/` 已上架 Bot 的 templateUrl 对上的，标 listed 和 slug。
+54. **评分、国内适配、安全标记**：评分看五项写没写（明确任务、输入、步骤、验收方法、审批边界），每项 1 分，由写作模型逐条判断，代码求和；只给全文条目打分，只有一句简介的分享链接不打分。cnFit 只看依赖的服务在国内能不能打开，清单在 `scripts/ingest/config/cn-blocked.json`，Grok、X 不算（每条都要用）。needsReview 用规则按句子找「自动发送、付款、删除、关闭审批、读取凭据、向外部地址上传」这几类指令，同一句里有否定或审批词（不要、未经、先问、草稿、never 等）的不算；密钥扫描复用 `scripts/lib/validate/secrets.mjs`，命中的条目不收正文。
+55. **中文字段**：全文条目都写中文标题、一句话用途、适合谁，原文不翻译；分享链接沿用来源自带的中文摘要（majiayu000、kydlikebtc，CC0），没有的先留空。前 50 名同分时按来源轮流取，免得被一个来源包圆；每条配一句能直接发的首个任务和「看到什么算跑对了」。
+
 ## 2026-11-15 正式域名
 
 45. **正式域名换成 `bot.jiachengbo.com`，旧地址 `bot-zhipin.pages.dev` 照常能开、打开即跳到新域名**（用户 2026-11-15：「这个东西域名能换成我的吗？不然用这个域名很丑」，定用 bot.jiachengbo.com）。

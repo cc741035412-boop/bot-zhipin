@@ -1,0 +1,68 @@
+{
+  "note": "本次入库用到的来源仓库与提交。run.mjs 用 --src 指向克隆目录（不在本仓库里），dir 相对于它。",
+  "sources": [
+    {
+      "key": "cobus",
+      "repo": "cobusgreyling/grok-bot-templates",
+      "dir": "cobusgreyling_grok-bot-templates/repo",
+      "commit": "4f3f28b4e6578cd227ff7f4b78ec91d15fd091b5",
+      "license": "MIT",
+      "licenseNote": "整个仓库 MIT，Copyright (c) 2026 Cobus Greyling",
+      "fetchedAt": "2026-11-21T06:44:43Z"
+    },
+    {
+      "key": "grokbotdev",
+      "repo": "ZeroPointRepo/GrokBotDev",
+      "dir": "ZeroPointRepo_GrokBotDev/repo",
+      "commit": "48fec858f3968e12cb149ad205fe4ff059d8f2d1",
+      "license": "CC-BY-4.0",
+      "licenseNote": "content/ 为 CC BY 4.0（LICENSE-CONTENT.md），代码 MIT；只收 content/",
+      "fetchedAt": "2026-11-21T06:44:43Z"
+    },
+    {
+      "key": "botdirectory",
+      "repo": "elie222/botdirectory.ai",
+      "dir": "elie222_botdirectory.ai/repo",
+      "commit": "447d18f1b6b70a7fa3ade8676bf28d1f8540c124",
+      "license": "MIT",
+      "licenseNote": "整个仓库 MIT，Copyright (c) 2026 Inbox Zero Inc.",
+      "fetchedAt": "2026-11-21T06:44:43Z"
+    },
+    {
+      "key": "ronglecat",
+      "repo": "RongleCat/awesome-grok-bot",
+      "dir": "RongleCat_awesome-grok-bot/repo",
+      "commit": "e50ac2f8dd2f5fe83827bf2a2b9f70e50d893be1",
+      "license": "CC0-1.0",
+      "licenseNote": "整个仓库 CC0 1.0",
+      "fetchedAt": "2026-11-21T06:44:43Z"
+    },
+    {
+      "key": "sitin",
+      "repo": "sit-in/awesome-grokbot-playbooks",
+      "dir": "sit-in_awesome-grokbot-playbooks/repo",
+      "commit": "a0984780ce733b750366fa23999e0a32d90dc44b",
+      "license": "MIT",
+      "licenseNote": "整个仓库 MIT，Copyright (c) 2026 awesome-grokbot-playbooks contributors",
+      "fetchedAt": "2026-11-21T06:44:43Z"
+    },
+    {
+      "key": "majiayu",
+      "repo": "majiayu000/awesome-grok-bot",
+      "dir": "majiayu000_awesome-grok-bot/repo",
+      "commit": "34ae6ed87f6d1af227c29fa41795014fd9db35d7",
+      "license": "CC0-1.0",
+      "licenseNote": "catalog.json、catalog/、templates/、packs/ 为 CC0（README 许可段），scripts/ MIT；docs/ 未单列，按根目录 LICENSE（CC0）",
+      "fetchedAt": "2026-11-21T06:44:43Z"
+    },
+    {
+      "key": "kydlikebtc",
+      "repo": "kydlikebtc/awesome-grokbot",
+      "dir": "kydlikebtc_awesome-grokbot/repo",
+      "commit": "f64dc25af7f823bcc697ad7d5fa675b397934d82",
+      "license": "CC0-1.0",
+      "licenseNote": "逐行许可：catalog.json、retired.json 每行自带 license（CC0-1.0 或继承 GrokBotDev 的 CC-BY-4.0）；scripts/ MIT",
+      "fetchedAt": "2026-11-21T06:44:43Z"
+    }
+  ]
+}
