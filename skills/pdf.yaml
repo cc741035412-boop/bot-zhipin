@@ -1,0 +1,34 @@
+slug: pdf
+title: 读取、拆合和填写 PDF
+name: pdf
+category: 文档
+purpose: 从 PDF 里取出文字和表格，也能拆分合并、填写表单、识别扫描件
+scenarios:
+- 把供应商报价表提取出来逐项比较
+- 把申请表填好后核对文字有没有落错格
+agents:
+- Claude Code
+- Claude.ai
+summary: 先分清文件里是文字、可填写的字段，还是一整页扫描图。普通页面用 Python 的 pypdf 拆合，用 pdfplumber 读表格；填表附有查字段和核对位置的脚本，会另存结果。扫描件需要 Poppler 和 Tesseract，中文材料还要相应语言包。只拆页不必装 OCR。
+install:
+- agent: Claude Code
+  command: /plugin marketplace add anthropics/skills
+  note: 第 1 步，在 Claude Code 中添加市场。已添加可跳过。
+- agent: Claude Code
+  command: /plugin install document-skills@anthropic-agent-skills
+  note: 第 2 步，安装文档四件套，只需装一次。
+requires:
+- Python 3：pypdf、pdfplumber；制表或新建 PDF 用 pandas、openpyxl、reportlab
+- 表单图像：Pillow、pdf2image、Poppler
+- 扫描识别：Tesseract、对应语言包、pytesseract
+- 命令行替代：qpdf 或 pdftk
+- 进阶示例按需：pypdfium2、numpy；JS 方案用 Node.js、pdf-lib 或 pdfjs-dist
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/pdf
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/pdf/LICENSE.txt
+addedAt: '2026-11-20'

@@ -1,0 +1,24 @@
+slug: synthesize-research
+title: 整理访谈和问卷结果
+name: synthesize-research
+category: 研究
+purpose: 给访谈笔记和问卷，它归纳反复出现的问题，附上原话作证据
+scenarios:
+- 汇总五位受访者的首次使用障碍
+- 整理读者问卷，给反复提到的意见和相反的说法各找出处
+agents:
+- Claude Code
+summary: 把已脱敏的访谈笔记和问卷交给它，按主题聚合证据，再区分普遍问题与个别线索。它提供整理访谈和解释问卷的框架；建议保留与结论不符的案例，小样本不能当作全体用户的比例。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install product-management@knowledge-work-plugins
+  note: 在终端运行，装的是整个 product-management 插件，只需装一次。会登记 16 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/skills/synthesize-research
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/LICENSE
+addedAt: '2026-11-20'

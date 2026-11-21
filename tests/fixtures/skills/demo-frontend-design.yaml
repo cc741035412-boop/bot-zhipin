@@ -1,0 +1,24 @@
+slug: demo-frontend-design
+title: 示例·前端界面设计
+name: demo-frontend-design
+category: 设计
+purpose: 写前端页面时避开千篇一律的样子，给出有辨识度的排版和配色
+scenarios:
+  - 从零搭一个落地页
+  - 给已有页面换一套更有设计感的样式
+tags: [前端, UI]
+agents: [Claude Code, Codex]
+summary: |
+  一个虚构的示例 skill：让 agent 在写前端之前先定一个明确的视觉方向（字体、配色、版式），再按这个方向写代码，避免每个页面都长得差不多。不带脚本，只有一份 SKILL.md 说明。
+install:
+  - agent: Claude Code
+    command: git clone https://example.com/demo-skills.git /tmp/demo-skills && cp -r /tmp/demo-skills/frontend-design ~/.claude/skills/
+source:
+  url: https://example.com/demo-skills/tree/main/frontend-design
+  name: demo/skills
+author:
+  name: 示例团队
+  url: https://example.com/demo-team
+license: Apache-2.0
+licenseUrl: https://example.com/demo-skills/LICENSE
+addedAt: 2026-11-14

@@ -1,0 +1,20 @@
+slug: karpathy-personal-wiki
+title: 让 AI 帮你维护个人知识库
+category: 效率
+purpose: 每次给它新资料，它并进已有笔记、修订旧页面，并标出前后矛盾
+scenarios:
+- 整理几个月的论文阅读笔记
+- 长期跟踪一个专题的资料并随时回查原始出处
+- 把零散的技术文档和读书摘录攒成互链的个人知识库
+lang: en
+titleOriginal: LLM Wiki
+summary: 让有文件读写权限的助手维护一层互相链接的笔记：每次加入新资料，它会把新内容并入知识库、回头修订关联的旧页面，并标出前后冲突的说法。原始资料单独保存，方便随时核对原文和纠错。
+usage: 先建一个空的试验目录，放几份允许交给模型的材料。把原文交给有文件权限的助手，商量索引结构；第二次加资料时检查它是否修订了旧页。
+source:
+  url: https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f#file-llm-wiki-md
+  name: LLM Wiki
+author:
+  name: Andrej Karpathy
+  url: https://github.com/karpathy
+license: 未声明
+addedAt: '2026-11-20'

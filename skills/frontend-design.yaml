@@ -1,0 +1,24 @@
+slug: frontend-design
+title: 做出有设计感的网页
+name: frontend-design
+category: 设计
+purpose: 给页面要放的内容，它写出主次分明、不千篇一律的前端页面
+scenarios:
+- 给连载小说做目录页，让新读者一眼找到第一章
+- 重排市集活动页，把时间地点放到摊位介绍前面
+agents:
+- Claude Code
+summary: 在 Claude Code 里装好这个技能，给它页面上真的要放的文字，再说读者打开页面最想找什么。它会据此写前端，用字体、内容顺序和留白突出重点。要确认按钮点下去有没有反应，还得在浏览器里另测。要是只想给手头的页面需求加几条视觉约束，不用装技能，去 Prompt 页找「让网页设计不再千篇一律」，直接复制提示词即可。
+install:
+- agent: Claude Code
+  command: claude plugin install frontend-design@claude-plugins-official
+  note: 在终端运行，只装这一个技能，内容与 anthropics/skills 相同。全新机器可先运行 claude plugin marketplace add anthropics/claude-plugins-official。
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/frontend-design
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/frontend-design/LICENSE.txt
+addedAt: '2026-11-20'

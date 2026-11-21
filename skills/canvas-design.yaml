@@ -1,0 +1,24 @@
+slug: canvas-design
+title: 做一张海报
+name: canvas-design
+category: 设计
+purpose: 给一句主题和要放的文字，它排出一张海报，导出 PNG 或 PDF
+scenarios:
+- 把演出时间和地点排成一张招募海报
+- 给摄影展做一张带展名和作者名的单页封面
+agents:
+- Claude Code
+summary: 交给它一句主题和必须出现的文字，它先定视觉思路，再把图形与文字排成静态画布，可以交付 PNG 或 PDF。目录附有字体；做中文稿时先用实际标题试排，别等导出才发现缺字。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/skills && claude plugin install example-skills@anthropic-agent-skills
+  note: 在终端运行，先添加插件市场，再安装包含这个技能的 example-skills 插件。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/canvas-design
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/canvas-design/LICENSE.txt
+addedAt: '2026-11-20'

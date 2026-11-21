@@ -1,5 +1,5 @@
 // schema 是唯一真源；运行时只加载已提交的静态校验代码。
-// 三份 schema 各生成一个文件：bot（Bot 卡片）、squad（小队）、curation（策展）。
+// 每份 schema 各生成一个文件：bot（Bot 卡片）、squad（小队）、curation（策展）、prompt、skill（收录的 Prompt 和 Skill）。
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import { dirname, resolve } from 'node:path'
@@ -9,7 +9,7 @@ import standaloneCode from 'ajv/dist/standalone/index.js'
 import { build } from 'esbuild'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-export const SCHEMAS = ['bot', 'squad', 'curation']
+export const SCHEMAS = ['bot', 'squad', 'curation', 'prompt', 'skill']
 
 async function generate(name) {
   const file = `schema/${name}.schema.json`

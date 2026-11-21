@@ -1,0 +1,24 @@
+slug: design-handoff
+title: 把设计稿写成开发能照做的说明
+name: design-handoff
+category: 写作
+purpose: 给设计图，它补全各种状态和交互，写成开发能直接照做的说明
+scenarios:
+- 向工程同学交接搜索结果页
+- 说明弹窗在小屏上的处理方式
+agents:
+- Claude Code
+summary: 给出设计图和已知规则，它会按照布局、组件、状态、响应式行为等维度整理交接稿。特别适合找漏项，例如空内容、加载失败或键盘聚焦后应该怎样显示；稿子没规定的行为请设计者确认。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install design@knowledge-work-plugins
+  note: 在终端运行，装的是整个 design 插件，只需装一次。会登记 9 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/design/skills/design-handoff
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/LICENSE
+addedAt: '2026-11-20'

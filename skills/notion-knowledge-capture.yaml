@@ -1,0 +1,26 @@
+slug: notion-knowledge-capture
+title: 把讨论结论存进 Notion
+name: notion-knowledge-capture
+category: 写作
+purpose: 把聊天里定下的结论整理成 Notion 知识库页面，以后找得到
+scenarios:
+- 把一次选型讨论存成决策记录
+- 从答疑对话提炼新生常见问题
+agents:
+- Codex
+summary: 把聊天或讨论里定下的结论写入 Notion 知识库：先区分要存的是操作流程、常见问题还是决策记录，再检索已有页面和目标数据库，避免同一结论重复建页。目录里带了页面结构参考和实例。需要授权 Notion 连接，写入前记得核对所在工作区和页面可见范围。
+install:
+- agent: Codex
+  command: /plugins
+  note: 在 Codex CLI 输入，搜索并安装 Notion。一次装上 4 个 Notion 技能，装完新开会话，首次使用时按提示授权 Notion。
+requires:
+- Notion 账号
+source:
+  url: https://github.com/openai/plugins/tree/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-knowledge-capture
+  name: openai/plugins
+author:
+  name: Notion Labs, Inc.
+  url: https://www.notion.so
+license: MIT
+licenseUrl: https://github.com/openai/plugins/blob/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-knowledge-capture/LICENSE.txt
+addedAt: '2026-11-20'

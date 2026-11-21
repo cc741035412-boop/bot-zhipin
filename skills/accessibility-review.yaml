@@ -1,0 +1,24 @@
+slug: accessibility-review
+title: 检查网页对残障用户是否友好
+name: accessibility-review
+category: 测试
+purpose: 给页面或设计稿，它查颜色对比、键盘操作和读屏，列出要先修的问题
+scenarios:
+- 看活动页截图，检查日期文字和底色是否太接近
+- 打开报名表，只用键盘从姓名栏一路填到提交按钮
+agents:
+- Claude Code
+summary: 可从页面或设计稿开始，按 WCAG 2.1 AA 检查对比度、键盘导航和读屏表现，整理审查结果。静态图能发现部分视觉问题，却不能证明焦点顺序和读屏正确；把这些交互项留到实际页面用键盘和辅助工具复测。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install design@knowledge-work-plugins
+  note: 在终端运行，装的是整个 design 插件，只需装一次。会登记 9 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/design/skills/accessibility-review
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/LICENSE
+addedAt: '2026-11-20'

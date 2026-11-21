@@ -1,0 +1,24 @@
+slug: statistical-analysis
+title: 判断数据变化是不是巧合
+name: statistical-analysis
+category: 数据
+purpose: 给两组数据，它判断差异是不是随机波动，并说清结论能信到什么程度
+scenarios:
+- 解释两个版本平均耗时的差别
+- 检查少数极端评分是否拉偏结果
+agents:
+- Claude Code
+summary: 拿到数据后先看分布和异常值，再按问题选做趋势分析、分组比较或假设检验。说明里列出了容易误判的情形，适合用来核对样本量、区间和效应大小。就算算出两组数据有差异，也不能单凭两列数就直接下结论说是功能上线带来的因果变化。这是供助手在分析时调用的后台技能，没有单独的斜杠命令。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install data@knowledge-work-plugins
+  note: 在终端运行，装的是整个 data 插件，只需装一次。会登记 8 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/skills/statistical-analysis
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/LICENSE
+addedAt: '2026-11-20'

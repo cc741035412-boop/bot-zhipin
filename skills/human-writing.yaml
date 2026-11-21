@@ -1,0 +1,32 @@
+slug: human-writing
+title: 用你的亲身经历写文章
+name: human-writing
+category: 写作
+purpose: 围绕你亲历的细节起稿，缺素材时先问你，不拿别人的经历凑数
+scenarios:
+- 把第一次独自摆摊的见闻写成一篇手记
+- 写短篇小说时，从人物的一次争执起草开场
+agents:
+- Claude Code
+- Codex
+- 通用
+summary: 先弄清是你亲眼见过的事，还是允许虚构的故事。现实稿缺细节时会追问，不拿别人的经历填空；写小说则按人物和场景选材料。目录里按文体分了写作参考，长稿存为文本后还可用 Python 脚本检查生硬措辞。查公开事实时可能联网，不建长期作者档案。
+install:
+- agent: Claude Code
+  command: /plugin marketplace add KKKKhazix/human-writing
+  note: 第 1 步，在 Claude Code 中添加市场。已添加可跳过。
+- agent: Claude Code
+  command: /plugin install human-writing@human-writing
+  note: 第 2 步，安装插件。
+requires:
+- Python 3（可选，运行长稿检查）
+- 网页读取（核对公开材料时）
+source:
+  url: https://github.com/KKKKhazix/human-writing/tree/288297b6c2d9b6df23e0ceb64888443f15cfbcc3/human-writing
+  name: KKKKhazix/human-writing
+author:
+  name: 数字生命卡兹克
+  url: https://github.com/KKKKhazix
+license: MIT
+licenseUrl: https://github.com/KKKKhazix/human-writing/blob/288297b6c2d9b6df23e0ceb64888443f15cfbcc3/human-writing/LICENSE
+addedAt: '2026-11-20'

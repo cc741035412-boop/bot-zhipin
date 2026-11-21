@@ -1,0 +1,18 @@
+slug: baoyu-image-style-sheet
+title: 拆解一张参考图的画风
+category: 创意
+purpose: 发一张喜欢的图，它把构图、光线、配色拆开写，方便照着出新图
+scenarios:
+- 与设计师对齐配图方向
+- 比较两套落地页主视觉
+lang: en
+summary: 把参考图发给看图模型，让它把构图、光线、用色以及主体位置、镜头、文字和材质拆开描述。拿到分项记录后，可以按字段挑出这次想沿用的部分单独调整，不用只靠口头说「照这个感觉来」；如果打算把结果交给程序读取，用前先核查是否为合法 JSON。
+usage: 上传有权使用的参考图，再用原文的英文模板。只摘出这次设计需要沿用的字段；要交给程序读取时，先校验结果是否为合法 JSON。
+source:
+  url: https://baoyu.io/blog/image-style-prompt-reference
+  name: Image 风格提取的提示词参考
+author:
+  name: 宝玉
+  url: https://baoyu.io
+license: 保留所有权利
+addedAt: '2026-11-20'

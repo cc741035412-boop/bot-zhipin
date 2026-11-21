@@ -1,0 +1,18 @@
+slug: baoyu-translation-revision
+title: 分三步把文档翻译通顺
+category: 写作
+purpose: 先逐句直译，再挑出别扭的地方，最后出一版通顺译稿，原排版保留
+scenarios:
+- 翻译开源项目说明
+- 校对面向海外用户的更新日志
+lang: en
+summary: 翻译带标题、列表的 Markdown 资料时，让它分三步走：先出一份保留原排版、逐句对得上的直译底稿，再挑出直译里生硬或意思含混的地方，最后改出一版通顺的修订稿。把前两步留在对话里，核对时一眼就能看出修订稿只是顺了句子，还是把原意改偏了。
+usage: 先去来源链接取用提示词模板，填好目标语言后贴入一段 Markdown 原稿。对照返回的三步结果，重点核对否定词、数字、代码和产品名有没有在润色时被意译。模板默认用学术语气；翻产品文案时，另说清是写给谁、该用什么口吻。
+source:
+  url: https://baoyu.io/blog/prompt-engineering/a-common-translation-prompt-for-different-languages
+  name: 一个相对通用的翻译 Prompt，可以适用于多种不同的语言翻译
+author:
+  name: 宝玉
+  url: https://baoyu.io
+license: 保留所有权利
+addedAt: '2026-11-20'

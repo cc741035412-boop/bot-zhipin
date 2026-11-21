@@ -1,0 +1,25 @@
+slug: humanizer-zh
+title: 去掉文章里的 AI 腔
+name: humanizer-zh
+category: 写作
+purpose: 给一段读着像套话的中文稿，它删掉空话，保留事实和你的观点
+scenarios:
+- 删去更新公告里没信息量的宣传句
+- 润色故障通报但保留尚未确认的判断
+agents:
+- Claude Code
+summary: 适合手里已经有一段能读懂、却有点像公关稿的文字时用。它参照编辑清单改句子，不把可能原因写成定论，也不为了换句式删掉有效信息。直接贴文字可拿到改稿；给文件时若只想审阅，要说清不要写回。这是改稿指南，不是作者身份检测器。
+install:
+- agent: Claude Code
+  command: git clone https://github.com/op7418/Humanizer-zh.git ~/.claude/skills/humanizer-zh
+  note: 终端执行，需要 Git；适用于尚未安装的用户。
+requires: []
+source:
+  url: https://github.com/op7418/Humanizer-zh/tree/f4518a8eab97b8bfebc66a89d34320a89bef6930
+  name: op7418/Humanizer-zh
+author:
+  name: 歸藏
+  url: https://github.com/op7418
+license: MIT
+licenseUrl: https://github.com/op7418/Humanizer-zh/blob/f4518a8eab97b8bfebc66a89d34320a89bef6930/LICENSE
+addedAt: '2026-11-20'

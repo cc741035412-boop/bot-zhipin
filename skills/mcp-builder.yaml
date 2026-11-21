@@ -1,0 +1,30 @@
+slug: mcp-builder
+title: 让 AI 能调用你的服务
+name: mcp-builder
+category: 工具
+purpose: 把外部服务或接口做成 AI 助手能直接调用的工具（MCP 服务器）
+scenarios:
+- 给原型里的助手接入只读的商品目录接口
+- 检查工具参数说明够不够清楚、助手能不能选对操作
+agents:
+- Claude Code
+summary: 它会联网读 MCP 官方规范，再看要接的服务：可以做覆盖全部接口的工具，也可以针对某项任务单独设计工具。拿不准时，优先完整覆盖 API。默认推荐 TypeScript SDK，也有 Python（FastMCP）指南。鉴权和数据访问范围仍要自己配置。评估脚本需要 Python、anthropic 和 mcp 包及 ANTHROPIC_API_KEY，调用按量计费。默认模型 claude-3-7-sonnet-20250219 已于 2026-02-19 下线，运行时须用 -m 指定可用模型。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/skills && claude plugin install example-skills@anthropic-agent-skills
+  note: 在终端运行，先添加插件市场，再安装包含这个技能的 example-skills 插件。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/mcp-builder
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/mcp-builder/LICENSE.txt
+requires:
+- Python 3
+- Node.js
+- anthropic
+- mcp
+- ANTHROPIC_API_KEY
+addedAt: '2026-11-20'

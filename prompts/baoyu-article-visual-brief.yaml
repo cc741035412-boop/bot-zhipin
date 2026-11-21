@@ -1,0 +1,18 @@
+slug: baoyu-article-visual-brief
+title: 把文章做成信息图
+category: 创意
+purpose: 贴一篇文章，它先挑出要点，写好交给画图 AI 的信息图指令
+scenarios:
+- 给技术解读配文章头图
+- 把课程重点做成一页图解
+lang: zh
+summary: 把文章交给文字模型，让它先挑出适合放进横版信息图的核心关系，整理成一份给绘图模型用的绘图指令。这样可以把配图拆成两步走：先在文字稿里核对提炼出的观点和图中术语，确认无误后再交给绘图模型出图，比直接生成图片后再反复修改图上的错误省事。
+usage: 在原文的文章位置放入正文或整理好的要点。检查返回的英文图中文字，确认术语无误后，再把绘图指令交给能生成图片的模型。
+source:
+  url: https://baoyu.io/blog/knowledge-article-infographics
+  name: 如何给知识类文章画信息图风格的配图
+author:
+  name: 宝玉
+  url: https://baoyu.io
+license: 保留所有权利
+addedAt: '2026-11-20'

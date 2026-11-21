@@ -1,0 +1,26 @@
+slug: notion-research-documentation
+title: 从 Notion 里汇总资料
+name: notion-research-documentation
+category: 研究
+purpose: 围绕一个问题翻找你的 Notion 页面，汇成一份标明出处的简报
+scenarios:
+- 从历次复盘提取共同的流失原因
+- 对照工作区里几个供应商的评测记录
+agents:
+- Codex
+summary: 围绕一个具体问题检索已授权的 Notion 页面，把分散在各处的结论、相互不一致的说法和还缺的资料汇总成一份带引用出处的简报。附有不同篇幅的简报示例。检索范围仅限已接入的 Notion 工作区，不会搜外网；内部隐私页面不要写进对外公开的简报。
+install:
+- agent: Codex
+  command: /plugins
+  note: 在 Codex CLI 输入，搜索并安装 Notion。一次装上 4 个 Notion 技能，装完新开会话，首次使用时按提示授权 Notion。
+requires:
+- Notion 账号
+source:
+  url: https://github.com/openai/plugins/tree/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-research-documentation
+  name: openai/plugins
+author:
+  name: Notion Labs, Inc.
+  url: https://www.notion.so
+license: MIT
+licenseUrl: https://github.com/openai/plugins/blob/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-research-documentation/LICENSE.txt
+addedAt: '2026-11-20'

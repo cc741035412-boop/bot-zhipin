@@ -1,0 +1,24 @@
+slug: design-critique
+title: 给界面设计挑毛病
+name: design-critique
+category: 设计
+purpose: 给界面截图和使用场景，它指出哪里该保留、哪里要先改
+scenarios:
+- 对比两个入门引导页的视觉层级
+- 拿读书会报名页的截图，看第一眼能不能找到活动日期
+agents:
+- Claude Code
+summary: 把目标用户、要完成的任务和截图一起交给它。它会先描述视线落在哪里，再看导航、信息层级和一致性，区分应保留的设计与优先要改的地方。截图之外的交互猜测需要回到原型验证。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install design@knowledge-work-plugins
+  note: 在终端运行，装的是整个 design 插件，只需装一次。会登记 9 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/design/skills/design-critique
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/LICENSE
+addedAt: '2026-11-20'

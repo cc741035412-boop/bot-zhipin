@@ -1,0 +1,23 @@
+slug: doc-coauthoring
+title: 陪你一节节写完一份文档
+name: doc-coauthoring
+category: 写作
+purpose: 它先问清背景，再一节一节陪你写，最后从读者角度找没讲清的地方
+scenarios:
+- 把一次口头讨论写成决策备忘
+- 起草社团交接手册，检查新成员会在哪一步看不懂
+agents:
+- Claude Code
+summary: 它会先向执笔人补问背景，再一节一节商量该保留哪些内容，按小节推进成稿。草稿写完后，再站在不了解项目的读者角度提问检查，挑出作者觉得理所当然、读者看却缺上下文的地方。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/skills && claude plugin install example-skills@anthropic-agent-skills
+  note: 在终端运行，先添加插件市场，再安装含 12 个技能的 example-skills 插件。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/doc-coauthoring
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: 未声明
+addedAt: '2026-11-20'

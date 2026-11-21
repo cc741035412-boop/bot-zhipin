@@ -1,0 +1,34 @@
+slug: pptx
+title: 做 PPT 并检查排版
+name: pptx
+category: 文档
+purpose: 照公司模板做演示稿，逐页检查漏字、遮挡和错位
+scenarios:
+- 把季度开支放进公司的汇报模板
+- 上台答辩前逐页看幻灯片，检查图例有没有被遮住
+agents:
+- Claude Code
+- Claude.ai
+summary: 给它一份公司模板，可以先看缩略图挑版式，再复用对应页面，不必把整套幻灯片画成图片。新建稿用 Node.js 和 pptxgenjs，附带的 Python 脚本负责抽取页内文字和检查文件结构。最后用 LibreOffice 和 Poppler 把成稿逐页渲染；结构检查通过，不代表观众看得清图例。
+install:
+- agent: Claude Code
+  command: /plugin marketplace add anthropics/skills
+  note: 第 1 步，在 Claude Code 中添加市场。已添加可跳过。
+- agent: Claude Code
+  command: /plugin install document-skills@anthropic-agent-skills
+  note: 第 2 步，安装文档四件套，只需装一次。
+requires:
+- Node.js、pptxgenjs
+- Python 3：python-pptx、Pillow、defusedxml、lxml
+- LibreOffice（soffice）
+- Poppler（pdftoppm）
+- 制作图标时：react-icons、react、react-dom、sharp
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/pptx
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/pptx/LICENSE.txt
+addedAt: '2026-11-20'

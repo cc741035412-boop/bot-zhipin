@@ -1,0 +1,32 @@
+slug: writing-plans
+title: 把方案拆成一步步的任务
+name: writing-plans
+category: 开发
+purpose: 把定好的方案拆成小任务，写清每步改哪里、做完怎么检查
+scenarios:
+- 拆分旧脚本前，按文件列出修改顺序和每步要跑的测试
+- 准备把导出功能交给同事接手，写清从哪里改、怎样算做完
+agents:
+- Claude Code
+- Codex
+- Cursor
+summary: 把已经讨论过的方案交给它，它会拆出改动位置、任务顺序和验证办法，让接手的人清楚第一步改哪里、做完怎么判断对错。拆出来的文件路径和测试命令还得对照当前项目核实，不能只读完计划就算完成。计划会写进仓库的 docs/superpowers/plans/。安装会装上整套 Superpowers：15 个技能加一个会话启动钩子。以后每次开会话，助手都会先查该用哪个技能。用 Claude Code 时，想只对当前项目生效，可在安装命令末尾加 --scope project。
+install:
+- agent: Claude Code
+  command: claude plugin install superpowers@claude-plugins-official
+  note: 在终端运行。第一次打开交互式 claude 会自动添加官方市场；全新机器也可先运行 claude plugin marketplace add anthropics/claude-plugins-official。
+- agent: Codex
+  command: /plugins
+  note: 在 Codex CLI 输入，搜索 superpowers，选 Install Plugin；在 Codex App 里可到侧栏 Plugins 点 +。装完新开会话。
+- agent: Cursor
+  command: /add-plugin superpowers
+  note: 在 Cursor 的 Agent 对话框输入。
+source:
+  url: https://github.com/obra/superpowers/tree/22f0b463e7a5e579904dd6211a520321035526f7/skills/writing-plans
+  name: obra/superpowers
+author:
+  name: Jesse Vincent
+  url: https://github.com/obra
+license: MIT
+licenseUrl: https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/LICENSE
+addedAt: '2026-11-20'

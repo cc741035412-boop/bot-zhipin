@@ -1,6 +1,7 @@
 // 把每个 Bot 的截图和头像复制到 site/public/bot-assets/<slug>/，网站用 /bot-assets/<slug>/<文件名> 引用。
 // 同时生成 site/public/api-data/slugs.json（全部 slug），计数接口靠它判断 slug 是否存在，见 docs/dev/API.md；
-// 以及 squad-slugs.json（全部小队 slug），小队页的下架兜底（functions/squads/[slug].ts）靠它。
+// 以及 squad-slugs.json（全部小队 slug），小队页的下架兜底（functions/squads/[slug].ts）靠它；
+// prompt-slugs.json、skill-slugs.json 同理，给 functions/prompts/[slug].ts、functions/skills/[slug].ts 用。
 // 这两个目录都是生成物，已 gitignore；每次 dev / build 前重建。
 import { copyFileSync, lstatSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, join, relative, resolve, sep } from 'node:path'
@@ -13,6 +14,8 @@ import { LIMITS } from './submission/bundle-core.mjs'
 import { explanations, shelfData } from '../site/.vitepress/data/bots.mjs'
 import { isPublicBot, isPublicSquad } from './lib/public-bot.mjs'
 import { loadAllSquads, squadsDirFor } from './lib/load-squads.mjs'
+import { promptsDirFor, skillsDirFor, loadEntries } from './lib/load-prompts-skills.mjs'
+import { isPublicEntry } from './lib/entry-summary.mjs'
 
 const OUT = join(ROOT, 'site', 'public', 'bot-assets')
 const API_DATA = join(ROOT, 'site', 'public', 'api-data')
@@ -27,7 +30,10 @@ function safeFile(root, file) {
   })
 }
 
-export function syncAssets({ botsDir = BOTS_DIR, squadsDir = squadsDirFor(botsDir), out = OUT, apiData = API_DATA } = {}) {
+export function syncAssets({
+  botsDir = BOTS_DIR, squadsDir = squadsDirFor(botsDir), promptsDir = promptsDirFor(botsDir), skillsDir = skillsDirFor(botsDir),
+  out = OUT, apiData = API_DATA,
+} = {}) {
   rmSync(out, { recursive: true, force: true })
   const bots = loadAllBots(botsDir).filter(isPublicBot)
   mkdirSync(apiData, { recursive: true })
@@ -35,6 +41,12 @@ export function syncAssets({ botsDir = BOTS_DIR, squadsDir = squadsDirFor(botsDi
   // 和网站生成页面用同一个口径（shelfData），清单里有的小队才有页面。
   const squads = shelfData(bots, { squads: loadAllSquads(squadsDir).filter(isPublicSquad), curation: {} }).squads.map((squad) => squad.slug)
   writeFileSync(join(apiData, 'squad-slugs.json'), JSON.stringify(squads) + '\n')
+  // 收录的 Prompt 和 Skill：和网站生成页面同一个口径（isPublicEntry），有页面的才进清单。
+  const slugsByKind = {}
+  for (const [kind, dir] of [['prompt', promptsDir], ['skill', skillsDir]]) {
+    slugsByKind[kind] = loadEntries(kind, dir).filter(isPublicEntry).map((entry) => entry.slug)
+    writeFileSync(join(apiData, `${kind}-slugs.json`), JSON.stringify(slugsByKind[kind]) + '\n')
+  }
   let commit = process.env.CF_PAGES_COMMIT_SHA
   if (!commit) {
     try { commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() } catch { /* 仓库导出包没有 git 元数据 */ }
@@ -68,10 +80,10 @@ export function syncAssets({ botsDir = BOTS_DIR, squadsDir = squadsDirFor(botsDi
       n++
     }
   }
-  return { bots: bots.length, squads: squads.length, images: n }
+  return { bots: bots.length, squads: squads.length, prompts: slugsByKind.prompt.length, skills: slugsByKind.skill.length, images: n }
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  const { bots, squads, images } = syncAssets()
-  console.log(`[sync-assets] ${bots} 个 Bot、${squads} 支小队；已复制 ${images} 个图片文件到 site/public/bot-assets/，已写 site/public/api-data/slugs.json 和 squad-slugs.json`)
+  const { bots, squads, prompts, skills, images } = syncAssets()
+  console.log(`[sync-assets] ${bots} 个 Bot、${squads} 支小队、${prompts} 条 Prompt、${skills} 个 Skill；已复制 ${images} 个图片文件到 site/public/bot-assets/，已写 site/public/api-data/ 下的 slugs.json、squad-slugs.json、prompt-slugs.json、skill-slugs.json`)
 }

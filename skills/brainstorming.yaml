@@ -1,0 +1,35 @@
+slug: brainstorming
+title: 写代码前先把方案想清楚
+name: brainstorming
+category: 开发
+purpose: 它先问清关键问题，给出几种做法让你选，定下后写成设计文档
+scenarios:
+- 写批量改名脚本前，先商量遇到重名文件怎么办
+- 讨论是否值得新增一套配置页
+agents:
+- Claude Code
+- Codex
+- Cursor
+summary: 它先看项目资料，只追问会改变方案的问题，列出两三种做法让你选。选定后，它会把设计文档写进仓库的 docs/superpowers/specs/ 并提交到 Git；你确认方案前，它不会写实现代码。要看草图时，可以用 Node.js 打开本地预览。安装会装上整套 Superpowers：15 个技能加一个会话启动钩子。以后每次开会话，助手都会先查该用哪个技能。用 Claude Code 时，想只对当前项目生效，可在安装命令末尾加 --scope project。
+install:
+- agent: Claude Code
+  command: claude plugin install superpowers@claude-plugins-official
+  note: 在终端运行。第一次打开交互式 claude 会自动添加官方市场；全新机器也可先运行 claude plugin marketplace add anthropics/claude-plugins-official。
+- agent: Codex
+  command: /plugins
+  note: 在 Codex CLI 输入，搜索 superpowers，选 Install Plugin；在 Codex App 里可到侧栏 Plugins 点 +。装完新开会话。
+- agent: Cursor
+  command: /add-plugin superpowers
+  note: 在 Cursor 的 Agent 对话框输入。
+source:
+  url: https://github.com/obra/superpowers/tree/22f0b463e7a5e579904dd6211a520321035526f7/skills/brainstorming
+  name: obra/superpowers
+author:
+  name: Jesse Vincent
+  url: https://github.com/obra
+license: MIT
+licenseUrl: https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/LICENSE
+requires:
+- Git
+- Node.js（可选，用于草图预览）
+addedAt: '2026-11-20'

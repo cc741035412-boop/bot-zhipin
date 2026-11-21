@@ -1,0 +1,35 @@
+slug: docx
+title: 编辑 Word 文档、加批注
+name: docx
+category: 文档
+purpose: 在已有的 Word 稿上改字、加批注和修订，交付前逐页检查版式
+scenarios:
+- 在合同草案边上标出有歧义的条款
+- 给书稿中需要补出处的段落留批注
+- 交实验报告前逐页看表格有没有超出页边距
+agents:
+- Claude Code
+- Claude.ai
+summary: 已有 Word 稿不必重做。Python 脚本能把被 Word 拆散的文字片段合起来再改，也能把意见挂到原段落上。新建文档用 Node.js 的 docx 库；读正文用 Pandoc。出稿时用 LibreOffice 转成 PDF，再用 Poppler 把每页渲染出来看，免得表格越过页边距。
+install:
+- agent: Claude Code
+  command: /plugin marketplace add anthropics/skills
+  note: 第 1 步，在 Claude Code 中添加市场。已添加可跳过。
+- agent: Claude Code
+  command: /plugin install document-skills@anthropic-agent-skills
+  note: 第 2 步，安装文档四件套，只需装一次。
+requires:
+- Python 3（defusedxml、lxml）
+- Node.js、docx
+- Pandoc
+- LibreOffice（soffice）
+- Poppler（pdftoppm）
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/docx
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/docx/LICENSE.txt
+addedAt: '2026-11-20'

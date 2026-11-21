@@ -1,0 +1,24 @@
+slug: competitive-brief
+title: 对比竞争对手的产品
+name: competitive-brief
+category: 研究
+purpose: 说出要比的产品和你要做的决定，它查资料整理成一张对比表
+scenarios:
+- 比较三个知识库产品的引用体验
+- 判断是否要跟进竞品的批量导入
+agents:
+- Claude Code
+summary: 先指定竞品范围和待决策的问题，再结合公开资料、产品观察或已提供的笔记整理对照矩阵，区分能力差异和定位差异。可把资料日期附在结论旁，避免把旧版本未提供的功能误写成长期短板。它会联网检索，用户评价主要来自 G2、Capterra 等海外站点。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install product-management@knowledge-work-plugins
+  note: 在终端运行，装的是整个 product-management 插件，只需装一次。会登记 16 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/skills/competitive-brief
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/LICENSE
+addedAt: '2026-11-20'

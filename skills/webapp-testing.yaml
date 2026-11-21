@@ -1,0 +1,28 @@
+slug: webapp-testing
+title: 自动测试本地网页
+name: webapp-testing
+category: 测试
+purpose: 让浏览器自动点一遍你的本地网页，检查流程并截图留证
+scenarios:
+- 验收筛选后是否还保留已选条件
+- 检查提交表单后的成功提示
+agents:
+- Claude Code
+summary: 附有启动本地服务的辅助脚本和 Python 浏览器示例。给它启动方式、页面地址和预期结果，它可以等待页面加载后点击控件、读控制台或保存截图。请准备测试数据，避免把真实订单提交出去。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/skills && claude plugin install example-skills@anthropic-agent-skills
+  note: 在终端运行，先添加插件市场，再安装包含这个技能的 example-skills 插件。已添加该市场时，只运行安装插件那一步。
+requires:
+- Python 3
+- Playwright
+- Chromium
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/webapp-testing
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/webapp-testing/LICENSE.txt
+addedAt: '2026-11-20'

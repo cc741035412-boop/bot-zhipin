@@ -1,0 +1,26 @@
+slug: skill-creator
+title: 自己做一个技能
+name: skill-creator
+category: 工具
+purpose: 把反复做的事写成技能，再用样例对比装之前和装之后的效果
+scenarios:
+- 把每次发稿前的自查步骤写成编辑技能
+- 改完技能说明后跑几组样例，看输出有没有漏项
+agents:
+- Claude Code
+summary: 起草和调优自定义技能说明：先描述希望助手在什么情况下触发、交付什么结果，它会协助写出技能说明，并用你给的测试样例对比启用技能前后的输出。目录里有评估脚本和结果查看工具；验收标准最好在跑测试前先定好，避免看完输出再倒推标准。评测会同时跑多组带技能和不带技能的样例，注意额度。优化触发描述要用 claude -p，这一步只能在 Claude Code 里跑。
+install:
+- agent: Claude Code
+  command: claude plugin install skill-creator@claude-plugins-official
+  note: 在终端运行，只装这一个技能，内容与 anthropics/skills 相同。全新机器可先运行 claude plugin marketplace add anthropics/claude-plugins-official。
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/skill-creator
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/skill-creator/LICENSE.txt
+requires:
+- Python 3
+addedAt: '2026-11-20'

@@ -13,6 +13,12 @@ import { generateHeaders } from '../../scripts/gen-headers.mjs'
 import { botWatch } from './bot-watch.mjs'
 import { fullName } from '../../scripts/lib/bot-name.mjs'
 
+// 收录条目的网页标题：中文标题在前，原标题（Prompt 的 titleOriginal、Skill 的原名）放括号里。
+function entryHead(item: { title: string, purpose: string, titleOriginal?: string | null, name?: string }) {
+  const original = item.titleOriginal || (item.name && item.name !== item.title ? item.name : null)
+  return { title: original ? `${item.title}（${original}）` : item.title, description: item.purpose }
+}
+
 const siteImage = share.ogImageUrl('site', undefined, share.siteOgInput(HERO_MASCOTS))
 
 function sharingHead(page: PageData): HeadConfig[] {
@@ -69,7 +75,7 @@ export default defineConfig({
   },
   transformPageData(pageData) {
     if (pageData.relativePath === '404.md') return
-    const { bot, squad } = pageData.params ?? {}
+    const { bot, squad, prompt, skill } = pageData.params ?? {}
     if (bot || squad) {
       // Bot 详情页：「中文叫法（原名）怎么用、值不值得装」+ 一句话介绍接编辑点评第一句（规则在 share.mjs，决策 56）。
       // 小队页仍用队名和一句话介绍。
@@ -78,6 +84,11 @@ export default defineConfig({
       // 客户端路由切换时 VitePress 用 setAttribute 写入 description（安全）；服务端那行不转义的
       // description 会因下面 transformHead 已提供 description 而被跳过（isDescriptionOverridden）。
       pageData.description = bot ? share.botDescription(bot) : squad.tagline
+      delete pageData.frontmatter.description
+    } else if (prompt || skill) {
+      const { title, description } = entryHead(prompt || skill)
+      pageData.title = pageData.frontmatter.title = title
+      pageData.description = description
       delete pageData.frontmatter.description
     } else if (pageData.relativePath) {
       pageData.description = pageData.relativePath === 'index.md' ? SITE.tagline : pageData.frontmatter.description || SITE.tagline
@@ -96,6 +107,7 @@ export default defineConfig({
     return ((pageData.frontmatter.head || []) as HeadConfig[]).filter(([tag, attrs]) => tag === 'meta' && attrs?.name === 'description')
   },
   themeConfig: {
+    modules: [{ text: 'Bot', link: '/' }, { text: 'Prompt', link: '/prompts/' }, { text: 'Skills', link: '/skills/' }],
     nav: [{ text: '我要投稿', link: CONTRIBUTE_URL }],
     socialLinks: [{ icon: 'github', link: SITE.repo }],
     outline: { label: '本页目录' },

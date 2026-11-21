@@ -1,0 +1,18 @@
+# 原文署名：>/ 作者：卡兹克
+slug: khazix-reverse-case
+title: 从好作品里学做法
+category: 产品
+purpose: 给一个做得好的产品或页面，它拆出你能借鉴的做法和不能照搬的地方
+scenarios:
+- 改版前拆解同行的注册页
+- 从别人的数据看板学布局
+lang: zh
+summary: 看到一页不错的新手引导，先别急着照搬按钮。它会沿着用户要办的事倒推页面为什么这样安排，把可以借的做法和只在对方产品里管用的细节分开，最后留一个小练习。
+usage: 在原文「学习」里找「反向拆解」。把要研究的页面截图和学习目标一起发过去，例如只看它怎样让第一次来的用户走完注册。
+source:
+  url: https://mp.weixin.qq.com/s/NAdhdFrUq9-BKelqzqpwBQ
+  name: 都Agent时代了，我还是想分享给你这12个我最常用的Prompt。
+author:
+  name: 数字生命卡兹克
+license: 保留所有权利
+addedAt: '2026-11-20'

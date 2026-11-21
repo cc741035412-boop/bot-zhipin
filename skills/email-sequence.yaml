@@ -1,0 +1,24 @@
+slug: email-sequence
+title: 写一组自动发送的营销邮件
+name: email-sequence
+category: 写作
+purpose: 说出想让用户做什么，它排好每封邮件什么时候发，并写出内容
+scenarios:
+- 给试用用户安排首周指引
+- 写活动报名提醒邮件，把已经报名的人列为不再提醒
+agents:
+- Claude Code
+summary: 先定好想让用户完成什么动作，再倒推每封邮件的触发条件、发送间隔、分支和退出条件，接着逐封写出主题与正文。你可以先用虚构用户走一遍整个流程；它只产出邮件方案和文案，不会替你配置邮件发送服务。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install marketing@knowledge-work-plugins
+  note: 在终端运行，装的是整个 marketing 插件，只需装一次。会登记 13 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/marketing/skills/email-sequence
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/marketing/LICENSE
+addedAt: '2026-11-20'

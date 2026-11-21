@@ -1,0 +1,32 @@
+slug: xlsx
+title: 编辑 Excel 表格不弄坏公式
+name: xlsx
+category: 文档
+purpose: 改 Excel 时保留公式和格式，改完重新计算并找出出错的格子
+scenarios:
+- 改一档模型调用价格，看月成本怎样变化
+- 交预算表前排查失效的跨表引用
+agents:
+- Claude Code
+- Claude.ai
+summary: 给预算表换单价时，改的是输入格，不是把总额写成一个固定数字。Python 用 openpyxl 保留公式，批量整理数据用 pandas，粗读整表可用 markitdown。随表的重算脚本让 LibreOffice 在副本上计算，再把缓存值写回输出文件。没有报错只代表公式算得动，还得抽查引用的行是否正确。
+install:
+- agent: Claude Code
+  command: /plugin marketplace add anthropics/skills
+  note: 第 1 步，在 Claude Code 中添加市场。已添加可跳过。
+- agent: Claude Code
+  command: /plugin install document-skills@anthropic-agent-skills
+  note: 第 2 步，安装文档四件套，只需装一次。
+requires:
+- Python 3：openpyxl、pandas、markitdown
+- defusedxml
+- LibreOffice（soffice）
+source:
+  url: https://github.com/anthropics/skills/tree/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/xlsx
+  name: anthropics/skills
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/xlsx/LICENSE.txt
+addedAt: '2026-11-20'
