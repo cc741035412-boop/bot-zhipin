@@ -54,4 +54,5 @@ AI 只会问你几件它查不到的事，然后给你一个链接：**点开 �
 
 - 网站代码：[MIT](LICENSE)
 - `bots/` 下的投稿内容：[CC BY 4.0](bots/LICENSE)
+- 本站写的 Bot 介绍、编辑点评、开场白（外部收录条目和 `curation/`）：[CC BY 4.0](bots/LICENSE)，署名「Bot 直聘」
 - 第三方代码：见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)

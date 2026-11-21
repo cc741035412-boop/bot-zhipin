@@ -1,10 +1,10 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createHmac, randomBytes } from 'node:crypto'
-import { copyFile, mkdtemp, readFile, rm } from 'node:fs/promises'
+import { copyFile, mkdtemp, readdir, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { getPlatformProxy } from 'wrangler'
+import { getPlatformProxy, unstable_splitSqlQuery } from 'wrangler'
 import { onRequestPost, onRequest as clickFallback } from '../../functions/api/click.ts'
 import { onRequestGet, onRequest as statsFallback } from '../../functions/api/stats.ts'
 import { DAY_MS, DEDUPE_SQL, hashIp, readStats, recordClick } from '../../functions/_lib/clicks.ts'
@@ -13,26 +13,40 @@ import { loadSlugs } from '../../functions/_lib/slugs.ts'
 import { normalizeIp } from '../../functions/_lib/ip.ts'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
-const slugs = new Set(['demo-prd-reviewer', 'demo-weekly-digest', 'demo-external'])
+const migrationDir = join(root, 'migrations')
+const slugs = new Set(['demo-prd-reviewer', 'demo-weekly-digest', 'demo-external', 'constructor'])
+const squad = 'demo-squad'
+const squadSlugs = new Set([squad, 'constructor'])
 const slug = 'demo-prd-reviewer'
 const ip = '192.0.2.10' // Synthetic documentation address, never included in test output.
 const otherIp = '192.0.2.11'
 const now = 1_800_000_000_000
 const validBody = { slug, kind: 'import' }
-let proxy, db, directory, migration, salt, env, pending
+let proxy, db, directory, migrationFiles, salt, env, pending
 
-beforeAll(async () => {
-  directory = await mkdtemp(join(tmpdir(), 'bot-click-unit-'))
-  await copyFile(join(root, 'wrangler.toml'), join(directory, 'wrangler.toml'))
-  migration = (await readFile(join(root, 'migrations/0001_init.sql'), 'utf8'))
-    .split(';').map((statement) => statement.trim()).filter(Boolean)
-  proxy = await getPlatformProxy({
+function localProxy() {
+  return getPlatformProxy({
     configPath: join(directory, 'wrangler.toml'),
     envFiles: [],
     persist: false,
     remoteBindings: false,
   })
+}
+
+async function migrate(database, files) {
+  for (const file of files) {
+    const sql = await readFile(join(migrationDir, file), 'utf8')
+    await database.batch(unstable_splitSqlQuery(sql).map((statement) => database.prepare(statement)))
+  }
+}
+
+beforeAll(async () => {
+  directory = await mkdtemp(join(tmpdir(), 'bot-click-unit-'))
+  await copyFile(join(root, 'wrangler.toml'), join(directory, 'wrangler.toml'))
+  migrationFiles = (await readdir(migrationDir)).filter((file) => file.endsWith('.sql')).sort()
+  proxy = await localProxy()
   db = proxy.env.DB
+  await migrate(db, migrationFiles)
 }, 30_000)
 
 afterAll(async () => {
@@ -42,7 +56,6 @@ afterAll(async () => {
 
 beforeEach(async () => {
   await db.batch([
-    ...migration.map((statement) => db.prepare(statement)),
     db.prepare('DELETE FROM click_dedupe'),
     db.prepare('DELETE FROM click_counts'),
   ])
@@ -51,7 +64,11 @@ beforeEach(async () => {
     DB: db,
     IP_SALT: salt,
     ALLOW_TEST_IP: '1',
-    ASSETS: { fetch: vi.fn(async () => Response.json([...slugs])) },
+    ASSETS: { fetch: vi.fn(async ({ pathname }) => {
+      if (pathname === '/api-data/slugs.json') return Response.json([...slugs])
+      if (pathname === '/api-data/squad-slugs.json') return Response.json([...squadSlugs])
+      return new Response(null, { status: 404 })
+    }) },
   }
   pending = []
   vi.spyOn(Math, 'random').mockReturnValue(0.5)
@@ -93,6 +110,31 @@ async function dedupeRows() {
   return (await db.prepare('SELECT * FROM click_dedupe').all()).results
 }
 
+it('旧库升级：保留全部计数，迁移前的哈希继续挡住 import/prompt，但不挡 starter', async () => {
+  const legacy = await localProxy()
+  try {
+    const database = legacy.env.DB
+    const index = migrationFiles.indexOf('0004_click_kinds.sql')
+    expect(index).toBeGreaterThan(0)
+    await migrate(database, migrationFiles.slice(0, index))
+    const hash = createHmac('sha256', salt).update(`${ip}|${slug}`).digest('hex')
+    await database.batch([
+      database.prepare("INSERT INTO click_counts VALUES (?1, 'import', 9), (?1, 'prompt', 3), ('demo-external', 'prompt', 4)").bind(slug),
+      database.prepare('INSERT INTO click_dedupe VALUES (?1, ?2, ?3)').bind(slug, hash, now - 1),
+    ])
+    const counts = database.prepare('SELECT slug, kind, n FROM click_counts ORDER BY slug, kind')
+    const before = (await counts.all()).results
+    await migrate(database, migrationFiles.slice(index))
+    expect((await counts.all()).results).toEqual(before)
+    for (const kind of ['import', 'prompt']) {
+      expect(await click({ db: database, kind })).toEqual({ ok: true, counted: false, heat: 12 })
+    }
+    expect(await click({ db: database, kind: 'starter' })).toEqual({ ok: true, counted: true, heat: 12 })
+  } finally {
+    await legacy.dispose()
+  }
+})
+
 describe('真实本地 D1：滚动窗口与原子计数', () => {
   it('首次点击计入', async () => {
     expect(await click()).toEqual({ ok: true, counted: true, heat: 1 })
@@ -103,10 +145,23 @@ describe('真实本地 D1：滚动窗口与原子计数', () => {
     expect(await click({ now: now + 1 })).toEqual({ ok: true, counted: false, heat: 1 })
   })
 
-  it('同 IP 换 kind 不计入，归属第一次按钮', async () => {
+  it('同 IP 从 import 换到 prompt 不计入，归属第一次按钮', async () => {
     await click()
     expect((await click({ kind: 'prompt' })).counted).toBe(false)
-    expect((await readStats(db)).byKind[slug]).toEqual({ import: 1, prompt: 0 })
+    expect((await readStats(db)).byKind[slug]).toEqual({ import: 1, prompt: 0, starter: 0 })
+  })
+
+  it.each(['starter', 'kickoff'])('%s 不占导入窗口、不改热度；重复不刷新，到边界可再计', async (kind) => {
+    // 在同名 Bot / 小队上验证归一化后的实际去重行，而不只比较两个哈希是否不同。
+    const address = '2001:DB8:1:2::ab'
+    const copy = (at) => click({ slug: 'constructor', ip: address, kind, now: at, slugs: kind === 'kickoff' ? squadSlugs : slugs })
+    await click({ slug: 'constructor', ip: address })
+    const heat = kind === 'kickoff' ? 0 : 1
+    expect(await copy(now)).toEqual({ ok: true, counted: true, heat })
+    expect(await copy(now + DAY_MS - 1)).toEqual({ ok: true, counted: false, heat })
+    const hash = createHmac('sha256', salt).update(`2001:0db8:0001:0002::/64|constructor|${kind}`).digest('hex')
+    expect(await dedupeRows()).toContainEqual({ slug: 'constructor', ip_hash: hash, last_at: now })
+    expect(await copy(now + DAY_MS)).toEqual({ ok: true, counted: true, heat })
   })
 
   it('换 IP 计入', async () => {
@@ -170,23 +225,36 @@ describe('真实本地 D1：滚动窗口与原子计数', () => {
     expect((await dedupeRows())[0].last_at).toBe(now + DAY_MS)
   })
 
-  it('stats 聚合 heat/byKind，未点击的 Bot 不出现', async () => {
-    expect(await readStats(db)).toEqual({ ok: true, heat: {}, byKind: {} })
+  it('stats 分开 Bot 和小队，只有开场白的 Bot 热度为 0，没点过的不出现', async () => {
+    expect(await readStats(db)).toEqual({ ok: true, heat: {}, byKind: {}, squads: {} })
     await click()
     await click({ kind: 'prompt' })
     await click({ ip: otherIp, kind: 'prompt' })
     await click({ slug: 'demo-weekly-digest', kind: 'prompt' })
+    await click({ kind: 'starter' })
+    await expectJson(await post({ slug: 'demo-external', kind: 'starter' }), 200, { ok: true, counted: true, heat: 0 })
+    await expectJson(await post({ slug: squad, kind: 'kickoff' }), 200, { ok: true, counted: true, heat: 0 })
     await expectJson(await stats(), 200, {
       ok: true,
-      heat: { [slug]: 2, 'demo-weekly-digest': 1 },
-      byKind: { [slug]: { import: 1, prompt: 1 }, 'demo-weekly-digest': { import: 0, prompt: 1 } },
+      heat: { [slug]: 2, 'demo-weekly-digest': 1, 'demo-external': 0 },
+      byKind: {
+        [slug]: { import: 1, prompt: 1, starter: 1 },
+        'demo-weekly-digest': { import: 0, prompt: 1, starter: 0 },
+        'demo-external': { import: 0, prompt: 0, starter: 1 },
+      },
+      squads: { [squad]: { kickoff: 1 } },
     })
   })
 
-  it('合法 slug constructor 不受对象原型影响', async () => {
-    await click({ slug: 'constructor', slugs: new Set(['constructor']) })
-    expect((await readStats(db)).heat.constructor).toBe(1)
-    expect((await readStats(db)).byKind.constructor).toEqual({ import: 1, prompt: 0 })
+  it('Bot 和小队都叫 constructor：三个窗口、三张无原型映射互不串数', async () => {
+    for (const [kind, heat] of [['import', 1], ['kickoff', 0], ['starter', 1]]) {
+      await expectJson(await post({ slug: 'constructor', kind }), 200, { ok: true, counted: true, heat })
+    }
+    const { heat, byKind, squads } = await readStats(db)
+    for (const map of [heat, byKind, squads]) expect(Object.getPrototypeOf(map)).toBe(null)
+    expect(heat.constructor).toBe(1)
+    expect(byKind.constructor).toEqual({ import: 1, prompt: 0, starter: 1 })
+    expect(squads.constructor).toEqual({ kickoff: 1 })
   })
 })
 
@@ -204,9 +272,16 @@ describe('HTTP 校验、响应头与错误', () => {
     const bodies = await Promise.all(responses.map((response) => response.json()))
     expect(bodies.filter((body) => body.counted)).toHaveLength(1)
     await expectJson(await stats(), 200, {
-      ok: true, heat: { [slug]: 1 }, byKind: { [slug]: { import: 1, prompt: 0 } },
+      ok: true, heat: { [slug]: 1 }, byKind: { [slug]: { import: 1, prompt: 0, starter: 0 } }, squads: {},
     })
   })
+
+  it.each([[slug, 'kickoff'], [squad, 'starter'], [squad, 'import'], [squad, 'prompt']])(
+    '%s 不在 %s 对应的清单：404 且不占窗口', async (slug, kind) => {
+      await expectJson(await post({ slug, kind }), 404, { ok: false, error: 'unknown_slug' })
+      expect(await dedupeRows()).toHaveLength(0)
+    },
+  )
 
   it('未知 slug 返回 404', async () => {
     await expectJson(await post({ slug: 'no-such-bot', kind: 'import' }), 404, { ok: false, error: 'unknown_slug' })
@@ -296,10 +371,11 @@ describe('HTTP 校验、响应头与错误', () => {
     expect(await dedupeRows()).toHaveLength(0)
   })
 
-  it('真实数据库错误返回通用 500，不记录错误详情', async () => {
+  it('真实数据库错误返回通用 500，不记录错误详情', async ({ onTestFinished }) => {
     const log = vi.spyOn(console, 'log')
     const error = vi.spyOn(console, 'error')
-    await db.prepare('DROP TABLE click_counts').run()
+    await db.prepare('ALTER TABLE click_counts RENAME TO unavailable_counts').run()
+    onTestFinished(() => db.prepare('ALTER TABLE unavailable_counts RENAME TO click_counts').run())
     await expectJson(await post(), 500, { ok: false, error: 'server_error' })
     await expectJson(await stats(), 500, { ok: false, error: 'server_error' })
     expect(log).not.toHaveBeenCalled()
@@ -460,10 +536,11 @@ describe('概率清理（真实 D1）', () => {
     expect(pending).toHaveLength(0)
   })
 
-  it('清理失败不影响 stats 响应，也不产生未处理拒绝', async () => {
-    await db.prepare('DROP TABLE click_dedupe').run()
+  it('清理失败不影响 stats 响应，也不产生未处理拒绝', async ({ onTestFinished }) => {
+    await db.prepare('ALTER TABLE click_dedupe RENAME TO unavailable_dedupe').run()
+    onTestFinished(() => db.prepare('ALTER TABLE unavailable_dedupe RENAME TO click_dedupe').run())
     Math.random.mockReturnValue(0)
-    await expectJson(await stats(), 200, { ok: true, heat: {}, byKind: {} })
+    await expectJson(await stats(), 200, { ok: true, heat: {}, byKind: {}, squads: {} })
     expect(pending).toHaveLength(1)
     await expect(Promise.all(pending)).resolves.toEqual([undefined])
   })

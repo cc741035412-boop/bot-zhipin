@@ -9,7 +9,8 @@ export const onRequestPost: PagesFunction<Env> = (context) => handleApi(context,
   validateClickHeaders(context.request)
   if (!context.env.IP_SALT) throw new ApiError(500, 'server_error')
   const { slug, kind } = await readClickBody(context.request)
-  const slugs = await loadSlugs(context.env.ASSETS, context.request.url, now)
+  const list = kind === 'kickoff' ? '/api-data/squad-slugs.json' : '/api-data/slugs.json'
+  const slugs = await loadSlugs(context.env.ASSETS, context.request.url, now, list)
   return json(await recordClick({
     db: context.env.DB,
     salt: context.env.IP_SALT,

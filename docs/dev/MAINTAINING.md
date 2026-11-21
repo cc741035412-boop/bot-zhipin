@@ -62,9 +62,23 @@
 - **作者绑定**：D1 `bot_owners` 记录每个 slug 的作者数字 ID，网站首投成功时写入。要把一个 Bot 转给别人，在 D1 Console 改这一行。
 - 密钥在 Cloudflare：`GITHUB_APP_PRIVATE_KEY`、`OAUTH_CLIENT_SECRET`、`SESSION_SECRET`；原件在维护者本机 `~/.config/bot-zhipin/`。换 `SESSION_SECRET` 时先把旧值放进 `SESSION_SECRET_PREV`，24 小时后删掉。
 
+## 分享图
+
+构建日志出现「[分享图] 缺字」时，在维护机上安装 FontTools（`pip install fonttools==4.60.1`），确认 `pyftsubset` 和 `curl` 在 PATH 中，运行 `npm run gen:og-fonts`，重新构建核对，再将更新的字体子集纳入版本管理。只有这个手动命令会下载并校验字体，正常构建不需要 Python、系统中文字体或联网。若原版字体也没有这个字，更新子集不能补出字形，需要另选用字或字体。
+
+改了分享图版式、配色或字体，要把 `scripts/lib/share.mjs` 的 `OG_LAYOUT_VERSION` 加 1，让平台重新抓图。
+
 ## 计数数据
 
-热度存在 Cloudflare D1 `bot-zhipin` 的 `click_counts`、`click_dedupe` 两张表。要清零（比如上线前清掉测试点击），在 Cloudflare 控制台 D1 → bot-zhipin → Console 执行：
+Cloudflare D1 `bot-zhipin` 的 `click_counts` 按 `(slug, kind)` 存累计数，`click_dedupe` 存去重窗口。查开场白和口令的复制点击次数（已去重，不计入热度；`starter` 的 slug 是 Bot，`kickoff` 的是小队）：
+
+```sql
+SELECT slug, kind, n FROM click_counts
+WHERE kind IN ('starter', 'kickoff')
+ORDER BY kind, n DESC, slug;
+```
+
+要清零全部计数（比如上线前清掉测试点击），在 Cloudflare 控制台 D1 → bot-zhipin → Console 执行：
 
 ```sql
 DELETE FROM click_counts;

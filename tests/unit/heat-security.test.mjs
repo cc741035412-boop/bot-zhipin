@@ -39,3 +39,18 @@ it('合法 slug constructor 的 stats 和 click 数字正常更新，不污染�
   await vi.waitFor(() => expect(heat.heatLabel('constructor')).toBe('热度 5'))
   expect(Object.getPrototypeOf(heat.heatState.values)).toBe(null)
 })
+
+it.each([['import', 9], ['prompt', 9], ['starter', 4], ['kickoff', 4]])(
+  '%s 照常上报，只有 import/prompt 的响应可更新热度', async (kind, expected) => {
+    heat.heatState.values.constructor = 4
+    const result = { ok: true, counted: true, heat: kind === 'kickoff' ? 0 : 9 }
+    vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, json: async () => result })))
+    heat.reportClick('constructor', kind)
+    expect(fetch).toHaveBeenCalledWith('/api/click', expect.objectContaining({
+      method: 'POST', keepalive: true, body: JSON.stringify({ slug: 'constructor', kind }),
+    }))
+    // reportClick 本身不返回请求；等本轮 fetch 和 json 的微任务都走完再看状态。
+    await new Promise((resolve) => setImmediate(resolve))
+    expect(heat.heatState.values.constructor).toBe(expected)
+  },
+)

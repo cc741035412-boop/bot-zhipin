@@ -11,3 +11,19 @@
 
 - 用途：站点生成器（npm 依赖，不随仓库分发）
 - 许可证：MIT
+
+## Noto Sans SC
+
+- 用途：分享图的 Medium 和 Bold 字体（随仓库分发静态 OTF 子集）
+- 来源：https://github.com/notofonts/noto-cjk/releases/tag/Sans2.004 （简体中文 Noto Sans CJK SC）
+- 许可证：OFL-1.1，全文见 `scripts/og/fonts/OFL.txt`
+
+## satori
+
+- 用途：将分享图文字转为 SVG 路径（npm 依赖，不随仓库分发）
+- 许可证：MPL-2.0
+
+## @resvg/resvg-js
+
+- 用途：将分享图 SVG 光栅化为 PNG（npm 依赖，不随仓库分发）
+- 许可证：MPL-2.0

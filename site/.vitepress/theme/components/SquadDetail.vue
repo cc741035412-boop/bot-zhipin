@@ -103,6 +103,7 @@ let timer: ReturnType<typeof setTimeout> | undefined
 async function copyText(key: 'kickoff' | 'tryout') {
   const text = props.squad[key]
   if (!text) return
+  if (key === 'kickoff') reportClick(props.squad.slug, 'kickoff')
   try {
     await navigator.clipboard.writeText(text)
     copied.value = key

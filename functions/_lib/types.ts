@@ -21,7 +21,8 @@ export interface Env {
 }
 
 export type ApiContext = EventContext<Env, string, unknown>
-export type ClickKind = 'import' | 'prompt'
+export const CLICK_KINDS = ['import', 'prompt', 'starter', 'kickoff'] as const
+export type ClickKind = typeof CLICK_KINDS[number]
 export interface ClickBody {
   slug: string
   kind: ClickKind
