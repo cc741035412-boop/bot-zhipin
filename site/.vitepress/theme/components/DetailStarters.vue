@@ -2,12 +2,13 @@
 import { inject, onBeforeUnmount, ref } from 'vue'
 import { previewMode } from '../submit/preview-mode'
 import { announce } from '../announce'
+import { reportClick } from '../heat'
 import { useBotAction } from '../live/scope'
 import BzIcon from './BzIcon.vue'
 
 // 开场白：导入后可以直接发给 Bot 的第一句话。每条是一个聊天气泡样子的按钮，点一下复制，
 // 图标换成对勾、旁边出现「已复制」，1.8 秒后恢复；Bot 眨一下眼。投稿预览里不可点。
-defineProps<{ lines: string[] }>()
+const props = defineProps<{ slug: string; lines: string[] }>()
 const preview = inject(previewMode, false)
 const play = useBotAction()
 const copied = ref(-1)
@@ -33,6 +34,7 @@ async function write(text: string) {
 }
 async function copy(index: number, text: string, event: MouseEvent) {
   if (preview) return
+  reportClick(props.slug, 'starter')
   const button = event.currentTarget as HTMLElement
   if (!await write(text)) {
     // 两条路都不通：把这句话选中，按 ⌘C / Ctrl+C 就能带走。

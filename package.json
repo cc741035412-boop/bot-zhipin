@@ -18,7 +18,8 @@
     "new-bot": "node scripts/new-bot.mjs",
     "check": "npm run validate && npm test && npm run build",
     "gen:schema": "node scripts/gen-schema-validator.mjs",
-    "gen:favicon": "node scripts/gen-favicon.mjs"
+    "gen:favicon": "node scripts/gen-favicon.mjs",
+    "gen:og-fonts": "node scripts/gen-og-fonts.mjs"
   },
   "dependencies": {
     "yaml": "^2.9.1"
@@ -26,9 +27,12 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261114.1",
     "@playwright/test": "^1.65.1",
+    "@resvg/resvg-js": "2.6.2",
+    "@shuding/opentype.js": "1.4.0-beta.0",
     "ajv": "^8.20.0",
     "esbuild": "0.28.2",
     "markdown-it": "14.1.0",
+    "satori": "0.18.3",
     "vitepress": "^1.6.4",
     "vitest": "^5.1.0",
     "wrangler": "^4.162.0"
