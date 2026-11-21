@@ -8,6 +8,7 @@ import LibrarySource from './LibrarySource.vue'
 import BzIcon from './BzIcon.vue'
 const props = defineProps<{ item: LibraryItem }>()
 const summaryOnly = computed(() => props.item.kind === 'prompt' && !props.item.hasBody)
+const readingBody = computed(() => props.item.bodyZh ?? props.item.body)
 const suffix = ref('')
 function restore() { const {q, cat} = readQuery(categoriesFor(props.item.kind)); suffix.value = listQuery(q, cat) }
 onMounted(() => { restore(); window.addEventListener('popstate', restore) })
@@ -19,7 +20,7 @@ onBeforeUnmount(() => window.removeEventListener('popstate', restore))
       <a class="bz-btn ghost ix-back" :href="`/${item.kind}s/${suffix}`"><BzIcon name="arrow-left" />返回</a>
       <LibraryTile class="ix-id" :kind="item.kind" :category="item.category" :size="96" />
       <div class="ix-actions">
-        <LibraryCopy v-if="item.body" class="primary block lg" :value="item.body" target="body" />
+        <LibraryCopy v-if="item.body && readingBody" class="primary block lg" :value="readingBody" target="body" />
         <LibrarySource class="bz-btn block lg" :class="{ primary: summaryOnly }" :href="item.source.url" />
       </div>
       <dl class="ix-meta">
@@ -42,13 +43,22 @@ onBeforeUnmount(() => window.removeEventListener('popstate', restore))
           </div>
         </section>
         <section v-if="item.requires?.length" class="ix-sec"><header><h2>运行依赖</h2></header><ul class="ix-points"><li v-for="r in item.requires" :key="r">{{ r }}</li></ul></section>
+        <section v-if="item.body && readingBody" class="ix-sec">
+          <header><h2>正文</h2><LibraryCopy class="sm ghost" :value="readingBody" target="body" /></header>
+          <div id="body" class="ix-sheet" :lang="item.bodyZh ? 'zh' : item.lang" v-text="readingBody" />
+          <details v-if="item.bodyZh" class="ix-original">
+            <summary>英文原文</summary>
+            <LibraryCopy class="sm ghost" :value="item.body" target="body-en" />
+            <div id="body-en" class="ix-sheet" lang="en" v-text="item.body" />
+          </details>
+        </section>
+        <section v-if="item.body && item.usage" class="ix-sec"><header><h2>怎么用</h2></header><p class="ix-text">{{ item.usage }}</p></section>
         <section v-if="item.summary" class="ix-sec"><header><h2>摘要</h2></header>
           <div v-if="summaryOnly" class="ix-sheet is-summary"><p>{{ item.summary }}</p><footer>{{ item.source.name }} · <LibrarySource class="ext ix-link" :href="item.source.url" /></footer></div>
           <p v-else class="ix-text">{{ item.summary }}</p>
         </section>
         <section class="ix-sec"><header><h2>适用场景</h2></header><ul class="ix-points"><li v-for="s in item.scenarios" :key="s">{{ s }}</li></ul></section>
-        <section v-if="item.body" class="ix-sec"><header><h2>正文</h2><LibraryCopy class="sm ghost" :value="item.body" target="body" /></header><div id="body" class="ix-sheet" :lang="item.lang" v-text="item.body" /></section>
-        <section v-if="item.usage" class="ix-sec"><header><h2>怎么用</h2></header><p class="ix-text">{{ item.usage }}</p></section>
+        <section v-if="!item.body && item.usage" class="ix-sec"><header><h2>怎么用</h2></header><p class="ix-text">{{ item.usage }}</p></section>
         <section v-if="!summaryOnly" class="ix-sec"><header><h2>来源</h2></header><p class="ix-text"><LibrarySource class="ext ix-link" :href="item.source.url">{{ item.source.name }}</LibrarySource></p></section>
       </div>
     </article>

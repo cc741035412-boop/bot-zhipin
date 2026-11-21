@@ -6,8 +6,86 @@ scenarios:
 - 与设计师对齐配图方向
 - 比较两套落地页主视觉
 lang: en
+body: |-
+  You are a professional visual-style analyst.
+  Analyze the attached image carefully and return ONLY valid JSON strictly following the provided schema. Feel free to include additional keys or detailed comments if needed to clarify artistic choices.
+
+  JSON Schema:
+  {
+    "scene":         "string",   // 描述整体场景内容和核心主题（如角色与背景关系）
+    "subjects": [
+      {
+        "type":        "string", // 主体类型（人物、物体或概念）
+        "description": "string", // 详细外观描述与艺术特点
+        "position":    "string"  // 在画面中的位置与布局关系
+      }
+    ],
+    "style":          "string",    // 艺术风格或渲染方式（如皮克斯风格3D角色插画）
+    "color_palette":  ["string"],  // 主要色系 (3-7个色彩，注意和谐与视觉表达)
+    "lighting":       "string",    // 光照类型、方向、阴影效果
+    "mood":           "string",    // 场景整体传达的情绪氛围
+    "composition":    "string",    // 构图方式和视角特点
+    "camera": {
+      "angle":    "string",       // 摄影机角度（如正面、低角度、微仰视）
+      "distance": "string",       // 与主体的距离（如中距离特写、近景）
+      "lens":     "string"        // 镜头特性（广角、中距、望远镜头）
+    },
+    "typography": {
+      "text":          "string",  // 画面中的文字内容
+      "font_style":    "string",  // 字体风格（如极简黑色无衬线字体）
+      "position":      "string"   // 字体在画面中的位置与布局
+    },
+    "symbolism": {
+      "concept":       "string",  // 画面中的象征意义、隐喻或艺术概念
+      "representation":"string"   // 如何通过视觉表达实现这一象征意义
+    },
+    "rendering_details": {
+      "textures":     "string",   // 材质和纹理的细节描述
+      "effects":      "string"    // 特殊视觉效果（如颗粒感、光斑、梦幻效果）
+    }
+  }
+bodyZh: |-
+  你是一名专业的视觉风格分析师。
+  请仔细分析所附图片，严格按照下方给出的结构，只返回有效的 JSON。为说明画面中的艺术处理方式，可按需添加键或详细注释。
+
+  JSON 结构：
+  ```
+  {
+    "scene":         "string",   // 描述整体场景内容和核心主题（如角色与背景关系）
+    "subjects": [
+      {
+        "type":        "string", // 主体类型（人物、物体或概念）
+        "description": "string", // 详细外观描述与艺术特点
+        "position":    "string"  // 在画面中的位置与布局关系
+      }
+    ],
+    "style":          "string",    // 艺术风格或渲染方式（如皮克斯风格3D角色插画）
+    "color_palette":  ["string"],  // 主要色系 (3-7个色彩，注意和谐与视觉表达)
+    "lighting":       "string",    // 光照类型、方向、阴影效果
+    "mood":           "string",    // 场景整体传达的情绪氛围
+    "composition":    "string",    // 构图方式和视角特点
+    "camera": {
+      "angle":    "string",       // 摄影机角度（如正面、低角度、微仰视）
+      "distance": "string",       // 与主体的距离（如中距离特写、近景）
+      "lens":     "string"        // 镜头特性（广角、中距、望远镜头）
+    },
+    "typography": {
+      "text":          "string",  // 画面中的文字内容
+      "font_style":    "string",  // 字体风格（如极简黑色无衬线字体）
+      "position":      "string"   // 字体在画面中的位置与布局
+    },
+    "symbolism": {
+      "concept":       "string",  // 画面中的象征意义、隐喻或艺术概念
+      "representation":"string"   // 如何通过视觉表达实现这一象征意义
+    },
+    "rendering_details": {
+      "textures":     "string",   // 材质和纹理的细节描述
+      "effects":      "string"    // 特殊视觉效果（如颗粒感、光斑、梦幻效果）
+    }
+  }
+  ```
 summary: 把参考图发给看图模型，让它把构图、光线、用色以及主体位置、镜头、文字和材质拆开描述。拿到分项记录后，可以按字段挑出这次想沿用的部分单独调整，不用只靠口头说「照这个感觉来」；如果打算把结果交给程序读取，用前先核查是否为合法 JSON。
-usage: 上传有权使用的参考图，再用原文的英文模板。只摘出这次设计需要沿用的字段；要交给程序读取时，先校验结果是否为合法 JSON。
+usage: 在能看图的对话里上传一张你有权使用的参考图，贴上提示词一起发送。JSON 里的 string 是给 AI 的格式示意，不用自己填。拿到结果后对着图核对主体位置、配色、光线和画面文字，只摘出新设计想沿用的字段。要交给程序读取，先验证整段能否按 JSON 解析。
 source:
   url: https://baoyu.io/blog/image-style-prompt-reference
   name: Image 风格提取的提示词参考
@@ -15,4 +93,5 @@ author:
   name: 宝玉
   url: https://baoyu.io
 license: 保留所有权利
+copyright: © 宝玉（baoyu.io），本站原创内容，独家授权赛博禅心公众号发布
 addedAt: '2026-11-20'

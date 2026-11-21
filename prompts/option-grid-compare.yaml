@@ -8,6 +8,22 @@ scenarios:
 - 比较不同套餐的计费条件
 lang: en
 body: "# IDENTITY and PURPOSE\n\nPlease be brief. Compare and contrast the list of items.\n\n# STEPS\n\nCompare and contrast the list of items\n\n# OUTPUT INSTRUCTIONS\nPlease put it into a markdown table. \nItems along the left and topics along the top.\n\n# INPUT:\n\nINPUT:"
+bodyZh: |-
+  # 身份与目的
+
+  请简明扼要地比较列表中各项的异同。
+
+  # 步骤
+
+  比较列表中各项的异同。
+
+  # 输出要求
+  用 Markdown 表格呈现比较结果。
+  左侧每行列一个比较对象，顶部每列列一个比较维度。
+
+  # 输入：
+
+  输入：
 summary: 把要对比的几个备选项发给它，会交回一张简明的 Markdown 表格，左边按行排各个备选项，顶部按列排对比维度。适合在选型初期先把彼此的差别摆到桌面上，看清还缺哪些资料；表格只做横向对照，不提供事实证据或推荐结论。
 usage: '在末尾 INPUT: 后面列出要比较的备选项，附上同一时间的规格、报价和你关心的对比维度。可以顺手补一句缺数据的格子留空，别让模型自己猜。'
 source:

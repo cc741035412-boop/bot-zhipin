@@ -111,6 +111,10 @@
   font-size: var(--bz-fs-body); line-height: 1.85; color: var(--bz-ink); white-space: pre-wrap; tab-size: 2;
 }
 /* 仅摘要：同一张纸的位置，换成虚线空框，里面只有摘要和去原文的路 */
+.ix-original { margin-top: var(--bz-sp-4); }
+.ix-original > summary { display: list-item; cursor: pointer; }
+.ix-original > summary::marker { color: var(--bz-text-3); }
+.ix-original > .copy { margin-block: var(--bz-sp-3); }
 .ix-sheet.is-summary { border-style: dashed; border-color: var(--bz-border-strong); background: transparent; box-shadow: none; white-space: normal; }
 .ix-sheet.is-summary p { font-size: var(--bz-fs-title); line-height: 1.8; color: var(--ix-read); text-wrap: pretty; }
 .ix-sheet.is-summary footer { margin-top: var(--bz-sp-6); font-size: var(--bz-fs-btn); color: var(--bz-text-2); }

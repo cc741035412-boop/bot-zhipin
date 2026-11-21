@@ -24,6 +24,7 @@ export interface LibraryItem extends LibraryCard {
   lang?: string
   usage?: string
   body?: string
+  bodyZh?: string
   requires?: string[]
   install?: { agent: string; command: string; note?: string }[]
 }

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/jakob52123/bot-zhipin/schema/prompt.schema.json",
   "title": "prompts/<slug>.yaml",
-  "description": "收录的一条 Prompt。文件名就是 slug。分类、正文语言、许可证的取值只在这里定义；哪些许可证允许放正文见 $defs.reusableLicense。",
+  "description": "收录的一条 Prompt。文件名就是 slug。分类、正文语言、许可证的取值只在这里定义；放正文时哪些许可证还应附许可链接见 $defs.reusableLicense。",
   "type": "object",
   "additionalProperties": false,
   "required": ["slug", "title", "category", "purpose", "scenarios", "lang", "source", "author", "license", "addedAt"],
@@ -37,11 +37,18 @@
     },
     "lang": { "description": "正文语言", "enum": ["zh", "en"] },
     "body": {
-      "description": "正文：许可证允许转载时才有，原样照抄，不改写；超过 6000 字的不收正文",
+      "description": "正文：照录原文，不改写；最多 15000 字",
       "type": "string",
       "minLength": 1,
       "pattern": "\\S",
-      "maxLength": 6000
+      "maxLength": 15000
+    },
+    "bodyZh": {
+      "description": "本站中文译文：body 是英文时提供，页面默认显示和复制它",
+      "type": "string",
+      "minLength": 10,
+      "pattern": "\\S",
+      "maxLength": 15000
     },
     "summary": {
       "description": "本站用中文自己写的摘要；没有 body 时必填",
@@ -72,7 +79,7 @@
       ]
     },
     "reusableLicense": {
-      "description": "允许原样转载正文（body）的许可证；其余只能写 summary + 链接",
+      "description": "可转载许可证；放正文时应同时给出许可证原文链接",
       "enum": ["CC0-1.0", "Unlicense", "MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "CC-BY-4.0", "CC-BY-SA-4.0"]
     },
     "licenseUrl": {

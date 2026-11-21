@@ -1,8 +1,12 @@
 import { test, expect } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { db, categories, matching, body, summary, skill, pathFor } from './library-data.mjs'
-import { exerciseEdges } from './library-edges.mjs'
+import { db, fixturePrompts, categories, matching, body, summary, skill, pathFor } from './library-data.mjs'
+import { exerciseEdges, withLibraryServer } from './library-edges.mjs'
+
+const fixtureTest = test.extend({
+  fixtureURL: async ({}, use) => withLibraryServer('tests/fixtures', use),
+})
 
 const search = (p) => p.locator('#library-search')
 const catButton = (p, c) => p.locator(`[data-cat="${c}"]`)
@@ -27,6 +31,11 @@ async function copy(p, button, key, value) {
   await expect(button).toHaveText('已复制')
   expect(await p.evaluate(() => navigator.clipboard.readText())).toBe(value)
   await expect(button).toBeFocused()
+}
+async function fulltextShot(p, info, name) {
+  const dir = process.env.FT_SHOTS_DIR || info.outputPath('shots')
+  await mkdir(dir, { recursive: true })
+  await p.screenshot({ path: join(dir, `${name}.png`), fullPage: true, animations: 'disabled' })
 }
 const noOverflow = async (p) =>
   expect(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
@@ -111,6 +120,7 @@ for (const width of [1280, 390])
         await p.goto(`/${dir}/`)
         await expect(p.getByRole('heading', { level: 1 })).toHaveText(title)
         await rows(p, db[dir])
+        if (dir === 'prompts') await expect(counts(p)).toHaveText('共 70 条')
         const all = await p
           .locator('.entry')
           .evaluateAll((es) =>
@@ -141,6 +151,8 @@ for (const width of [1280, 390])
     test('LIST-02 分类顺序、查询后零项仍可选', async ({ page: p }) => {
       for (const dir of Object.keys(db)) {
         await p.goto(`/${dir}/`)
+        // 静态列表在 Vue 挂载前也能填值，此时 input 事件不会更新分类计数。
+        await p.waitForFunction(() => !!document.querySelector('#app').__vue_app__)
         const cats = ['', ...categories(dir)]
         expect(await p.locator('[data-cat]').evaluateAll((es) => es.map((e) => e.dataset.cat))).toEqual(cats)
         const i = db[dir][0]
@@ -240,14 +252,14 @@ for (const width of [1280, 390])
       await expect(search(p)).toBeFocused()
       await expect(p).toHaveURL(/\/prompts\/$/)
     })
-    test('LIST-07 仅摘要标签及独立外链命中', async ({ page: p }) => {
+    fixtureTest('LIST-07 仅摘要标签及独立外链命中', async ({ page: p, fixtureURL }) => {
       for (const dir of Object.keys(db)) {
         await p.goto(`/${dir}/`)
         expect(
           await p.locator('.entry:has(h2 .bz-tag.outline)').evaluateAll((es) => es.map((e) => e.dataset.slug)),
         ).toEqual(db[dir].filter((i) => dir === 'prompts' && !i.body).map((i) => i.slug))
       }
-      await p.goto('/prompts/')
+      await p.goto(fixtureURL + '/prompts/')
       const c = card(p, summary),
         link = c.locator('.source-link')
       await external(link, summary.source.url)
@@ -281,17 +293,70 @@ for (const width of [1280, 390])
       await expect(small).toBeVisible()
       expect(await small.textContent()).toBe(i.copyright)
     })
+    fixtureTest('双语正文优先显示和复制中文，展开可复制英文', async ({ page: p, fixtureURL }, info) => {
+      const i = fixturePrompts.find(i => i.lang === 'en' && i.bodyZh)
+      await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
+      await p.goto(fixtureURL + pathFor(i))
+      const section = p.locator('.ix-sec').filter({ has: p.getByRole('heading', { name: '正文' }) })
+      const zh = section.locator('.ix-sheet[lang=zh]'), en = section.locator('.ix-sheet[lang=en]')
+      const details = section.locator('details')
+      await expect(zh).toBeVisible()
+      expect(await zh.textContent()).toBe(i.bodyZh)
+      await expect(details).toHaveJSProperty('open', false)
+      await expect(en).toBeHidden()
+      await fulltextShot(p, info, `bilingual-${width}-closed`)
+      await copy(p, p.locator('.ix-actions .primary'), 'Enter', i.bodyZh)
+      await copy(p, section.locator('header .copy'), 'Enter', i.bodyZh)
+      await details.getByText('英文原文', { exact: true }).click()
+      await expect(en).toBeVisible()
+      expect(await en.textContent()).toBe(i.body)
+      if (!mobile) await fulltextShot(p, info, 'bilingual-1280-open')
+      await copy(p, details.locator('.copy'), 'Enter', i.body)
+    })
+    fixtureTest('保留所有权利的正文仍可复制并显示版权行', async ({ page: p, fixtureURL }, info) => {
+      const i = fixturePrompts.find(i => i.license === '保留所有权利' && i.body)
+      await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
+      await p.goto(fixtureURL + pathFor(i))
+      await expect(p.locator('#body')).toBeVisible()
+      expect(await p.locator('#body').textContent()).toBe(i.body)
+      await expect(p.locator('.ix-meta small')).toHaveText(i.copyright)
+      if (!mobile) await fulltextShot(p, info, 'reserved-1280')
+      await copy(p, p.locator('.ix-actions .primary'), 'Enter', i.body)
+    })
+    for (const [slug, field] of [['khazix-socratic-questions', 'body'], ['campaign-brief-sketch', 'bodyZh']]) {
+      test(`正式库 ${slug} 首屏正文与一键复制`, async ({ page: p }, info) => {
+        const i = db.prompts.find(i => i.slug === slug)
+        await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
+        await p.goto(pathFor(i))
+        await expect(p.locator('#body')).toBeInViewport()
+        expect(await p.locator('#body').textContent()).toBe(i[field])
+        if (field === 'bodyZh') await expect(p.locator('.ix-original')).toHaveJSProperty('open', false)
+        if (!mobile || field === 'body') await fulltextShot(p, info, `${slug}-${width}`)
+        await copy(p, p.locator('.ix-actions .primary'), 'Enter', i[field])
+      })
+    }
+    test('正式库 Karpathy 长文保留到最后一字', async ({ page: p }) => {
+      const i = db.prompts.find(i => i.slug === 'karpathy-personal-wiki')
+      await p.goto(pathFor(i))
+      expect(await p.locator('#body').textContent()).toBe(i.bodyZh)
+      await p.getByText('英文原文', { exact: true }).click()
+      const en = p.locator('#body-en')
+      await expect(en).toBeVisible()
+      await expect(en).toContainText(i.body.slice(-20))
+      expect(await en.textContent()).toBe(i.body)
+    })
     test('DETAIL-01 有正文 Prompt 阅读次序、完整原文', async ({ page: p }) => {
       await p.goto(pathFor(body))
-      expect(await normText(p, '.ix-body h2')).toEqual([...(body.summary ? ['摘要'] : []), '适用场景', '正文', ...(body.usage ? ['怎么用'] : []), '来源'])
+      expect(await normText(p, '.ix-body h2')).toEqual(['正文', ...(body.usage ? ['怎么用'] : []), ...(body.summary ? ['摘要'] : []), '适用场景', '来源'])
       await expect(p.locator('.ix-lead')).toHaveText(body.purpose)
       expect(await p.locator('#body').textContent()).toBe(body.body)
       expect(await p.locator('#body').evaluate((e) => e.scrollHeight <= e.clientHeight + 1)).toBe(true)
       await expect(p.locator('.ix-body button')).toHaveCount(1)
       expect(await normText(p, '.ix-body li')).toEqual(body.scenarios)
     })
-    test('DETAIL-02 仅摘要首末来源、无正文与复制', async ({ page: p }) => {
-      await p.goto(pathFor(summary))
+    fixtureTest('DETAIL-02 仅摘要首末来源、无正文与复制', async ({ page: p, fixtureURL }) => {
+      await p.goto(fixtureURL + pathFor(summary))
+      await expect(p.locator('.ix-title h1')).toHaveText(summary.title)
       expect(await normText(p, '.ix-body h2')).toEqual(['摘要', '适用场景', ...(summary.usage ? ['怎么用'] : [])])
       await expect(p.locator('.ix-title .outline')).toBeVisible()
       await expect(p.locator('.ix-actions .primary')).toBeInViewport()
@@ -310,9 +375,10 @@ for (const width of [1280, 390])
         await expect(p.locator('.ix-body pre')).toHaveCount(i.install.length)
       }
     })
-    test('DETAIL-04 属性、可选外链与侧栏布局', async ({ page: p }) => {
+    fixtureTest('DETAIL-04 属性、可选外链与侧栏布局', async ({ page: p, fixtureURL }) => {
       for (const i of [summary, skill]) {
-        await p.goto(pathFor(i))
+        await p.goto((i === summary ? fixtureURL : '') + pathFor(i))
+        await expect(p.locator('.ix-title h1')).toHaveText(i.title)
         expect(await normText(p, '.lib-page dt')).toEqual([
           ...(i.agents ? ['能用在'] : []), '作者', '许可证', '收录',
         ])
@@ -365,7 +431,7 @@ for (const width of [1280, 390])
       await b.press('Enter')
       await expect(b.locator('[role=status]')).toHaveText('未复制')
       await expect(b.locator('svg')).toHaveAttribute('data-icon', 'x')
-      expect(await p.evaluate(() => getSelection().toString())).toBe(body.body)
+      expect(await p.evaluate(() => getSelection().getRangeAt(0).toString())).toBe(body.body)
       await p.clock.runFor(1900)
       await expect(b).toHaveText('复制')
     })
@@ -476,10 +542,11 @@ for (const width of [1280, 390])
           .evaluate((e) => e.scrollWidth <= e.clientWidth),
       ).toBe(true)
     })
-    test('VIS-02 深浅 token 与控件状态、减少动效', async ({ page: p }) => {
+    fixtureTest('VIS-02 深浅 token 与控件状态、减少动效', async ({ page: p, fixtureURL }) => {
       for (const scheme of ['dark', 'light']) {
         await p.emulateMedia({ colorScheme: scheme })
-        await p.goto(pathFor(summary))
+        await p.goto(fixtureURL + pathFor(summary))
+        await expect(p.locator('.ix-actions .primary')).toBeVisible()
         const colors = await p.evaluate(() => {
           const e = document.querySelector('.ix-actions .primary'),
             probe = document.createElement('span')
@@ -511,7 +578,7 @@ for (const width of [1280, 390])
       await expect(catButton(p, '')).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
       await p.emulateMedia({ reducedMotion: 'reduce' })
       await expect(catButton(p, '')).toHaveCSS('transition-duration', '0s')
-      await p.goto(pathFor(summary))
+      await p.goto(fixtureURL + pathFor(summary))
       await primary.hover()
       await p.mouse.down()
       await expect(primary).toHaveCSS('transform', 'none')
@@ -521,7 +588,7 @@ for (const width of [1280, 390])
     test('LIST-06 DETAIL-01/02/03/04 COPY-01/02 空库、缺省字段、授权边界与连续两条命令', async ({ page: p }) => {
       await exerciseEdges(p, copy)
     })
-    test('VIS-03 六页全页截图', async ({ page: p }, info) => {
+    fixtureTest('VIS-03 六页全页截图', async ({ page: p, fixtureURL }, info) => {
       // 默认从数据挑；对照样稿时允许指定它拍摄的同一条记录。
       const pick = (items, slug, fallback) => items.find(i => i.slug === slug) || fallback
       const shotCategory = categories('prompts').find(c => c === process.env.SHOT_CATEGORY) || body.category
@@ -534,7 +601,7 @@ for (const width of [1280, 390])
           prompts: '/prompts/',
           skills: '/skills/',
           'prompt-detail': pathFor(pick(db.prompts.filter(i => i.body), process.env.SHOT_BODY, body)),
-          'prompt-detail-summary-only': pathFor(pick(db.prompts.filter(i => !i.body), process.env.SHOT_SUMMARY, summary)),
+          'prompt-detail-summary-only': fixtureURL + pathFor(pick(fixturePrompts.filter(i => !i.body), process.env.SHOT_SUMMARY, summary)),
           'skill-detail': pathFor(pick(db.skills, process.env.SHOT_SKILL, skill)),
           empty: '/prompts/?' + new URLSearchParams({ cat: emptyCategory, q: '不会有这个词的' }),
           ...(!mobile && scheme === 'dark' ? { 'prompts-cat': '/prompts/?cat=' + encodeURIComponent(shotCategory) } : {}),

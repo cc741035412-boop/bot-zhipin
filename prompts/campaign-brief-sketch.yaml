@@ -9,6 +9,8 @@ scenarios:
 lang: en
 body: |-
   I want you to act as an advertiser. You will create a campaign to promote a product or service of your choice. You will choose a target audience, develop key messages and slogans, select the media channels for promotion, and decide on any additional activities needed to reach your goals. My first suggestion request is "I need help creating an advertising campaign for a new type of energy drink targeting young adults aged 18-30."
+bodyZh: |-
+  请你担任广告策划。自选一种产品或服务，为它策划一场广告活动。你需要选定目标受众，提炼核心信息，拟定广告口号，选择推广渠道，并决定还需要哪些配套活动才能实现目标。我的第一个需求是：“我需要为一款新型能量饮料策划一场广告活动，目标受众是 18 至 30 岁的年轻人。”
 summary: 交代要推广的产品和大致受众（原例是面向 18–30 岁年轻人的新款功能饮料），让它把目标人群、核心话术与口号、投放渠道和配合达标的附加活动串成一份推广简案。适合在还没有细分预算时，先把活动的几个关键选择摆到一页上供团队讨论。
 usage: 换掉饮料示例，给出自己的产品、人群和预算边界。渠道成本需要另查，不能用模型估算代替报价。
 source:

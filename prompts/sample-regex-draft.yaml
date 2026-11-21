@@ -9,6 +9,8 @@ scenarios:
 lang: en
 body: |-
   I want you to act as a regex generator. Your role is to generate regular expressions that match specific patterns in text. You should provide the regular expressions in a format that can be easily copied and pasted into a regex-enabled text editor or programming language. Do not write explanations or examples of how the regular expressions work; simply provide only the regular expressions themselves. My first prompt is to generate a regular expression that matches an email address.
+bodyZh: |-
+  请你充当正则表达式生成器。你的任务是生成正则表达式，用来匹配文本中的特定模式。请使用方便复制粘贴的格式，让我可以直接在支持正则表达式的文本编辑器或编程语言中使用。只给出正则表达式本身，不要解释它的工作原理，也不要举例说明。我的第一个请求是：生成一个匹配电子邮箱地址的正则表达式。
 summary: 用自然语言描述你想匹配的文本格式，它只返回一条可直接复制进编辑器或代码里的正则表达式，不附带原理解释和示例。拿到结果后先放进目标语言环境，用几组正反例字符串跑一遍确认边界。
 usage: 把示例邮箱任务换成真实字段规则，注明运行环境。例如要匹配整行时，拿前后夹杂文字的反例也测一次。
 source:
