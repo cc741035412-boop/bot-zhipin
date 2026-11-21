@@ -30,7 +30,7 @@ about:
     - 按你的点赞点踩调整话题权重
     - 周五加本周五句话和一条可以忽略的
   starters:
-    - 我主要用 Claude 和 Cursor 做 AI 产品原型，北京时间早上 8 点发，用中文
+    - 我平时用 Claude 和 Cursor 写代码、查资料，北京时间早上 8 点发，用中文
     - 先给我一份过去 24 小时的样刊，国产模型 DeepSeek、Qwen 也要看
   skills:
     - name: 上手设置
@@ -50,7 +50,7 @@ about:
       when: 每周一 9:02 触发，只在每月 1 到 7 号干活，按纽约时间
       default: 关
       quiet: 不打扰
-  fit: 要每天盯海外模型和 AI 工具动态的产品经理
+  fit: 需要每天盯海外模型和 AI 工具更新的人
   notFit: 想看国内 AI 圈的人；要深查某条说法得另装 AI Claim Checker
   cnFit: 好
   cnNote: 不连账号也能靠网页搜索出简报，X 是可选的；来源偏英文，国产模型要在上手时点名

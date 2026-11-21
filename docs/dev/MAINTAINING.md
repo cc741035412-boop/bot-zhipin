@@ -4,8 +4,8 @@
 
 | 来源 | 样子 | 说明 |
 |---|---|---|
-| 网站投稿（默认） | PR 作者是 `bot-zhipin-submit[bot]`，分支 `submission/web-<数字id>-<slug>`，标题「新增 Bot：…」或「更新 Bot：…」；提交作者是投稿人本人；已开启自动合并 | 学员在 `/submit` 登录后提交，`functions/api/submit/` 建 PR。CI 自动运行，不用点批准运行 |
-| Issue 表单（备用） | Issue 带 `投稿` 标签，几十秒后 Issue 下出现自动回复；通过的会开一个 `submission/issue-<号>` 分支的 PR，作者是 github-actions | `.github/workflows/submission.yml`。网站投稿关闭或学员打不开投稿页时用 |
+| 网站投稿（默认） | PR 作者是 `bot-zhipin-submit[bot]`，分支 `submission/web-<数字id>-<slug>`，标题「新增 Bot：…」或「更新 Bot：…」；提交作者是投稿人本人；已开启自动合并 | 投稿人在 `/submit` 登录后提交，`functions/api/submit/` 建 PR。CI 自动运行，不用点批准运行 |
+| Issue 表单（备用） | Issue 带 `投稿` 标签，几十秒后 Issue 下出现自动回复；通过的会开一个 `submission/issue-<号>` 分支的 PR，作者是 github-actions | `.github/workflows/submission.yml`。网站投稿关闭或投稿人打不开投稿页时用 |
 | 自己 fork 提 PR | 普通 PR，只改 `bots/<slug>/`，或只改 `squads/<slug>/squad.yaml`（投稿小队） | 外部贡献者改了这两处以外的文件（包括 `curation/`），CI 的范围检查会直接失败 |
 
 ## 审核一个网站投稿 PR
@@ -36,7 +36,7 @@
 小队只能走 fork + PR，PR 里应该只有 `squads/<slug>/squad.yaml` 一个文件（多了别的文件范围检查会失败）。
 
 1. 等 `validate-and-build` 通过：机器已经查过格式、成员都在货架上且不重复、`flow` 两头都是成员或 `you`、「带队」恰好一个队长。
-2. 人工核对：分工和交接是不是真的跑得通（对照各成员的详情页）；`kickoff`、`setup` 里有没有密钥、内部链接；`origin` 写得对不对（学员自己编的写「学员投稿」，照搬原作者成套发布的写「原作者成套」）。
+2. 人工核对：分工和交接是不是真的跑得通（对照各成员的详情页）；`kickoff`、`setup` 里有没有密钥、内部链接；`origin` 写得对不对（投稿人自己编的写「社区投稿」，照搬原作者成套发布的写「原作者成套」）。
 3. 已有小队被修改时，`addedAt` 和 `author.github` 不能变（CI 会拦）。
 
 ## 策展（只有维护者能改）
@@ -58,7 +58,7 @@
 
 - **临时关掉网站投稿**：在 Cloudflare 后台 Pages → bot-zhipin → 设置 → 变量与密钥，删掉 `OAUTH_CLIENT_SECRET`，重新部署后 `/api/auth/*` 和 `/api/submit*` 返回 503，投稿页自动显示「改用 GitHub Issue 投稿」。恢复时从本机 `~/.config/bot-zhipin/oauth-app.json` 取回原值写回去。
 - **限流**（D1 `rate_limits` 表，见 `docs/dev/SUBMIT.md` §3.8）：每人每天最多 10 次提交、60 张截图，全站每小时 20 次提交，同时最多 3 个未合并的投稿 PR。被刷时先看这张表。
-- **状态查询**有缓存（D1 `pr_status`），每小时最多真正问 GitHub 600 次；学员看到「状态暂时刷新不了」一般过一会儿就好。
+- **状态查询**有缓存（D1 `pr_status`），每小时最多真正问 GitHub 600 次；投稿人看到「状态暂时刷新不了」一般过一会儿就好。
 - **作者绑定**：D1 `bot_owners` 记录每个 slug 的作者数字 ID，网站首投成功时写入。要把一个 Bot 转给别人，在 D1 Console 改这一行。
 - 密钥在 Cloudflare：`GITHUB_APP_PRIVATE_KEY`、`OAUTH_CLIENT_SECRET`、`SESSION_SECRET`；原件在维护者本机 `~/.config/bot-zhipin/`。换 `SESSION_SECRET` 时先把旧值放进 `SESSION_SECRET_PREV`，24 小时后删掉。
 

@@ -44,7 +44,7 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 
 # 第二期 S3：网站直投
 
-目标：学员在本站中文页面完成投稿（预览 → GitHub 登录 → 提交；「拖截图」一步已按 DECISIONS 第 43 条去掉），维护者只点一次 Approve，上线后自动通知投稿人。契约 `SUBMIT.md`，交互 `INTERACTION-SUBMIT.md`。
+目标：投稿人在本站中文页面完成投稿（预览 → GitHub 登录 → 提交；「拖截图」一步已按 DECISIONS 第 43 条去掉），维护者只点一次 Approve，上线后自动通知投稿人。契约 `SUBMIT.md`，交互 `INTERACTION-SUBMIT.md`。
 
 | # | 任务 | 执行 | 前置 | 写入范围 | 状态 |
 |---|---|---|---|---|---|
@@ -61,5 +61,5 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | M4 | 投稿文档：AGENTS、README、CONTRIBUTING、MAINTAINING | 维护者 | L5 | 根目录文档 | ✅ |
 | SEC | 上线前加固（独立安全审查必修项）：状态缓存、服务端只收明文、校验防超时、额度后扣、按数字 id 绑定归属 | 编码 agent | L2b | `functions/`、`scripts/lib/`、`migrations/0003` | ✅ |
 | M5 | 联调：仓库设置（自动合并、规则集）、线上真实全程（新增 + 更新）、CPU 实测 | 维护者 | 全部 | — | ✅ |
-| M6 | 待办：真实 Grok Bot 按新版 AGENTS.md 走一遍；学员实测；Workers 套餐决定；安全审查「上线后跟进」各项 | 维护者 | M5 | — | ⬜ |
+| M6 | 待办：真实 Grok Bot 按新版 AGENTS.md 走一遍；投稿人实测；Workers 套餐决定；安全审查「上线后跟进」各项 | 维护者 | M5 | — | ⬜ |
 | NS | 去掉截图（DECISIONS 第 43 条）：校验不再要求截图、DESIGN 引用不存在的截图报错；投稿页去掉「放截图」一步；后端接受空回执；Issue 表单去掉截图栏；AGENTS.md 改为摘 Bot 真实输出；文档同步。遗留：`submit.css` 里截图槽位的样式没删（改版线 `feat/shelf-v5` 重写了这个文件，等它合并后一起清）；改版线合并时，`INTERACTION.md` §9.5 里「截图 1（待放入）」「暂无截图。」两处要去掉 | Claude | — | `scripts/`、`functions/`、`site/.vitepress/theme/`、`.github/`、根目录与 `docs/dev/` 文档 | ✅ |

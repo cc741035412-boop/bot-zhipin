@@ -64,7 +64,7 @@ about:
       when: 每周一上午 10 点
       default: 关
       quiet: 不打扰
-  fit: 有 GitHub 仓库和 Cursor、想把点子做成真原型的产品经理
+  fit: 有 GitHub 仓库和 Cursor、想做可点击原型的产品经理和设计师
   notFit: 没有代码仓库，或不想为云端构建和生图付钱的人
   cnFit: 一般
   cnNote: 核心要 GitHub 加付费 Cursor，生图要海外密钥；都不连只剩截图评审和网上调研
