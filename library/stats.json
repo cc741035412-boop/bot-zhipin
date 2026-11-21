@@ -1,0 +1,142 @@
+{
+  "sources": {
+    "cobus": {
+      "records": {
+        "recipe": 12,
+        "routine": 8,
+        "skill": 47,
+        "team": 10,
+        "profile": 49
+      },
+      "dropped": {
+        "未收录说明文档、示例和其他非入库文件": 145
+      }
+    },
+    "grokbotdev": {
+      "records": {
+        "bot-link": 1904,
+        "prompt": 138
+      },
+      "dropped": {
+        "集合成员找不到对应的模板": 5,
+        "不收录 content/ 以外的文件及 content/ 内非用例、模板、集合的文件": 480
+      }
+    },
+    "botdirectory": {
+      "records": {
+        "prompt": 650,
+        "bot-link": 254
+      },
+      "dropped": {}
+    },
+    "ronglecat": {
+      "records": {
+        "bot-link": 9,
+        "prompt": 10
+      },
+      "dropped": {
+        "同批提示词的英文版，只收中文版": 1,
+        "资源导航链接，不含有效的 Bot 分享 ID": 2174,
+        "未收录说明文档和其他非入库文件": 302
+      }
+    },
+    "sitin": {
+      "records": {
+        "recipe": 10
+      },
+      "dropped": {
+        "案例填写模板，不是实际配方": 1,
+        "未收录说明文档和其他非入库文件": 43
+      }
+    },
+    "majiayu": {
+      "records": {
+        "bot-link": 8026,
+        "recipe": 1,
+        "team": 4
+      },
+      "dropped": {
+        "站点生成的分语言目录副本，不重复收录": 18,
+        "本次只收目录分享链接、队伍和指定配方，不收模板目录": 18,
+        "未收录说明文档和其他非入库文件": 38
+      }
+    },
+    "kydlikebtc": {
+      "records": {
+        "bot-link": 5103
+      },
+      "dropped": {}
+    }
+  },
+  "sharePageText": {
+    "botdirectory": 122,
+    "grokbotdev": 2,
+    "kydlikebtc": 2493,
+    "majiayu": 2295
+  },
+  "dropped": {
+    "未收录说明文档、示例和其他非入库文件": 145,
+    "集合成员找不到对应的模板": 5,
+    "不收录 content/ 以外的文件及 content/ 内非用例、模板、集合的文件": 480,
+    "同批提示词的英文版，只收中文版": 1,
+    "资源导航链接，不含有效的 Bot 分享 ID": 2174,
+    "未收录说明文档和其他非入库文件": 383,
+    "案例填写模板，不是实际配方": 1,
+    "站点生成的分语言目录副本，不重复收录": 18,
+    "本次只收目录分享链接、队伍和指定配方，不收模板目录": 18
+  },
+  "fullText": {
+    "before": 939,
+    "after": 939
+  },
+  "links": {
+    "before": 15359,
+    "after": 8066
+  },
+  "licenses": {
+    "MIT": 1051,
+    "CC-BY-4.0": 4121,
+    "CC0-1.0": 11063
+  },
+  "licenseTraced": 640,
+  "scores": {
+    "0": 3,
+    "1": 22,
+    "2": 60,
+    "3": 173,
+    "4": 312,
+    "5": 369,
+    "null": 0
+  },
+  "cnFit": {
+    "fullText": {
+      "一般": 329,
+      "好": 610
+    },
+    "links": {
+      "好": 7644,
+      "一般": 422
+    }
+  },
+  "needsReview": {
+    "R-send": 9,
+    "R-pay": 71,
+    "R-delete": 19,
+    "R-noapproval": 1,
+    "R-credential": 5,
+    "R-upload": 6,
+    "R-secret": 0
+  },
+  "listed": {
+    "fullText": 1,
+    "links": 81
+  },
+  "annotations": {
+    "covered": 939,
+    "total": 939,
+    "coverage": 1,
+    "dropped": 0
+  },
+  "secretHits": 0,
+  "withheld": []
+}

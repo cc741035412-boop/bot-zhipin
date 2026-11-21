@@ -1,4 +1,5 @@
 import { reactive } from 'vue'
+import type { ClickKind } from '../../../functions/_lib/types'
 
 // 只在客户端调用 fetch；SSR 的初始状态不含任何用户数据。
 export const heatState = reactive({
@@ -33,7 +34,7 @@ export function heatLabel(slug: string) {
   return `热度 ${heatState.values[slug] ?? (heatState.status === 'ready' ? 0 : heatState.status === 'failed' ? '—' : '…')}`
 }
 
-export function reportClick(slug: string, kind: 'import' | 'prompt') {
+export function reportClick(slug: string, kind: ClickKind) {
   // 不 await：复制和新标签跳转均不依赖接口成功。
   void fetch('/api/click', {
     method: 'POST',
@@ -41,7 +42,8 @@ export function reportClick(slug: string, kind: 'import' | 'prompt') {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ slug, kind }),
   }).then(async (response) => {
-    if (!response.ok) return
+    // 开场白只计次数，口令的 heat: 0 也不能覆盖同名 Bot 的热度。
+    if (!response.ok || (kind !== 'import' && kind !== 'prompt')) return
     const data = await response.json()
     if (data.ok === true && typeof data.heat === 'number' && Number.isFinite(data.heat) && data.heat >= 0) {
       heatState.values[slug] = data.heat

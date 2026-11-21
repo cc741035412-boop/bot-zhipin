@@ -2,6 +2,24 @@
 
 按时间倒序追加。每条写：决定了什么、为什么、放弃了什么。
 
+## 2026-11-21 被搜到、被转发、被机器读到
+
+56. **打开 sitemap，每页加规范地址和分享标签；Bot 详情页标题改成「<中文叫法>（<原名>）怎么用、值不值得装」，描述用一句话介绍接编辑点评的第一句**（用户 11-21 看过 3 页的改前改后后定）。旧地址 `bot-zhipin.pages.dev` 和正式域名内容一样，只靠页面脚本跳转，所以 canonical 一律指正式域名，免得搜索引擎把两边当成重复页。标题、描述、绝对地址的规则只在 `scripts/lib/share.mjs` 里定。小队页标题不变。放弃：结构化数据 JSON-LD（是内联脚本，会进投稿页以外的页面、收益不明，先不做）。已知代价：标题 22～50 字，搜索结果一般只显示前 30 字左右，长的尾巴会被截掉。
+57. **分享图在构建时生成**：satori 把文字转成路径、resvg 出 PNG，字体用提交进仓库的 Noto Sans SC 子集（OFL-1.1，GB2312 全部汉字加当前用到的字）。因为 Cloudflare 的构建机没有中文字体、没有 Chromium，而且构建不联网（ARCHITECTURE「约定」）。放弃：`@fontsource/noto-sans-sc`（整包 75MB、1905 个文件，每次构建都要装）；维护者手动出图再提交（网站投稿自动合并后新 Bot 会没有图）；Functions 实时出图（免费版每请求 10ms CPU 不够）。代价：投稿里出现子集外的字时只在构建日志警告「[分享图] 缺字」，要维护者跑 `npm run gen:og-fonts` 补；改了分享图版式要把 `OG_LAYOUT_VERSION` 加 1，平台才会重新抓图。
+58. **构建时输出 `/catalog.json` 和 `/llms.txt`，本站写的文字按 CC BY 4.0 开放**（用户 11-21 定，修订第 9 条）。第 9 条说外部收录条目「只含本站写的介绍和链接，不在 CC BY 范围内」，那时没有声明这些文字的许可；现在货架上 83 个 Bot 全是外部收录，介绍、点评、开场白都是本站写的，不写许可的话 AI 和别的站不敢放心引用。现在：本站写的文字按 CC BY 4.0，署名「Bot 直聘」并附详情页链接；投稿内容照旧 CC BY 4.0、归投稿人；Bot 模板本身归原作者，以 x.ai 模板页为准。放弃：只要求注明出处、不声明许可（法律上仍是保留所有权利）。
+59. **复制开场白（`starter`）和复制小队口令（`kickoff`）单独计数，不进热度**（用户 11-21 定，修订第 3 条）。两个新按钮各自一个 24 小时去重窗口，哈希里多带 kind；`import`、`prompt` 的窗口和哈希完全不变，线上已有的去重行照常有效。热度仍只算导入和复制提示词，「最热」排序不受影响。`kickoff` 的 slug 是小队，查 `squad-slugs.json`；小队和 Bot 的 slug 没有禁止重名，所以 `/api/stats` 把小队单独放进 `squads` 一栏。放弃：并进热度、共用去重窗口（大多数人先点导入再回来复制开场白，开场白那次几乎永远记不上）。
+60. **计数表先在线上迁移，再合并代码**。`click_counts.kind` 的 CHECK 只认两种，SQLite 改不了 CHECK，`0004_click_kinds.sql` 新建表、拷数据、删旧表、改名。新表也接受旧的两种 kind，所以先迁移不影响线上旧代码；反过来先上代码，复制开场白会在去重写入之后、计数写入之前报 500，白白占掉这个 IP 当天的开场白窗口。顺序：`wrangler d1 export` 备份 → `wrangler d1 migrations apply DB --remote` → 核对行数和热度 → 合并 PR。
+
+## 2026-11-20 资源库 library/（编号从 49 起：46–48 已被 feat/prompts-skills 占用）
+
+49. **新增顶层原料仓 `library/`，给 Prompt、Skills 两个板块和 Bot 货架攒原料**（用户 2026-11-20 定：「就是要增加 prompt 跟 skills 的板块，这个属于是补充信息」）。从开源仓库全量收：分享链接、岗位设定、提示词、技能、定时任务、团队、配方，原文保留，另加中文三项、评分、国内适配、安全标记。它不上页面，也不进 `bots.data` 和站点构建；货架（`bots/`、`prompts/`、`skills/`）仍只放点评过的条目，从这里挑。`library/skills/` 收 SKILL.md 全文，和 Prompt/Skills 板块「Skill 不放 SKILL.md 全文」不冲突：那条管的是页面展示。放弃：直接灌进 `prompts/`、`skills/`（几千条没审过的会淹没 30–50 条精选）；只存链接（没有正文就没法去重、评分、写首个任务）。
+50. **收什么、不收什么**。收 7 个开源来源：cobusgreyling/grok-bot-templates（MIT）、ZeroPointRepo/GrokBotDev 的 `content/`（CC BY 4.0）、elie222/botdirectory.ai（MIT）、RongleCat/awesome-grok-bot（CC0）、sit-in/awesome-grokbot-playbooks（MIT）、majiayu000/awesome-grok-bot（CC0）、kydlikebtc/awesome-grokbot（逐行 CC0 / CC BY）。不收：要登录或付费才能看的、闭源站点的文案（麦当 Bot 小镇、Agensi、Grok Bot Wiki；2026-11-20 自媒体区整理的 mdldm 离线包也算，包里的 GitHub 仓库和 x.ai 链接只当线索，回源头按各自许可收）、x.ai 分享页上的配置和介绍原文（沿用第 9 条；kydlikebtc 的 `official_summary` 就是分享页原文，一个字不收）。RongleCat 和本仓库 fork 来源（grok-bot-learn）是同一作者，拿 20 字片段比对，两边重合为 0，所以照收；以后再收他的东西也要先比对。来源仓库克隆在仓库外，只当数据读，不执行其中任何脚本。
+51. **许可以单条为准，逐条落到文件上**。每个全文文件头写 source、sourceUrl（钉在提交上）、author、license、fetchedAt、changes；CC BY 的另写 attribution，changes 写明相对原文改了什么。MIT 来源的版权声明进 `THIRD_PARTY_NOTICES.md`，混合许可的总说明在 `library/LICENSES.md`，不适用 `bots/LICENSE`。**许可回溯**：majiayu000 把目录全标 CC0，但其中有的摘要和 GrokBotDev（CC BY）的文字一样；同一分享链接下文字相同的行，改按 CC BY 署名，不信上游的标注。本站另加的字段随所在条目，按该条的许可发布。
+52. **botdirectory 收不收正文，按它自己 CONTRIBUTING 的定义判断**：`contributor` 是「这套设置是谁的」，`scouted_by` 是「谁找到的」。contributor 是站方账号 BotDirectoryAI 又带 scouted_by 的，算原作者不明；来源链接只认 `sources[]` 和 `added_via`，`grok_share_url`（指向的正是不收全文的分享页）和 `url`（产品官网）不算，站方自己账号的帖子也不算。原作者不明又没有来源链接的，只留标题和链接，清单放 `library/link-only.jsonl`。
+53. **去重**：分享链接按 `x.ai/bot/<21 位 ID>`；全文按去掉所有空白后的 sha256。同一段全文取许可最宽的那份做主记录（CC0 > MIT > CC BY），其余记在 alsoIn；和 `bots/` 已上架 Bot 的 templateUrl 对上的，标 listed 和 slug。
+54. **评分、国内适配、安全标记**：评分看五项写没写（明确任务、输入、步骤、验收方法、审批边界），每项 1 分，由写作模型逐条判断，代码求和；只给全文条目打分，只有一句简介的分享链接不打分。cnFit 只看依赖的服务在国内能不能打开，清单在 `scripts/ingest/config/cn-blocked.json`，Grok、X 不算（每条都要用）。needsReview 用规则按句子找「自动发送、付款、删除、关闭审批、读取凭据、向外部地址上传」这几类指令，同一句里有否定或审批词（不要、未经、先问、草稿、never 等）的不算；密钥扫描复用 `scripts/lib/validate/secrets.mjs`，命中的条目不收正文。
+55. **中文字段**：全文条目都写中文标题、一句话用途、适合谁，原文不翻译；分享链接沿用来源自带的中文摘要（majiayu000、kydlikebtc，CC0），没有的先留空。前 50 名同分时按来源轮流取，免得被一个来源包圆；每条配一句能直接发的首个任务和「看到什么算跑对了」。
+
 ## 2026-11-15 正式域名
 
 45. **正式域名换成 `bot.jiachengbo.com`，旧地址 `bot-zhipin.pages.dev` 照常能开、打开即跳到新域名**（用户 2026-11-15：「这个东西域名能换成我的吗？不然用这个域名很丑」，定用 bot.jiachengbo.com）。
@@ -100,13 +118,13 @@
 
 1. **git 历史从零开始**。原仓库没有开源许可证，历史里有原作者的全部教程、图片、二维码；新历史从孤儿提交开始，原历史只在维护者本地备份，不推送。
 2. **点击计数用 D1，不用 KV**。KV 免费版每天 1000 次写入，每次有效点击要写两次，一天只撑约 500 次，且最终一致、同 key 每秒一写，并发会丢计数。D1 免费版每天 10 万行写入，`n = n + 1` 原子。
-3. **热度不分按钮**：同 IP 同 Bot 24 小时只算一次；按钮分别记录，算在先点的那个上。
+3. **热度不分按钮**：同 IP 同 Bot 24 小时只算一次；按钮分别记录，算在先点的那个上。（2026-11-21 第 59 条补充：后加的复制开场白、复制小队口令单独计数，不进热度。）
 4. **点击后排序不实时重排**，下次进入或切换排序才变，免得卡片在鼠标下跳走。
 5. **上架时间用 `addedAt` 字段，不从 git 取**。浅克隆拿不到完整历史，squash 和 merge 两种合并方式算出的时间不同，本地和线上会不一致。
 6. **外部收录（`external: true`）不强制 ROLE.md、DESIGN.md、skills 和截图**；作者没有 GitHub 时可以只填 `name`（可选 `url`）。（截图部分已被第 43 条取代：现在所有 Bot 都不强制截图。）
 7. **部署用 Cloudflare Pages 的 Git 集成**，GitHub 里不放任何密钥；PR 检查用 GitHub Actions（只用 `pull_request` 触发）。
 8. **默认头像用 bloub（MIT）按 slug 生成**，从上游按固定提交引入，不用原仓库里那份拷贝。原 Bot 直聘页的形态和交互手感保留，代码全部重写。
-9. **许可证**：代码 MIT；`bots/` 投稿内容 CC BY 4.0，提交即同意；外部收录条目只含本站写的介绍和链接，不在 CC BY 范围内。
+9. **许可证**：代码 MIT；`bots/` 投稿内容 CC BY 4.0，提交即同意；外部收录条目只含本站写的介绍和链接，不在 CC BY 范围内。（2026-11-21 第 58 条修订：本站写的文字也按 CC BY 4.0 开放。）
 10. **`/api/stats` 第一期不加缓存**，D1 每天 500 万行读取够用；量起来再加短缓存。
 11. **视觉沿用旧站风格**（产品定）：黑白墨色、黑底胶囊主按钮、漫画式描边 + 硬投影气泡、舞台光晕。只复刻视觉数值，代码全部自写，并修掉旧站的缺陷（两行台词压头像、对比度不足、触摸目标小等），见 `INTERACTION.md`。
 12. **投稿内容按不可信处理**（独立代码审查后加固）：DESIGN.md 禁止 frontmatter 且渲染时绕开 gray-matter；不跟随符号链接；meta 走转义写法，name/tagline/pitch 禁止 `< > "`；外链图片只渲染成链接；文本文件 ≤100KB；`npm run build` 先校验；CI 检查外部贡献者只能改 `bots/`、不能改已上架 Bot 的 addedAt；计数接口只收 JSON、拒绝跨站来源、IPv6 按 /64 去重。

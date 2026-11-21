@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 真 HTTP + 本地 D1 验收；所有构建产物、变量、数据库和日志均在临时副本。
-# 用法：PORT=8792 INSPECTOR_PORT=9332 bash scripts/accept-click.sh
+# 用法：PORT=8795 INSPECTOR_PORT=9335 bash scripts/accept-click.sh
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 T="$(mktemp -d)"
@@ -28,11 +28,11 @@ success = False
 base = f'http://127.0.0.1:{port}'
 # Never send local requests through a configured HTTP proxy.
 opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-environment = {**os.environ, 'BOTS_DIR': 'tests/fixtures/bots', 'WRANGLER_SEND_METRICS': 'false',
-               'WRANGLER_LOG_PATH': str(temporary / 'wrangler.log'), 'CI': '1'}
-for name in list(environment):
-    if name.startswith(('CLOUDFLARE_', 'CF_API_')) or name in ('IP_SALT', 'ALLOW_TEST_IP'):
-        del environment[name]
+environment = {name: os.environ[name] for name in os.environ
+               if not name.startswith(('CLOUDFLARE_', 'CF_API_')) and name not in ('IP_SALT', 'ALLOW_TEST_IP')}
+environment.update(BOTS_DIR='tests/fixtures/bots', SQUADS_DIR='tests/fixtures/squads',
+                   CURATION_FILE='tests/fixtures/curation/shelf.yaml', WRANGLER_SEND_METRICS='false',
+                   WRANGLER_LOG_PATH=str(temporary / 'wrangler.log'), CI='1')
 
 
 def require(condition, message):
@@ -150,7 +150,6 @@ try:
     # Generate a disposable salt; never read/copy the developer's .dev.vars or print it.
     (work / '.dev.vars').write_text('IP_SALT=' + secrets.token_hex(32) + '\nALLOW_TEST_IP=1\n')
     (work / '.dev.vars').chmod(0o600)
-    run(['node', 'scripts/ensure-dev-vars.mjs'], 'vars.log')
     run(['npm', 'run', 'build'], 'build.log')
     run(['npx', '--no-install', 'wrangler', 'd1', 'migrations', 'apply', 'DB', '--local'], 'migrate.log')
     server_log = (temporary / 'dev.log').open('w')
@@ -180,7 +179,15 @@ try:
     click('10.0.0.3', 'demo-external', 'import', True, 1)
     # Header probe is a duplicate click; it must not add a fifth dedupe row.
     click('10.0.0.1', slug, 'import', False, 2)
+    squad = 'demo-squad'
+    click('10.0.0.1', slug, 'starter', True, 2)
+    click('10.0.0.1', slug, 'starter', False, 2)
+    click('10.0.0.1', squad, 'kickoff', True, 0)
+    click('10.0.0.1', squad, 'kickoff', False, 0)
     for body, expected_status, error in [
+        ({'slug': squad, 'kind': 'starter'}, 404, 'unknown_slug'),
+        ({'slug': squad, 'kind': 'import'}, 404, 'unknown_slug'),
+        ({'slug': slug, 'kind': 'kickoff'}, 404, 'unknown_slug'),
         ({'slug': 'no-such-bot', 'kind': 'import'}, 404, 'unknown_slug'),
         ('not json', 400, 'bad_request'),
         ({'slug': slug, 'kind': 'like'}, 400, 'bad_request'),
@@ -200,19 +207,20 @@ try:
     require(status == 200 and payload == {
         'ok': True,
         'heat': {slug: 2, 'demo-weekly-digest': 1, 'demo-external': 1},
-        'byKind': {slug: {'import': 1, 'prompt': 1},
-                   'demo-weekly-digest': {'import': 0, 'prompt': 1},
-                   'demo-external': {'import': 1, 'prompt': 0}},
+        'byKind': {slug: {'import': 1, 'prompt': 1, 'starter': 1},
+                   'demo-weekly-digest': {'import': 0, 'prompt': 1, 'starter': 0},
+                   'demo-external': {'import': 1, 'prompt': 0, 'starter': 0}},
+        'squads': {squad: {'kickoff': 1}},
     }, 'stats 聚合不正确')
     rows_text = run(['npx', '--no-install', 'wrangler', 'd1', 'execute', 'DB', '--local', '--json',
                      '--command', 'SELECT * FROM click_dedupe'], 'inspect.log', capture=True)
     # Do not echo query results, even on failure.
     require('10.0.0.' not in rows_text, '数据库出现原始 IP')
     rows = json.loads(rows_text)[0]['results']
-    require(len(rows) == 4, 'click_dedupe 应有 4 行')
+    require(len(rows) == 6, 'click_dedupe 应有 6 行')
     require(all(re.fullmatch('[0-9a-f]{64}', row['ip_hash']) for row in rows), '哈希格式错误')
     print('HTTP 点击、校验、方法、响应头、stats：通过')
-    print('本地 D1：4 条去重记录，均为 HMAC 哈希，无原始 IP')
+    print('本地 D1：6 条去重记录，均为 HMAC 哈希，无原始 IP')
     success = True
 except Exception as error:
     # Our messages contain no request bodies, addresses, salt or database values.
