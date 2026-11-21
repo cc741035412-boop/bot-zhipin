@@ -13,7 +13,7 @@ export default defineConfig({
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
-        command: 'BOTS_DIR=tests/fixtures/bots npm run build && npm run preview -- --host 127.0.0.1 --port 4175',
+        command: 'BOTS_DIR=tests/fixtures/bots PROMPTS_DIR=prompts SKILLS_DIR=skills npm run build && npm run preview -- --host 127.0.0.1 --port 4175',
         url: baseURL,
         reuseExistingServer: false,
         timeout: 180_000,

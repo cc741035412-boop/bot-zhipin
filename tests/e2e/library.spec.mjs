@@ -1,8 +1,12 @@
 import { test, expect } from '@playwright/test'
 import { mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
-import { db, categories, matching, body, summary, skill, pathFor } from './library-data.mjs'
-import { exerciseEdges } from './library-edges.mjs'
+import { db, fixturePrompts, categories, matching, body, summary, skill, pathFor } from './library-data.mjs'
+import { exerciseEdges, withLibraryServer } from './library-edges.mjs'
+
+const fixtureTest = test.extend({
+  fixtureURL: async ({}, use) => withLibraryServer('tests/fixtures', use),
+})
 
 const search = (p) => p.locator('#library-search')
 const catButton = (p, c) => p.locator(`[data-cat="${c}"]`)
@@ -286,10 +290,10 @@ for (const width of [1280, 390])
       await expect(small).toBeVisible()
       expect(await small.textContent()).toBe(i.copyright)
     })
-    test('双语正文优先显示和复制中文，展开可复制英文', async ({ page: p }, info) => {
-      const i = db.prompts.find(i => i.lang === 'en' && i.bodyZh)
+    fixtureTest('双语正文优先显示和复制中文，展开可复制英文', async ({ page: p, fixtureURL }, info) => {
+      const i = fixturePrompts.find(i => i.lang === 'en' && i.bodyZh)
       await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
-      await p.goto(pathFor(i))
+      await p.goto(fixtureURL + pathFor(i))
       const section = p.locator('.ix-sec').filter({ has: p.getByRole('heading', { name: '正文' }) })
       const zh = section.locator('.ix-sheet[lang=zh]'), en = section.locator('.ix-sheet[lang=en]')
       const details = section.locator('details')
@@ -306,10 +310,10 @@ for (const width of [1280, 390])
       if (!mobile) await fulltextShot(p, info, 'bilingual-1280-open')
       await copy(p, details.locator('.copy'), 'Enter', i.body)
     })
-    test('保留所有权利的正文仍可复制并显示版权行', async ({ page: p }, info) => {
-      const i = db.prompts.find(i => i.license === '保留所有权利' && i.body)
+    fixtureTest('保留所有权利的正文仍可复制并显示版权行', async ({ page: p, fixtureURL }, info) => {
+      const i = fixturePrompts.find(i => i.license === '保留所有权利' && i.body)
       await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
-      await p.goto(pathFor(i))
+      await p.goto(fixtureURL + pathFor(i))
       await expect(p.locator('#body')).toBeVisible()
       expect(await p.locator('#body').textContent()).toBe(i.body)
       await expect(p.locator('.ix-meta small')).toHaveText(i.copyright)

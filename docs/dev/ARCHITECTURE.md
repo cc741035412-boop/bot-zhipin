@@ -119,11 +119,11 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 
 ### Prompt / Skills 收录库
 
-`prompts/<slug>.yaml`、`skills/<slug>.yaml` 是唯一条目源，分别对应 `schema/{prompt,skill}.schema.json`。`scripts/lib/load-prompts-skills.mjs` 读文件和 schema，`validate/library.mjs` 验证字段、来源、许可及正文边界。测试可用 `PROMPTS_DIR`、`SKILLS_DIR` 指定独立目录，默认跟随 Bot 目录的兄弟目录。
+`prompts/<slug>.yaml`、`skills/<slug>.yaml` 是唯一条目源，分别对应 `schema/{prompt,skill}.schema.json`。`scripts/lib/load-prompts-skills.mjs` 读文件和 schema，`validate/library.mjs` 验证字段、来源、许可、版权行及原文与译文的对应关系。所有许可的 Prompt 都可写 `body`；英文原文没有 `bodyZh` 时提醒，不阻断构建。测试可用 `PROMPTS_DIR`、`SKILLS_DIR` 指定独立目录，默认跟随 Bot 目录的兄弟目录。
 
 Prompt 的 `copyright` 是单行原版权行（1–200 字），有 `body` 必填，只投影到详情。Skill 的 `requires` 是有序依赖列表，最多 5 项、去重，每项 1–80 字。分类选项取自 schema；`theme/library-marks.ts` 只负责分类名到颜色和 SVG 路径的映射，单测逐库核对键集合。
 
-`entry-summary.mjs` 在构建侧先剔除无转载权的正文，再输出详情和精简列表。`site/.vitepress/data/prompts-skills.mjs` → 列表 data loader / `[slug].paths.mjs` → `site/{prompts,skills}/` 列表和静态详情。浏览器只在本库列表字段上查询；不加载 SKILL.md、不发搜索请求、不接 Bot 热度接口。`sync-assets.mjs` 生成两份 slug 清单，`functions/{prompts,skills}/[slug].ts` 各按自己的清单处理下架地址。
+`entry-summary.mjs` 在详情数据中保留 Prompt 原文和本站译文，精简列表两者都不带。详情有译文时默认显示和复制中文，原文折叠并可单独复制；没有译文就使用原文。`site/.vitepress/data/prompts-skills.mjs` → 列表 data loader / `[slug].paths.mjs` → `site/{prompts,skills}/` 列表和静态详情。浏览器只在本库列表字段上查询；不加载 SKILL.md、不发搜索请求、不接 Bot 热度接口。`sync-assets.mjs` 生成两份 slug 清单，`functions/{prompts,skills}/[slug].ts` 各按自己的清单处理下架地址。
 
 ## 构建与部署
 
