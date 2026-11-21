@@ -43,11 +43,6 @@ onBeforeUnmount(() => window.removeEventListener('popstate', restore))
           </div>
         </section>
         <section v-if="item.requires?.length" class="ix-sec"><header><h2>运行依赖</h2></header><ul class="ix-points"><li v-for="r in item.requires" :key="r">{{ r }}</li></ul></section>
-        <section v-if="item.summary" class="ix-sec"><header><h2>摘要</h2></header>
-          <div v-if="summaryOnly" class="ix-sheet is-summary"><p>{{ item.summary }}</p><footer>{{ item.source.name }} · <LibrarySource class="ext ix-link" :href="item.source.url" /></footer></div>
-          <p v-else class="ix-text">{{ item.summary }}</p>
-        </section>
-        <section class="ix-sec"><header><h2>适用场景</h2></header><ul class="ix-points"><li v-for="s in item.scenarios" :key="s">{{ s }}</li></ul></section>
         <section v-if="item.body && readingBody" class="ix-sec">
           <header><h2>正文</h2><LibraryCopy class="sm ghost" :value="readingBody" target="body" /></header>
           <div id="body" class="ix-sheet" :lang="item.bodyZh ? 'zh' : item.lang" v-text="readingBody" />
@@ -57,7 +52,13 @@ onBeforeUnmount(() => window.removeEventListener('popstate', restore))
             <div id="body-en" class="ix-sheet" lang="en" v-text="item.body" />
           </details>
         </section>
-        <section v-if="item.usage" class="ix-sec"><header><h2>怎么用</h2></header><p class="ix-text">{{ item.usage }}</p></section>
+        <section v-if="item.body && item.usage" class="ix-sec"><header><h2>怎么用</h2></header><p class="ix-text">{{ item.usage }}</p></section>
+        <section v-if="item.summary" class="ix-sec"><header><h2>摘要</h2></header>
+          <div v-if="summaryOnly" class="ix-sheet is-summary"><p>{{ item.summary }}</p><footer>{{ item.source.name }} · <LibrarySource class="ext ix-link" :href="item.source.url" /></footer></div>
+          <p v-else class="ix-text">{{ item.summary }}</p>
+        </section>
+        <section class="ix-sec"><header><h2>适用场景</h2></header><ul class="ix-points"><li v-for="s in item.scenarios" :key="s">{{ s }}</li></ul></section>
+        <section v-if="!item.body && item.usage" class="ix-sec"><header><h2>怎么用</h2></header><p class="ix-text">{{ item.usage }}</p></section>
         <section v-if="!summaryOnly" class="ix-sec"><header><h2>来源</h2></header><p class="ix-text"><LibrarySource class="ext ix-link" :href="item.source.url">{{ item.source.name }}</LibrarySource></p></section>
       </div>
     </article>

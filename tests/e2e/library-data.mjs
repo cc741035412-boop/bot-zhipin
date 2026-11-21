@@ -38,8 +38,9 @@ export function matching(dir, q, cat = '') {
   })
 }
 export const body =
-  db.prompts.find((i) => i.body && i.usage && /<[^>]+>/.test(i.body)) || db.prompts.find((i) => i.body)
-export const summary = db.prompts.find((i) => !i.body)
+  db.prompts.find((i) => i.body && !i.bodyZh && i.usage && /<[^>]+>/.test(i.body)) || db.prompts.find((i) => i.body && !i.bodyZh)
+// 正式库全部有正文；仅摘要的导航、阅读与复制边界继续用 fixture 覆盖。
+export const summary = fixturePrompts.find((i) => !i.body && i.usage)
 export const skill =
   db.skills.find((i) => i.install.length > 1) || db.skills.find((i) => i.requires?.length) || db.skills[0]
 export const pathFor = (i) => `/${i.name ? 'skills' : 'prompts'}/${i.slug}`

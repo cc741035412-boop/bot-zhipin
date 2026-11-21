@@ -50,7 +50,7 @@ export async function exerciseEdges(page, copy) {
     await expect(page.locator('.ix-meta small')).toHaveText(p.copyright)
     await expect(page.locator('#body')).toHaveText(sentinel)
     await expect(page.locator('.copy')).toHaveCount(2)
-    await expect(page.locator('.ix-body h2')).toHaveText(['摘要', '适用场景', '正文', '来源'])
+    await expect(page.locator('.ix-body h2')).toHaveText(['正文', '摘要', '适用场景', '来源'])
     expect((await Promise.all(resources)).join('')).toContain(sentinel)
     await page.goto(`${base}/skills/${s.slug}`)
     const buttons = page.locator('.copy')
