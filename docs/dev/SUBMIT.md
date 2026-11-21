@@ -4,7 +4,7 @@
 
 ## 0. 一句话
 
-AI 生成 `https://bot.jiachengbo.com/submit#BZB1:…` → 学员在 `/submit` 预览、用 GitHub 登录、勾授权、提交（2026-11-15 起不传截图，DECISIONS 第 43 条）→ Function 用 GitHub App 在 `submission/web-<数字id>-<slug>` 建单提交并开 PR、开启自动合并 → `pull_request` CI 自动跑 → 维护者 Approve → 自动合并 → `announce-live` 工作流在部署完成后评论「已上线」。
+AI 生成 `https://bot.jiachengbo.com/submit#BZB1:…` → 投稿人在 `/submit` 预览、用 GitHub 登录、勾授权、提交（2026-11-15 起不传截图，DECISIONS 第 43 条）→ Function 用 GitHub App 在 `submission/web-<数字id>-<slug>` 建单提交并开 PR、开启自动合并 → `pull_request` CI 自动跑 → 维护者 Approve → 自动合并 → `announce-live` 工作流在部署完成后评论「已上线」。
 
 原 Issue 表单链路（`submission.yml`）保留为备用，行为见 §8。
 
@@ -13,7 +13,7 @@ AI 生成 `https://bot.jiachengbo.com/submit#BZB1:…` → 学员在 `/submit` �
 - 格式不变：`BZB1:` + base64url(gzip(明文投稿包 `BOT-ZHIPIN-BUNDLE v1`))，限额照旧（30 个文件、单文本 100KB、文本总量 400KB、解压后 512KB）。
 - 链接：`${SITE.url}/submit#${token}`。`SITE.url = 'https://bot.jiachengbo.com'`，加在 `site/.vitepress/meta.mjs` 的 `SITE` 里。
 - 长度上限是 `bundle-core.mjs` 导出的 `URL_LIMITS`（`submitUrl: 16000`、`issueUrl: 7500`），CLI 和浏览器共用。
-- 链接超过 16000 字符时，CLI 改为输出 `${SITE.url}/submit` 加整行令牌，让学员打开页面后粘进「已有投稿包」输入框。粘贴框也接受明文投稿包。
+- 链接超过 16000 字符时，CLI 改为输出 `${SITE.url}/submit` 加整行令牌，让投稿人打开页面后粘进「已有投稿包」输入框。粘贴框也接受明文投稿包。
 - `#` 后面的内容不发给服务器。页面读到后存进 sessionStorage，再用 `history.replaceState` 去掉片段。
 
 ## 2. 校验内核（L1）
@@ -333,7 +333,7 @@ CREATE TABLE IF NOT EXISTS bot_owners (
 ## 5. CLI（L5）
 
 - `node scripts/make-submission-link.mjs bots/<slug>`：本地校验时缺 `author.github` 就用 `applyServerFields` 填占位值，投稿包本身不改。
-- 输出第一行是 `${SITE.url}/submit#BZB1:…`。后面几行是给学员的提示：「点开链接 → 页面上用 GitHub 登录 → 勾授权 → 提交」（不再有拖截图这一步）。
+- 输出第一行是 `${SITE.url}/submit#BZB1:…`。后面几行是给投稿人的提示：「点开链接 → 页面上用 GitHub 登录 → 勾授权 → 提交」（不再有拖截图这一步）。
 - 超过 16000 字符走 §1 的退路。
 - `--issue` 参数照旧输出 GitHub Issue 预填链接（备用）。
 - `site/.vitepress/meta.mjs`：`SITE.url`；`submitPrompt()`（全文见 INTERACTION-SUBMIT.md §4.2）；`CONTRIBUTE_URL` 改成站内 `/submit`，首页「我要投稿」和空状态「做第一个投稿的人」都链到它（站内链接，去掉外链标记）。

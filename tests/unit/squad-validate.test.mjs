@@ -67,7 +67,7 @@ describe('schema', () => {
     ['tagline 不到 4 字', (d) => { d.tagline = '太短' }, 'tagline', '要求 4～40 个字符'],
     ['tagline 超过 40 字', (d) => { d.tagline = long(41) }, 'tagline', '要求 4～40 个字符'],
     ['formation 不在可选值里', (d) => { d.formation = '乱战' }, 'formation', '可选值：带队、接力、搭伙'],
-    ['origin 不在可选值里', (d) => { d.origin = '捡来的' }, 'origin', '可选值：原作者成套、本站编队、学员投稿'],
+    ['origin 不在可选值里', (d) => { d.origin = '捡来的' }, 'origin', '可选值：原作者成套、本站编队、社区投稿'],
     ['author 缺 name', (d) => { d.author = { github: 'someone' } }, 'author.name', '缺少必填字段 author.name'],
     ['author.github 格式不对', (d) => { d.author.github = '@someone' }, 'author.github', '格式不正确'],
     ['author.url 不是 https', (d) => { d.author = { name: '作者', url: 'http://example.com' } }, 'author.url', '格式不正确'],
