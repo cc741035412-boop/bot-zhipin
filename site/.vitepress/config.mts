@@ -4,6 +4,12 @@ import { generateHeaders } from '../../scripts/gen-headers.mjs'
 import { botWatch } from './bot-watch.mjs'
 import { fullName } from '../../scripts/lib/bot-name.mjs'
 
+// 收录条目的网页标题：中文标题在前，原标题（Prompt 的 titleOriginal、Skill 的原名）放括号里，和中文叫法的 Bot 一个写法。
+function libraryHead(item: { title: string, purpose: string, titleOriginal?: string | null, name?: string }) {
+  const original = item.titleOriginal || (item.name && item.name !== item.title ? item.name : null)
+  return { title: original ? `${item.title}（${original}）` : item.title, description: item.purpose }
+}
+
 export default defineConfig({
   lang: 'zh-CN',
   title: SITE.name,
@@ -26,29 +32,40 @@ export default defineConfig({
   transformPageData(pageData) {
     // Bot 详情页和小队页都用自己的名字当标题、一句话介绍当 description。
     // 有中文叫法的 Bot，标题是「中文叫法（原名）」：标签页上先看到中文，搜原名也搜得到。
-    const bot = pageData.params?.bot || pageData.params?.squad
-    if (bot) {
-      const title = fullName(bot)
+    // Prompt、Skill 的详情页同理：标题是「中文标题（原标题 / skill 原名）」，description 是一句话用途。
+    const params = pageData.params
+    const libraryPath = pageData.relativePath?.match(/^(prompts|skills)\/(.+)\.md$/)
+    if (libraryPath) {
+      const path = `/${libraryPath[1]}/${params?.slug || (libraryPath[2] === 'index' ? '' : libraryPath[2])}`
+      pageData.frontmatter.head = [...(pageData.frontmatter.head || []), ['link', { rel: 'canonical', href: SITE.url + path }]]
+    }
+    const page = params?.bot || params?.squad
+      ? { title: fullName(params.bot || params.squad), description: (params.bot || params.squad).tagline }
+      : params?.prompt || params?.skill ? libraryHead(params.prompt || params.skill) : null
+    if (page) {
+      const { title, description } = page
       pageData.title = title
       // 客户端路由切换时 VitePress 用 setAttribute 写入它（安全）；服务端那行不转义的
       // description 会因下面 transformHead 已提供 description 而被跳过（isDescriptionOverridden）。
-      pageData.description = bot.tagline
+      pageData.description = description
       pageData.frontmatter.title = title
       delete pageData.frontmatter.description
       pageData.frontmatter.head = [
         ...((pageData.frontmatter.head || []) as HeadConfig[]).filter(([tag, attrs]) => !(tag === 'meta' && attrs?.name === 'description')),
-        ['meta', { name: 'description', content: bot.tagline }],
+        ['meta', { name: 'description', content: description }],
       ]
     }
   },
   // VitePress 1.6.4 的 SSR 会过滤 frontmatter.head 中的 description。
   // 在最终 head 阶段补回，走属性转义，并覆盖默认 description，避免重复 meta。
   transformHead({ pageData }) {
-    return pageData.params?.bot || pageData.params?.squad
+    const params = pageData.params
+    return params?.bot || params?.squad || params?.prompt || params?.skill
       ? (pageData.frontmatter.head as HeadConfig[]).filter(([tag, attrs]) => tag === 'meta' && attrs?.name === 'description')
       : []
   },
   themeConfig: {
+    modules: [{ text: 'Bot', link: '/' }, { text: 'Prompt', link: '/prompts/' }, { text: 'Skills', link: '/skills/' }],
     nav: [{ text: '我要投稿', link: CONTRIBUTE_URL }],
     socialLinks: [{ icon: 'github', link: SITE.repo }],
     outline: { label: '本页目录' },

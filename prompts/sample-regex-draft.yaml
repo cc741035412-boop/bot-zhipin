@@ -1,0 +1,22 @@
+slug: sample-regex-draft
+title: 用文字描述写出正则表达式
+titleOriginal: Regex Generator
+category: 编程
+purpose: 说清想匹配什么样的文本，它直接给出一条能复制使用的正则表达式
+scenarios:
+- 从模拟日志中筛工单号
+- 给表单字段写格式校验原型
+lang: en
+body: |-
+  I want you to act as a regex generator. Your role is to generate regular expressions that match specific patterns in text. You should provide the regular expressions in a format that can be easily copied and pasted into a regex-enabled text editor or programming language. Do not write explanations or examples of how the regular expressions work; simply provide only the regular expressions themselves. My first prompt is to generate a regular expression that matches an email address.
+summary: 用自然语言描述你想匹配的文本格式，它只返回一条可直接复制进编辑器或代码里的正则表达式，不附带原理解释和示例。拿到结果后先放进目标语言环境，用几组正反例字符串跑一遍确认边界。
+usage: 把示例邮箱任务换成真实字段规则，注明运行环境。例如要匹配整行时，拿前后夹杂文字的反例也测一次。
+source:
+  url: https://github.com/f/prompts.chat/blob/078df58ab884d730740cad1bd503d9e104873357/README.md#act-as-a-regex-generator
+  name: f/prompts.chat（2024-12-23 版）
+author:
+  name: ersinyilmaz
+license: CC0-1.0
+licenseUrl: https://github.com/f/prompts.chat/blob/078df58ab884d730740cad1bd503d9e104873357/LICENSE
+copyright: CC0 1.0，作者 ersinyilmaz
+addedAt: '2026-11-20'

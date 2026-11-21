@@ -1,0 +1,18 @@
+# 原文署名：>/ 作者：卡兹克
+slug: khazix-two-sided-decision
+title: 做决定前把两个选项都想透
+category: 分析
+purpose: 给两个选项，它替双方各讲最有力的理由，找出真正决定取舍的那一点
+scenarios:
+- 在自研与采购之间做选择
+- 合唱团商量排练放在周末还是工作日晚上
+lang: zh
+summary: 当团队已经偏向自研，随手列的采购优缺点往往只是在陪跑。这条会替两边分别说出真正站得住的理由，找到争议取决于哪条信息，等你补过这一点才给建议。
+usage: 在原文「决策」里找到「双向钢人论证」。把两个选项、预算和不可延期的节点写进输入。遇到追问就补实际情况，不让模型替团队猜。
+source:
+  url: https://mp.weixin.qq.com/s/NAdhdFrUq9-BKelqzqpwBQ
+  name: 都Agent时代了，我还是想分享给你这12个我最常用的Prompt。
+author:
+  name: 数字生命卡兹克
+license: 保留所有权利
+addedAt: '2026-11-20'

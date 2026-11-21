@@ -1,0 +1,22 @@
+slug: demo-headline-ideas
+title: 示例·标题十连发
+category: 营销
+purpose: 给一篇写好的文章一次出十个不同角度的标题，挑一个最想点的
+scenarios:
+  - 文章写完了，标题想了半天还是平平无奇
+  - 同一篇内容要发到几个平台，每个平台要不同的标题
+tags: [标题, 选题]
+lang: zh
+summary: |
+  一个虚构的示例，许可证是署名-非商业（CC BY-NC 4.0），不允许本站转载全文，所以只有摘要：它让模型先概括文章的核心卖点，再从好奇、反差、数字、提问等十个角度各写一个标题。
+usage: |
+  先把文章全文发过去，再让它按十个角度出标题；觉得都不行就说「再来十个，更口语一点」。
+source:
+  url: https://example.com/demo-blog/headline-ideas
+  name: 示例博客：标题怎么起
+author:
+  name: 示例博主
+  url: https://example.com/demo-blogger
+license: CC-BY-NC-4.0
+licenseUrl: https://creativecommons.org/licenses/by-nc/4.0/
+addedAt: 2026-11-08

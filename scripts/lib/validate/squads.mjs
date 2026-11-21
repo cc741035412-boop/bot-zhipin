@@ -9,7 +9,7 @@ import { redact, scanSecrets } from './secrets.mjs'
 export const YOU = 'you'
 
 // 和 Bot 校验同一套口径：同一个文件同一个位置只出一条，后来的问题并进去。
-function reporter(prefix, errors, warnings) {
+export function reporter(prefix, errors, warnings) {
   const seen = new Map()
   return (path, where, problem, fix, warning = false) => {
     const item = { file: redact(`${prefix}${path}`), where: redact(where), problem: redact(problem), fix: redact(fix) }
@@ -25,7 +25,7 @@ function reporter(prefix, errors, warnings) {
   }
 }
 
-function reportYaml(model, name, report, { tooLarge, missing }) {
+export function reportYaml(model, name, report, { tooLarge, missing }) {
   if (model.yamlTooLarge) {
     report(name, '文件大小', tooLarge.problem, tooLarge.fix)
     return false
@@ -40,7 +40,7 @@ function reportYaml(model, name, report, { tooLarge, missing }) {
 }
 
 // 只扫这一个文本文件；复用 Bot 的密钥规则。
-function scan(name, raw, report) {
+export function scan(name, raw, report) {
   if (typeof raw !== 'string') return
   scanSecrets({ files: [{ path: name, size: new TextEncoder().encode(raw).length, text: raw, format: null }] }, report)
 }

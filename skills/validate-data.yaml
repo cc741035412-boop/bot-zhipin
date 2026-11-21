@@ -1,0 +1,24 @@
+slug: validate-data
+title: 发布数据结论前再核一遍
+name: validate-data
+category: 数据
+purpose: 对外分享数据结论前，它复算数字，查重复统计和样本偏差
+scenarios:
+- 核对账单汇总，看看合并明细时有没有重复算一笔钱
+- 发布读者调查前，检查只在订阅群里取样会漏掉谁
+agents:
+- Claude Code
+summary: 把分析问题、查询过程和待发布的结果交给它，对照交付前核对清单，从取样、计算、口径到结论解释逐项排查，并建议用独立算法做数量级比对。如果拿不到源表，需要标清哪些结论只做了逻辑检查、尚未复算。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install data@knowledge-work-plugins
+  note: 在终端运行，装的是整个 data 插件，只需装一次。会登记 8 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/skills/validate-data
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/LICENSE
+addedAt: '2026-11-20'

@@ -30,12 +30,14 @@ const BOT_UNIONS = {
 }
 
 /**
- * 把 Ajv 的错误翻译成中文「位置 / 问题 / 改法」。Bot、小队、策展三份 schema 共用。
+ * 把 Ajv 的错误翻译成中文「位置 / 问题 / 改法」。Bot、小队、策展、Prompt、Skill 五份 schema 共用。
  * check 是预编译的校验函数；doc 是文件名（如 bot.yaml）；schemaFile 是 schema 的仓库路径。
  */
 export function reportSchemaErrors({ check, schema, data, doc, schemaFile, unions = {}, report }) {
   if (check(data)) return
-  const propertySchema = (pointer) => parts(pointer).reduce((node, key) => node?.properties?.[key] ?? node?.items, schema)
+  // 跟着 schema 内部的 $ref（#/$defs/…）走，报错时才拿得到字段说明和可选值。
+  const deref = (node) => typeof node?.$ref === 'string' && node.$ref.startsWith('#/') ? parts(node.$ref.slice(1)).reduce((value, key) => value?.[key], schema) : node
+  const propertySchema = (pointer) => parts(pointer).reduce((node, key) => deref(deref(node)?.properties?.[key] ?? deref(node)?.items), schema)
   const selected = new Map()
   for (const error of check.errors) {
     if (error.keyword === 'if') continue

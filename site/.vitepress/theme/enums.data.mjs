@@ -1,8 +1,18 @@
 import { defineLoader } from 'vitepress'
 import { loadEnums, SCHEMA_PATH } from '../../../scripts/lib/load-bots.mjs'
+import { loadLibraryEnums, PROMPT_SCHEMA_PATH, SKILL_SCHEMA_PATH } from '../../../scripts/lib/load-library.mjs'
 
 // 分组（category）的取值和顺序只认 schema；浏览器端拿到的是构建时的只读快照，不在代码里另写一份。
+// Prompt、Skill 的分类和 Skill 的 agents 同理，分别来自 prompt.schema.json、skill.schema.json。
 export default defineLoader({
-  watch: [SCHEMA_PATH],
-  load: () => ({ categories: loadEnums().categories }),
+  watch: [SCHEMA_PATH, PROMPT_SCHEMA_PATH, SKILL_SCHEMA_PATH],
+  load: () => {
+    const library = loadLibraryEnums()
+    return {
+      categories: loadEnums().categories,
+      promptCategories: library.prompt.categories,
+      skillCategories: library.skill.categories,
+      skillAgents: library.skill.agents,
+    }
+  },
 })

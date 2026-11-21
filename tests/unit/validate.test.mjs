@@ -390,8 +390,8 @@ it('CLI 错误退出 1，只有提醒退出 0 且先列提醒', () => {
   const warning = cli(['--dir', botsDir])
   expect(warning.status).toBe(0)
   expect(warning.stdout.startsWith('! bots/')).toBe(true)
-  // CLI 做全量校验，成功时同时报 Bot 数和小队数；临时目录旁边没有 squads/，所以是 0 支。
-  expect(warning.stdout.trim().endsWith('✓ 校验通过：3 个 Bot（其中 1 个外部收录），0 支小队')).toBe(true)
+  // CLI 做全量校验，成功时同时报 Bot、小队、Prompt、Skill 的数量；临时目录旁边没有这几个目录，所以都是 0。
+  expect(warning.stdout.trim().endsWith('✓ 校验通过：3 个 Bot（其中 1 个外部收录），0 支小队，0 条 Prompt，0 个 Skill')).toBe(true)
   remove('bot.yaml')
   const failure = cli(['--dir', botsDir])
   expect(failure.status).toBe(1)

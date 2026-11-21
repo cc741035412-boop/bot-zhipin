@@ -1,0 +1,17 @@
+slug: demo-summary-only
+title: 示例·去 AI 味改稿
+category: 写作
+purpose: 把一段读起来很像 AI 写的文字改得像人说话
+scenarios:
+  - 公众号初稿写完，读着总觉得有股机器味
+  - 改别人用 AI 起草的周报
+lang: zh
+summary: |
+  一个虚构的示例，用来测试「仅摘要」的条目：原文没有声明许可证，所以这里只写本站的中文摘要和出处链接，不放正文。它的思路是先列出套话和排比，再逐句换成具体的事实和口语。
+source:
+  url: https://example.com/demo-blog/remove-ai-tone
+  name: 示例博客：改稿的三个小办法
+author:
+  name: 示例博主
+license: 未声明
+addedAt: 2026-11-12

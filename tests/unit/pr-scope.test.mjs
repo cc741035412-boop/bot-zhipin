@@ -119,6 +119,18 @@ it('CI 只读 PR/手动派发，拉取两层历史并按首父严格检查范围
   expect(steps.indexOf(scope)).toBeLessThan(steps.findIndex((step) => step.run === 'npm run validate'))
 })
 
+it.each(['prompts/my-prompt.yaml', 'skills/my-skill.yaml'])('%s 新增、修改、删除只有维护者放行', (file) => {
+  for (const text of ['slug: test', 'slug: test\n', null]) {
+    if (text === null) rmSync(join(directory, file))
+    else put(file, text)
+    commit()
+    const result = check()
+    expect(result.status).toBe(1)
+    expect(result.stderr).toContain(`${JSON.stringify(file)}；prompts/、skills/ 只由维护者修改`)
+    expect(check('MEMBER').status).toBe(0)
+  }
+})
+
 // ---- V5：小队投稿范围。贡献者只能新增或修改 squads/<slug>/squad.yaml 这一个文件；curation/ 只有维护者能动。 ----
 const squadYaml = (extra = '') => `slug: my-squad\naddedAt: 2026-11-10\nauthor:\n  name: Alice\n  github: Alice\n${extra}`
 

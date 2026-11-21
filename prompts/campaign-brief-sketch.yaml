@@ -1,0 +1,22 @@
+slug: campaign-brief-sketch
+title: 写一份推广活动方案
+titleOriginal: Advertiser
+category: 营销
+purpose: 告诉它产品和想打动的人群，它写出口号、投放渠道和配套活动
+scenarios:
+- 为校园招募活动准备第一版简案
+- 比较两类人群的产品推广切入点
+lang: en
+body: |-
+  I want you to act as an advertiser. You will create a campaign to promote a product or service of your choice. You will choose a target audience, develop key messages and slogans, select the media channels for promotion, and decide on any additional activities needed to reach your goals. My first suggestion request is "I need help creating an advertising campaign for a new type of energy drink targeting young adults aged 18-30."
+summary: 交代要推广的产品和大致受众（原例是面向 18–30 岁年轻人的新款功能饮料），让它把目标人群、核心话术与口号、投放渠道和配合达标的附加活动串成一份推广简案。适合在还没有细分预算时，先把活动的几个关键选择摆到一页上供团队讨论。
+usage: 换掉饮料示例，给出自己的产品、人群和预算边界。渠道成本需要另查，不能用模型估算代替报价。
+source:
+  url: https://github.com/f/prompts.chat/blob/078df58ab884d730740cad1bd503d9e104873357/README.md#act-as-an-advertiser
+  name: f/prompts.chat（2024-12-23 版）
+author:
+  name: devisasari
+license: CC0-1.0
+licenseUrl: https://github.com/f/prompts.chat/blob/078df58ab884d730740cad1bd503d9e104873357/LICENSE
+copyright: CC0 1.0，作者 devisasari
+addedAt: '2026-11-20'

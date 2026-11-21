@@ -1,0 +1,24 @@
+slug: explore-data
+title: 拿到数据表先摸个底
+name: explore-data
+category: 数据
+purpose: 给一张数据表，它看清每列是什么、哪里有空值和异常，再开始分析
+scenarios:
+- 第一次接手一份埋点明细
+- 检查问卷导出表的缺失和重复
+agents:
+- Claude Code
+summary: 先看字段类型、行数、唯一值和空值分布，再抽样找异常组合，形成数据概况和质量笔记。可以提供文件或获准读取的表。涉及用户数据时用脱敏样本，别为解释几列字段就上传完整明细。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install data@knowledge-work-plugins
+  note: 在终端运行，装的是整个 data 插件，只需装一次。会登记 8 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/skills/explore-data
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/LICENSE
+addedAt: '2026-11-20'

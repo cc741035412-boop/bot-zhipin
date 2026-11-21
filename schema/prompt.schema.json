@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/jakob52123/bot-zhipin/schema/prompt.schema.json",
+  "title": "prompts/<slug>.yaml",
+  "description": "收录的一条 Prompt。文件名就是 slug。分类、正文语言、许可证的取值只在这里定义；哪些许可证允许放正文见 $defs.reusableLicense。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["slug", "title", "category", "purpose", "scenarios", "lang", "source", "author", "license", "addedAt"],
+  "properties": {
+    "slug": {
+      "description": "和文件名相同（不含 .yaml）。只能用小写字母、数字和短横线，3 到 40 个字符，全库唯一",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "minLength": 3,
+      "maxLength": 40
+    },
+    "title": { "description": "中文标题，像名字不像句子", "type": "string", "minLength": 2, "maxLength": 24, "pattern": "\\p{Script=Han}" },
+    "titleOriginal": { "description": "原标题（原文不是中文时写）", "type": "string", "minLength": 1, "maxLength": 80 },
+    "category": {
+      "description": "分类",
+      "enum": ["写作", "编程", "学习", "分析", "产品", "营销", "创意", "效率"]
+    },
+    "purpose": { "description": "一句话用途，本站自己写", "type": "string", "minLength": 8, "maxLength": 60 },
+    "scenarios": {
+      "description": "适用场景，2 到 4 条，本站自己写",
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 4,
+      "items": { "type": "string", "minLength": 4, "maxLength": 40 }
+    },
+    "tags": {
+      "description": "标签，最多 5 个",
+      "type": "array",
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 10 }
+    },
+    "lang": { "description": "正文语言", "enum": ["zh", "en"] },
+    "body": {
+      "description": "正文：许可证允许转载时才有，原样照抄，不改写；超过 6000 字的不收正文",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S",
+      "maxLength": 6000
+    },
+    "summary": {
+      "description": "本站用中文自己写的摘要；没有 body 时必填",
+      "type": "string",
+      "minLength": 40,
+      "pattern": "\\p{Script=Han}",
+      "maxLength": 300
+    },
+    "usage": { "description": "怎么用：变量怎么替换、配什么模型、先说什么，本站自己写", "type": "string", "minLength": 1, "maxLength": 300 },
+    "source": { "$ref": "#/$defs/source" },
+    "author": { "$ref": "#/$defs/author" },
+    "license": { "$ref": "#/$defs/license" },
+    "copyright": { "description": "原版权行，转载正文时必填", "type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[^\\r\\n\\u2028\\u2029]+$" },
+    "licenseUrl": { "$ref": "#/$defs/licenseUrl" },
+    "addedAt": {
+      "description": "收录日期，YYYY-MM-DD",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    }
+  },
+  "$defs": {
+    "license": {
+      "description": "许可证：SPDX 标识；查不到写「未声明」，作者明确禁止转载写「保留所有权利」",
+      "enum": [
+        "CC0-1.0", "MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "Unlicense",
+        "CC-BY-4.0", "CC-BY-SA-4.0", "CC-BY-NC-4.0", "CC-BY-NC-SA-4.0", "CC-BY-ND-4.0",
+        "未声明", "保留所有权利"
+      ]
+    },
+    "reusableLicense": {
+      "description": "允许原样转载正文（body）的许可证；其余只能写 summary + 链接",
+      "enum": ["CC0-1.0", "Unlicense", "MIT", "Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "ISC", "CC-BY-4.0", "CC-BY-SA-4.0"]
+    },
+    "licenseUrl": {
+      "description": "许可证原文链接，以 https:// 开头；未声明时留空或不写",
+      "type": ["string", "null"],
+      "pattern": "^(https://\\S+)?$",
+      "maxLength": 500
+    },
+    "source": {
+      "description": "原始出处",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "name"],
+      "properties": {
+        "url": { "description": "精确到这一条所在的文件或文章，以 https:// 开头", "type": "string", "pattern": "^https://\\S+$", "maxLength": 500 },
+        "name": { "description": "仓库名或文章标题", "type": "string", "minLength": 1, "maxLength": 120 }
+      }
+    },
+    "author": {
+      "description": "原作者",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "description": "原作者名字；合集里查不到单条作者就写仓库维护者", "type": "string", "minLength": 1, "maxLength": 80 },
+        "url": { "description": "作者主页，以 https:// 开头", "type": "string", "pattern": "^https://\\S+$", "maxLength": 500 }
+      }
+    }
+  }
+}

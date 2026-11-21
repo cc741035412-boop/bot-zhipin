@@ -1,0 +1,31 @@
+slug: review-resume
+title: 改产品经理简历
+name: review-resume
+category: 写作
+purpose: 贴简历和目标岗位描述，它逐段点评，把空泛的职责改成有数字的成果
+scenarios:
+- 从运营转产品时筛选可迁移的经历
+- 投递 AI 产品实习前重写一个项目条目
+agents:
+- Claude Code
+- Codex
+- Gemini CLI
+- Cursor
+summary: 贴一份简历，最好附上目标岗位的 JD。它对照 10 条产品经理简历规范逐条点评：开头摘要是否具体、有没有写「我」、篇幅和每段条数、成果有没有按 XYZ+S 公式写出指标、关键词是否贴合 JD、职位名称是否规范，并引用原句给出改法；对转岗和应届生另有建议。这些规范按英文简历的惯例写，职业邮箱、LinkedIn、海外证书这几条，中文简历要自己取舍。示例里的增长数字不能当成自己的业绩，贴简历前可以先去掉手机号。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add phuryn/pm-skills && claude plugin install pm-toolkit@pm-skills
+  note: 终端执行，装的是整个 pm-toolkit（4 个技能）。已添加市场时只运行 && 后面的部分。
+- agent: Codex
+  command: codex plugin marketplace add phuryn/pm-skills && codex plugin add pm-toolkit@pm-skills
+  note: 终端执行。Codex 不认插件里的斜杠命令，直接用中文说要做什么。旧版 Codex CLI 没有 plugin 子命令，先升级。
+requires: []
+source:
+  url: https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-toolkit/skills/review-resume
+  name: phuryn/pm-skills
+author:
+  name: Paweł Huryn
+  url: https://github.com/phuryn
+license: MIT
+licenseUrl: https://github.com/phuryn/pm-skills/blob/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/LICENSE
+addedAt: '2026-11-20'

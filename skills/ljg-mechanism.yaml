@@ -1,0 +1,31 @@
+slug: ljg-mechanism
+title: 弄清一个现象背后的原因
+name: ljg-mechanism
+category: 研究
+purpose: 给一个反常现象，它提出几种解释，联网查证哪一种站得住
+scenarios:
+- 研究一个社区没有专职客服却很快有人回复的原因
+- 判断一次增长经验换到别的产品是否还成立
+agents:
+- Claude Code
+- Codex
+summary: 先找一个说得清的反常现象，再逐步追问是谁做了什么，哪一环换掉会得到不同结果。随附的研究流程要求联网比较相互竞争的解释；找不到能区分它们的证据，就说明还差哪类观察。默认在对话里给结论，不往项目里写笔记。
+install:
+- agent: Claude Code
+  command: npx skills add lijigang/ljg-skills --skill ljg-mechanism -g -a claude-code -y
+  note: 终端执行，只装这一个技能，装到 ~/.claude/skills。
+- agent: Codex
+  command: bunx skills add lijigang/ljg-skills -g -a codex --skill ljg-mechanism -y
+  note: 作者 README 的原写法，装到 ~/.agents/skills。bunx 仍会调用 Node；没装 Bun 就把 bunx 换成 npx。
+requires:
+- Node.js 22.20 以上（安装用）
+- 联网搜索与网页正文读取（验证时）
+source:
+  url: https://github.com/lijigang/ljg-skills/tree/76b5fb9b657f420287a421737a3a9778c9e53379/skills/ljg-mechanism
+  name: lijigang/ljg-skills
+author:
+  name: 李继刚
+  url: https://github.com/lijigang
+license: MIT
+licenseUrl: https://github.com/lijigang/ljg-skills/blob/76b5fb9b657f420287a421737a3a9778c9e53379/LICENSE
+addedAt: '2026-11-20'

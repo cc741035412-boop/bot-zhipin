@@ -107,7 +107,8 @@ test('侧栏：导入、三项属性、作者来源上架热度；宽屏两栏�
   const peek = rail.getByTestId('rail-peek')
   await expect(peek).toHaveAttribute('data-show', 'false')
   await page.getByTestId('section-design').scrollIntoViewIfNeeded()
-  await page.mouse.wheel(0, 600)
+  // wheel() 只派发输入，不等合成器滚完；迟到的滚动会盖掉下面的回顶操作。
+  await page.evaluate(() => window.scrollBy({ top: 600, behavior: 'instant' }))
   await expect(peek).toHaveAttribute('data-show', 'true')
   expect((await box(rail)).y).toBe(88 + 16)
   await expect(peek).toHaveAttribute('aria-hidden', 'true')

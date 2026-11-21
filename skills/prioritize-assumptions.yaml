@@ -1,0 +1,31 @@
+slug: prioritize-assumptions
+title: 决定先验证哪个想法
+name: prioritize-assumptions
+category: 研究
+purpose: 给一组没验证过的想法，它按影响大小和把握多少排序，告诉你先测哪个
+scenarios:
+- 评估用户是否愿意把内部文档交给问答助手
+- 试点只有一周，决定先验证什么
+agents:
+- Claude Code
+- Codex
+- Gemini CLI
+- Cursor
+summary: 把一组还没验证的假设交给它，最好连同已有的调研材料一起给。它按「影响」和「风险」两条轴给每条分格，这里的风险是「把握不大」乘以「验证要花的力气」，不只是押错的可能。四格各有去向：影响小风险低的先放着，影响大风险低的直接做，影响小风险高的放弃，影响大风险高的才设计实验。实验要看真实行为而不是口头意见，并写明成功指标和过关线。内容多时存成 Markdown。它只给实验建议，不替你跑实验。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add phuryn/pm-skills && claude plugin install pm-product-discovery@pm-skills
+  note: 终端执行，装的是整个 pm-product-discovery（13 个技能）。已添加市场时只运行 && 后面的部分。
+- agent: Codex
+  command: codex plugin marketplace add phuryn/pm-skills && codex plugin add pm-product-discovery@pm-skills
+  note: 终端执行。Codex 不认插件里的斜杠命令，直接用中文说要做什么。旧版 Codex CLI 没有 plugin 子命令，先升级。
+requires: []
+source:
+  url: https://github.com/phuryn/pm-skills/tree/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/pm-product-discovery/skills/prioritize-assumptions
+  name: phuryn/pm-skills
+author:
+  name: Paweł Huryn
+  url: https://github.com/phuryn
+license: MIT
+licenseUrl: https://github.com/phuryn/pm-skills/blob/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/LICENSE
+addedAt: '2026-11-20'

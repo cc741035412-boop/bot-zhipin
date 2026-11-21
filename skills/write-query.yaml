@@ -1,0 +1,24 @@
+slug: write-query
+title: 帮你写 SQL 查询
+name: write-query
+category: 数据
+purpose: 给表结构和想查的问题，它写出适合你所用数据库的 SQL
+scenarios:
+- 按书目和借阅记录写查询，统计各类书每月借出多少次
+- 为店铺对账写一条按日期汇总订单金额的查询
+agents:
+- Claude Code
+summary: 帮你梳理多表连接与聚合逻辑，写出符合所用数据库方言的 SQL 查询。提问时先提供表结构、事件含义和数据库类型，避免「活跃用户」这类指标被算成别的口径；拿到查询后先在只读连接和小时间窗里跑通核对。
+install:
+- agent: Claude Code
+  command: claude plugin marketplace add anthropics/knowledge-work-plugins && claude plugin install data@knowledge-work-plugins
+  note: 在终端运行，装的是整个 data 插件，只需装一次。会登记 8 个第三方连接器，不连接也能直接贴资料。已添加该市场时，只运行安装插件那一步。
+source:
+  url: https://github.com/anthropics/knowledge-work-plugins/tree/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/skills/write-query
+  name: anthropics/knowledge-work-plugins
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: Apache-2.0
+licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/LICENSE
+addedAt: '2026-11-20'

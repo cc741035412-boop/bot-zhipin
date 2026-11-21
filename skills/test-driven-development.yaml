@@ -1,0 +1,32 @@
+slug: test-driven-development
+title: 先写测试再写代码
+name: test-driven-development
+category: 测试
+purpose: 先把要实现的效果写成测试，再写刚好让测试通过的代码
+scenarios:
+- 为计费舍入规则补自动化测试
+- 修复空列表被误报为加载中的问题
+agents:
+- Claude Code
+- Codex
+- Cursor
+summary: 带你先把预期行为写成一条测试，再写刚好能让测试跑通的代码，最后整理代码结构。开始前先给它能运行的项目和测试入口；第一步要检查测试确实是因为功能缺失而失败，如果只是路径写错，说明还没测到目标行为。如果先写了实现代码，它会要求删掉重来，从失败测试开始。安装会装上整套 Superpowers：15 个技能加一个会话启动钩子。以后每次开会话，助手都会先查该用哪个技能。用 Claude Code 时，想只对当前项目生效，可在安装命令末尾加 --scope project。
+install:
+- agent: Claude Code
+  command: claude plugin install superpowers@claude-plugins-official
+  note: 在终端运行。第一次打开交互式 claude 会自动添加官方市场；全新机器也可先运行 claude plugin marketplace add anthropics/claude-plugins-official。
+- agent: Codex
+  command: /plugins
+  note: 在 Codex CLI 输入，搜索 superpowers，选 Install Plugin；在 Codex App 里可到侧栏 Plugins 点 +。装完新开会话。
+- agent: Cursor
+  command: /add-plugin superpowers
+  note: 在 Cursor 的 Agent 对话框输入。
+source:
+  url: https://github.com/obra/superpowers/tree/22f0b463e7a5e579904dd6211a520321035526f7/skills/test-driven-development
+  name: obra/superpowers
+author:
+  name: Jesse Vincent
+  url: https://github.com/obra
+license: MIT
+licenseUrl: https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/LICENSE
+addedAt: '2026-11-20'
