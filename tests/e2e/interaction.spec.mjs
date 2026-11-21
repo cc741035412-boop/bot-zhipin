@@ -193,7 +193,8 @@ for (const dark of [false, true]) {
       for (const ratio of ratios) expect(ratio).toBeGreaterThanOrEqual(4.5)
       for (const link of await page.locator('.shelf-page a[target="_blank"]').all()) {
         await expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-        await expect(link).toContainText('（在新标签页打开）')
+        const isImport = await link.getAttribute('data-testid') === 'btn-import'
+        await expect(link).toContainText(isImport ? '（打开 Grok Bot）' : '（在新标签页打开）')
         // 导入按钮是「图标 + 动词」，用图标库里的右上箭头；其余外链沿用文字后面的「↗」。两种都对读屏隐藏。
         await expect(link.locator('.external-icon[aria-hidden="true"], svg[data-icon="arrow-up-right"][aria-hidden="true"]')).toHaveCount(1)
       }

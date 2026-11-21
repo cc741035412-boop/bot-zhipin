@@ -21,6 +21,7 @@ function summarizeAbout(about) {
   const summary = {
     intro: text(about.intro),
     does: texts(about.does),
+    trial: text(about.trial),
     starters: texts(about.starters),
     skills: rows(about.skills).map((skill) => ({ name: text(skill.name), does: text(skill.does) })),
     routines: rows(about.routines).map((routine) => ({

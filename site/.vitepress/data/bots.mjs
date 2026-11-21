@@ -76,7 +76,8 @@ export function botSummaries(bots, sources) {
  * 详情页的完整摘要走路由参数（site/bots/[slug].paths.mjs），每个 Bot 各自一份。
  */
 export function listSummaries(bots, sources) {
-  return botSummaries(bots, sources).map(({ about, ...bot }) => bot)
+  // 只留导入要复制的那一句（试跑句，没写就用第一条开场白），卡片上的「导入」也能顺手复制。
+  return botSummaries(bots, sources).map(({ about, ...bot }) => ({ ...bot, trial: about?.trial || about?.starters?.[0] || null }))
 }
 
 // 数据加载器的监听范围。VitePress 1.6 的 glob 会从工作区外路径的共同祖先（可能是 /）遍历，
