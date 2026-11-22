@@ -63,7 +63,7 @@ function escape(e: KeyboardEvent) { if (!e.isComposing && e.keyCode !== 229) q.v
             </header>
             <span class="bz-sr-only">{{ i.category }}</span><p>{{ i.purpose }}</p>
             <div :class="i.images?.length ? 'ix-preview' : 'ix-plain-preview'">
-              <PromptSnippet v-if="i.copyText" :id="`snip-${i.slug}`" :text="i.copyText" />
+              <div v-if="i.copyText"><PromptSnippet :id="`snip-${i.slug}`" :text="i.copyText" /></div>
               <a v-if="i.images?.[0]" class="ix-thumb" :href="i.detailUrl + suffix"><img :src="i.images[0].src" :alt="i.images[0].alt" :width="i.images[0].width" :height="i.images[0].height" loading="lazy"></a>
             </div>
           </div>
