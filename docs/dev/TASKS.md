@@ -94,7 +94,7 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 
 | # | 任务 | 执行 | 写入范围 | 状态 |
 |---|---|---|---|---|
-| SP1 | ⌘K 面板输入后加 Prompt、Skills 两组：`searchLibrary`、按需加载的 `library-search.data`（失败退回 `/data/index.json`）、分类砖条目、吸顶组名、读屏播报；中英文交界拆词（库页同用）、原名按词头匹配、场景最低档；单测、样例站 e2e、对比度 e2e、浅深色和 390 手机截图 | 编码 agent | `SearchPalette.vue`、`LibraryPage.vue`、`theme/search.ts`、`data/library-search.data.mjs`、`tests/unit/search*`、`tests/e2e/search-library*` | 🟡 |
+| SP1 | ⌘K 面板输入后加 Prompt、Skills 两组：`searchLibrary`、按需加载的 `library-search.data`（失败退回 `/data/index.json`）、分类砖条目、吸顶组名、读屏播报；中英文交界拆词（库页同用）、原名按词头匹配、场景最低档；单测、样例站 e2e、对比度 e2e、浅深色和 390 手机截图 | 编码 agent | `SearchPalette.vue`、`LibraryPage.vue`、`theme/search.ts`、`data/library-search.data.mjs`、`tests/unit/search*`、`tests/e2e/search-library*` | ✅ |
 
 # 让 AI 来找：bot-zhipin skill（2026-11-22）
 
