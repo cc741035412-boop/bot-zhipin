@@ -14,6 +14,7 @@ export interface LibraryCard {
   addedAt: string
   detailUrl: string
   hasBody?: boolean
+  copyText?: string | null
   titleOriginal?: string
   name?: string
   agents?: string[]
@@ -41,6 +42,7 @@ export const fieldsFor = (i: LibraryCard) =>
     ...i.tags,
     i.author.name,
     ...(i.agents || []),
+    ...(i.kind === 'prompt' && i.copyText ? [i.copyText] : []),
   ].map(norm)
 export function listQuery(q: string, cat: string) {
   const params = new URLSearchParams()

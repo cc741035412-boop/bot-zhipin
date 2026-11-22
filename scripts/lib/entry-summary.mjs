@@ -1,5 +1,5 @@
 // 网站用的收录条目（Prompt、Skill）数据形状：纯函数，不读盘。
-// 详情页拿完整的一条（路由参数）；本库列表与筛选用去掉长文字的列表版，控制每个页面要加载的数据量。
+// 详情页拿完整的一条（路由参数）；本库列表与筛选只带列表会用到的字段，控制每个页面要加载的数据量。
 import { schema as promptSchema } from './validate/generated/prompt-schema.mjs'
 import { schema as skillSchema } from './validate/generated/skill-schema.mjs'
 
@@ -67,8 +67,10 @@ export function summarizeSkill(entry) {
   }
 }
 
-/** 列表版：去掉只有详情页才用的长文字（Prompt 的原文、译文、摘要、用法；Skill 的摘要、安装和依赖）。 */
-export const listPrompt = ({ body, bodyZh, summary, usage, copyright, ...item }) => item
+/** Prompt 列表只带一份供展示、搜索和复制的正文；没有原文时仍是仅摘要条目。 */
+export const listPrompt = ({ body, bodyZh, summary, usage, copyright, ...item }) => ({
+  ...item, copyText: body ? bodyZh ?? body : null,
+})
 export const listSkill = ({ summary, install, requires, ...item }) => item
 
 // FNV-1a 32：slug 只含 ASCII，按无符号整数比较。

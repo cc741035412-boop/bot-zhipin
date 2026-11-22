@@ -70,6 +70,49 @@
 .bz-empty .bz-tile { color: var(--bz-text-3); }
 .bz-empty .bz-tile > svg { width: 28px; height: 28px; }
 
+/* Prompt 行：沿用分类砖的栅格，正文从标题起一直排到行尾。 */
+.ix-prompt { grid-column: 2 / -1; min-width: 0; }
+.ix-prompt-head { display: flex; align-items: flex-start; gap: var(--bz-sp-3); }
+.ix-prompt-head h2 { flex: 1; align-self: center; flex-wrap: wrap; }
+.ix-prompt-head .entry-link { position: relative; } /* 链接的命中区和焦点环都只包住标题 */
+.ix-prompt-head .ix-row-go { display: inline; margin: 0 0 0 var(--bz-sp-1); vertical-align: middle; }
+@media (hover: none) {
+  .ix-prompt-head .ix-row-go { display: none; }
+}
+.ix-prompt-head .ix-row-by { max-width: 132px; align-self: center; }
+.ix .ix-prompt .copy { flex: none; min-width: 84px; }
+.ix .ix-prompt .copy.copied { color: var(--bz-ink); border-color: color-mix(in srgb, var(--c) 40%, var(--bz-border)); background: color-mix(in srgb, var(--c) 16%, var(--bz-card)); }
+.ix-snip {
+  margin-top: var(--bz-sp-4); padding: 14px var(--bz-sp-4); background: var(--bz-card); border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card);
+  color: var(--ix-read); font: var(--bz-fs-btn)/1.75 var(--bz-font-text); transition: border-color var(--bz-dur) var(--bz-ease);
+}
+.ix-row:is(:hover, :focus-within) .ix-snip { border-color: color-mix(in srgb, var(--c) 30%, var(--bz-hairline)); }
+.ix-snip-window { overflow: hidden; max-height: 4lh; transition: max-height 240ms var(--bz-ease); }
+.ix-snip-window.faded { mask-image: linear-gradient(to bottom, black 70%, transparent); }
+.ix-snip-text { white-space: pre-wrap; }
+.ix-snip mark { padding-inline: 2px; border-radius: calc(var(--bz-r-control) / 2); color: inherit; background: color-mix(in srgb, var(--c) 16%, transparent); }
+.ix-snip-toggle {
+  display: inline-flex; align-items: center; gap: var(--bz-sp-1); padding: var(--bz-sp-2) 0; border-radius: var(--bz-r-control);
+  font-size: var(--bz-fs-sm); font-weight: 600; color: var(--bz-text-3);
+}
+.ix-row:has(.ix-prompt) { scroll-margin-top: var(--vp-nav-height); }
+.ix-prompt :is(.copy, .ix-snip-toggle):not(:focus-visible) { outline: none; }
+.ix-snip-toolbar {
+  position: sticky; bottom: var(--bz-sp-4); display: flex; align-items: center; justify-content: space-between;
+  margin-top: var(--bz-sp-3); padding: var(--bz-sp-2) var(--bz-sp-3); border: 1px solid var(--bz-border); border-radius: var(--bz-r-card);
+  background: var(--bz-nav-bg); backdrop-filter: blur(var(--bz-sp-4)); box-shadow: var(--bz-shadow-float);
+}
+.ix-snip-toggle:hover { color: var(--bz-ink); }
+.ix-snip-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+@media (max-width: 640px) {
+  .ix .ix-prompt .bz-btn.copy {
+    --copy-size: calc(var(--bz-sp-6) + var(--bz-sp-2));
+    width: var(--copy-size); height: var(--copy-size); min-width: 0; min-height: 0; padding: 0; background: var(--bz-glass);
+  }
+  .ix .ix-prompt .copy.copied { color: var(--bz-success); border-color: var(--bz-success); background: color-mix(in srgb, var(--bz-success) 16%, var(--bz-glass)); }
+  .ix-prompt .copy [role="status"] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+}
+
 /* ---------- 详情：左边砖、动作和属性，右边读 ---------- */
 .ix-detail {
   /* 次级按钮染上分类色，和站点 .bz-bot-scope 同一个算法（照 A2） */

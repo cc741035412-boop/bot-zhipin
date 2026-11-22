@@ -27,7 +27,7 @@ it.each(['prompt', 'skill'])('合法 %s 夹具通过全部校验', (kind) => {
 it.each([prompt, skill])('$kind：非法分类提示字段与正确取值', (entry) => {
   expect(problems(change(entry, { category: '不在枚举中' }))).toContainEqual(at(entry, 'category', enums[entry.kind].categories[0]))
 })
-it('未声明许可也保留原文和译文，精简列表不带两种正文', () => {
+it('未声明许可也保留原文和译文，列表只带一份复制正文', () => {
   const item = change(prompt, { license: '未声明' })
   expect(problems(item)).toEqual([])
   const detail = summarizePrompt(item)
@@ -35,6 +35,9 @@ it('未声明许可也保留原文和译文，精简列表不带两种正文', (
   expect(detail.bodyZh).toBe(item.data.bodyZh)
   const list = listPrompt(detail)
   expect(list.hasBody).toBe(true)
+  expect(list.copyText).toBe(item.data.bodyZh)
+  expect(listPrompt({ ...detail, bodyZh: null }).copyText).toBe(item.data.body)
+  expect(listPrompt({ ...detail, body: null }).copyText).toBeNull()
   expect(list).not.toHaveProperty('body')
   expect(list).not.toHaveProperty('bodyZh')
 })

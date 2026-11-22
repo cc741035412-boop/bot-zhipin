@@ -2,6 +2,8 @@
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { categoriesFor, fieldsFor, listQuery, norm, readQuery, type LibraryCard } from '../library'
 import { markFor, tint } from '../library-marks'
+import LibraryCopy from './LibraryCopy.vue'
+import PromptSnippet from './PromptSnippet.vue'
 import LibrarySource from './LibrarySource.vue'
 import LibraryTile from './LibraryTile.vue'
 import BzIcon from './BzIcon.vue'
@@ -49,10 +51,22 @@ function by(i: LibraryCard) {
       <div v-if="visible.length" class="entries">
         <article v-for="i in visible" :key="i.slug" class="ix-row entry" :data-slug="i.slug" :style="tint(kind, i.category)">
           <LibraryTile :kind="kind" :category="i.category" :size="48" />
-          <div><h2><a class="entry-link" :href="i.detailUrl + suffix">{{ i.title }}</a><code v-if="i.name">{{ i.name }}</code>
-            <LibrarySource v-if="kind === 'prompt' && !i.hasBody" class="bz-tag outline source-link" :href="i.source.url" aria-label="查看原文">仅摘要</LibrarySource>
-          </h2><span class="bz-sr-only">{{ i.category }}</span><p>{{ i.purpose }}</p></div>
-          <span class="ix-row-by" :title="i.agents?.join('、')">{{ by(i) }}</span><BzIcon name="arrow-right" class="ix-row-go" />
+          <div v-if="kind === 'prompt'" class="ix-prompt">
+            <header class="ix-prompt-head">
+              <h2>
+                <a class="entry-link" :href="i.detailUrl + suffix">{{ i.title }}<BzIcon name="arrow-right" class="ix-row-go" /></a>
+                <LibrarySource v-if="!i.hasBody" class="bz-tag outline source-link" :href="i.source.url" aria-label="查看原文">仅摘要</LibrarySource>
+              </h2>
+              <span class="ix-row-by">{{ i.author.name }}</span>
+              <LibraryCopy v-if="i.copyText" class="sm" compact :value="i.copyText" :target="`snip-${i.slug}`" />
+            </header>
+            <span class="bz-sr-only">{{ i.category }}</span><p>{{ i.purpose }}</p>
+            <PromptSnippet v-if="i.copyText" :id="`snip-${i.slug}`" :text="i.copyText" />
+          </div>
+          <template v-else>
+            <div><h2><a class="entry-link" :href="i.detailUrl + suffix">{{ i.title }}</a><code v-if="i.name">{{ i.name }}</code></h2><span class="bz-sr-only">{{ i.category }}</span><p>{{ i.purpose }}</p></div>
+            <span class="ix-row-by" :title="i.agents?.join('、')">{{ by(i) }}</span><BzIcon name="arrow-right" class="ix-row-go" />
+          </template>
         </article>
       </div>
       <div v-else class="bz-empty lib-empty"><span class="bz-tile s72"><BzIcon name="search" :size="28" /></span><h2>没有找到</h2><button class="bz-btn" @click="reset">看看全部</button></div>
