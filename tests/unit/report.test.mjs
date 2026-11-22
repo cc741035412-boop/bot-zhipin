@@ -34,6 +34,8 @@ function seed(db) {
     event('page_view', '404', {}, { sid: 'd', path: '/missing/' }),
     event('page_view', '404', {}, { sid: 'd', path: '/missing/' }),
     event('page_view', '404', {}, { sid: 'd', path: '/gone/' }),
+    event('search', '404', {}, { sid: 'd', path: '/missing/' }),
+    event('search', '404', {}, { sid: 'd', path: '/event-only/' }),
     event('bot_import', 'bot', { direct: true, trial: 'copied' }, { slug: 'alpha' }),
     event('bot_import', 'home', { direct: true, trial: 'failed' }, { slug: 'alpha' }),
     event('bot_import', 'squad', { direct: false }, { slug: 'alpha' }),
@@ -101,7 +103,29 @@ it('概览六项：跨日访客累加、会话去重，环比按未舍入值计�
     pageViews: { current: 13, previous: 4, change: '↑225%' },
     takes: { current: 9, previous: 1, change: '↑800%' },
     takeSessions: { current: 3, previous: 1, change: '↑200%' },
-    takeRate: { current: 0.75, previous: 0.25, change: '↑200%' },
+    takeRate: { current: 0.75, previous: 0.25, change: '↑50.0 个百分点' },
+  })
+})
+
+it('404 排行只计浏览事件', () => {
+  // 非浏览事件由测试夹具中的 search 产生，既不能增加已有路径次数，也不能新增路径。
+  expect(data.health.notFound).toEqual([{ path: '/missing/', count: 2 }, { path: '/gone/', count: 1 }])
+})
+
+it('拿走率环比显示百分点，区分零、持平和无数据', async () => {
+  const report = (date) => buildReport({ runSql: runner(proxy.env.DB), today: date, days: 1 })
+  expect(renderReport({ ...data, database: 'local' })).toContain('| 拿走率 | 75.0% | 25.0% | ↑50.0 个百分点 |')
+  expect((await report('2026-11-21')).overview.takeRate.change).toBe('持平')
+  expect((await report('2026-11-22')).overview.takeRate.change).toBe('↑75.0 个百分点')
+  expect((await report('2026-11-20')).overview.takeRate.change).toBe('↓50.0 个百分点')
+  expect((await report('2026-11-18')).overview.takeRate.change).toBe('—')
+  expect((await report('2026-11-19')).overview.takeRate.change).toBe('—')
+})
+
+it('只有拿走、只浏览过其他模块的会话不计入该模块拿走率分子', () => {
+  // b 浏览了 Prompt，但在 Bot 只有 squad_copy；该事件仍计入拿走次数。
+  expect(data.modules.find((row) => row.module === 'Bot')).toMatchObject({
+    takes: 7, viewSessions: 1, takeSessions: 1, takeRate: 1,
   })
 })
 
@@ -124,7 +148,7 @@ it('来源只看落地浏览；国家和设备按会话去重', () => {
 
 it('三个模块按事件页面归属，作者页归 Bot', () => {
   expect(data.modules).toEqual([
-    { module: 'Bot', pageViews: 5, viewSessions: 1, takes: 7, takeSessions: 2, takeRate: 2 },
+    { module: 'Bot', pageViews: 5, viewSessions: 1, takes: 7, takeSessions: 1, takeRate: 1 },
     { module: 'Prompt', pageViews: 3, viewSessions: 1, takes: 1, takeSessions: 1, takeRate: 1 },
     { module: 'Skills', pageViews: 2, viewSessions: 1, takes: 1, takeSessions: 1, takeRate: 1 },
   ])
@@ -192,7 +216,7 @@ it('Markdown 包含区间、库名、九个标题及一位小数的百分数', (
   expect(report).toContain('数据库：本地库')
   expect(report).toContain('本期（北京时间）：2026-11-20 至 2026-11-22')
   expect(report.match(/^## .+$/gm)).toEqual(headings.map((s) => `## ${s}`))
-  expect(report).toContain('| 拿走率 | 75.0% | 25.0% | ↑200% |')
+  expect(report).toContain('| 拿走率 | 75.0% | 25.0% | ↑50.0 个百分点 |')
   expect(report).toContain('| 协议唤起 | 2 | 66.7% |')
 })
 

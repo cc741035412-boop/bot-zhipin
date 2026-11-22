@@ -36,6 +36,12 @@ function change(current, previous) {
   return `${current > previous ? '↑' : '↓'}${Math.round(Math.abs(current - previous) / previous * 100)}%`
 }
 
+function percentagePointChange(current, previous) {
+  if (current === null || previous === null) return '—'
+  if (current === previous) return '持平'
+  return `${current > previous ? '↑' : '↓'}${(Math.abs(current - previous) * 100).toFixed(1)} 个百分点`
+}
+
 const overviewLabels = {
   visitors: '访客', sessions: '会话', pageViews: '浏览量', takes: '拿走次数',
   takeSessions: '拿走会话', takeRate: '拿走率',
@@ -64,7 +70,8 @@ export async function buildReport({ runSql, today, days }) {
   const now = await summarize(periods.current)
   const last = await summarize(periods.previous)
   const overview = Object.fromEntries(Object.keys(overviewLabels).map((key) => [key, {
-    current: now[key], previous: last[key], change: change(now[key], last[key]),
+    current: now[key], previous: last[key],
+    change: (key === 'takeRate' ? percentagePointChange : change)(now[key], last[key]),
   }]))
   if (!now.events) return { periods, empty: true, overview }
 
@@ -114,7 +121,10 @@ export async function buildReport({ runSql, today, days }) {
     SELECT module, COUNT(*) FILTER (WHERE name = 'page_view') AS pageViews,
       COUNT(*) FILTER (WHERE ${take}) AS takes,
       COUNT(DISTINCT sid) FILTER (WHERE name = 'page_view') AS viewSessions,
-      COUNT(DISTINCT sid) FILTER (WHERE ${take}) AS takeSessions
+      COUNT(DISTINCT sid) FILTER (WHERE ${take} AND EXISTS (
+        SELECT 1 FROM tagged AS viewed
+        WHERE viewed.module = tagged.module AND viewed.sid = tagged.sid AND viewed.name = 'page_view'
+      )) AS takeSessions
     FROM tagged WHERE module IS NOT NULL GROUP BY module`)
   const modules = ['Bot', 'Prompt', 'Skills'].map((module) => {
     const row = moduleRows.find((r) => r.module === module)
@@ -183,7 +193,7 @@ export async function buildReport({ runSql, today, days }) {
     const row = copyRows.find((r) => r.name === name) ?? { name, total: 0, failed: 0 }
     return { ...row, rate: ratio(row.failed, row.total) }
   })
-  const notFound = await inPeriod(`SELECT path, COUNT(*) AS count FROM period WHERE page = '404'
+  const notFound = await inPeriod(`SELECT path, COUNT(*) AS count FROM period WHERE page = '404' AND name = 'page_view'
     GROUP BY path ORDER BY count DESC, path LIMIT 10`)
   return { periods, empty: false, overview, sources, modules, items: { topTakes, untaken },
     search: { top: topSearches, empty: emptySearches }, filters: { top: topFilters, empty: emptyFilters },
