@@ -160,5 +160,23 @@ test('390px 首屏露出复制图标，不横滚', async ({ page }, info) => {
   await shot(page, info, '390-light')
   await button.click()
   await expect(button.locator('[data-icon="check"]')).toBeVisible()
-  await shot(page, info, '390-copied')
+})
+
+test.describe('390px 触屏', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true })
+
+  test('点复制后标题旁没有箭头，标题下不多占一行', async ({ page }, info) => {
+    const first = page.locator('.entry').first()
+    await first.locator('.copy').tap()
+    await expect(first.getByRole('status')).toHaveText('已复制')
+    await expect(first.locator('.ix-row-go')).toHaveCSS('display', 'none')
+    const title = first.locator('h2')
+    const trailingSpace = await title.evaluate(el => {
+      const text = document.createRange()
+      text.selectNodeContents(el.querySelector('.entry-link').firstChild)
+      return (el.getBoundingClientRect().bottom - text.getBoundingClientRect().bottom) / parseFloat(getComputedStyle(el).lineHeight)
+    })
+    expect(trailingSpace).toBeLessThan(1)
+    await shot(page, info, '390-copied')
+  })
 })

@@ -76,6 +76,9 @@
 .ix-prompt-head h2 { flex: 1; align-self: center; flex-wrap: wrap; }
 .ix-prompt-head .entry-link { position: relative; } /* 链接的命中区和焦点环都只包住标题 */
 .ix-prompt-head .ix-row-go { display: inline; margin: 0 0 0 var(--bz-sp-1); vertical-align: middle; }
+@media (hover: none) {
+  .ix-prompt-head .ix-row-go { display: none; }
+}
 .ix-prompt-head .ix-row-by { max-width: 132px; align-self: center; }
 .ix .ix-prompt .copy { flex: none; min-width: 84px; }
 .ix .ix-prompt .copy.copied { color: var(--bz-ink); border-color: color-mix(in srgb, var(--c) 40%, var(--bz-border)); background: color-mix(in srgb, var(--c) 16%, var(--bz-card)); }
