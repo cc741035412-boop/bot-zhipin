@@ -30,7 +30,7 @@ test('接口失败：排序留在推荐、热度不占位、链接与外部收�
   // 列表卡只在热度大于 0 时显示热度；拿不到热度就不占位。
   await expect(card(page, weekly).getByTestId('heat')).toHaveCount(0)
   await expect(page.getByTestId('contribute-link')).toHaveAttribute('href', CONTRIBUTE_URL)
-  await expect(card(page, reviewer).getByTestId('author-link')).toHaveAttribute('href', 'https://github.com/example-user')
+  await expect(card(page, reviewer).getByTestId('author-link')).toHaveAttribute('href', '/authors/example-user')
   await expect(card(page, external).getByTestId('author-link')).toHaveAttribute('href', 'https://x.ai/bot/demo-external-000')
   await expect(card(page, external).getByTestId('btn-prompt')).toHaveCount(0)
   await expect(card(page, weekly).getByTestId('detail-link')).toHaveAttribute('href', `/bots/${weekly}`)

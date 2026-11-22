@@ -8,10 +8,12 @@
 | Issue 表单（备用） | Issue 带 `投稿` 标签，几十秒后 Issue 下出现自动回复；通过的会开一个 `submission/issue-<号>` 分支的 PR，作者是 github-actions | `.github/workflows/submission.yml`。网站投稿关闭或投稿人打不开投稿页时用 |
 | 自己 fork 提 PR | 普通 PR，只改 `bots/<slug>/`，或只改 `squads/<slug>/squad.yaml`（投稿小队） | 外部贡献者改了这两处以外的文件（包括 `curation/`），CI 的范围检查会直接失败 |
 
+fork PR 只要改了 `bots/<slug>/`、`squads/<slug>/squad.yaml` 以外的任何文件（特别是 `.github/`、`scripts/`），不论 CI 结果如何，一律不合并：`pull_request` 跑的是 PR 自己那份 CI 和检查脚本，可以被一起改掉。
+
 ## 审核一个网站投稿 PR
 
 1. 打开 PR，等 `validate-and-build` 通过（网站投稿的 PR 会自动跑，不需要点批准运行）。
-2. **标题以「⚠ 更新已上架 Bot」开头的要多看一眼**：这个 Bot 之前没有绑定作者的数字 ID，系统只按 GitHub 用户名核对，要确认提交的人确实是原作者（对照原 PR、作者主页）。
+2. **标题以「⚠ 更新已上架 Bot」开头的要多看一眼**：这个 Bot 之前没有绑定作者的数字 ID，系统只按 GitHub 用户名核对，要确认提交的人确实是原作者（对照原 PR、他的 GitHub 个人页）。
 3. 人工核对机器判断不了的：
    - DESIGN.md 是不是真实情况（没有编造效果数据）；
    - 「实际效果」里摘的原文像不像这个 Bot 的真实输出，有没有露出密钥、内部信息、隐私（投稿不再带截图，DECISIONS 第 43 条）；
@@ -37,7 +39,8 @@
 
 1. 等 `validate-and-build` 通过：机器已经查过格式、成员都在货架上且不重复、`flow` 两头都是成员或 `you`、「带队」恰好一个队长。
 2. 人工核对：分工和交接是不是真的跑得通（对照各成员的详情页）；`kickoff`、`setup` 里有没有密钥、内部链接；`origin` 写得对不对（投稿人自己编的写「社区投稿」，照搬原作者成套发布的写「原作者成套」）。
-3. 已有小队被修改时，`addedAt` 和 `author.github` 不能变（CI 会拦）。
+3. `author.github` 不是 PR 作者时，CI 会报错；只有 `origin: 原作者成套` 放行，但会打 ⚠ 警告。警告会作为黄色注释出现在 PR 的 Files changed 和 CI 运行摘要里。看到警告要核对：作者确实是这支队的原设计者。合并后它会出现在该作者的作者主页上，主页昵称也可能被这条的 `author.name` 换掉。
+4. 已有小队被修改时，`addedAt` 和 `author.github` 不能变（CI 会拦）。
 
 ## 策展（只有维护者能改）
 
@@ -59,6 +62,8 @@
 **下架前先搜一下这个 slug 有没有被引用**：`grep -rn "<slug>" squads curation`。被小队或策展引用的 Bot 不能单独删，`npm run validate` 会失败。要在同一个 PR 里一起处理：从 `curation/shelf.yaml` 里删掉它；它所在的小队，要么去掉这个成员（剩下不到 2 个就整支下架），要么把它记到 `missing` 里。
 
 小队下架同理：提 PR 删掉 `squads/<slug>/`，小队页由 `functions/squads/[slug].ts` 兜底返回 404；成员 Bot 不受影响。
+
+作者的 Bot 和小队全部下架后，`/authors/<登录名>` 由 `functions/authors/[login].ts` 立即返回 404，头像接口也随白名单停掉。删掉 `author.github` 只适用于外部收录的 Bot（`external: true`）和小队；投稿人自己投的 Bot，schema 要求必须有 `author.github`，目前没有不下架作品就撤掉作者主页的办法，遇到这种请求先问维护者。
 
 ## 网站投稿的开关与排障
 

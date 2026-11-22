@@ -1,3 +1,4 @@
+import { authorPagePath } from './authors.mjs'
 import { SITE } from '../../site/.vitepress/meta.mjs'
 
 const OFFICIAL_MARKETPLACE_PREFIX = 'https://x.ai/bot/marketplace/bots/'
@@ -55,6 +56,7 @@ export function summarizeBot(bot, { asset, names = new Map(), namesZh = new Map(
     category: data.category,
     author: {
       name: author.name,
+      page: authorPagePath(author.github),
       github: author.github || null,
       url: author.url || null,
       link: author.github ? `https://github.com/${author.github}` : author.url || data.templateUrl,
