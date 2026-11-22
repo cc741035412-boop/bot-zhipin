@@ -87,3 +87,15 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | B | 构建时出分享图：Bot、小队、全站各一张，Noto Sans SC 子集；换行标点优先、行宽均衡 | 编码 agent | — | `scripts/og/`、`scripts/gen-og-fonts.mjs`、依赖 | ✅ |
 | C | 计数加 starter / kickoff：迁移 0004、接口、前端、测试、文档 | 编码 agent | — | `functions/`、`migrations/0004`、`heat.ts`、三个组件 | ✅ |
 | M | 集成、复跑验收、目视分享图；线上 D1 先备份再迁移，然后合并 | 维护者 | A、B、C | — | ✅ |
+
+# 埋点（2026-11-22）
+
+目标：全站埋点自建，存 D1，命令出中文报告。决策 72，设计 `TRACKING.md`。任务书和验收脚本在维护者本地的派活目录 `2026-11-22-bot-zhipin-tracking/`。
+
+| # | 任务 | 执行 | 前置 | 写入范围 | 状态 |
+|---|---|---|---|---|---|
+| TR-API | `POST /api/events`、迁移 0005、单测（真实本地 D1） | 编码 agent | — | `functions/api/events.ts`、`functions/_lib/events-store.ts`、`migrations/0005` | ✅ |
+| TR-RPT | `npm run report` 只读报告、单测 | 编码 agent | — | `scripts/report.mjs`、`scripts/lib/report.mjs` | ✅ |
+| TR-WEB-CORE | `theme/track.ts` 模块和单测，不接组件 | 编码 agent | — | `site/.vitepress/theme/track.ts` | ✅ |
+| TR-WEB-HOOK | 接进主题入口和各组件、e2e 核对每个事件 | 编码 agent | #34、#35、#36、搜索面板线合进 main；TR-WEB-CORE | `theme/index.ts`、各组件、`theme/submit/`、`tests/e2e/tracking*` | ⬜ |
+| TR-INT | 集成、文档、开 PR；线上先备份再迁移，然后合并 | 维护者 | 全部 | — | 🟡 |

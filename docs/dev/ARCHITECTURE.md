@@ -51,7 +51,10 @@
 | `site/.vitepress/theme/components/BotDetail.vue` | 详情页（一份「简历」）：头部 + 吸顶侧栏（导入、三项属性、作者来源）+ 主栏的一块块内容；同样被投稿预览复用。配套 `DetailStarters.vue`（开场白，点一下复制）、`BotMini.vue`（小头像）；「同组的 Bot」和小队成员小头像由 `site/.vitepress/data/detail.mjs` 在构建时算好，经 `site/bots/[slug].paths.mjs` 放进路由参数。规格见 INTERACTION §9 | 维护者 |
 | `site/.vitepress/data/faces.json` | slug → color / shape / fetchedAt 的离线真脸数据，静态 import | 维护者 |
 | `scripts/sync-faces.mjs` | 手动抓 x.ai 模板页；--check 离线校验 | 维护者 |
-| `functions/api/` | 点击计数接口 | 维护者 |
+| `functions/api/` | 点击计数接口；`events.ts` 是埋点接口（`TRACKING.md` 第 5 节） | 维护者 |
+| `functions/_lib/events.ts` | **埋点事件名和字段的唯一真源**，前端 `theme/track.ts`、后端、`scripts/report.mjs` 共用；改了同步 `TRACKING.md` 第 3 节（单测核对） | 维护者 |
+| `site/.vitepress/theme/track.ts` | 埋点前端：排队、批量发送、页面类型、站外链接分类；组件里调用 `track(事件名, 字段)` | 维护者 |
+| `scripts/report.mjs` | `npm run report`：只读查 D1 的 `events`，打印中文埋点报告 | 维护者 |
 | `functions/bots/[slug].ts`、`functions/squads/[slug].ts` | 下架兜底：不在清单里的 Bot / 小队立即返回 404，不让边缘缓存继续给旧页面 | 维护者 |
 | `migrations/` | D1 表结构 | 维护者 |
 | `tests/unit/` | vitest 单元测试；`tests/fixtures/` 校验器样例；`tests/e2e/` Playwright 真浏览器 | 维护者 |
@@ -73,6 +76,7 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
                                                                           │
 浏览器 ── GET /api/stats、POST /api/click ──► functions/api/* ──► D1（DB） │
                                      └─ 读 /api-data/slugs.json（ASSETS）─┘
+浏览器 theme/track.ts ── POST /api/events（批量）──► functions/api/events.ts ──► D1 events ──► npm run report（只读）
 浏览器 ── GET /bots/<slug>、/squads/<slug> ──► functions/{bots,squads}/[slug].ts
                                      └─ 读 /api-data/slugs.json、squad-slugs.json，不在清单里就 404
 ```

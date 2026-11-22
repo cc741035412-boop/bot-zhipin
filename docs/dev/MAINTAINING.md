@@ -74,6 +74,22 @@
 
 改了分享图版式、配色或字体，要把 `scripts/lib/share.mjs` 的 `OG_LAYOUT_VERSION` 加 1，让平台重新抓图。
 
+## 埋点报告
+
+设计和口径见 `TRACKING.md`。
+
+```
+npm run report                 # 最近 7 天，和前 7 天比，只读查线上库
+npm run report -- --days 30
+npm run report -- --local      # 查 dev:full 的本地库
+npm run report -- --json
+```
+
+- 第一次上线前要先迁移，顺序见 `TRACKING.md` 第 8 节：备份 → 应用 `0005` → 合并 → 线上点几下 → `--days 1` 能看到数字。
+- 报错「events 表不存在」：线上还没应用迁移 0005。
+- 加事件或字段只改 `functions/_lib/events.ts` 和 `TRACKING.md` 第 3 节，不用迁移。删字段、改字段含义会影响旧数据的报表，改之前先想清楚。
+- 清空埋点（比如上线前清掉测试数据）：D1 控制台执行 `DELETE FROM events;`。不影响热度。
+
 ## 计数数据
 
 Cloudflare D1 `bot-zhipin` 的 `click_counts` 按 `(slug, kind)` 存累计数，`click_dedupe` 存去重窗口。查开场白和口令的复制点击次数（已去重，不计入热度；`starter` 的 slug 是 Bot，`kickoff` 的是小队）：
