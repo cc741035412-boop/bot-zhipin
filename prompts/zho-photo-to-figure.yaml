@@ -1,0 +1,39 @@
+slug: zho-photo-to-figure
+title: 角色手办与包装盒效果图
+category: 出图
+purpose: 给它一张人物、宠物或角色照片，它生成站在底座上的同款角色手办，并在身后配上包装盒与建模画面。
+scenarios:
+- 把自己或朋友的照片做成手办效果图发社交平台
+- 家长把孩子或家里的猫狗照片做成手办纪念图
+- 画手把自己的原创角色立绘变成手办与包装盒效果图
+summary: 这是作者 ZHO 整理的角色手办玩法。提示词把画面里的物件和位置关系交代得很清楚：先把上传的照片转成角色手办，在手办身后同时摆上印有该角色图像的包装盒，以及一台屏幕正显示 Blender 建模过程的电脑；再在包装盒前方加一个圆形塑料底座，让角色手办站在底座上，并提出场景尽量设在室内。一张图里同时呈现了站在底座上的手办本体、角色包装盒和屏幕上的三维建模画面。
+usage: 没有要替换的占位符。先上传一张主体清晰的人物、宠物或角色照片作为参考图，再粘贴提示词。推荐画幅跟随参考图比例（或采用 1:1 方形），发给 Gemini 或 Google AI Studio 里的 Nano Banana 出图。生成后对照参考图检查手办的脸部、发型、服饰等主体特征是否还原，脚下圆形塑料底座是否完整，身后的包装盒图案与电脑屏幕上的 Blender 建模画面是否自然。
+tags:
+- 角色手办
+- 手办包装盒
+- 人像玩法
+- 宠物照片
+models:
+- Nano Banana
+lang: en
+body: |-
+  turn this photo into a character figure. Behind it, place a box with the character’s image printed on it, and a computer showing the Blender modeling process on its screen. In front of the box, add a round plastic base with the character figure standing on it. set the scene indoors if possible
+bodyZh: |
+  把这张照片变成角色手办。在它身后放一个印有该角色图像的包装盒，以及一台屏幕上显示着 Blender 建模过程的电脑。在包装盒前方加一个圆形塑料底座，让角色手办站在底座上。场景尽量设在室内。
+source:
+  url: https://github.com/ZHO-ZHO-ZHO/ZHO-nano-banana-Creation/blob/f449fb475fe8cd344f337c87c0c5d2709d7d7a49/README.md
+  name: ZHO-ZHO-ZHO/ZHO-nano-banana-Creation
+author:
+  name: ZHO（@ZHO_ZHO_ZHO）
+  url: https://github.com/ZHO-ZHO-ZHO
+license: 未声明
+licenseUrl: https://github.com/ZHO-ZHO-ZHO/ZHO-nano-banana-Creation/blob/f449fb475fe8cd344f337c87c0c5d2709d7d7a49/LICENSE
+copyright: ZHO，仓库 GPL-3.0，转载注明出处
+addedAt: '2026-11-22'
+images:
+- file: zho-photo-to-figure-1.jpg
+  alt: 把雨天街拍做成的手办：穿黄雨衣、撑透明伞的女孩站在圆形透明底座上，后面是印着她的包装盒和正在建模的电脑屏幕
+  credit: 本站用 GPT Image 跑
+- file: zho-photo-to-figure-2.jpg
+  alt: 原图：穿黄雨衣、红雨靴，撑透明伞站在雨后街角的女孩
+  credit: 原图也是 AI 生成的虚构人物

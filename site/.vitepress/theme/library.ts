@@ -18,6 +18,8 @@ export interface LibraryCard {
   titleOriginal?: string
   name?: string
   agents?: string[]
+  models?: string[]
+  images?: { src: string; alt: string; credit: string; width: number; height: number }[]
 }
 export interface LibraryItem extends LibraryCard {
   summary?: string
