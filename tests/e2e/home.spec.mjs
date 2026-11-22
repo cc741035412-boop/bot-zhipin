@@ -451,8 +451,8 @@ test('手机 390：触摸目标够大；只有分组条吸顶；单列时每组�
     await expect(page.locator('.role-tabs')).toHaveCSS('position', 'sticky')
     await page.evaluate(() => window.scrollTo(0, document.querySelector('.shelf-list').getBoundingClientRect().top + window.scrollY + 120))
     await expect(page.locator('.shelf-toolbar')).toHaveAttribute('data-stuck', 'true')
-    const nav = await page.locator('.VPNavBar').boundingBox(), tabs = await page.locator('.role-tabs').boundingBox()
-    expect(Math.round(tabs.y)).toBe(Math.round(nav.y + nav.height + 8))
+    const tabs = await page.locator('.role-tabs').boundingBox()
+    expect(Math.round(tabs.y)).toBe(80) // 窄屏正文仍让位 80px，不跟着页眉外观缩短。
     expect((await page.locator('.sort-seg').boundingBox()).y, '排序滚到分组条上面去了').toBeLessThan(tabs.y)
     // 点专题（触摸）：筛选并滚到列表。
     await page.evaluate(() => window.scrollTo(0, 0))

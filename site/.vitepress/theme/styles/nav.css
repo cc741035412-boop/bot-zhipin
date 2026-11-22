@@ -1,25 +1,33 @@
-/* nav.css：悬浮玻璃导航条（VitePress 默认顶栏换肤，不另写导航组件）。
-   右侧顺序：我要投稿（次级小按钮，中性玻璃，前面一个 plus 图标）、主题开关、GitHub；后两个是 32px 的幽灵图标按钮。 */
+/* 三岛页眉：保留默认导航的语义和 Tab 顺序。 */
 
 /* 这个站没有文档页：滚动后才冒出来的「回到顶部」条会从悬浮岛后面露出来，全站关掉。 */
 .Layout .VPLocalNav { display: none; }
 .Layout > .VPNav.VPNav { position: fixed; top: 0; left: 0; width: 100%; padding: var(--bz-nav-top) var(--bz-sp-4) 0; }
 .Layout > .VPContent.VPContent { padding-top: var(--vp-nav-height); }
 .Layout .VPNav .VPNavBar, .Layout .VPNav .VPNavBar.screen-open {
-  /* 条里的子元素按条高排版；外面的正文让位仍用 :root 上的总高度 */
-  --vp-nav-height: calc(var(--bz-nav-bar) - 2px);
-  max-width: 1204px; height: var(--bz-nav-bar); margin: 0 auto;
-  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-panel);
-  background-color: var(--bz-nav-bg);
-  -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
-  box-shadow: var(--bz-nav-shadow); pointer-events: auto; transition: none;
+  --vp-nav-height: 44px; --vp-nav-bg-color: transparent;
+  max-width: 1140px; height: 44px; margin: 0 auto; border: 0; background: transparent;
+  pointer-events: none;
 }
 .Layout .VPNavBar .divider { display: none; }
-.Layout .VPNavBar .wrapper { padding: 0 var(--bz-sp-4) 0 var(--bz-sp-5); }
-.Layout .VPNavBar .content-body { gap: var(--bz-sp-1); background-color: transparent; }
+.Layout .VPNavBar .wrapper { padding: 0; }
+.Layout .VPNavBar .container { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; max-width: none; }
+.Layout .VPNavBar .container > .title { justify-self: start; height: 44px; }
+.Layout .VPNavBar .content { grid-column: 3; justify-self: end; }
+.Layout .VPNavBar .content-body { gap: 4px; padding: 0 6px; background: transparent; }
+.Layout .VPNavBarTitle .title, .Layout .VPNavBar .content-body { position: relative; z-index: 0; }
+/* 底层铺满各自含内边距的块；中间的 fixed 胶囊不是滤镜的后代。 */
+.Layout .VPNavBar .nav-island-glass {
+  position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  border-radius: var(--bz-r-pill); transition: background-color 240ms, backdrop-filter 240ms, box-shadow 240ms;
+}
+.Layout .VPNav.is-scrolled .nav-island-glass {
+  background-color: var(--bz-nav-bg); backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: 0 0 0 1px var(--bz-hairline), 0 10px 24px -16px rgba(0,0,0,.35);
+}
 
 /* 站名：自己画的小吉祥物（橙色圆团 + 两只竖眼）+ 圆体字 */
-.Layout .VPNavBarTitle .title { font-size: var(--bz-fs-title); font-weight: 600; letter-spacing: 0; border-bottom: 0; }
+.Layout .VPNavBarTitle .title { padding: 6px 12px 6px 6px; font-size: var(--bz-fs-title); font-weight: 600; letter-spacing: 0; border-bottom: 0; }
 .Layout .VPNavBarTitle .title::before {
   content: ''; flex: none; width: 28px; height: 28px; margin-right: var(--bz-sp-2);
   background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23ff6a13' d='M16 2.5c8.2 0 13.5 4.7 13.5 12.3 0 8.4-5.6 14.7-13.5 14.7S2.5 23.2 2.5 14.8C2.5 7.2 7.8 2.5 16 2.5Z'/%3E%3Cpath fill='%2316161b' d='M12.6 10.2c.9 0 1.6.7 1.6 1.6v5.4a1.6 1.6 0 0 1-3.2 0v-5.4c0-.9.7-1.6 1.6-1.6Zm6.8 0c.9 0 1.6.7 1.6 1.6v5.4a1.6 1.6 0 0 1-3.2 0v-5.4c0-.9.7-1.6 1.6-1.6Z'/%3E%3C/svg%3E") center / contain no-repeat;
@@ -27,15 +35,28 @@
 }
 @media (hover: hover) { .Layout .VPNavBarTitle .title:hover::before { transform: rotate(-10deg) scale(1.12); } }
 
-.module-nav { display: flex; align-items: center; gap: 4px; margin: 0 auto 0 var(--bz-sp-6); }
-.module-nav a { display: grid; place-items: center; min-height: 36px; padding: 0 12px; border-radius: var(--bz-r-control); font-size: var(--bz-fs-btn); font-weight: 500; color: var(--bz-text-2); }
-.module-nav a:hover { color: var(--bz-ink); background: var(--bz-surface-3); }
-.module-nav a[aria-current] { color: var(--bz-ink); background: var(--bz-seg-active); box-shadow: var(--bz-seg-shadow); font-weight: 650; }
-@media (prefers-reduced-motion: no-preference) { .module-nav a:active { transform: scale(.98); } }
-@media (max-width: 767px) {
-  .module-nav { margin-left: 8px; gap: 0; }
-  .module-nav a { min-width: 44px; height: 44px; padding: 0 8px; font-size: var(--bz-fs-sm); }
+.module-nav {
+  position: fixed; top: calc(var(--bz-nav-top) + 2px); left: 50%; translate: -50% 0;
+  isolation: isolate; display: flex; align-items: center; gap: 2px; height: 40px; padding: 4px;
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-pill); background: var(--bz-nav-bg);
+  backdrop-filter: blur(20px) saturate(180%); box-shadow: var(--bz-highlight), 0 10px 28px -16px rgba(0,0,0,.28);
 }
+.module-nav a { display: grid; place-items: center; height: 32px; padding: 0 16px; border-radius: inherit; font-size: var(--bz-fs-sm); font-weight: 550; color: var(--bz-text-2); }
+.module-nav a:hover, .module-nav a[aria-current] { color: var(--bz-ink); }
+.module-nav a[aria-current] { font-weight: 650; }
+.module-slider { position: absolute; left: 0; height: 32px; z-index: -1; border-radius: inherit; background: var(--bz-seg-active); box-shadow: var(--bz-seg-shadow); }
+@media (prefers-reduced-motion: no-preference) { .module-slider { transition: transform 280ms var(--bz-ease-spring), width 280ms var(--bz-ease-spring); } }
+@media (max-width: 767px) {
+  .module-nav a { min-width: 44px; padding: 0 6px; }
+  .Layout .VPNavBar .content-body { padding: 0; }
+  .Layout .VPNavBar .hamburger { width: 44px; }
+}
+@media (min-width: 360px) and (max-width: 460px) {
+  /* 完整站名比汉堡多占约 72px，中岛放在两者之间。 */
+  .module-nav { left: calc(50% + 36px); }
+  .module-nav a { padding-inline: 4px; }
+}
+@media (pointer: coarse) { .module-nav a { min-width: 44px; height: 44px; } }
 @media (min-width: 768px) {
   .Layout .VPNavBar .content-body > :is(.appearance,.social-links) { display: flex; }
   .Layout .VPNavBar .content-body > .extra { display: none; }
@@ -44,16 +65,16 @@
   .Layout .VPNavBarTitle a.title { font-size: 0; width: 44px; justify-content: center; }
   .Layout .VPNavBarTitle a.title::before { margin: 0; }
 }
-/* 「我要投稿」：和 .bz-btn.sm 同一套数（高 32、左右 12、13px / 600、圆角 8、中性玻璃） */
+/* 无边框投稿按钮 */
 .Layout .VPNavBar .VPNavBarMenu { align-items: center; margin-right: var(--bz-sp-1); }
 .Layout .VPNavBar .VPNavBarMenuLink, .Layout .VPNavBar .VPNavBarMenuLink.active {
-  height: 32px; padding: 0 var(--bz-sp-3); border: 1px solid var(--bz-border-strong); border-radius: var(--bz-r-control);
-  background-color: var(--bz-surface-2); box-shadow: var(--bz-highlight); color: var(--bz-ink);
+  height: 32px; padding: 0 var(--bz-sp-3); border: 0; border-radius: var(--bz-r-pill);
+  background: transparent; color: var(--bz-text-2);
   font-family: var(--bz-font-text); font-size: var(--bz-fs-sm); font-weight: 600; line-height: 30px;
   transition: border-color var(--bz-dur) var(--bz-ease), background-color var(--bz-dur) var(--bz-ease);
 }
 .Layout .VPNavBar .VPNavBarMenuLink:hover, .Layout .VPNavBar .VPNavBarMenuLink.active:hover {
-  border-color: var(--bz-border-hover); background-color: var(--bz-surface-3); color: var(--bz-ink);
+  background-color: var(--bz-surface-3); color: var(--bz-ink);
 }
 /* plus 图标：和 theme/icons.ts 的 plus 同一条路径（24 网格、线宽 1.5、圆头），用遮罩画，颜色跟着文字走；手机菜单里那一项也带 */
 .Layout .VPNavBar .VPNavBarMenuLink::before, .Layout .VPNav .VPNavScreenMenuLink::before {
@@ -85,8 +106,8 @@
 
 /* 手机菜单：从导航条下面掉出来的一块面板（浮层，有投影），不铺满全屏 */
 .Layout .VPNav .VPNavScreen {
-  top: calc(var(--bz-nav-top) + var(--bz-nav-bar) + 8px); right: var(--bz-sp-4); bottom: auto; left: var(--bz-sp-4); width: auto;
-  max-height: calc(100dvh - var(--bz-nav-top) - var(--bz-nav-bar) - 24px); padding: var(--bz-sp-1) var(--bz-sp-5) var(--bz-sp-4);
+  top: calc(var(--bz-nav-top) + 44px + 8px); right: var(--bz-sp-4); bottom: auto; left: var(--bz-sp-4); width: auto;
+  max-height: calc(100dvh - var(--bz-nav-top) - 44px - 24px); padding: var(--bz-sp-1) var(--bz-sp-5) var(--bz-sp-4);
   border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-panel); background-color: var(--bz-card);
   box-shadow: var(--bz-highlight), var(--bz-shadow-float);
 }
@@ -95,7 +116,6 @@
 .Layout .VPNav .VPNavScreenAppearance { border-radius: var(--bz-r-control); background-color: var(--bz-surface-2); }
 .Layout .VPNav .VPNavScreenAppearance .text { font-size: var(--bz-fs-sm); }
 @media (max-width: 767px) {
-  .Layout .VPNavBar .wrapper { padding: 0 var(--bz-sp-1) 0 var(--bz-sp-3); }
   .Layout .VPNav .VPNavScreen { padding: 12px; }
   .Layout .VPNav .VPNavScreen .container { display: flex; align-items: center; gap: 8px; padding: 0; }
   .Layout .VPNav .VPNavScreenAppearance, .Layout .VPNav .VPNavScreenSocialLinks { padding: 0; margin: 0; background: none; }
