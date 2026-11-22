@@ -13,7 +13,7 @@ export const isReusable = (license) => REUSABLE_LICENSES.includes(license)
 
 const RULES = {
   prompt: { check: checkPrompt, schema: promptSchema, schemaFile: 'schema/prompt.schema.json', noun: '条 Prompt', tooLarge: '超过 32KB', trim: '正文超过 6000 字的不收正文，改成 summary + 链接；精简 summary、usage 的文字。' },
-  skill: { check: checkSkill, schema: skillSchema, schemaFile: 'schema/skill.schema.json', noun: '个 Skill', tooLarge: '超过 16KB', trim: 'Skill 只放本站写的摘要、安装命令和链接，不放 SKILL.md 原文。' },
+  skill: { check: checkSkill, schema: skillSchema, schemaFile: 'schema/skill.schema.json', noun: '个 Skill', tooLarge: '超过 256KB', trim: '精简摘要和示例，长产出改用节选并注明出处，不放 SKILL.md 全文。' },
 }
 const filled = (value) => typeof value === 'string' && value.trim() !== ''
 
@@ -37,6 +37,26 @@ function checkQuotes(data, say) {
     for (const match of quotes) length += [...match.slice(1).find((part) => part !== undefined)].length
     if (length > 30) say(field, '非可转载许可的条目，摘要或用法中标明的引用超过 30 字', `缩短 ${field} 中的引文，用自己的话介绍并保留 source.url。`)
   }
+}
+
+function checkExamples(entry, say) {
+  if (!Array.isArray(entry.data.examples)) return
+  entry.data.examples.forEach((example, i) => {
+    if (!example || typeof example !== 'object') return
+    const issue = (field, problem, fix) => say(`第 ${i + 1} 个示例 · ${field}`, problem, fix)
+    if (!['ask', 'reply', 'video', 'file'].some(k => filled(example[k])) && !example.images?.length)
+      issue('内容', '没有可展示的示例内容', '至少填写 ask、reply、images、video 或 file 之一。')
+    for (const key of ['ask', 'reply']) {
+      const zh = `${key}Zh`
+      if (example.lang === 'en' && filled(example[key]) && !filled(example[zh])) issue(zh, '英文原文缺少译文', `在 ${zh} 填写本站中文译文。`)
+      if (zh in example && (example.lang === 'zh' || !filled(example[key]))) issue(zh, '译文没有对应的英文原文', `删掉 ${zh}，或补上相应的英文原文并核对 lang。`)
+    }
+    if (Array.isArray(example.images)) for (const image of example.images) {
+      if (image?.file && !entry.imageFiles?.includes(image.file)) issue('images', `找不到图片 ${image.file}`, '将图片放到当前 skills/media/ 下，核对文件名。')
+    }
+    for (const key of ['video', 'file']) if (example[key] && typeof example[key] === 'string' && URL.parse(example[key])?.protocol !== 'https:') issue(key, '不是 HTTPS 地址', '填写完整 HTTPS 链接。')
+    checkSource(example.source?.url, issue)
+  })
 }
 
 function reportStray(entry, dir, report) {
@@ -86,7 +106,7 @@ export function validateLibrary(kind, entries, { now = new Date() } = {}) {
       }
       reportSchemaErrors({
         check: rule.check, schema: rule.schema, data: checked, doc: name, schemaFile: rule.schemaFile,
-        report: (where, problem, fix) => say(where, problem, fix),
+        report: (where, problem, fix) => say(where.replace(/^examples\.(\d+)\b/, (_, i) => `第 ${Number(i) + 1} 个示例`), problem, fix),
       })
       if (typeof data.slug === 'string') {
         if (data.slug !== entry.slug) say('slug', `slug ${data.slug} 和文件名不一致（文件名是 ${name}）`, `把 slug 改成 ${entry.slug}，或者把文件改名为 ${data.slug}.yaml。`)
@@ -96,6 +116,7 @@ export function validateLibrary(kind, entries, { now = new Date() } = {}) {
         else taken.set(data.slug, name)
       }
       validateDate({ data, yamlPath: name }, now, report)
+      if (kind === 'skill') checkExamples(entry, say)
       checkSource(data.source?.url, say)
       if (!isReusable(data.license)) checkQuotes(data, say)
 

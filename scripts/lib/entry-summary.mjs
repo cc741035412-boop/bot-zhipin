@@ -64,6 +64,7 @@ export function summarizeSkill(entry) {
       agent: str(item.agent), command: item.command, note: str(item.note),
     })) : [],
     requires: strings(data.requires),
+    examples: data.examples,
   }
 }
 
@@ -71,7 +72,7 @@ export function summarizeSkill(entry) {
 export const listPrompt = ({ body, bodyZh, summary, usage, copyright, ...item }) => ({
   ...item, copyText: body ? bodyZh ?? body : null,
 })
-export const listSkill = ({ summary, install, requires, ...item }) => item
+export const listSkill = ({ summary, install, requires, examples, ...item }) => item
 
 // FNV-1a 32：slug 只含 ASCII，按无符号整数比较。
 function slugHash(slug) {

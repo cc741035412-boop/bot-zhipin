@@ -51,16 +51,20 @@ export function loadEntries(kind, dir = libraryDirFor(kind)) {
   if (!top) return []
   if (top.isSymbolicLink()) return [buildEntryModel(kind, '.', { stray: 'symlink' })]
   if (!top.isDirectory()) return [buildEntryModel(kind, '.', { stray: 'root-file' })]
+  const media = join(dir, 'media')
+  const imageFiles = kind === 'skill' && lstatSync(media, { throwIfNoEntry: false })?.isDirectory()
+    ? readdirSync(media, { withFileTypes: true }).filter(f => f.isFile()).map(f => f.name) : []
   return readdirSync(dir).filter((name) => name !== '.gitkeep' && name !== '.DS_Store').sort().map((name) => {
     const path = join(dir, name)
     const stat = lstatSync(path, { throwIfNoEntry: false })
     if (!stat) return null
     if (stat.isSymbolicLink()) return buildEntryModel(kind, name, { stray: 'symlink' })
+    if (kind === 'skill' && stat.isDirectory() && name === 'media') return null
     if (stat.isDirectory()) return buildEntryModel(kind, name, { stray: 'directory' })
     if (!stat.isFile() || !name.endsWith('.yaml')) return buildEntryModel(kind, name, { stray: 'extension' })
     // 超限的文件不读进内存：给一个刚好超限的占位，让内核报「文件太大」。
     const raw = stat.size > yamlBytes ? ' '.repeat(yamlBytes + 1) : readFileSync(path, 'utf8')
-    return { ...buildEntryModel(kind, name, { raw }), path }
+    return { ...buildEntryModel(kind, name, { raw }), path, imageFiles }
   }).filter(Boolean)
 }
 

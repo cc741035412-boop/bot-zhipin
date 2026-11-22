@@ -26,6 +26,9 @@ export interface LibraryItem extends LibraryCard {
   usage?: string
   body?: string
   bodyZh?: string
+  examples?: { caption: string; lang: 'en' | 'zh'; ask?: string; askZh?: string; reply?: string; replyZh?: string; excerpt?: boolean;
+    images?: { file: string; alt: string; width: number; height: number }[]; video?: string; file?: string;
+    source: { url: string; name: string }; rights: string }[]
   requires?: string[]
   install?: { agent: string; command: string; note?: string }[]
 }
