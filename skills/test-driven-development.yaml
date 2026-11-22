@@ -30,3 +30,174 @@ author:
 license: MIT
 licenseUrl: https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 针对邮箱留空也能提交的问题，先写测试确认它会失败，再补上必填校验，让同一个测试通过。
+    lang: en
+    ask: Empty email accepted
+    reply: |-
+      **RED**
+      ```typescript
+      test('rejects empty email', async () => {
+        const result = await submitForm({ email: '' });
+        expect(result.error).toBe('Email required');
+      });
+      ```
+
+      **Verify RED**
+      ```bash
+      $ npm test
+      FAIL: expected 'Email required', got undefined
+      ```
+
+      **GREEN**
+      ```typescript
+      function submitForm(data: FormData) {
+        if (!data.email?.trim()) {
+          return { error: 'Email required' };
+        }
+        // ...
+      }
+      ```
+
+      **Verify GREEN**
+      ```bash
+      $ npm test
+      PASS
+      ```
+
+      **REFACTOR**
+      Extract validation for multiple fields if needed.
+    askZh: 邮箱留空也能提交。
+    replyZh: |-
+      **红灯：写一个应当失败的测试**
+      ```typescript
+      test('rejects empty email', async () => {
+        const result = await submitForm({ email: '' });
+        expect(result.error).toBe('Email required');
+      });
+      ```
+
+      **验证红灯：运行测试，确认它确实失败**
+      ```bash
+      $ npm test
+      FAIL: expected 'Email required', got undefined
+      ```
+
+      **绿灯：写代码让这个测试通过**
+      ```typescript
+      function submitForm(data: FormData) {
+        if (!data.email?.trim()) {
+          return { error: 'Email required' };
+        }
+        // ...
+      }
+      ```
+
+      **验证绿灯：再次运行测试，确认它已经通过**
+      ```bash
+      $ npm test
+      PASS
+      ```
+
+      **重构**
+      如果有多个字段需要校验，可以把校验逻辑提取出来。
+    source:
+      url: https://raw.githubusercontent.com/obra/superpowers/22f0b463e7a5e579904dd6211a520321035526f7/skills/test-driven-development/SKILL.md
+      name: obra/superpowers
+    rights: MIT（obra/superpowers）
+  - caption: 先用测试检查 todo 脚本是否存在且可执行，看到失败后才写入最小脚本、加上执行权限，再跑一次就通过了。
+    lang: en
+    reply: |-
+      Bash(npm test)
+       Waiting 
+       
+
+       Error: > todo-cli@1.0.0 test
+       > bats tests/
+
+       1..1
+       not ok 1 todo script exists and is executable
+       # (in test file tests/todo.bats, line 14)
+       # `[ -x "./todo" ]' failed
+       
+
+       Write(/Users/jesse/tmp/new-tool/.worktrees/todo-cli/todo)
+
+       
+
+       Wrote 3 lines to /Users/jesse/tmp/new-tool/.worktrees/todo-cli/todo
+       #!/usr/bin/env bash
+       # Minimal todo CLI
+
+       
+
+       Bash(chmod +x /Users/jesse/tmp/new-tool/.worktrees/todo-cli/todo)
+       Waiting 
+       
+
+       (No content)
+
+       
+
+       Bash(npm test)
+       Waiting 
+       
+
+       > todo-cli@1.0.0 test 
+       > bats tests/
+
+       1..1
+       ok 1 todo script exists and is executable
+    replyZh: |-
+      ```text
+      Bash(npm test)
+      ```
+      正在等待命令执行完毕
+
+      出错：
+      ```text
+      > todo-cli@1.0.0 test
+      > bats tests/
+
+      1..1
+      not ok 1 todo script exists and is executable
+      # (in test file tests/todo.bats, line 14)
+      # `[ -x "./todo" ]' failed
+      ```
+
+      ```text
+      Write(/Users/jesse/tmp/new-tool/.worktrees/todo-cli/todo)
+      ```
+
+      已将 3 行内容写入 /Users/jesse/tmp/new-tool/.worktrees/todo-cli/todo
+      ```bash
+      #!/usr/bin/env bash
+      # Minimal todo CLI
+      ```
+
+      ```text
+      Bash(chmod +x /Users/jesse/tmp/new-tool/.worktrees/todo-cli/todo)
+      ```
+      正在等待命令执行完毕
+
+      （没有输出内容）
+
+      ```text
+      Bash(npm test)
+      ```
+      正在等待命令执行完毕
+
+      ```text
+      > todo-cli@1.0.0 test
+      > bats tests/
+
+      1..1
+      ok 1 todo script exists and is executable
+      ```
+    excerpt: true
+    file: https://blog.fsck.com/blog/2025/superpowers/superpowers-demo.txt
+    source:
+      url: https://blog.fsck.com/blog/2025/superpowers/superpowers-demo.txt
+      name: Jesse Vincent 的博客
+    rights: Jesse Vincent 个人博客 blog.fsck.com，页脚声明 © 1996–2026 Jesse Vincent. All rights reserved，未声明开源许可

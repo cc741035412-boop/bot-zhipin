@@ -21,3 +21,9 @@ author:
   name: 示例个人开发者
 license: 未声明
 addedAt: 2026-11-09
+examples:
+  - caption: 将重复的操作整理为技能草稿。
+    lang: zh
+    ask: 把这份操作记录整理成一个能反复使用的技能。
+    source: { name: 示例个人开发者, url: https://example.com/demo-skills/builder/draft }
+    rights: © 示例个人开发者

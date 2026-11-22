@@ -34,3 +34,12 @@ author:
 license: MIT
 licenseUrl: https://github.com/KKKKhazix/khazix-skills/blob/76fc0f8e8245b40a809d8eed89b27f04cbcf81bb/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 直接点名 Cursor，请它用横纵分析法研究这家公司。
+    lang: zh
+    ask: 研究一下 Cursor 这家公司
+    source:
+      url: https://raw.githubusercontent.com/KKKKhazix/khazix-skills/76fc0f8e8245b40a809d8eed89b27f04cbcf81bb/README.md
+      name: KKKKhazix/khazix-skills
+    rights: MIT（KKKKhazix/khazix-skills）

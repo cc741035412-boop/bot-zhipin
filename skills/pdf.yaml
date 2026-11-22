@@ -32,3 +32,41 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/pdf/LICENSE.txt
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 想知道餐车哪些菜卖得好、利润如何，拿到一份用图表分析经营状况的 PDF 报告。
+    lang: en
+    ask: I need a business report for my food truck. Create a PDF with charts - best sellers, margin, etc- whatever you think is useful. Make it look great and help me make decisions!
+    askZh: 我需要一份餐车经营报告。做成带图表的 PDF，看看哪些菜最畅销、利润率怎么样，其他你觉得有用的内容也可以放进去。排版要好看，还得能帮我做决策！
+    images:
+      - file: pdf-1-1.jpg
+        alt: 图中央是餐车经营报告的 PDF 预览，第 2 页用趋势图、横向条形图和按星期几汇总的表格分析经营表现。
+    source:
+      url: https://claude.com/resources/articles/create-files
+      name: Anthropic 官网
+    rights: © 2026 Anthropic PBC
+  - caption: 上传 PDF 订单表，让 Claude 用它已经知道的个人信息填表。
+    lang: en
+    ask: |-
+      Fill out this PDF based on what you know about me
+      Attached: /mnt/uploads/order_form.pdf
+    reply: Certainly! I’ll use the PDF Skill to help
+    askZh: |-
+      根据你对我的了解，帮我填好这份 PDF。
+      附件：/mnt/uploads/order_form.pdf
+    replyZh: 当然！我会用 PDF 技能来帮你填。
+    images:
+      - file: pdf-2-1.jpg
+        alt: 上下文示意图中，用户附上 PDF 订单表后，Claude 先读取 PDF 技能的 SKILL.md，再按其中的引用读取 forms.md。
+    source:
+      url: https://www.anthropic.com/research/equipping-agents-for-the-real-world-with-agent-skills
+      name: Anthropic 官网
+    rights: © 2026 Anthropic PBC
+  - caption: 给出 PDF 文件路径，让 Claude 提取其中的表单字段。
+    lang: en
+    ask: Use the PDF skill to extract the form fields from `path/to/some-file.pdf`
+    askZh: 用 PDF 技能从 `path/to/some-file.pdf` 中提取表单字段。
+    source:
+      url: https://raw.githubusercontent.com/anthropics/skills/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/README.md
+      name: anthropics/skills
+    rights: Apache-2.0（anthropics/skills）

@@ -30,3 +30,36 @@ author:
 license: MIT
 licenseUrl: https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 确认设计后，让它为命令行待办工具写实现计划，定下三个子命令、单脚本结构和纯文本存储方式。
+    lang: en
+    ask: 'Yes'
+    reply: |-
+      # Todo CLI Implementation Plan
+
+       > **For Claude:** Use `${CLAUDE_PLUGIN_ROOT}/skills/collaboration/executing-plans/SKILL.md` to implement this plan task-by-task.
+
+       **Goal:** Build a minimal bash CLI tool for managing todos with add, list, and complete commands
+
+       **Architecture:** Single executable bash script (`todo`) that stores todos in a plain text file (`.todos.txt`). Each command (add/list/complete) operates on this file. No persistence between
+       invocations beyond the file storage.
+
+       **Tech Stack:** Bash, bats (Bash Automated Testing System), plain text storage
+    askZh: 是的。
+    replyZh: |-
+      # 命令行待办工具实现计划
+
+       > **给 Claude：** 使用 `${CLAUDE_PLUGIN_ROOT}/skills/collaboration/executing-plans/SKILL.md`，逐项完成这份计划中的任务。
+
+       **目标：** 用 Bash 写一个最小的命令行待办工具，通过 add、list 和 complete 三个命令来添加任务、列出任务和标记任务完成。
+
+       **架构：** 整个工具是一个可执行的 Bash 脚本（`todo`），待办事项保存在一个纯文本文件（`.todos.txt`）中。每个命令（add/list/complete）都操作这个文件。两次调用之间，除了文件里保存的内容，不保留其他状态。
+
+       **技术栈：** Bash、bats（Bash 自动化测试系统）、纯文本存储
+    excerpt: true
+    file: https://blog.fsck.com/blog/2025/superpowers/superpowers-demo.txt
+    source:
+      url: https://blog.fsck.com/blog/2025/superpowers/superpowers-demo.txt
+      name: Jesse Vincent 的博客
+    rights: Jesse Vincent 个人博客 blog.fsck.com，页脚声明 © 1996–2026 Jesse Vincent. All rights reserved，未声明开源许可

@@ -22,3 +22,13 @@ author:
 license: Apache-2.0
 licenseUrl: https://example.com/demo-skills/LICENSE
 addedAt: 2026-11-14
+examples:
+  - caption: 对照两种背景色的页面底稿。
+    lang: zh
+    images:
+      - { file: demo-blue.png, alt: 蓝色页面底稿 }
+      - { file: demo-green.png, alt: 绿色页面底稿 }
+    video: https://example.com/demo-skills/design/video
+    file: https://example.com/demo-skills/design/layout.pdf
+    source: { name: 示例团队, url: https://example.com/demo-skills/design/colors }
+    rights: © 示例团队

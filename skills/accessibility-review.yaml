@@ -22,3 +22,13 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 给出页面设计稿，请它按 WCAG 2.1 AA 标准找出无障碍问题。
+    lang: en
+    ask: Audit this page design for WCAG 2.1 AA compliance issues
+    askZh: 请检查这份页面设计，看看哪些地方不符合 WCAG 2.1 AA 标准。
+    source:
+      url: https://claude.com/plugins/design
+      name: Anthropic 官网
+    rights: © 2026 Anthropic PBC

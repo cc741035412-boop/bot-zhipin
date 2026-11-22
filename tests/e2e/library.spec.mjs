@@ -409,6 +409,76 @@ for (const width of [1280, 390])
       await expect(small).toBeVisible()
       expect(await small.textContent()).toBe(i.copyright)
     })
+    test('正式作者示例：复制 xlsx 的中文请求，无示例不显示章节', async ({ page: p }, info) => {
+      await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
+      await gotoReady(p, '/skills/xlsx')
+      const section = p.locator('.ix-examples')
+      await expect(section.getByRole('heading', { name: '示例', exact: true })).toBeVisible()
+      const shot = async name => {
+        const dir = process.env.EXAMPLE_SHOTS_DIR || info.outputPath('shots')
+        await mkdir(dir, { recursive: true })
+        await section.evaluate(el => window.scrollBy(0, el.getBoundingClientRect().top - 88))
+        await p.screenshot({ path: join(dir, `example-real-${name}.png`), animations: 'disabled' })
+      }
+      if (!mobile) await shot('xlsx-1280-light')
+      await copy(p, section.locator('.ix-ask .copy').first(), 'Enter', '我想给妻子一个惊喜，带她去意大利旅行！我有 6 个月可以攒钱，这是我最近的收支情况。帮我用 Excel 做个计划，再列一份预算。我能从哪些开销里省出这笔钱呢？！')
+      if (!mobile) {
+        await p.emulateMedia({ colorScheme: 'dark' })
+        await gotoReady(p, '/skills/notion-meeting-intelligence')
+        await expect(p.locator('html')).toHaveClass(/dark/)
+        await shot('notion-meeting-intelligence-1280-dark')
+      }
+      await gotoReady(p, '/skills/design-handoff')
+      await expect(p.locator('.ix-title h1')).toBeVisible()
+      await expect(p.getByRole('heading', { name: '示例', exact: true })).toHaveCount(0)
+    })
+    fixtureTest('作者示例：中文复制、折叠、原文与媒体', async ({ page: p, fixtureURL }, info) => {
+      await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
+      await gotoReady(p, fixtureURL + '/skills/demo-pdf-toolkit')
+      const section = p.locator('.ix-examples'), reply = section.locator('.ix-reply')
+      const shot = async name => {
+        const dir = process.env.EXAMPLE_SHOTS_DIR || info.outputPath('shots')
+        await mkdir(dir, { recursive: true })
+        await section.evaluate(el => window.scrollBy(0, el.getBoundingClientRect().top - 88))
+        await p.screenshot({ path: join(dir, `example-${width}-${name}.png`), animations: 'disabled' })
+      }
+      await expect(p.locator('.ix-body h2')).toHaveText(['安装','示例','运行依赖','摘要','适用场景','来源'])
+      await expect(reply.getByText('节选')).toBeVisible()
+      await expect(reply.getByRole('button')).toHaveAttribute('aria-expanded','false')
+      await noOverflow(p)
+      await shot('light')
+      if (!mobile) {
+        await p.emulateMedia({ colorScheme: 'dark' })
+        await expect(p.locator('html')).toHaveClass(/dark/)
+        await shot('dark')
+        await p.emulateMedia({ colorScheme: 'light' })
+      }
+      await copy(p, section.locator('.copy'), 'Enter', '请提取章节标题和页码。')
+      await reply.getByRole('button', { name: '展开' }).click()
+      await expect(reply.getByRole('button')).toHaveAttribute('aria-expanded','true')
+      await section.getByText('英文原文').click()
+      await expect(section.getByText('Extract the chapter titles and page numbers.')).toBeVisible()
+      if (!mobile) await shot('expanded')
+      await reply.getByRole('button', { name: '收起' }).click()
+      await expect(reply.getByRole('button')).toHaveAttribute('aria-expanded','false')
+      await gotoReady(p, fixtureURL + '/skills/demo-frontend-design')
+      await expect(section.locator('img')).toHaveCount(2)
+      for (const img of await section.locator('img').all()) {
+        await img.scrollIntoViewIfNeeded()
+        await expect(img).toHaveAttribute('alt', /底稿/)
+        await expect(img).toHaveAttribute('loading','lazy')
+        await expect(img).toHaveAttribute('width','960')
+        await expect(img).toHaveAttribute('height','240')
+        await expect.poll(() => img.evaluate(el => el.naturalWidth)).toBe(960)
+      }
+      for (const name of ['看演示视频','看示例文件']) {
+        const link = section.getByRole('link', { name })
+        await expect(link).toHaveAttribute('target','_blank')
+        await expect(link).toHaveAttribute('rel','noopener noreferrer')
+      }
+      await noOverflow(p)
+      if (!mobile) await shot('images')
+    })
     fixtureTest('双语正文优先显示和复制中文，展开可复制英文', async ({ page: p, fixtureURL }, info) => {
       const i = fixturePrompts.find(i => i.lang === 'en' && i.bodyZh)
       await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
@@ -485,7 +555,7 @@ for (const width of [1280, 390])
     test('DETAIL-03 Skill 安装顺序、说明和可选依赖', async ({ page: p }) => {
       for (const i of new Set([skill, db.skills.find((i) => !i.requires?.length)].filter(Boolean))) {
         await gotoReady(p, pathFor(i))
-        expect(await normText(p, '.ix-body h2')).toEqual(['安装', ...(i.requires?.length ? ['运行依赖'] : []), '摘要', '适用场景', '来源'])
+        expect(await normText(p, '.ix-body h2')).toEqual(['安装', ...(i.examples?.length ? ['示例'] : []), ...(i.requires?.length ? ['运行依赖'] : []), '摘要', '适用场景', '来源'])
         expect(await normText(p, '.ix-term header > span')).toEqual(i.install.map((s) => s.agent))
         expect(await normText(p, '.ix-term code')).toEqual(i.install.map((s) => s.command))
         expect(await normText(p, '.ix-term p')).toEqual(i.install.flatMap((s) => (s.note ? [s.note] : [])))

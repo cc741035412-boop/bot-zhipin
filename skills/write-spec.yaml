@@ -22,3 +22,16 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 提出给企业客户加单点登录的需求，得到一份完整的产品需求文档，列明用户故事、成功指标和待解问题。
+    lang: en
+    ask: We need to add SSO support for enterprise customers
+    reply: "[Generates full PRD with problem statement, user stories, requirements, success metrics, open questions]"
+    askZh: 我们需要为企业客户增加单点登录（SSO）支持。
+    replyZh: "[生成完整的产品需求文档（PRD），包括问题描述、用户故事、需求、成功指标和待解决的问题]"
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/README.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）

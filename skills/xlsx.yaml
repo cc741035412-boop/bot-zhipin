@@ -30,3 +30,73 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/xlsx/LICENSE.txt
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 给出近期收支，用 Excel 算出哪些开支可以省，再按月攒够去意大利旅行的钱。
+    lang: en
+    ask: I want to surprise my wife with a trip to Italy! I have 6 months to save - here’s my recent finances. Help me create a plan and a budget in Excel. Where can I save the money?!
+    askZh: 我想给妻子一个惊喜，带她去意大利旅行！我有 6 个月可以攒钱，这是我最近的收支情况。帮我用 Excel 做个计划，再列一份预算。我能从哪些开销里省出这笔钱呢？！
+    images:
+      - file: xlsx-1-1.jpg
+        alt: 图右侧的意大利旅行储蓄表列出每月目标、要采取的行动、各项开支能省多少钱，以及每周要坚持的习惯。
+    source:
+      url: https://claude.com/resources/articles/create-files
+      name: Anthropic 官网
+    rights: © 2026 Anthropic PBC
+  - caption: 根据餐车经营报告做出 Excel 定价模型，输入烤肉饭的新价格，就能看利润会怎么变。
+    lang: en
+    video: https://www.youtube.com/watch?v=EV89Ws8Ui9Y
+    source:
+      url: https://www.youtube.com/watch?v=EV89Ws8Ui9Y
+      name: Anthropic 官方 YouTube 频道
+    rights: Anthropic 官方 YouTube 视频，未声明开源许可
+  - caption: 给出月度收支明细，请 Claude 做一张 Excel 预算表，用公式算净储蓄，用柱状图对比收入和支出。
+    lang: en
+    ask: |-
+      Create a monthly budget Excel spreadsheet with the following:
+
+      Income:
+      - Salary: $5,000
+      - Freelance: $1,200
+      - Investments: $300
+
+      Expenses:
+      - Rent: $1,500
+      - Utilities: $200
+      - Groceries: $600
+      - Transportation: $300
+      - Entertainment: $400
+      - Savings: $1,000
+
+      Include:
+      1. Formulas to calculate total income and total expenses
+      2. A formula for net savings (income - expenses)
+      3. Format currency values properly
+      4. Add a simple column chart showing income vs expenses
+      5. Use professional formatting with headers
+    askZh: |-
+      根据以下内容做一张 Excel 月度预算表：
+
+      收入：
+      - 工资：$5,000
+      - 自由职业收入：$1,200
+      - 投资收益：$300
+
+      支出：
+      - 房租：$1,500
+      - 水电等公用事业费：$200
+      - 食品杂货：$600
+      - 交通：$300
+      - 娱乐：$400
+      - 储蓄：$1,000
+
+      要求：
+      1. 用公式分别算出总收入和总支出
+      2. 用公式算出净储蓄（收入减去支出）
+      3. 为金额设置正确的货币格式
+      4. 加一张简单的柱状图，对比收入和支出
+      5. 设置表头，排版要专业
+    source:
+      url: https://raw.githubusercontent.com/anthropics/claude-cookbooks/8ad5de647d4f0f50c95d74aabc8aa20a3f70cdd3/skills/notebooks/01_skills_introduction.ipynb
+      name: anthropics/claude-cookbooks
+    rights: MIT（anthropics/claude-cookbooks）

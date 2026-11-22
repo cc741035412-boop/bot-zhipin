@@ -36,3 +36,200 @@ author:
 license: MIT
 licenseUrl: https://github.com/OthmanAdi/planning-with-files/blob/c37abd73ff25f309a7b1b5991ef2149d5858bc49/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 用任务计划跟踪 Python 命令行待办工具的开发，逐项记下增删查功能的测试结果和遇到的错误。
+    lang: en
+    ask: Build a simple command-line todo app in Python that can add, list, and delete tasks.
+    reply: |-
+      # Task Plan: Build Command-Line Todo App
+
+      ## Goal
+      Create a Python CLI todo app with add, list, and delete functionality.
+
+      ## Current Phase
+      Phase 5 (Complete)
+
+      ## Phases
+
+      ### Phase 1: Requirements & Discovery
+      - [x] Understand user intent ✓
+      - [x] Identify constraints and requirements ✓
+      - [x] Document findings in findings.md ✓
+      - **Status:** complete
+
+      ### Phase 2: Planning & Structure
+      - [x] Define technical approach ✓
+      - [x] Create project structure ✓
+      - [x] Document decisions with rationale ✓
+      - **Status:** complete
+
+      ### Phase 3: Implementation
+      - [x] Write todo.py with core functions ✓
+      - [x] Implement add functionality ✓
+      - [x] Implement list functionality ✓
+      - [x] Implement delete functionality ✓
+      - **Status:** complete
+
+      ### Phase 4: Testing & Verification
+      - [x] Test add operation ✓
+      - [x] Test list operation ✓
+      - [x] Test delete operation ✓
+      - [x] Verify error handling ✓
+      - **Status:** complete
+
+      ### Phase 5: Delivery
+      - [x] Review code quality ✓
+      - [x] Ensure all features work ✓
+      - [x] Deliver to user ✓
+      - **Status:** complete
+
+      ## Key Questions
+      1. Should tasks persist between sessions? ✓ Yes - using JSON file
+      2. What format for storing tasks? ✓ JSON file (todos.json)
+      3. Command-line interface style? ✓ argparse with subcommands
+
+      ## Decisions Made
+      | Decision | Rationale |
+      |----------|-----------|
+      | Use JSON for storage | Simple, human-readable, built-in Python support |
+      | argparse with subcommands | Clean CLI: `python todo.py add "task"`, `python todo.py list` |
+      | Store in todos.json | Standard location, easy to find and debug |
+      | Use incremental IDs | Simple counter, easier than UUIDs for this use case |
+
+      ## Errors Encountered
+      | Error | Attempt | Resolution |
+      |-------|---------|------------|
+      | FileNotFoundError when reading todos.json | 1 | Check if file exists, create empty list if not |
+      | JSONDecodeError on empty file | 2 | Handle empty file case explicitly |
+
+      ## Notes
+      - Update phase status as you progress: pending → in_progress → complete
+      - Re-read this plan before major decisions (plan recitation)
+      - Log ALL errors - they help avoid repetition
+    askZh: 用 Python 写个简单的命令行待办工具，能添加任务、列出任务和删除任务。
+    replyZh: |-
+      # 任务计划：开发命令行待办工具
+
+      ## 目标
+      用 Python 开发一个命令行待办工具，支持添加、列出和删除任务。
+
+      ## 当前阶段
+      第 5 阶段（已完成）
+
+      ## 阶段划分
+
+      ### 第 1 阶段：梳理需求
+      - [x] 弄清用户想做什么 ✓
+      - [x] 明确限制条件和需求 ✓
+      - [x] 把调查结果记在 findings.md 中 ✓
+      - **状态：** 已完成
+
+      ### 第 2 阶段：规划方案和项目结构
+      - [x] 确定技术方案 ✓
+      - [x] 创建项目结构 ✓
+      - [x] 记录各项决定及其理由 ✓
+      - **状态：** 已完成
+
+      ### 第 3 阶段：实现功能
+      - [x] 在 todo.py 中编写核心函数 ✓
+      - [x] 实现添加任务的功能 ✓
+      - [x] 实现列出任务的功能 ✓
+      - [x] 实现删除任务的功能 ✓
+      - **状态：** 已完成
+
+      ### 第 4 阶段：测试与验证
+      - [x] 测试添加操作 ✓
+      - [x] 测试列出任务的操作 ✓
+      - [x] 测试删除操作 ✓
+      - [x] 验证错误处理逻辑 ✓
+      - **状态：** 已完成
+
+      ### 第 5 阶段：交付
+      - [x] 检查代码质量 ✓
+      - [x] 确认所有功能都能正常使用 ✓
+      - [x] 交付给用户 ✓
+      - **状态：** 已完成
+
+      ## 关键问题
+      1. 退出后要保留任务，供下次使用吗？✓ 要，用 JSON 文件保存。
+      2. 用什么格式存储任务？✓ JSON 文件（todos.json）。
+      3. 命令行接口采用哪种形式？✓ 用 argparse 处理子命令。
+
+      ## 已作出的决定
+      | 决定 | 理由 |
+      |----------|-----------|
+      | 用 JSON 存储 | 格式简单，便于阅读，Python 原生支持 |
+      | 用 argparse 处理子命令 | 命令简洁：`python todo.py add "task"`、`python todo.py list` |
+      | 存在 todos.json 中 | 存储位置固定，方便查找和调试 |
+      | 用递增的 ID | 只需一个计数器，这种场景下比 UUID 简单 |
+
+      ## 遇到的错误
+      | 错误 | 尝试次数 | 解决办法 |
+      |-------|---------|------------|
+      | 读取 todos.json 时出现 FileNotFoundError | 1 | 检查文件是否存在，不存在就创建空列表 |
+      | 文件为空时出现 JSONDecodeError | 2 | 单独处理空文件的情况 |
+
+      ## 备注
+      - 随进度更新阶段状态：pending → in_progress → complete
+      - 作重大决定前，重新读一遍这份计划（回顾计划）
+      - 把所有错误都记下来，以免重犯
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/OthmanAdi/planning-with-files/c37abd73ff25f309a7b1b5991ef2149d5858bc49/examples/README.md
+      name: OthmanAdi/planning-with-files
+    rights: MIT（OthmanAdi/planning-with-files）
+  - caption: 请它调研晨练的好处，它先写出四步计划，列出要查的身心健康问题和需要寻找的研究证据。
+    lang: en
+    ask: Research the benefits of morning exercise and write a summary
+    reply: |-
+      # Task Plan: Morning Exercise Benefits Research
+
+      ## Goal
+      Create a research summary on the benefits of morning exercise.
+
+      ## Phases
+      - [ ] Phase 1: Create this plan ✓
+      - [ ] Phase 2: Search and gather sources
+      - [ ] Phase 3: Synthesize findings
+      - [ ] Phase 4: Deliver summary
+
+      ## Key Questions
+      1. What are the physical health benefits?
+      2. What are the mental health benefits?
+      3. What scientific studies support this?
+
+      ## Status
+      **Currently in Phase 1** - Creating plan
+    askZh: 调研一下晨练有哪些好处，写一份总结。
+    replyZh: |-
+      # 任务计划：调研晨练的好处
+
+      ## 目标
+      就晨练的好处写一份研究总结。
+
+      ## 阶段划分
+      - [ ] 第 1 阶段：制定这份计划 ✓
+      - [ ] 第 2 阶段：检索并收集资料
+      - [ ] 第 3 阶段：综合研究结果
+      - [ ] 第 4 阶段：交付总结
+
+      ## 关键问题
+      1. 晨练对身体健康有哪些好处？
+      2. 晨练对心理健康有哪些好处？
+      3. 哪些科学研究支持这些说法？
+
+      ## 状态
+      **当前处于第 1 阶段**：正在制定计划
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/OthmanAdi/planning-with-files/c37abd73ff25f309a7b1b5991ef2149d5858bc49/skills/planning-with-files/examples.md
+      name: OthmanAdi/planning-with-files
+    rights: MIT（OthmanAdi/planning-with-files）
+  - caption: 动画对比了上下文清空后的两种情况：没有计划文件得重新问在做什么，有文件就能查到下一步是做边界测试。
+    lang: en
+    video: https://raw.githubusercontent.com/OthmanAdi/planning-with-files/c37abd73ff25f309a7b1b5991ef2149d5858bc49/media/pwf-context-story-v1.mp4
+    source:
+      url: https://raw.githubusercontent.com/OthmanAdi/planning-with-files/c37abd73ff25f309a7b1b5991ef2149d5858bc49/README.md
+      name: OthmanAdi/planning-with-files
+    rights: MIT（OthmanAdi/planning-with-files）

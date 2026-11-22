@@ -24,3 +24,37 @@ licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a
 requires:
 - Python 3
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 用 skill-creator 做好并打包一个图片编辑技能，再用它居中裁剪小狗照片并旋转 180 度。
+    lang: en
+    video: https://www.youtube.com/watch?v=kS1MJFZWMq4
+    source:
+      url: https://www.youtube.com/watch?v=kS1MJFZWMq4
+      name: Anthropic 官方 YouTube 频道
+    rights: Anthropic 官方 YouTube 视频，未声明开源许可
+  - caption: 用同一组任务测试 PDF 技能，五项测试中，加载技能时全部通过，不加载时通过两项。
+    lang: en
+    ask: Benchmark the pdf skill with and without the skill loaded. Show me side-by-side results so I can see the uplift.
+    askZh: 分别在加载和不加载 PDF 技能的情况下跑一次基准测试。把两组结果并排列出来，让我看看提升有多大。
+    images:
+      - file: skill-creator-2-1.png
+        alt: 对照表逐项列出五个 PDF 任务是否通过、耗时和 token 用量：加载技能时通过率为 100%，未加载时为 40%。
+    source:
+      url: https://claude.com/resources/articles/improving-skill-creator-test-measure-and-refine-agent-skills
+      name: Anthropic 官网
+    rights: © 2026 Anthropic PBC
+  - caption: 准备好销售电话后，请 Claude 把刚才的准备流程做成可下载的技能。
+    lang: en
+    ask: Claude can you help me make a skill?
+    reply: Luckily, I remember exactly what just happened (prepping you for a sales call), and I have a skill builder skill to help create a skill!
+    askZh: Claude，你能帮我做一个技能吗？
+    replyZh: 正好，我还清楚地记得刚才做了什么（帮你为一通销售电话做准备），而且我有一个专门用来创建技能的技能，可以帮上忙！
+    excerpt: true
+    images:
+      - file: skill-creator-3-1.jpg
+        alt: 对话中，Claude 读取技能创建工具，底部出现名为 sales-call-prep 的技能卡片和下载按钮。
+    source:
+      url: https://claude.com/skills
+      name: Anthropic 官网
+    rights: © 2026 Anthropic PBC

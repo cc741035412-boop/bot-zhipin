@@ -12,6 +12,7 @@ import { INDEX_PATH, SKILL_DIR, buildAgentData } from '../../scripts/lib/agent-d
 import { promptData, skillData } from './data/prompts-skills.mjs'
 import { generateOgImages } from '../../scripts/og/index.mjs'
 import { generateHeaders } from '../../scripts/gen-headers.mjs'
+import { skillMedia } from './skill-media.mjs'
 import { botWatch } from './bot-watch.mjs'
 import { fullName } from '../../scripts/lib/bot-name.mjs'
 
@@ -63,7 +64,7 @@ export default defineConfig({
     ['script', {}, `if(location.hostname===${JSON.stringify(SITE.legacyHost)})location.replace(${JSON.stringify(SITE.url)}+location.pathname+location.search+location.hash)`],
   ],
   appearance: true,
-  vite: { plugins: [botWatch()] },
+  vite: { plugins: [botWatch(), skillMedia()] },
   lastUpdated: false,
   // 构建产物里补这些：分享图（og/）、catalog.json、llms.txt、按投稿页内联脚本算出的 CSP（_headers），
   // 以及给 AI 用的 Prompt、Skill、Bot 数据（data/）和 bot-zhipin skill 的文件（skill/bot-zhipin/，决策 70）。

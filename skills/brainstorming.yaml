@@ -33,3 +33,136 @@ requires:
 - Git
 - Node.js（可选，用于草图预览）
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 想给面包店做网站，它先问清访客是来看当天卖什么，还是要在线下单。
+    lang: en
+    ask: |-
+      a website for
+        my bakery
+    reply: |-
+      If it's mostly for people deciding whether to stop by,
+        I'd lead with hours and what's in the case today; taking orders is a
+        different site. What do you want someone to do when they land on it?
+    askZh: 给我的面包店做个网站
+    replyZh: 如果主要是给还在考虑要不要来店里的人看，我会把营业时间和今天柜台里卖什么放在最前面；如果要接单，网站的做法就不一样了。你希望访客打开网站后做什么？
+    source:
+      url: https://raw.githubusercontent.com/obra/superpowers/22f0b463e7a5e579904dd6211a520321035526f7/skills/brainstorming/SKILL.md
+      name: obra/superpowers
+    rights: MIT（obra/superpowers）
+  - caption: 提出做个待办清单应用，它先查看项目目录，再问要做成命令行工具、网页、桌面应用还是手机应用。
+    lang: en
+    ask: Let's make a todo list app
+    reply: |-
+      I'll help you create a todo list app! Let me first check the superpowers getting-started guide, then we can plan this out together.
+
+       Read(file_path: "/Users/jesse/.claude/plugins/cache/superpowers/skills/getting-started/SKILL.md")
+       Read 174 lines
+
+       I've read the getting-started guide and I'm ready to help with your superpowers workflow!
+
+       Since we're starting a new project, I'm going to follow Mandatory Workflow 1 and use the Brainstorming skill to understand what you want before jumping into code.
+
+       Read(file_path: "/Users/jesse/.claude/plugins/cache/superpowers/skills/collaboration/brainstorming/SKILL.md")
+       Read 57 lines
+
+       I'm using the Brainstorming skill to refine your idea into a design.
+
+       Let me first check what's currently in this directory to understand the starting point:
+
+       Bash(ls -la)
+       total 0 
+       drwxr-xr-x 3 jesse admin 96 Oct 9 13:14 .
+       drwxr-xr-x 3 jesse admin 96 Oct 9 13:05 ..
+       drwx------@ 3 jesse admin 96 Oct 9 13:38 .claude
+
+       Perfect, we're starting from scratch in a clean directory.
+
+       Now, let me understand what you're envisioning. What type of todo list app do you want to build?
+
+       A) Command-line tool - Simple CLI that stores todos locally (fastest to build)
+       B) Web application - Browser-based with persistent storage
+       C) Desktop GUI - Native app with local storage
+       D) Mobile app - iOS/Android application
+       E) Something else - Tell me what you're thinking
+    askZh: 我们来做个待办清单应用吧
+    replyZh: |-
+      我来帮你做个待办清单应用！我先看看 superpowers 入门指南，再一起规划怎么做。
+
+      ```
+       Read(file_path: "/Users/jesse/.claude/plugins/cache/superpowers/skills/getting-started/SKILL.md")
+       Read 174 lines
+      ```
+
+      我读完入门指南了，可以帮你按 superpowers 的流程做了！
+
+      既然是新项目，我会按规定的第 1 套流程，先用 Brainstorming 技能弄清楚你想要什么，再开始写代码。
+
+      ```
+       Read(file_path: "/Users/jesse/.claude/plugins/cache/superpowers/skills/collaboration/brainstorming/SKILL.md")
+       Read 57 lines
+      ```
+
+      我正在用 Brainstorming 技能，把你的想法细化成设计方案。
+
+      我先看看当前目录里有什么，好知道从哪里开始：
+
+      ```
+       Bash(ls -la)
+       total 0 
+       drwxr-xr-x 3 jesse admin 96 Oct 9 13:14 .
+       drwxr-xr-x 3 jesse admin 96 Oct 9 13:05 ..
+       drwx------@ 3 jesse admin 96 Oct 9 13:38 .claude
+      ```
+
+      很好，目录很干净，我们从零开始。
+
+      现在说说你的设想吧。你想做哪种待办清单应用？
+
+      A) 命令行工具：简单的命令行界面，待办事项存在本地（做起来最快）
+      B) 网页应用：在浏览器里使用，可以持久保存数据
+      C) 桌面图形界面：原生应用，数据存在本地
+      D) 移动应用：iOS/Android 应用
+      E) 其他：说说你的想法
+    excerpt: true
+    file: https://blog.fsck.com/blog/2025/superpowers/superpowers-demo.txt
+    source:
+      url: https://blog.fsck.com/blog/2025/superpowers/superpowers-demo.txt
+      name: Jesse Vincent 的博客
+    rights: Jesse Vincent 个人博客 blog.fsck.com，页脚声明 © 1996–2026 Jesse Vincent. All rights reserved，未声明开源许可
+  - caption: 想改进视频转成的网页，先在终端选出对外观、导航和阅读体验的不满，再到浏览器里比较三种版式。
+    lang: en
+    ask: A,B,C
+    reply: |-
+      Before diving in — when you say "improve the generated UX," what's the main thing that bothers you about the current output? For example:
+
+      - A) The visual design/aesthetics feel dated or generic
+      - B) Navigation/usability — hard to find things, no search, no table of contents
+      - C) Reading experience — typography, spacing, how text flows with images
+      - D) Interactivity — want features like embedded video playback, keyboard shortcuts
+      - E) Something else entirely
+
+      What resonates most?
+    askZh: 我选ABC
+    replyZh: |-
+      动手之前先问一句：你说想“改善生成页面的用户体验”，现在生成的页面最让你不满意的是哪一点？比如：
+
+      - A) 视觉设计或整体风格显得过时，或者没什么特色
+      - B) 导航或易用性：东西不好找，没有搜索，也没有目录
+      - C) 阅读体验：文字排版、间距，以及图文怎么搭配
+      - D) 交互：希望能在页面里播放视频、使用键盘快捷键等
+      - E) 完全是别的问题
+
+      哪些最符合你的感受？
+    excerpt: true
+    images:
+      - file: brainstorming-3-1.jpg
+        alt: 终端列出视觉设计、导航、阅读体验、交互等选项，底部输入框里填着 A,B,C。
+      - file: brainstorming-3-2.jpg
+        alt: 浏览器选中 C 版「现代混合式」：每张卡片左侧是视频画面，右侧是时间戳和发言，页面右侧另有章节目录。
+      - file: brainstorming-3-3.jpg
+        alt: 浏览器选中 A 版「杂志式」：居中的衬线标题下方是一张大幅访谈画面，底部有三个版式选择按钮。
+    source:
+      url: https://blog.fsck.com/2026/03/09/superpowers-5.md
+      name: Jesse Vincent 的博客
+    rights: Jesse Vincent 个人博客 blog.fsck.com，页脚声明 © 1996–2026 Jesse Vincent. All rights reserved，未声明开源许可

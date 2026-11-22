@@ -28,3 +28,33 @@ author:
 license: 保留所有权利
 licenseUrl: https://example.com/demo-skills/pdf/LICENSE.txt
 addedAt: 2026-11-11
+examples:
+  - caption: 从目录页提取章节并保留页码。
+    lang: en
+    ask: Extract the chapter titles and page numbers.
+    askZh: 请提取章节标题和页码。
+    reply: |-
+      Contents
+      Introduction · 1
+      Materials · 3
+      Methods · 5
+      Setup · 8
+      Trial · 10
+      Observations · 13
+      Results · 17
+      Discussion · 22
+      Appendix · 28
+    replyZh: |-
+      目录
+      引言 · 1
+      材料 · 3
+      方法 · 5
+      准备 · 8
+      试验 · 10
+      观察 · 13
+      结果 · 17
+      讨论 · 22
+      附录 · 28
+    excerpt: true
+    source: { name: 示例团队, url: https://example.com/demo-skills/pdf/contents }
+    rights: © 示例团队
