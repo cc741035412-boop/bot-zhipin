@@ -112,7 +112,7 @@ for (const width of [1280, 390])
       await expect(p.locator('.VPNavBarTitle a')).toHaveAccessibleName('Bot 直聘')
       await expect(p.locator('.module-nav a').last()).toBeInViewport()
     })
-    test('LIST-01 真实字段、全量顺序、整卡点击和 Enter', async ({ page: p }) => {
+    test('LIST-01 真实字段、全量顺序、详情入口和 Enter', async ({ page: p }) => {
       for (const [dir, title] of [
         ['prompts', 'Prompt'],
         ['skills', 'Skills'],
@@ -142,6 +142,10 @@ for (const width of [1280, 390])
         await expect(c.locator('p')).toHaveCSS('-webkit-line-clamp', 'none')
         if (i.name) await expect(c.locator('h2 code')).toHaveCSS('text-overflow', 'ellipsis')
         await c.click({ position: { x: 7, y: 7 } })
+        if (dir === 'prompts') {
+          await expect(p).toHaveURL(/\/prompts\/$/)
+          await c.locator('.entry-link').click()
+        }
         await expect(p).toHaveURL(new RegExp(pathFor(i) + '$'))
         await p.goBack()
         await c.locator('a').first().press('Enter')
@@ -165,21 +169,24 @@ for (const width of [1280, 390])
         await rows(p, [])
       }
     })
-    test('LIST-03 跨字段、NFKC、场景、排除长内容及 IME', async ({ page: p }) => {
+    test('LIST-03 跨字段、NFKC、场景、正文与命令的搜索边界及 IME', async ({ page: p }) => {
       for (const dir of Object.keys(db)) {
         await p.goto(`/${dir}/`)
         const i = db[dir][0],
           input = search(p)
-        const privateText = (dir === 'prompts' ? body.body : skill.install[0].command).trim()
+        const longQuery = (dir === 'prompts' ? body.body : skill.install[0].command).trim().replace(/\s+/g, ' ')
         for (const q of [
           `${i.category}   ${i.author.name}`,
           i.scenarios[0],
           ...(dir === 'skills' ? ['ｃｏｄｅｘ'] : []),
-          privateText,
+          longQuery,
         ]) {
           await input.fill(q)
           await rows(p, matching(dir, q))
-          if (q === privateText) await rows(p, [])
+          if (q === longQuery) {
+            if (dir === 'prompts') await expect(card(p, body)).toBeVisible()
+            else await rows(p, [])
+          }
         }
         await input.fill('')
         await input.dispatchEvent('compositionstart')
@@ -262,6 +269,7 @@ for (const width of [1280, 390])
       await p.goto(fixtureURL + '/prompts/')
       const c = card(p, summary),
         link = c.locator('.source-link')
+      await expect(c.locator('.ix-snip, .copy')).toHaveCount(0)
       await external(link, summary.source.url)
       await c.locator('.entry-link').focus()
       await p.keyboard.press('Tab')

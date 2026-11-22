@@ -22,6 +22,7 @@ export function matching(dir, q, cat = '') {
       i.name,
       i.category,
       i.purpose,
+      dir === 'prompts' && i.body ? i.bodyZh ?? i.body : null,
       ...i.scenarios,
       ...(i.tags || []),
       i.author.name,
