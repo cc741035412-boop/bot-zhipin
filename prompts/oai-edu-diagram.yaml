@@ -1,0 +1,49 @@
+slug: oai-edu-diagram
+title: 课堂讲义风知识示意图
+category: 出图
+purpose: 给它课程主题、受众年级、过程步骤和必标名词，它生成白底课堂讲义风格的知识示意图。
+scenarios:
+- 中学老师备课时做一张流程清晰的课件插图
+- 学生复习时把复杂反应过程画成一页复习图
+- 科普创作者给视频配一张分步原理示意图
+summary: 这条提示词按五层结构来写：先定学科、标题和受众（高中生），再写清要解释的完整过程与包含的三个阶段（糖酵解、克雷布斯循环、电子传递链），接着点明用箭头连接步骤并列出必须标注的分子名称，然后规定做成白底、简洁图标、清晰标签和易读文字的课堂讲义或课件样式，最后排除过小文字和多余装饰。把过程拆成具体阶段，并逐一列出必须在图上标出的名词和要避开的干扰项，能把教学图里要画什么、标什么交代清楚。
+usage: 不用上传参考图。这是一条填好示例的提示词，套用时改三处：把第一句的“生物”、标题“Cellular Respiration at a Glance”和“高中生”换成你的学科、图标题和受众；把第二段“葡萄糖如何在细胞内转化为能量”及三个阶段换成你要讲的过程与分步环节；把“主要分子：”后面的名单换成图上必须标出的术语。推荐用 3:2 横版（如 1536×1024），在 ChatGPT 生图功能或支持 GPT Image 的入口中使用。出图后对照教材逐个检查术语拼写、箭头方向和步骤顺序是否正确。
+tags:
+- 教学示意图
+- 课件配图
+- 知识图解
+- 课堂讲义
+models:
+- GPT Image
+lang: en
+body: |-
+  Create a simple biology diagram titled "Cellular Respiration at a Glance" for high school students.
+
+  Show how glucose turns into energy inside a cell. Include glycolysis, the Krebs cycle, and the electron transport chain.
+  Use arrows to connect the steps, and label the main molecules: glucose, pyruvate, ATP, NADH, FADH2, CO2, O2, and H2O.
+  Make it look like a clean classroom handout or slide, with a white background, simple icons, clear labels, and easy-to-read text.
+
+  Avoid tiny text, extra decoration, or anything that makes the diagram hard to understand.
+bodyZh: |
+  为高中生绘制一张简洁的生物示意图，标题为“Cellular Respiration at a Glance”。
+
+  展示葡萄糖如何在细胞内转化为能量。包含糖酵解、克雷布斯循环和电子传递链。
+  用箭头连接各个步骤，并标出主要分子：葡萄糖、丙酮酸、ATP、NADH、FADH2、CO2、O2 和 H2O。
+  画面要像干净的课堂讲义或课件幻灯片，采用白色背景、简洁图标、清晰标签和易读文字。
+
+  避免过小的文字、多余的装饰，或任何会让示意图难以理解的元素。
+titleOriginal: Scientific / Educational Visuals
+source:
+  url: https://github.com/openai/openai-cookbook/blob/dfd760b4de0bd175b51ad05b9b5260c36dfea09c/examples/multimodal/image-gen-models-prompting-guide.ipynb
+  name: openai/openai-cookbook
+author:
+  name: OpenAI（Mandeep Singh、Emre Okcular、Tiger He，据 cookbook registry.yaml）
+  url: https://github.com/openai/openai-cookbook
+license: MIT
+licenseUrl: https://github.com/openai/openai-cookbook/blob/dfd760b4de0bd175b51ad05b9b5260c36dfea09c/LICENSE
+copyright: Copyright (c) 2025 OpenAI
+addedAt: '2026-11-22'
+images:
+- file: oai-edu-diagram-1.png
+  alt: 白底横版生物示意图，顶部英文标题“Cellular Respiration at a Glance”，用蓝、绿、紫三个分区和黑色箭头依次展示糖酵解、克雷布斯循环与电子传递链及各步产物，底部附总反应式。
+  credit: OpenAI，OpenAI Cookbook，MIT

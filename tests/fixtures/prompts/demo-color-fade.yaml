@@ -1,0 +1,14 @@
+slug: demo-color-fade
+title: 示例·色卡渐变短片
+category: 视频
+purpose: 把一对静态色卡做成颜色平滑过渡的短片
+scenarios: [演示颜色过渡, 制作短片背景]
+lang: zh
+models: [Veo 3.1]
+body: 从【起始色】开始，五秒内均匀过渡到【结束色】，保持镜头静止。
+source: { name: 本站测试样例, url: https://example.com/fixtures/demo-color-fade }
+author: { name: 示例作者 }
+copyright: 本站测试样例
+license: CC0-1.0
+licenseUrl: https://creativecommons.org/publicdomain/zero/1.0/
+addedAt: 2026-11-08

@@ -50,11 +50,11 @@
 
 1. 查重，打开原始文章、具体文件或 skill 目录，核实作者和许可（单条 / 子目录优先），保留精确出处及许可证原文链接。不要根据仓库首页的许可推断转载权。
 2. 在 `prompts/` 或 `skills/` 新建 `<slug>.yaml`，文件名与 `slug` 一致。对照对应 schema 选分类，写中文用途、场景、作者、许可和 `addedAt`。Prompt 不分许可，原文放在 `body`，英文另配本站译文 `bodyZh`；`copyright` 照原页填写（单行 1–200 字），原页没写就填「版权归原作者，原页未声明许可」。摘要和用法用自己的话写。Skill 写原名、确认支持的 agents、自写摘要、按顺序列 1–3 个安装命令（说明放 note）、必要依赖，不收 SKILL.md。
-3. 跑 `npm run check`，在列表点进详情核对分类、署名、来源与复制值；有中文译文时，核对主按钮复制译文，展开「英文原文」可单独复制原文；没有正文时仍显示仅摘要。原作者要求下架时删除对应 YAML 后重新校验、构建；列表、静态路径及下架兜底清单一起更新，无需改 Bot 计数。
+3. 跑 `npm run check`，在列表点进详情核对分类、署名、来源与复制值；有中文译文时，核对主按钮复制译文，展开「英文原文」可单独复制原文；没有正文时仍显示仅摘要。原作者要求下架时删除对应 YAML 后重新校验、构建；列表、静态路径及下架兜底清单一起更新，无需改 Bot 计数。给 AI 用的 `/data/prompts/<slug>.json`、`/data/skills/<slug>.json` 由 `functions/data/*/[slug].ts` 按同一份清单兜底，删了 YAML 就立即 404，不用另外处理；装了 bot-zhipin skill 的人本机索引最多缓存 24 小时，这段时间里搜索结果还可能列出这条，但取详情会是 404。
 
 ## 下架
 
-提一个 PR 删掉 `bots/<slug>/`，合并后约 1 分钟首页消失；详情页由 `functions/bots/[slug].ts` 兜底，立即返回 404。
+提一个 PR 删掉 `bots/<slug>/`，合并后约 1 分钟首页消失；详情页由 `functions/bots/[slug].ts` 兜底，立即返回 404；给 AI 用的 `/data/bots/<slug>.json` 由 `functions/data/bots/[slug].ts` 按同一份清单兜底。
 
 **下架前先搜一下这个 slug 有没有被引用**：`grep -rn "<slug>" squads curation`。被小队或策展引用的 Bot 不能单独删，`npm run validate` 会失败。要在同一个 PR 里一起处理：从 `curation/shelf.yaml` 里删掉它；它所在的小队，要么去掉这个成员（剩下不到 2 个就整支下架），要么把它记到 `missing` 里。
 

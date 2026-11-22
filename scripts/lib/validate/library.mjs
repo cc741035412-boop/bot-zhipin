@@ -86,7 +86,7 @@ export function validateLibrary(kind, entries, { now = new Date() } = {}) {
       }
       reportSchemaErrors({
         check: rule.check, schema: rule.schema, data: checked, doc: name, schemaFile: rule.schemaFile,
-        report: (where, problem, fix) => say(where, problem, fix),
+        report: (where, problem, fix) => say(where.replace(/^images\.(\d+)/, (_, n) => `第${Number(n) + 1}张图`), problem, fix),
       })
       if (typeof data.slug === 'string') {
         if (data.slug !== entry.slug) say('slug', `slug ${data.slug} 和文件名不一致（文件名是 ${name}）`, `把 slug 改成 ${entry.slug}，或者把文件改名为 ${data.slug}.yaml。`)
@@ -100,6 +100,9 @@ export function validateLibrary(kind, entries, { now = new Date() } = {}) {
       if (!Object.hasOwn(data, 'body') && !isReusable(data.license)) checkQuotes(data, say)
 
       if (kind === 'prompt') {
+        if (Array.isArray(data.images)) data.images.forEach((image, i) => {
+          if (image?.file && !entry.imageSizes?.[i]) say(`第${i + 1}张图.file`, '找不到图片或文件头与扩展名不符', `把有效图片放在 prompts/media/，检查 file 的名称和扩展名。`)
+        })
         const body = Object.hasOwn(data, 'body')
         if (body && !filled(data.copyright)) {
           say('copyright', '转载正文缺少原版权行', '照原文页面写版权行，比如「© 作者名，保留所有权利」；原页没写就写「版权归原作者，原页未声明许可」。')
