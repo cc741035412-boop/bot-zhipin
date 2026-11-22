@@ -18,11 +18,16 @@ Grok Bot 模板货架：挑一个顺手的直接导入，也欢迎把你做的 B
 
 ## 让你的 AI 来找
 
-网站上的 Prompt、Skills 和 Bot 也能让 AI 助手直接搜：装上 `bot-zhipin` 这个 skill，跟它说「找个写周报的 prompt」「有没有能做 PPT 的 skill」，它会在本站挑出合适的几条，Prompt 直接给原文，Skill 给出你这个助手的安装命令，确认后再装。
+网站上的 Prompt、Skills 和 Bot 也能让 AI 助手直接搜：装上 `bot-zhipin` 这个 skill，跟它说「找个写小红书标题的 prompt」「有没有能做 PPT 的 skill」，它会在本站挑出合适的几条，Prompt 直接给原文，Skill 给出你这个助手的安装命令，确认后再装。
 
-- Claude Code：`claude plugin marketplace add jakob52123/bot-zhipin && claude plugin install bot-zhipin@bot-zhipin`
-- Codex、Cursor 等其他助手：`npx skills add jakob52123/bot-zhipin --skill bot-zhipin`
-- 别的办法都不方便时：把 https://bot.jiachengbo.com/skill/bot-zhipin/SKILL.md 发给你的 AI，让它照着装
+- Claude Code：在终端依次运行这两条
+  ```
+  claude plugin marketplace add jakob52123/bot-zhipin
+  claude plugin install bot-zhipin@bot-zhipin
+  ```
+  装完新开一个会话。以后更新：`claude plugin marketplace update bot-zhipin`，再 `claude plugin update bot-zhipin@bot-zhipin`。
+- Codex、Cursor 等其他助手：`npx skills add jakob52123/bot-zhipin --skill bot-zhipin -g`（`-g` 装到全局，所有项目都能用）
+- 别的办法都不方便时：让你的 AI 下载 https://bot.jiachengbo.com/skill/bot-zhipin/SKILL.md 和 https://bot.jiachengbo.com/skill/bot-zhipin/scripts/find.py，按原来的目录结构放进它的 skills 目录
 
 skill 的源文件在 [`integrations/bot-zhipin/`](integrations/bot-zhipin/)，它读的数据是网站构建时生成的 [`/data/index.json`](https://bot.jiachengbo.com/data/index.json)，说明见 [`llms.txt`](https://bot.jiachengbo.com/llms.txt)。
 

@@ -74,6 +74,15 @@ describe('每条的完整数据', () => {
   })
 })
 
+it('Prompt 的署名带原版权行；给的是中文译文时注明本站翻译', () => {
+  const tutor = file('prompt', 'demo-socratic-tutor')
+  expect(tutor.copyright).toBeTruthy()
+  expect(tutor.credit).toContain(`版权：${tutor.copyright}`)
+  expect(tutor.credit).toContain(`中文由 ${SITE.name}翻译`)
+  const zh = file('prompt', 'demo-code-review-checklist')
+  expect(zh.credit).not.toContain('翻译')
+})
+
 it('署名行：缺的段落省掉', () => {
   expect(creditLine({ author: '宝玉', sourceUrl: 'https://baoyu.io', license: 'MIT', detailUrl: 'https://x/p' }))
     .toBe(`作者：宝玉 · 来源：https://baoyu.io · 许可：MIT · 经 ${SITE.name}收录：https://x/p`)

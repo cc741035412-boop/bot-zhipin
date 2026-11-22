@@ -12,6 +12,7 @@
 """
 import argparse
 import hashlib
+import http.client
 import json
 import os
 import re
@@ -22,18 +23,24 @@ import urllib.error
 import urllib.request
 
 DEFAULT_BASE = 'https://bot.jiachengbo.com'
-BASE = os.environ.get('BOT_ZHIPIN_URL', DEFAULT_BASE).rstrip('/')
+BASE = (os.environ.get('BOT_ZHIPIN_URL') or DEFAULT_BASE).strip().rstrip('/')
 CACHE_DIR = os.path.join(os.path.expanduser('~'), '.cache', 'bot-zhipin')
 TTL = 24 * 3600
+RETRY_AFTER = 600  # 联网失败后 10 分钟内直接用旧缓存，不再每次干等
+TIMEOUT = 10
 KIND_LABEL = {'prompt': 'Prompt', 'skill': 'Skill', 'bot': 'Grok Bot'}
 SLUG = re.compile(r'^[a-z0-9][a-z0-9-]*$')
-# 字段分组和权重：名字 > 用途 > 场景/标签/分类/开场白 > 作者。
+# 字段分组和权重：名字 > 用途 > 场景/标签/分类/开场白 > 作者、slug > 适用工具。
+# 适用工具（Claude Code、Codex……）是筛选属性，几乎每个 Skill 都有，只给很低的分，免得 code 之类的词全中。
 GROUPS = (
     (5.0, ('title', 'name', 'nameZh', 'titleOriginal')),
     (3.0, ('purpose',)),
-    (2.0, ('scenarios', 'tags', 'category', 'starters', 'agents')),
+    (2.0, ('scenarios', 'tags', 'category', 'starters')),
     (1.0, ('author', 'slug')),
+    (0.5, ('agents',)),
 )
+CJK_RUN = r'[\u3400-\u9fff\uf900-\ufaff]+'
+SPLIT = re.compile(r'[\s,;:!?/|、。，；：！？]+')
 
 for stream in (sys.stdout, sys.stderr):
     try:
@@ -50,13 +57,13 @@ def fail(message):
 def fetch(url):
     request = urllib.request.Request(url, headers={'User-Agent': 'bot-zhipin-skill/1.0', 'Accept': 'application/json'})
     try:
-        with urllib.request.urlopen(request, timeout=20) as response:
+        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
             return json.loads(response.read().decode('utf-8'))
     except urllib.error.HTTPError as error:
         if error.code == 404:
             raise LookupError('没有这条（404）：' + url)
         raise ConnectionError('Bot 直聘返回了错误 {}：{}'.format(error.code, url))
-    except (urllib.error.URLError, OSError) as error:
+    except (urllib.error.URLError, OSError, http.client.HTTPException) as error:
         reason = getattr(error, 'reason', error)
         raise ConnectionError('连不上 Bot 直聘（{}）。检查网络后再试，或直接打开 {}/prompts/、{}/skills/ 自己翻。'.format(reason, BASE, BASE))
     except ValueError:
@@ -78,21 +85,54 @@ def read_cache(path):
         return None
 
 
+def fail_mark(path):
+    return path + '.fail'
+
+
+def recently_failed(path):
+    try:
+        return time.time() - os.path.getmtime(fail_mark(path)) < RETRY_AFTER
+    except OSError:
+        return False
+
+
+def touch(path, remove=False):
+    try:
+        if remove:
+            os.remove(path)
+        else:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, 'w', encoding='utf-8'):
+                pass
+    except OSError:
+        pass
+
+
 def load_index(refresh=False):
+    """返回 (索引, 是不是本机缓存)。"""
     path = cache_path()
     cached = read_cache(path)
-    fresh = cached is not None and time.time() - os.path.getmtime(path) < TTL
-    if fresh and not refresh:
-        return cached
+    if cached is not None and not refresh:
+        try:
+            fresh = time.time() - os.path.getmtime(path) < TTL
+        except OSError:
+            fresh = False
+        if fresh:
+            return cached, True
+        if recently_failed(path):
+            print('（刚才连不上 Bot 直聘，先用本机缓存的旧索引；加 --refresh 强制重新拉）', file=sys.stderr)
+            return cached, True
     try:
         data = fetch(BASE + '/data/index.json')
         if not isinstance(data, dict) or not isinstance(data.get('items'), list):
             raise ConnectionError('索引格式不对：' + BASE + '/data/index.json')
     except (ConnectionError, LookupError) as error:
         if cached is not None:
+            touch(fail_mark(path))
             print('{}\n（这次先用本机缓存的旧索引，可能不是最新的）'.format(error), file=sys.stderr)
-            return cached
+            return cached, True
         fail(str(error))
+    touch(fail_mark(path), remove=True)
     try:
         os.makedirs(CACHE_DIR, exist_ok=True)
         temp = path + '.tmp'
@@ -101,7 +141,7 @@ def load_index(refresh=False):
         os.replace(temp, path)
     except OSError:
         pass  # 缓存写不进去不影响这次搜索
-    return data
+    return data, False
 
 
 def fold(value):
@@ -112,35 +152,56 @@ def fold(value):
     return re.sub(r'\s+', ' ', unicodedata.normalize('NFKC', value).lower()).strip()
 
 
-def pieces(term):
-    """英文和数字整段算一块；汉字两两一组（单字就是它自己）。"""
-    out = []
-    for run in re.findall(r'[a-z0-9][a-z0-9.+#-]*|[㐀-鿿豈-﫿]+', term):
-        if run[0].isascii() or len(run) < 2:
-            out.append(run)
+_PATTERNS = {}
+
+
+def contains(piece, text):
+    """英文、数字按词边界找（pr 不会命中 prompt；四位以上的词允许后面接字母，review 能命中 reviews）；汉字按子串找。"""
+    if not piece.isascii():
+        return piece in text
+    pattern = _PATTERNS.get(piece)
+    if pattern is None:
+        tail = '' if len(piece) >= 4 else '(?![a-z0-9])'
+        pattern = _PATTERNS[piece] = re.compile('(?<![a-z0-9])' + re.escape(piece) + tail)
+    return pattern.search(text) is not None
+
+
+def variants(term):
+    """一个词的几种拆法。英文、数字整段算一块；汉字相邻两两一组（代码审查 → 代码/码审/审查），
+    四个字以上再按不重叠的两字一块拆一次（简历优化 → 简历/优化），免得「历优」这种跨词片段拉低分数。"""
+    overlap, chunks = [], []
+    for run in re.findall(r'[a-z0-9][a-z0-9.+#-]*|' + CJK_RUN, term):
+        if run.isascii() or len(run) < 2:
+            overlap.append(run)
+            chunks.append(run)
         else:
-            out.extend(run[i:i + 2] for i in range(len(run) - 1))
-    return out
+            overlap.extend(run[i:i + 2] for i in range(len(run) - 1))
+            chunks.extend(run[i:i + 2] for i in range(0, len(run) - 1, 2))
+    return [parts for parts in (overlap, chunks) if parts]
+
+
+def term_score(term, texts):
+    """整词命中：每个命中的字段组都加分。没有整词命中：按片段算整条的覆盖率，每个片段取它命中的最高权重，打六折；
+    命中的片段不到四成不算（只中一两个零碎片段多半是巧合）。"""
+    full = sum(weight for weight, text in texts if contains(term, text))
+    if full:
+        return full
+    best = 0.0
+    for parts in variants(term):
+        weights = [max([weight for weight, text in texts if contains(part, text)] or [0.0]) for part in parts]
+        if sum(1 for weight in weights if weight) / len(parts) >= 0.4:
+            best = max(best, sum(weights) / len(parts) * 0.6)
+    return best
 
 
 def score(item, terms, phrase):
     texts = [(weight, '\n'.join(fold(item.get(key)) for key in keys)) for weight, keys in GROUPS]
     total, missed = 0.0, 0
     for term in terms:
-        parts = pieces(term)
-        best = 0.0
-        for weight, text in texts:
-            if term in text:
-                hit = 1.0
-            elif parts:
-                ratio = sum(1 for part in parts if part in text) / len(parts)
-                hit = ratio * 0.6 if ratio >= 0.5 else 0.0
-            else:
-                hit = 0.0
-            best += weight * hit
-        if best == 0:
+        points = term_score(term, texts)
+        if not points:
             missed += 1
-        total += best
+        total += points
     if not total:
         return 0.0
     if len(terms) > 1 and phrase in texts[0][1]:
@@ -149,8 +210,8 @@ def score(item, terms, phrase):
 
 
 def search(args):
-    index = load_index(args.refresh)
-    terms = [term for term in fold(' '.join(args.words)).replace('，', ' ').replace('、', ' ').split(' ') if term]
+    index, cached = load_index(args.refresh)
+    terms = [term for term in SPLIT.split(fold(' '.join(args.words))) if term]
     if not terms:
         fail('给几个关键词，比如：python3 find.py 周报')
     phrase = ' '.join(terms)
@@ -161,8 +222,10 @@ def search(args):
         floor = hits[0][0] * 0.2
         hits = [row for row in hits if row[0] >= floor]
     if not hits:
-        print('「{}」没找到{}。换个说法再搜，或者打开 {}/prompts/、{}/skills/、{}/ 自己翻。'.format(
-            ' '.join(args.words), ' ' + KIND_LABEL[args.kind] if args.kind else '', BASE, BASE, BASE))
+        print('「{}」没找到{}。{}换个说法再搜，或者打开 {}/prompts/、{}/skills/、{}/ 自己翻。'.format(
+            ' '.join(args.words), ' ' + KIND_LABEL[args.kind] if args.kind else '',
+            '用的是本机缓存的索引，先加 --refresh 用最新的再搜一次；还是没有就' if cached else '',
+            BASE, BASE, BASE))
         return
     shown = hits[:args.limit]
     print('「{}」找到 {} 条{}：'.format(' '.join(args.words), len(hits), '，列出前 {} 条'.format(len(shown)) if len(hits) > len(shown) else ''))
@@ -296,8 +359,10 @@ def main():
     parser.add_argument('--get', metavar='类型/slug', help='看一条的详情，如 prompt/<slug>')
     parser.add_argument('--original', action='store_true', help='配合 --get：英文 Prompt 打印英文原文')
     parser.add_argument('--json', action='store_true', help='配合 --get：原样打印详情 JSON')
-    args = parser.parse_args()
+    args = parser.parse_intermixed_args()
     args.limit = max(1, args.limit)
+    if not re.match(r'^https?://[^/\s]+', BASE):
+        fail('BOT_ZHIPIN_URL 要写成 http(s)://开头的站点根地址，比如 https://bot.jiachengbo.com')
     if args.get:
         get(args)
     else:

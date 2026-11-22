@@ -55,6 +55,7 @@
 | `scripts/sync-faces.mjs` | 手动抓 x.ai 模板页；--check 离线校验 | 维护者 |
 | `functions/api/` | 点击计数接口 | 维护者 |
 | `functions/bots/[slug].ts`、`functions/squads/[slug].ts` | 下架兜底：不在清单里的 Bot / 小队立即返回 404，不让边缘缓存继续给旧页面 | 维护者 |
+| `functions/data/{prompts,skills,bots}/[slug].ts` + `functions/_lib/data-route.ts` | 给 AI 用的每条完整数据的下架兜底：不在清单里的立即返回 JSON 404（决策 70） | 维护者 |
 | `migrations/` | D1 表结构 | 维护者 |
 | `tests/unit/` | vitest 单元测试；`tests/fixtures/` 校验器样例；`tests/e2e/` Playwright 真浏览器 | 维护者 |
 | `docs/dev/` | 维护者文档 | 维护者 |

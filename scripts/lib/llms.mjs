@@ -25,7 +25,7 @@ ${SITE.name}是一个 Grok Bot 模板的中文货架。Grok Bot 是 x.ai 出的 
 
 ## 让 AI 来找
 
-- [bot-zhipin skill](${absoluteUrl(`${SKILL_DIR}SKILL.md`)})：装进 AI 助手后，说「找个写周报的 prompt」「有没有做 PPT 的 skill」，它会在本站搜出合适的条目，Prompt 给原文，Skill 给对应助手的安装命令。Claude Code 安装：\`claude plugin marketplace add jakob52123/bot-zhipin && claude plugin install bot-zhipin@bot-zhipin\`；其他助手：\`npx skills add jakob52123/bot-zhipin --skill bot-zhipin\`。
+- [bot-zhipin skill](${absoluteUrl(`${SKILL_DIR}SKILL.md`)})：装进 AI 助手后，说「找个写小红书标题的 prompt」「有没有做 PPT 的 skill」，它会在本站搜出合适的条目，Prompt 给原文，Skill 给对应助手的安装命令。Claude Code 依次运行 \`claude plugin marketplace add jakob52123/bot-zhipin\` 和 \`claude plugin install bot-zhipin@bot-zhipin\`；其他助手运行 \`npx skills add jakob52123/bot-zhipin --skill bot-zhipin -g\`；也可以直接下载 [SKILL.md](${absoluteUrl(`${SKILL_DIR}SKILL.md`)}) 和 [scripts/find.py](${absoluteUrl(`${SKILL_DIR}scripts/find.py`)})，按原目录结构放进 AI 的 skills 目录。
 
 ## 机器可读数据
 

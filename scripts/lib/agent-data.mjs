@@ -9,12 +9,14 @@ export const SKILL_DIR = '/skill/bot-zhipin/'
 export const INDEX_PATH = '/data/index.json'
 export const dataPath = (kind, slug) => `/data/${kind}s/${slug}.json`
 
-/** 现成的一行署名：AI 把条目交给用户时原样附上。 */
-export function creditLine({ author, sourceUrl, license, detailUrl }) {
+/** 现成的一行署名：AI 把条目交给用户时原样附上。有原版权行就带上；给的是本站译文时注明。 */
+export function creditLine({ author, sourceUrl, license, copyright, translated, detailUrl }) {
   return [
     author && `作者：${author}`,
     sourceUrl && `来源：${sourceUrl}`,
     license && `许可：${license}`,
+    copyright && `版权：${copyright}`,
+    translated && `中文由 ${SITE.name}翻译`,
     `经 ${SITE.name}收录：${detailUrl}`,
   ].filter(Boolean).join(' · ')
 }
@@ -27,7 +29,10 @@ function promptDetail(p) {
     text: p.bodyZh ?? p.body, body: p.body, bodyZh: p.bodyZh, usage: p.usage, summary: p.summary,
     source: p.source, author: p.author, license: p.license, licenseUrl: p.licenseUrl, copyright: p.copyright,
     addedAt: p.addedAt, detailUrl,
-    credit: creditLine({ author: p.author.name, sourceUrl: p.source.url, license: p.license, detailUrl }),
+    credit: creditLine({
+      author: p.author.name, sourceUrl: p.source.url, license: p.license, copyright: p.copyright,
+      translated: Boolean(p.bodyZh), detailUrl,
+    }),
   }
 }
 
