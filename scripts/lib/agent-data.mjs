@@ -8,6 +8,17 @@ import { absoluteUrl } from './share.mjs'
 export const SKILL_DIR = '/skill/bot-zhipin/'
 export const INDEX_PATH = '/data/index.json'
 export const dataPath = (kind, slug) => `/data/${kind}s/${slug}.json`
+const SKILL_MEDIA = '/media/skills/'
+
+// Prompt 的效果图（出图、视频类）和 Skill 作者示例里的图：给绝对地址，AI 能直接把链接交给用户。
+// 这些字段由网站的数据层按需带上（entry-summary.mjs），没有就是空数组。
+const promptImages = (images) => (images ?? []).filter((image) => image?.src)
+  .map(({ src, alt, credit, width, height }) => ({ url: absoluteUrl(src), alt, credit, width, height }))
+const skillExamples = (examples) => (examples ?? []).map(({ images, ...example }) => ({
+  ...example,
+  images: (images ?? []).filter((image) => image?.file)
+    .map(({ file, alt, width, height }) => ({ url: absoluteUrl(SKILL_MEDIA + file), alt, width, height })),
+}))
 
 /** 现成的一行署名：AI 把条目交给用户时原样附上。有原版权行就带上；给的是本站译文时注明。 */
 export function creditLine({ author, sourceUrl, license, copyright, translated, detailUrl }) {
@@ -26,7 +37,8 @@ function promptDetail(p) {
   const credit = { author: p.author.name, sourceUrl: p.source.url, license: p.license, copyright: p.copyright, detailUrl }
   return {
     kind: 'prompt', slug: p.slug, title: p.title, titleOriginal: p.titleOriginal, category: p.category,
-    purpose: p.purpose, scenarios: p.scenarios, tags: p.tags, lang: p.lang,
+    purpose: p.purpose, scenarios: p.scenarios, tags: p.tags, lang: p.lang, models: p.models ?? [],
+    images: promptImages(p.images),
     text: p.bodyZh ?? p.body, body: p.body, bodyZh: p.bodyZh, usage: p.usage, summary: p.summary,
     source: p.source, author: p.author, license: p.license, licenseUrl: p.licenseUrl, copyright: p.copyright,
     addedAt: p.addedAt, detailUrl,
@@ -41,7 +53,7 @@ function skillDetail(s) {
   return {
     kind: 'skill', slug: s.slug, title: s.title, name: s.name, category: s.category,
     purpose: s.purpose, scenarios: s.scenarios, tags: s.tags, agents: s.agents,
-    summary: s.summary, install: s.install, requires: s.requires,
+    summary: s.summary, install: s.install, requires: s.requires, examples: skillExamples(s.examples),
     source: s.source, author: s.author, license: s.license, licenseUrl: s.licenseUrl,
     addedAt: s.addedAt, detailUrl,
     credit: creditLine({ author: s.author.name, sourceUrl: s.source.url, license: s.license, detailUrl }),
@@ -71,9 +83,9 @@ export function buildAgentData({ prompts, skills, bots }) {
   const details = [...prompts.map(promptDetail), ...skills.map(skillDetail), ...bots.map(botDetail)]
   const url = absoluteUrl('/')
   const items = details.map((d) => d.kind === 'prompt'
-    ? { ...common(d), titleOriginal: d.titleOriginal, lang: d.lang, hasBody: d.text !== null }
+    ? { ...common(d), titleOriginal: d.titleOriginal, lang: d.lang, models: d.models, hasBody: d.text !== null, hasImages: d.images.length > 0 }
     : d.kind === 'skill'
-      ? { ...common(d), name: d.name, agents: d.agents }
+      ? { ...common(d), name: d.name, agents: d.agents, hasExamples: d.examples.length > 0 }
       : { ...common({ ...d, purpose: d.tagline, scenarios: [], tags: [] }), name: d.name, nameZh: d.nameZh, starters: d.starters })
   const index = {
     name: SITE.name,

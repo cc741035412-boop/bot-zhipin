@@ -34,7 +34,7 @@ SLUG = re.compile(r'^[a-z0-9][a-z0-9-]*$')
 GROUPS = (
     (5.0, ('title', 'name', 'nameZh', 'titleOriginal')),
     (3.0, ('purpose',)),
-    (2.0, ('scenarios', 'tags', 'category', 'starters')),
+    (2.0, ('scenarios', 'tags', 'category', 'starters', 'models')),
     (1.0, ('author', 'slug')),
 )
 # 适用工具（Claude Code、Codex……）是筛选属性，几乎每个 Skill 都有：只认整个名字或名字的第一个词
@@ -291,6 +291,8 @@ def show_prompt(data, original):
     text = data.get('body') if original else data.get('text')
     if text:
         note = ''
+        if data.get('models'):
+            print('适用模型：' + '、'.join(data['models']))
         if data.get('bodyZh') and not original:
             note = '（原文是英文，下面是本站译的中文版；要英文原文加 --original）'
         print('\n## 正文{}'.format(note))
@@ -301,6 +303,10 @@ def show_prompt(data, original):
         source = (data.get('source') or {}).get('url') or data.get('detailUrl', '')
         print('\n这条只收了摘要，没有正文，原文在：' + source)
         section('摘要', data.get('summary'))
+    images = data.get('images') or []
+    if images:
+        section('效果图', '\n'.join('- {}：{}{}'.format(image.get('alt') or '图', image.get('url', ''),
+                                                       '（{}）'.format(image['credit']) if image.get('credit') else '') for image in images))
     section('怎么用', data.get('usage'))
     section('署名', (data.get('creditOriginal') or data.get('credit')) if original else data.get('credit'))
 
@@ -323,6 +329,25 @@ def show_skill(data):
                 print('  说明：' + entry['note'])
     if data.get('requires'):
         section('依赖', '\n'.join('- ' + item for item in data['requires']))
+    examples = data.get('examples') or []
+    if examples:
+        print('\n## 作者给的示例（{} 个）'.format(len(examples)))
+        for number, example in enumerate(examples, 1):
+            print('\n### {}. {}'.format(number, example.get('caption', '')))
+            ask = example.get('askZh') or example.get('ask')
+            reply = example.get('replyZh') or example.get('reply')
+            if ask:
+                print('用户说：' + ask.strip())
+            if reply:
+                print('它回：' + reply.strip())
+            for image in example.get('images') or []:
+                print('截图：{} {}'.format(image.get('alt') or '', image.get('url', '')).strip())
+            for key, label in (('video', '视频'), ('file', '文件')):
+                if example.get(key):
+                    print('{}：{}'.format(label, example[key]))
+            source = example.get('source') or {}
+            if source.get('url') or example.get('rights'):
+                print('出处：{}{}'.format(source.get('url') or '', '（{}）'.format(example['rights']) if example.get('rights') else ''))
     section('署名', data.get('credit'))
 
 

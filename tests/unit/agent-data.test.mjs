@@ -85,6 +85,24 @@ it('Prompt 的署名带原版权行；给的是中文译文时注明本站翻译
   expect(zh.creditOriginal).toBe(zh.credit)
 })
 
+it('出图类 Prompt 的效果图和适用模型、Skill 的作者示例都带上，图片给绝对地址；没有就是空数组', () => {
+  const [prompt] = prompts
+  const [skill] = skills
+  const withMedia = buildAgentData({
+    prompts: [{ ...prompt, models: ['Midjourney'], images: [{ file: 'a.png', src: '/media/prompts/a.png', alt: '效果图', credit: '作者图', width: 800, height: 600 }] }],
+    skills: [{ ...skill, examples: [{ caption: '示例说明文字', lang: 'zh', askZh: '问', images: [{ file: 'b.png', alt: '截图', width: 10, height: 20 }], source: { url: 'https://example.org' }, rights: 'MIT' }] }],
+    bots: [],
+  })
+  const p = withMedia.files.find((f) => f.data.kind === 'prompt').data
+  const s = withMedia.files.find((f) => f.data.kind === 'skill').data
+  expect(p.models).toEqual(['Midjourney'])
+  expect(p.images).toEqual([{ url: `${SITE.url}/media/prompts/a.png`, alt: '效果图', credit: '作者图', width: 800, height: 600 }])
+  expect(s.examples).toEqual([{ caption: '示例说明文字', lang: 'zh', askZh: '问', images: [{ url: `${SITE.url}/media/skills/b.png`, alt: '截图', width: 10, height: 20 }], source: { url: 'https://example.org' }, rights: 'MIT' }])
+  expect(withMedia.index.items.map((i) => [i.kind, i.hasImages ?? i.hasExamples])).toEqual([['prompt', true], ['skill', true]])
+  expect(file('prompt', prompt.slug)).toMatchObject({ models: [], images: [] })
+  expect(file('skill', skill.slug).examples).toEqual([])
+})
+
 it('署名行：缺的段落省掉', () => {
   expect(creditLine({ author: '宝玉', sourceUrl: 'https://baoyu.io', license: 'MIT', detailUrl: 'https://x/p' }))
     .toBe(`作者：宝玉 · 来源：https://baoyu.io · 许可：MIT · 经 ${SITE.name}收录：https://x/p`)

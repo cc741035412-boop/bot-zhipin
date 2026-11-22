@@ -47,10 +47,12 @@ Bot 直聘是一个中文 AI 资源货架，收了三样东西：
 - 后面附上「怎么用」和「署名」两段。
 - 英文 Prompt 默认给的是本站译的中文版，交给用户时说明这是 Bot 直聘的译文。用户要英文原文就加 `--original`。
 - 显示「只收了摘要」的条目没有正文：给出原文链接和摘要，别自己编一份。
+- 出图、视频类的 Prompt 有「效果图」和「适用模型」：把图片链接和模型一起给用户，让他知道照着用大概出什么效果。
 
 **Skill**
 - 先看你自己是哪个工具：Claude Code、Codex、Cursor 还是别的。从「安装」里挑对应的那条命令，连同说明和依赖一起给用户。没有对应你的那条，就照实说，并把有的几条都列出来。
 - **用户确认之后才运行安装命令。** 装完提醒用户：多数工具要新开会话，新装的 skill 才会生效。
+- 有「作者给的示例」时，挑一个和用户需求最近的讲给他听，让他知道装上以后大概怎么用；示例是原作者给的，照实转述，别自己编。
 
 **Grok Bot**
 - 给出模板页链接，告诉用户：在 Grok Bot App 里打开这个链接就能导入，不是在当前这个 agent 里装。
@@ -78,8 +80,8 @@ Windows 的 PowerShell 里写 `curl.exe -s ...`，或者用 `Invoke-RestMethod h
 
 `items` 里每条都有这些字段：`kind`、`slug`、`title`、`purpose`、`scenarios`、`category`、`author`、`detailUrl`、`dataUrl`。按标题、用途、场景挑出合适的几条，再拉选中那条的 `dataUrl`，就是详情 JSON。详情里的字段：
 
-- Prompt：`text`（要给用户的正文）、`usage`、`credit`；给英文原文 `body` 时署名用 `creditOriginal`
-- Skill：`install`（数组，每项有 `agent`、`command`、`note`）、`requires`、`credit`
+- Prompt：`text`（要给用户的正文）、`usage`、`models`、`images`（效果图）、`credit`；给英文原文 `body` 时署名用 `creditOriginal`
+- Skill：`install`（数组，每项有 `agent`、`command`、`note`）、`requires`、`examples`（作者给的示例）、`credit`
 - Grok Bot：`templateUrl`、`starters`、`credit`
 
 索引一共二三百条，别整份塞给用户，筛完再说。
