@@ -33,3 +33,31 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/docx/LICENSE.txt
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 用 Word 列出婚礼前 12 个月各阶段的筹备事项，并按场地、餐饮、摄影等项目分配预算。
+    lang: en
+    ask: My big day is coming! Help me make a detailed wedding planning checklist for the next 12 months. Organize by timeframe with tasks, vendor categories, and budget considerations.
+    askZh: 我要结婚啦！帮我列一份未来 12 个月的婚礼筹备清单，越详细越好。请按时间段整理，列出要做的事、要找哪类商家，以及预算上要注意什么。
+    images:
+      - file: docx-1-1.jpg
+        alt: 图中左侧是婚礼筹备请求和 Word 清单，文档列出各项开支的预算占比，下方从「婚礼前 12 个月」开始分阶段安排。
+    source:
+      url: https://claude.com/resources/articles/create-files
+      name: Anthropic 官网
+    rights: © 2026 Anthropic PBC
+  - caption: 上传餐车销售数据，请 Claude 找出最值得把握的三四个机会，整理成带图表和经营建议的 Word 报告。
+    lang: en
+    video: https://www.youtube.com/watch?v=EV89Ws8Ui9Y
+    source:
+      url: https://www.youtube.com/watch?v=EV89Ws8Ui9Y
+      name: Anthropic 官方 YouTube 频道
+    rights: Anthropic 官方 YouTube 视频，未声明开源许可
+  - caption: 请 Claude 用两页 Word 报告说明可再生能源有哪些好处。
+    lang: en
+    ask: Write a 2-page report on the benefits of renewable energy
+    askZh: 写一份两页的报告，介绍可再生能源的好处。
+    source:
+      url: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart.md
+      name: Anthropic 官网
+    rights: Anthropic 官方文档，未声明开源许可

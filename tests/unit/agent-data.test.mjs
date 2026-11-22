@@ -100,8 +100,34 @@ it('出图类 Prompt 的效果图和适用模型、Skill 的作者示例都带�
   expect(p.images).toEqual([{ url: `${SITE.url}/media/prompts/a.png`, alt: '效果图', credit: '作者图', width: 800, height: 600 }])
   expect(s.examples).toEqual([{ caption: '示例说明文字', lang: 'zh', askZh: '问', images: [{ url: `${SITE.url}/media/skills/b.png`, alt: '截图', width: 10, height: 20 }], source: { url: 'https://example.org' }, rights: 'MIT' }])
   expect(withMedia.index.items.map((i) => [i.kind, i.hasImages ?? i.hasExamples])).toEqual([['prompt', true], ['skill', true]])
-  expect(file('prompt', prompt.slug)).toMatchObject({ models: [], images: [] })
-  expect(file('skill', skill.slug).examples).toEqual([])
+  const shelfPrompts = promptData(readPrompts(join(ROOT, 'prompts')))
+  const shelfSkills = skillData(readSkills(join(ROOT, 'skills')))
+  const shelf = buildAgentData({ prompts: shelfPrompts, skills: shelfSkills, bots: [] })
+  const promptWithoutImages = shelfPrompts.find((p) => !p.images?.length && !p.models?.length)
+  const skillWithoutExamples = shelfSkills.find((s) => !s.examples?.length)
+  expect(promptWithoutImages, '真实货架找不到同时没有效果图和适用模型的 Prompt，无法核对空数组').toBeDefined()
+  expect(skillWithoutExamples, '真实货架找不到没有作者示例的 Skill，无法核对空数组').toBeDefined()
+  const shelfFile = (kind, slug) => shelf.files.find((f) => f.path === dataPath(kind, slug))?.data
+  expect(shelfFile('prompt', promptWithoutImages.slug)).toMatchObject({ models: [], images: [] })
+  expect(shelfFile('skill', skillWithoutExamples.slug).examples).toEqual([])
+
+  const skillsWithExamples = shelfSkills.filter((s) => s.examples?.length)
+  const exampleCount = skillsWithExamples.reduce((total, s) => total + s.examples.length, 0)
+  const exportedExamples = shelfSkills.flatMap((s) => shelfFile('skill', s.slug).examples)
+  expect(shelf.index.items.filter((i) => i.kind === 'skill' && i.hasExamples === true)).toHaveLength(skillsWithExamples.length)
+  expect(exportedExamples).toHaveLength(exampleCount)
+  for (const image of exportedExamples.flatMap((example) => example.images)) {
+    expect(image.url.startsWith(`${SITE.url}/`)).toBe(true)
+  }
+
+  const promptsWithImages = shelfPrompts.filter((p) => p.images?.length)
+  const imageCount = promptsWithImages.reduce((total, p) => total + p.images.length, 0)
+  const exportedImages = shelfPrompts.flatMap((p) => shelfFile('prompt', p.slug).images)
+  expect(shelf.index.items.filter((i) => i.kind === 'prompt' && i.hasImages === true)).toHaveLength(promptsWithImages.length)
+  expect(exportedImages).toHaveLength(imageCount)
+  for (const image of exportedImages) {
+    expect(image.url.startsWith(`${SITE.url}/`)).toBe(true)
+  }
 })
 
 it('署名行：缺的段落省掉', () => {

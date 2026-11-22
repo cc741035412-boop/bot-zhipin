@@ -22,3 +22,30 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 检查 users 表时，它发现 340 行记录的状态值异常，还列出了值得继续分析的字段。
+    lang: en
+    ask: /explore-data users table
+    reply: |-
+      [Profiles table: 2.3M rows, 47 columns]
+             → [Reports: created_at has 0.2% nulls, email has 99.8% cardinality]
+             → [Flags: status column has unexpected value "UNKNOWN" in 340 rows]
+             → [Suggests: "High-value dimensions to explore: plan_type, signup_source, country"]
+    askZh: /explore-data users 表
+    replyZh: |-
+      [分析表的概况：230 万行，47 列]
+             → [报告：created_at 的空值率为 0.2%，email 的不同取值数占总行数的 99.8%]
+             → [标出异常：有 340 行的 status 列出现了预期之外的值 "UNKNOWN"]
+             → [建议：“值得深入分析的维度：plan_type、signup_source、country”]
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/README.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）
+  - caption: 视频中，Claude 查阅 CRM、BigQuery、Docusign 和工单数据，分析丢单原因并交出一份 XLSX 分析表。
+    lang: en
+    video: https://www.youtube.com/watch?v=v5IOHK5xFlc
+    source:
+      url: https://www.youtube.com/watch?v=v5IOHK5xFlc&t=16s
+      name: Anthropic 官方 YouTube 频道
+    rights: Anthropic 官方 YouTube 频道（@claude）视频，未声明开源许可

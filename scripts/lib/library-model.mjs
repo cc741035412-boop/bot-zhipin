@@ -4,7 +4,7 @@ import { parseMapping } from './squad-model.mjs'
 // 一条 Prompt 的正文最多 6000 字（中文约 18KB），留出其他字段的余量；Skill 不收正文。
 export const LIBRARY_KINDS = Object.freeze({
   prompt: Object.freeze({ kind: 'prompt', dir: 'prompts', yamlBytes: 32 * 1024 }),
-  skill: Object.freeze({ kind: 'skill', dir: 'skills', yamlBytes: 16 * 1024 }),
+  skill: Object.freeze({ kind: 'skill', dir: 'skills', yamlBytes: 256 * 1024 }),
 })
 
 /**

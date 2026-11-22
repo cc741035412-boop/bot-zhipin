@@ -22,3 +22,39 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 分享分析文档前请它核对计算口径，它指出分母漏算了试用用户，转化率可能被高估约 5 个百分点。
+    lang: en
+    ask: /validate [shares analysis document]
+    reply: |-
+      [Reviews methodology] → [Checks for survivorship bias in churn analysis]
+             → [Verifies aggregation logic] → [Flags: "Denominator excludes trial users
+                which could overstate conversion rate by ~5pp"]
+             → [Confidence: "Ready to share with noted caveat"]
+    askZh: /validate [附上分析文档]
+    replyZh: |-
+      [审查分析方法] → [检查流失分析中是否存在幸存者偏差]
+             → [核对聚合逻辑] → [指出：“分母不含试用用户，
+                可能导致转化率被高估约 5 个百分点”]
+             → [可信度判断：“注明上述限制后即可分享”]
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/README.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）
+  - caption: 比较第三、第四季度的流失率时，指出第四季度的观察期较短，请它检查这样比较是否合理。
+    lang: en
+    ask: /validate-data Check my churn analysis -- I'm comparing Q4 churn rates to Q3 but Q4 has a shorter measurement window
+    askZh: /validate-data 帮我检查一下流失分析：我在比较第四季度和第三季度的流失率，但第四季度的观察期更短。
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/skills/validate-data/SKILL.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）
+  - caption: 把转化漏斗的 SQL 查询和运行结果一起贴上，请它核对查询逻辑。
+    lang: en
+    ask: /validate-data Here's a SQL query and its results for our conversion funnel. Does the logic look right? [query + results]
+    askZh: /validate-data 这是分析我们转化漏斗的 SQL 查询和运行结果。你看逻辑对吗？[query + results]
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/skills/validate-data/SKILL.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）

@@ -23,3 +23,31 @@ author:
 license: MIT
 licenseUrl: https://github.com/op7418/Humanizer-zh/blob/f4518a8eab97b8bfebc66a89d34320a89bef6930/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 把方案介绍里堆在一起的四字短语改成日常说法，保留运行稳定、响应快和方便维护三点。
+    lang: zh
+    ask: 该方案稳定可靠、快速响应、易于维护。
+    reply: 这套方案运行稳定、响应快，也方便维护。
+    source:
+      url: https://raw.githubusercontent.com/op7418/Humanizer-zh/f4518a8eab97b8bfebc66a89d34320a89bef6930/README.md
+      name: op7418/Humanizer-zh
+    rights: MIT（op7418/Humanizer-zh）
+  - caption: 把故障反馈拆成两句，写清是社区多次报告了问题，同时保留内存泄漏只是推测的意思。
+    lang: zh
+    ask: 该问题被社区多次报告，被认为可能与内存泄漏有关，但原因尚未确认。
+    reply: 社区多次报告这个问题。它被认为可能与内存泄漏有关，但原因尚未确认。
+    source:
+      url: https://raw.githubusercontent.com/op7418/Humanizer-zh/f4518a8eab97b8bfebc66a89d34320a89bef6930/README.md
+      name: op7418/Humanizer-zh
+    rights: MIT（op7418/Humanizer-zh）
+  - caption: 贴上文章请 humanizer-zh 润色，特别交代要保留技术评论的语气。
+    lang: zh
+    ask: |-
+      请用 humanizer-zh 润色下面的文章，保留技术评论的语气：
+      [原文]
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/op7418/Humanizer-zh/f4518a8eab97b8bfebc66a89d34320a89bef6930/README.md
+      name: op7418/Humanizer-zh
+    rights: MIT（op7418/Humanizer-zh）

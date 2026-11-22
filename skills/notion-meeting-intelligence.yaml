@@ -24,3 +24,200 @@ author:
 license: MIT
 licenseUrl: https://github.com/openai/plugins/blob/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-meeting-intelligence/LICENSE.txt
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 为讨论数据库迁移策略的架构会整理预读材料，列出查询变慢的数据、上次迁移的教训和本周要做的决定。
+    lang: en
+    ask: Prep for tomorrow's architecture meeting where we need to decide on database migration strategy
+    reply: |-
+      # Architecture Decision: Database Migration Strategy
+
+      ## Meeting Details
+      **Date & Time**: October 15, 2025 at 2:00 PM
+      **Duration**: 90 minutes
+      **Location**: Conference Room B / Zoom
+      **Facilitator**: Sarah Chen (Engineering Lead)
+      **Attendees**:
+      - Sarah Chen (Engineering Lead)
+      - David Kim (CTO)
+      - Alice Wang (Backend Team Lead)
+      - Bob Martinez (DevOps Lead)
+      - Carol Johnson (Product Director)
+
+      ## Pre-Read Summary
+
+      ### Background
+
+      Our MongoDB database is experiencing performance degradation as we scale. Query response times have increased from 50ms to 400ms average over the past 6 months. The schema-less nature that initially provided flexibility is now causing data consistency issues and making application logic more complex.
+
+      **Source**: <mention-page url="...">Current Database Performance Issues</mention-page>
+
+      ### Current Situation
+
+      **Performance metrics**:
+      - Average query time: 400ms (was 50ms 6 months ago)
+      - p95 query time: 1.2s (was 200ms)
+      - Database size: 500GB (growing 20GB/month)
+      - Connection pool exhaustion during peak traffic
+
+      **Technical debt**:
+      - 15+ application-layer validation rules compensating for lack of schema
+      - Complex data migration scripts for schema changes
+      - Limited transaction support causing race conditions
+
+      **Source**: <mention-page url="...">Database Migration Proposal</mention-page>
+
+      ### Historical Context
+
+      We successfully migrated from Redis to Memcached in 2023, which took 6 weeks. Key learnings:
+      - Underestimated application code changes (3 weeks instead of 1 week)
+      - Rollback plan was crucial when we discovered compatibility issues
+      - Parallel running period (dual writes) was essential for safe migration
+
+      **Source**: <mention-page url="...">Previous Migration Post-mortem</mention-page>
+
+      ## Decision Required
+
+      **Question**: Which database migration strategy should we adopt?
+
+      **Timeline**: Need decision by end of week to include in Q4 planning
+    askZh: 帮我准备明天的架构会，我们要在会上敲定数据库迁移策略。
+    replyZh: |-
+      # 架构决策：数据库迁移策略
+
+      ## 会议信息
+      **日期和时间**：2025 年 10 月 15 日下午 2 点
+      **时长**：90 分钟
+      **地点**：B 会议室 / Zoom
+      **主持人**：Sarah Chen（工程负责人）
+      **参会人**：
+      - Sarah Chen（工程负责人）
+      - David Kim（首席技术官）
+      - Alice Wang（后端团队负责人）
+      - Bob Martinez（DevOps 负责人）
+      - Carol Johnson（产品总监）
+
+      ## 会前材料摘要
+
+      ### 背景
+
+      随着规模扩大，我们的 MongoDB 数据库性能正在下降。过去 6 个月里，平均查询响应时间已从 50 毫秒升至 400 毫秒。不需要固定模式原本给我们带来了灵活性，现在却造成了数据一致性问题，也让应用逻辑更加复杂。
+
+      **来源**：<mention-page url="...">当前数据库性能问题</mention-page>
+
+      ### 现状
+
+      **性能指标**：
+      - 平均查询耗时：400 毫秒（6 个月前为 50 毫秒）
+      - p95 查询耗时：1.2 秒（原为 200 毫秒）
+      - 数据库大小：500 GB（每月增长 20 GB）
+      - 流量高峰时连接池会耗尽
+
+      **技术债**：
+      - 为弥补数据库缺少固定模式的问题，应用层使用了 15 多条校验规则
+      - 变更数据结构需要复杂的数据迁移脚本
+      - 事务支持有限，导致竞态条件
+
+      **来源**：<mention-page url="...">数据库迁移提案</mention-page>
+
+      ### 以往经验
+
+      2023 年，我们花了 6 周成功从 Redis 迁移到 Memcached。主要经验如下：
+      - 低估了修改应用代码的工作量（原估 1 周，实际用了 3 周）
+      - 发现兼容性问题时，回滚方案起了关键作用
+      - 要安全迁移，新旧系统并行运行一段时间（双写）必不可少
+
+      **来源**：<mention-page url="...">上次迁移复盘</mention-page>
+
+      ## 待做决定
+
+      **问题**：我们该采用哪种数据库迁移策略？
+
+      **时限**：需要在本周结束前做出决定，以便纳入第四季度规划。
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/openai/plugins/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-meeting-intelligence/examples/project-decision.md
+      name: openai/plugins
+    rights: MIT（Notion Labs，见该 Skill 目录 LICENSE.txt；所在仓库 openai/plugins）
+  - caption: 为周四与 Acme Corp 的销售会准备内部简报，把客户难题与解决办法逐项对照，并给出竞争优势和报价建议。
+    lang: en
+    ask: Prep for sales meeting with Acme Corp on Thursday
+    reply: |-
+      # Acme Corp Meeting - Pre-Read (Internal)
+
+      ## Company Overview
+      **Company**: Acme Corp (500-person fintech, Series B)
+      **Decision Makers**: CTO, VP Product, CFO
+      Source: <mention-page url='...'>CRM Notes</mention-page>
+
+      ## Their Pain Points → Our Solutions
+      - Manual workflows → Workflow automation
+      - Data silos → API integrations
+      - Scaling issues → Enterprise features
+
+      ## Competitive Position
+      **Our advantages over Competitor A/B**:
+      - Better integration ecosystem (Stripe, Plaid)
+      - Stronger compliance features
+      - Faster implementation (4 weeks vs 12 weeks)
+
+      ## Pricing Strategy
+      Recommend: $60K/year (mid-range of their budget)
+
+      ## Potential Objections & Responses
+      ...
+    askZh: 帮我准备周四和 Acme Corp 的销售会议。
+    replyZh: |-
+      # Acme Corp 会议：会前材料（内部）
+
+      ## 公司概况
+      **公司**：Acme Corp（金融科技公司，500 人，B 轮融资）
+      **决策人**：首席技术官、产品副总裁、首席财务官
+      来源：<mention-page url='...'>CRM 记录</mention-page>
+
+      ## 客户的难题 → 我们的解决办法
+      - 流程依赖手工操作 → 工作流自动化
+      - 数据孤岛 → API 集成
+      - 规模扩张遇到困难 → 企业级功能
+
+      ## 竞争态势
+      **我们相较于竞争对手 A、B 的优势**：
+      - 集成生态更完善（Stripe、Plaid）
+      - 合规功能更强
+      - 实施更快（我们用 4 周，对手用 12 周）
+
+      ## 报价策略
+      建议报价：每年 6 万美元（处于客户预算区间的中段）
+
+      ## 客户可能提出的异议及回应
+      ...
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/openai/plugins/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-meeting-intelligence/examples/customer-meeting.md
+      name: openai/plugins
+    rights: MIT（Notion Labs，见该 Skill 目录 LICENSE.txt；所在仓库 openai/plugins）
+  - caption: 为明天的冲刺计划会排好议程：先回顾上轮遗留事项，再按团队可承担的工作量挑选待办、确认承诺。
+    lang: en
+    ask: Prepare for tomorrow's sprint planning meeting
+    reply: |-
+      **Agenda**:
+      - Review Sprint 24 completion (5 min)
+      - Discuss carryover items (5 min)
+      - Review capacity (28 points available)
+      - Select backlog items (30 min)
+      - Identify dependencies & risks (10 min)
+      - Confirm commitments (10 min)
+    askZh: 帮我准备明天的冲刺计划会。
+    replyZh: |-
+      **议程**：
+      - 回顾第 24 次冲刺的完成情况（5 分钟）
+      - 讨论上轮未完成、需转入本轮的事项（5 分钟）
+      - 核对团队本轮可承担的工作量（28 个故事点）
+      - 从待办列表中选择本轮要做的事项（30 分钟）
+      - 找出依赖关系和风险（10 分钟）
+      - 确认团队承诺完成的事项（10 分钟）
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/openai/plugins/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-meeting-intelligence/examples/sprint-planning.md
+      name: openai/plugins
+    rights: MIT（Notion Labs，见该 Skill 目录 LICENSE.txt；所在仓库 openai/plugins）

@@ -12,7 +12,7 @@ const prompt = fixtures('prompt').find(({ slug }) => slug === 'demo-socratic-tut
 const skill = fixtures('skill')[0]
 const enums = loadLibraryEnums()
 function change(entry, patch, name = entry.name) {
-  return buildEntryModel(entry.kind, name, { raw: YAML.stringify({ ...entry.data, ...patch }) })
+  return { ...buildEntryModel(entry.kind, name, { raw: YAML.stringify({ ...entry.data, ...patch }) }), imageFiles: entry.imageFiles }
 }
 function problems(...entries) {
   return validateLibrary(entries[0].kind, entries).errors
@@ -92,6 +92,24 @@ it('同类 slug 重复时报告另一个文件', () => {
 })
 it('Skill 即使可转载也不能放 SKILL.md 正文', () => {
   expect(problems(change(skill, { body: '不该写在这里', license: 'MIT' }))).toContainEqual(at(skill, 'body', 'Skill 不收正文'))
+})
+it('示例数量、字段、翻译和图片引用', () => {
+  const base = { lang: 'zh', caption: '从目录页提取章节并保留页码', source: skill.data.source, rights: '© 示例团队' }
+  const image = { file: 'demo-blue.png', alt: '蓝色底稿' }
+  const check = (...examples) => problems(change(skill, { examples }))
+  for (const fields of [{ ask: '提取目录' }, { reply: '目录' }, { images: [image] }, { video: 'https://example.com/v' }, { file: 'https://example.com/f' }, { lang: 'en', ask: 'Contents?', askZh: '目录？', reply: 'Index', replyZh: '索引' }]) {
+    expect(check({ ...base, ...fields })).toEqual([])
+  }
+  for (const fields of [{}, { images: [] }, { lang: 'en', ask: 'Go' }, { lang: 'en', reply: 'Done' }, { ask: '请求', askZh: '请求' }, { reply: '产出', replyZh: '产出' }, { images: [{ ...image, file: 'missing.png' }] }, { images: [{ ...image, file: '../demo-blue.png' }] }, { images: [{ ...image, alt: 'blue' }] }, { images: Array(5).fill(image) }, { ask: 'a'.repeat(3001) }, { reply: 'r'.repeat(6001) }, { video: 'http://example.com' }, { file: 'local' }, { ask: '请求', caption: 'No Chinese' }, { ask: '请求', rights: '' }, { ask: '请求', source: {} }]) {
+    expect(check({ ...base, ...fields }).length).toBeGreaterThan(0)
+  }
+  for (const key of ['ask', 'reply']) {
+    const command = { ...base, lang: 'en', [key]: ' /start  \n\n/next' }
+    expect(check(command)).toEqual([])
+    expect(check({ ...command, [key]: `${command[key]}\nSummarize the notes.` })).toContainEqual(at(skill, `第 1 个示例 · ${key}Zh`, '英文原文缺少译文'))
+  }
+  expect(check()).not.toEqual([])
+  expect(check(...Array(4).fill({ ...base, ask: '目录' }))).not.toEqual([])
 })
 it('运行依赖每项最多 80 字，仍限五项且不能重复', () => {
   const validate = (requires) => problems(change(skill, { requires }))
