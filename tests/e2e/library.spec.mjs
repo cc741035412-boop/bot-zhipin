@@ -134,7 +134,7 @@ for (const width of [1280, 390])
           db[dir].map((i) => [
             i.title,
             i.name || '', i.category, i.purpose,
-            i.agents ? i.agents[0] + (i.agents.length > 1 ? ` +${i.agents.length - 1}` : '') : i.author.name,
+            i.author.name,
           ]),
         )
         const i = db[dir].find((i) => i.body || i.name),
