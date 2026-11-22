@@ -14,6 +14,10 @@ export const categories = (dir) =>
     db[dir].some((i) => i.category === c),
   )
 export const normalize = (s) => s.normalize('NFKC').trim().toLowerCase()
+// 独立实现的拆词：空白分词；汉字和两个字符以上的英文、数字段（+ # 算在内）交界处也断开（「做PPT」=「做 PPT」）。
+// 单个字母不断开（「B站」是一个词），这种中英混写的词再拿去掉空白的字段比一次（「B 站」也算）。
+const words = (q) => normalize(q).replace(/(\p{Script=Han})(?=[a-z0-9+#]{2})/gu, '$1 ').replace(/([a-z0-9+#]{2})(?=\p{Script=Han})/gu, '$1 ').split(/\s+/).filter(Boolean)
+const has = (field, word) => field.includes(word) || (/\p{Script=Han}/u.test(word) && /[a-z0-9]/.test(word) && field.replace(/\s+/g, '').includes(word))
 export function matching(dir, q, cat = '') {
   return db[dir].filter((i) => {
     const fields = [
@@ -32,9 +36,7 @@ export function matching(dir, q, cat = '') {
       .map(normalize)
     return (
       (!cat || cat === i.category) &&
-      normalize(q)
-        .split(/\s+/)
-        .every((token) => fields.some((f) => f.includes(token)))
+      words(q).every((token) => fields.some((f) => has(f, token)))
     )
   })
 }

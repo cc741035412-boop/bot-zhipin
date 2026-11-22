@@ -47,7 +47,7 @@
 | `site/.vitepress/theme/components/HeroBallpit.vue` + `theme/ballpit-physics.ts` | 首屏球池：货架上的真 Bot 掉下来堆在地板上，站名和搜索框是碰撞体；名片点进详情。物理是不碰 DOM 的纯模块（规格见 INTERACTION.md §2.2） | 维护者 |
 | `site/.vitepress/theme/components/FeaturedCard.vue` | 精选大卡：活 Bot、名字、介绍、作者、热度、导入；不带气泡 | 维护者 |
 | `site/.vitepress/theme/components/SearchTrigger.vue` | 长得像输入框的按钮（首屏和工具栏各一个），只负责派发 `bz-search-open` | 维护者 |
-| `site/.vitepress/theme/components/SearchPalette.vue` + `theme/search.ts` | 搜索命令面板和它的匹配、排序规则；挂在 Layout 的 `layout-bottom` 插槽，全站可用 | 维护者 |
+| `site/.vitepress/theme/components/SearchPalette.vue` + `theme/search.ts` | 搜索命令面板和它的匹配、排序规则（Bot、小队、Prompt、Skills）；挂在 Layout 的 `layout-bottom` 插槽，全站可用。Prompt、Skills 的数据 `site/.vitepress/data/library-search.data.mjs` 在第一次打开面板时才 `import()`，单独成块（决策 71） | 维护者 |
 | `site/.vitepress/theme/components/SiteFooter.vue` | 全站页脚：创建人、开源仓库、鸣谢（文字在 `meta.mjs` 的 `FOOTER`）；也挂在 `layout-bottom` | 维护者 |
 | `site/.vitepress/theme/components/BotCard.vue`、`BotAvatar.vue`、`BotActions.vue` | 列表卡：article 是容器查询的容器，里面的 `.bot-card-body` 是版式网格；头像外层在卡片里 `display: contents`，玻璃砖和气泡各占一格。/submit 的投稿预览复用这几个组件 | 维护者 |
 | `site/.vitepress/theme/components/BotDetail.vue` | 详情页（一份「简历」）：头部 + 吸顶侧栏（导入、三项属性、作者来源）+ 主栏的一块块内容；同样被投稿预览复用。配套 `DetailStarters.vue`（开场白，点一下复制）、`BotMini.vue`（小头像）；「同组的 Bot」和小队成员小头像由 `site/.vitepress/data/detail.mjs` 在构建时算好，经 `site/bots/[slug].paths.mjs` 放进路由参数。规格见 INTERACTION §9 | 维护者 |
@@ -130,7 +130,7 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 
 Prompt 的 `copyright` 是单行原版权行（1–200 字），有 `body` 必填，只投影到详情。Skill 的 `requires` 是有序依赖列表，最多 5 项、去重，每项 1–80 字。分类选项取自 schema；`theme/library-marks.ts` 只负责分类名到颜色和 SVG 路径的映射，单测逐库核对键集合。
 
-`entry-summary.mjs` 在详情数据中保留 Prompt 原文和本站译文，精简列表两者都不带。详情有译文时默认显示和复制中文，原文折叠并可单独复制；没有译文就使用原文。`site/.vitepress/data/prompts-skills.mjs` → 列表 data loader / `[slug].paths.mjs` → `site/{prompts,skills}/` 列表和静态详情。浏览器只在本库列表字段上查询；不加载 SKILL.md、不发搜索请求、不接 Bot 热度接口。`sync-assets.mjs` 生成两份 slug 清单，`functions/{prompts,skills}/[slug].ts` 各按自己的清单处理下架地址。
+`entry-summary.mjs` 在详情数据中保留 Prompt 原文和本站译文，精简列表两者都不带。详情有译文时默认显示和复制中文，原文折叠并可单独复制；没有译文就使用原文。`site/.vitepress/data/prompts-skills.mjs` → 列表 data loader / `[slug].paths.mjs` → `site/{prompts,skills}/` 列表和静态详情。浏览器只在本库列表字段上查询；不加载 SKILL.md、不发搜索请求、不接 Bot 热度接口。全站搜索面板另用一份更小的 `library-search.data`（不带正文，只带标题、原名、用途、分类、作者、场景、标签、agents、详情地址），第一次打开面板时动态 import，不进任何页面的首屏 JS（部署后旧标签页的数据块 404 时，生产环境退回读 `/data/index.json`）；它和 `prompts.data`、`skills.data` 一样用 `promptsWatch` / `skillsWatch` 监听，开发时改了条目会刷新。`sync-assets.mjs` 生成两份 slug 清单，`functions/{prompts,skills}/[slug].ts` 各按自己的清单处理下架地址。
 
 ## 构建与部署
 

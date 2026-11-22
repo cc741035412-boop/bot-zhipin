@@ -30,7 +30,7 @@ export const HERO_MASCOTS = [
 // 搜索占位字首屏搜索框和搜索面板共用。
 export const SHELF_COPY = {
   searchPlaceholder: '搜索',
-  searchLabel: '搜索 Bot',
+  searchLabel: '搜索 Bot、Prompt 和 Skills',
   contribute: '我要投稿',
   // 区块标题
   featuredTitle: '本周主推',
