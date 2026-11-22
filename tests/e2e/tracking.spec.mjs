@@ -54,9 +54,35 @@ test('详情协议导入、热度、疑似未安装且无出站重复', async ({
   expect(wire.clicks).toHaveLength(1); await recorded(page, 'bot_no_app', {}, { slug }); expect(await history(page, 'outbound')).toHaveLength(0)
 })
 test('卡片复制', async ({ page }) => { await go(page, '/'); await page.locator(`[data-slug="${slug}"] [data-testid="btn-prompt"]`).first().click(); await recorded(page, 'bot_copy_prompt', { from: 'card', ok: true }, { slug }) })
+for (const [name, event, options, count] of [
+  ['中键', 'auxclick', { button: 'middle' }, 0],
+  ['Cmd/Ctrl 左键', 'click', { modifiers: ['ControlOrMeta'] }, 1],
+]) test(`卡片${name}导入`, async ({ page, wire }) => {
+  await go(page, '/')
+  const button = page.locator(`[data-slug="${slug}"] [data-testid="btn-import"]`).first()
+  // 保留真实鼠标事件，只阻止打开外部模板页。
+  await button.evaluate((a, type) => a.addEventListener(type, e => e.preventDefault(), { once: true }), event)
+  await button.click(options)
+  const imported = () => wire.events.filter(e => e.name === 'bot_import' && e.slug === slug)
+  await expect.poll(imported).toEqual([expect.objectContaining({ props: { from: 'card', direct: false, mod: true } })])
+  expect(wire.clicks).toEqual(count ? [{ slug, kind: 'import' }] : [])
+})
 test('主推导入', async ({ page }) => { await go(page, '/'); await link(page.getByTestId('featured-import').first()); await recorded(page, 'bot_import', { from: 'featured', direct: false }) })
 test('开场白', async ({ page }) => { await go(page, botPath); await page.getByTestId('starter').first().click(); await recorded(page, 'bot_copy_starter', { ok: true, index: 0 }) })
 test('小队阵容和步骤成员', async ({ page }) => { await go(page, squadPath); for (const [id, from] of [['member-import','squad_lineup'], ['setup-import','squad_setup']]) { const a = page.getByTestId(id).first(); const member = await a.evaluate(a => a.closest('[data-slug]').dataset.slug); await link(a); await recorded(page, 'bot_import', { from, squad }, { slug: member }) } })
+test('小队阵容中键导入不报热度', async ({ page, wire }) => {
+  await go(page, squadPath)
+  const button = page.getByTestId('member-import').first()
+  const member = await button.evaluate(a => {
+    a.addEventListener('auxclick', e => e.preventDefault(), { once: true })
+    return a.closest('[data-slug]').dataset.slug
+  })
+  await button.click({ button: 'middle' })
+  await expect.poll(() => wire.events.filter(e => e.name === 'bot_import')).toEqual([
+    expect.objectContaining({ slug: member, props: expect.objectContaining({ from: 'squad_lineup', squad, mod: true }) }),
+  ])
+  expect(wire.clicks).toEqual([])
+})
 test('组队与两种口令', async ({ page }) => { await go(page, squadPath); await page.getByTestId('squad-start').click(); await recorded(page, 'squad_start', {}); for (const which of ['kickoff','tryout']) { await page.getByTestId(`copy-${which}`).click(); await recorded(page, 'squad_copy', { which, ok: true }) } })
 for (const translated of [true,false]) test(`列表复制 translated=${translated}`, async ({ page }) => {
   const item = db.prompts.find(i => i.body && !!i.bodyZh === translated)

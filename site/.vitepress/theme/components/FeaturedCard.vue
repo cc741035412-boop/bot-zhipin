@@ -34,7 +34,7 @@ function leave(event: PointerEvent) { if (event.pointerType === 'mouse') hovered
 function poke() { portrait.value?.play({ state: nextPoke(props.bot.slug).state }) }
 function importBot(event: MouseEvent) {
   portrait.value?.play({ state: 'comet' })
-  reportClick(props.bot.slug, 'import')
+  if (event.type !== 'auxclick') reportClick(props.bot.slug, 'import')
   track('bot_import', { from: 'featured', direct: false, trial: 'none', mod: event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1 }, { slug: props.bot.slug })
 }
 </script>

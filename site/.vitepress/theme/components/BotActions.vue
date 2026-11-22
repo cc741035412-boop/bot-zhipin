@@ -104,13 +104,13 @@ const isTouch = () => typeof window !== 'undefined' && (window.matchMedia?.('(po
 async function importBot(event: MouseEvent) {
   if (preview) return
   play({ state: 'comet' })
-  reportClick(props.bot.slug, 'import')
+  if (event.type !== 'auxclick') reportClick(props.bot.slug, 'import')
   const mod = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0
   const direct = !mod && Boolean(appUrl.value) && !isTouch()
   if (direct) event.preventDefault()
   // 先复制再唤起：浏览器弹「打开 Grok Bot？」以后页面失焦，剪贴板就写不进去了。
-  const result = !trial.value ? 'none' : !mod && await writeClipboard(trial.value) ? 'copied' : 'failed'
-  track('bot_import', { from: from.value, direct, trial: result, mod }, { slug: props.bot.slug })
+  const result = mod ? undefined : !trial.value ? 'none' : await writeClipboard(trial.value) ? 'copied' : 'failed'
+  track('bot_import', { from: from.value, direct, ...(mod ? {} : { trial: result }), mod }, { slug: props.bot.slug })
   if (mod) return
   if (result === 'copied') {
     launched.value = true

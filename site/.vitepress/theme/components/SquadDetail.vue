@@ -81,8 +81,8 @@ function enterRow(event: PointerEvent, slug: string) { if (event.pointerType ===
 function leaveRow(event: PointerEvent) { if (event.pointerType === 'mouse') hoveredRow.value = null }
 function poke(slug: string) { rowPortraits.get(slug)?.play({ state: nextPoke(slug).state }) }
 function importMember(slug: string, from: 'squad_lineup' | 'squad_setup', event: MouseEvent) {
-  // 和货架上的「导入」一样：照常上报这个 Bot 的导入，新标签页由链接自己打开。
-  reportClick(slug, 'import')
+  // 和货架上的「导入」一样：只在 click 时上报热度，新标签页由链接自己打开。
+  if (event.type !== 'auxclick') reportClick(slug, 'import')
   track('bot_import', { from, squad: props.squad.slug, direct: false, trial: 'none', mod: event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1 }, { slug })
   photo.value?.play(slug, { state: 'comet' })
   rowPortraits.get(slug)?.play({ state: 'comet' })
