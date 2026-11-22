@@ -181,7 +181,12 @@
 .ix-example img { width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--bz-hairline); }
 .ix-example-links { display: flex; gap: 8px; flex-wrap: wrap; }
 .ix-example footer { font-size: var(--bz-fs-sm); color: var(--bz-text-3); overflow-wrap: anywhere; }
-@media (max-width: 819px) { .ix-ask { max-width: 100%; } }
+@media (max-width: 819px) {
+  .ix-ask { max-width: 100%; }
+  /* 成对的问答共用示例栏宽；回复不沿用正文纸面的负外边距。 */
+  .ix-example:has(> .ix-reply) > .ix-ask { justify-self: stretch; }
+  .ix-example > .ix-reply { margin-inline: 0; }
+}
 .ix-original { margin-top: var(--bz-sp-4); }
 .ix-original > summary { display: list-item; cursor: pointer; }
 .ix-original > summary::marker { color: var(--bz-text-3); }
