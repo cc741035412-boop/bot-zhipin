@@ -16,6 +16,16 @@ Grok Bot 模板货架：挑一个顺手的直接导入，也欢迎把你做的 B
 
 导入前请看一眼详情页里的「会用到的权限」和「额度消耗」。
 
+## 让你的 AI 来找
+
+网站上的 Prompt、Skills 和 Bot 也能让 AI 助手直接搜：装上 `bot-zhipin` 这个 skill，跟它说「找个写周报的 prompt」「有没有能做 PPT 的 skill」，它会在本站挑出合适的几条，Prompt 直接给原文，Skill 给出你这个助手的安装命令，确认后再装。
+
+- Claude Code：`claude plugin marketplace add jakob52123/bot-zhipin && claude plugin install bot-zhipin@bot-zhipin`
+- Codex、Cursor 等其他助手：`npx skills add jakob52123/bot-zhipin --skill bot-zhipin`
+- 别的办法都不方便时：把 https://bot.jiachengbo.com/skill/bot-zhipin/SKILL.md 发给你的 AI，让它照着装
+
+skill 的源文件在 [`integrations/bot-zhipin/`](integrations/bot-zhipin/)，它读的数据是网站构建时生成的 [`/data/index.json`](https://bot.jiachengbo.com/data/index.json)，说明见 [`llms.txt`](https://bot.jiachengbo.com/llms.txt)。
+
 ## 我要投稿
 
 最快的方式：打开 **https://bot.jiachengbo.com/submit** ，点「复制投稿提示词」，发给你的 AI（你的 Grok Bot、Codex 或 Claude Code）。也可以直接复制下面这段：
