@@ -1,0 +1,17 @@
+{
+  "name": "bot-zhipin",
+  "description": "在 Bot 直聘（bot.jiachengbo.com）的收录库里找现成的 Prompt、Agent Skill 和 Grok Bot 模板，拿来就用",
+  "author": {
+    "name": "Bot 直聘",
+    "url": "https://bot.jiachengbo.com/"
+  },
+  "homepage": "https://bot.jiachengbo.com/",
+  "repository": "https://github.com/jakob52123/bot-zhipin",
+  "license": "MIT",
+  "keywords": [
+    "prompt",
+    "skills",
+    "grok-bot",
+    "中文"
+  ]
+}

@@ -99,3 +99,13 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | TR-WEB-CORE | `theme/track.ts` 模块和单测，不接组件 | 编码 agent | — | `site/.vitepress/theme/track.ts` | ✅ |
 | TR-WEB-HOOK | 接进主题入口和各组件、e2e 核对每个事件 | 编码 agent | #34、#35、#36、搜索面板线合进 main；TR-WEB-CORE | `theme/index.ts`、各组件、`theme/submit/`、`tests/e2e/tracking*` | ⬜ |
 | TR-INT | 集成、文档、开 PR；线上先备份再迁移，然后合并 | 维护者 | 全部 | — | 🟡 |
+
+# 让 AI 来找：bot-zhipin skill（2026-11-22）
+
+目标：任何人的 AI 助手装上 `bot-zhipin` skill 后能搜本站的 Prompt、Skills 和 Bot，Prompt 给原文，Skill 给安装命令。决策 70。
+
+| # | 任务 | 执行 | 前置 | 写入范围 | 状态 |
+|---|---|---|---|---|---|
+| FS1 | 构建时输出 `/data/index.json` 和每条完整数据，llms.txt 补 Prompt、Skills | 维护者 | — | `scripts/lib/{agent-data,llms}.mjs`、`site/.vitepress/config.mts`、单测 | ✅ |
+| FS2 | skill 本体：SKILL.md、`find.py`、Claude Code 插件清单 | 编码 agent | FS1 的数据格式 | `integrations/bot-zhipin/`、`.claude-plugin/` | ✅ |
+| FS3 | README、架构、决策；验收后推送开 PR，上线后线上核对 | 维护者 | FS1、FS2 | 文档 | 🟡 |

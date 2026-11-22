@@ -126,7 +126,7 @@ def curl(url, args=(), expected=200):
 try:
     for port in (8788, 8799, 9338): require(not listening(port), 'Acceptance port occupied; existing processes untouched')
     work.mkdir()
-    for name in ('functions', 'migrations', 'scripts', 'site', 'schema', 'bots', 'tests/fixtures'):
+    for name in ('functions', 'migrations', 'scripts', 'site', 'schema', 'bots', 'integrations', 'tests/fixtures'):
         shutil.copytree(root / name, work / name, ignore=shutil.ignore_patterns('dist', 'cache', 'bot-assets', 'api-data', '__pycache__'))
     for name in ('package.json', 'package-lock.json', 'wrangler.toml'): shutil.copy2(root / name, work / name)
     (work / 'node_modules').symlink_to(root / 'node_modules', target_is_directory=True)
