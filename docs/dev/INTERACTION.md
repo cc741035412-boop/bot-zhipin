@@ -186,15 +186,15 @@
 
 组件怎么分：`BotShelf.vue` 只管页面骨架；首屏是 `HeroBallpit.vue`（§2.2）；首屏以下全部在 `HomeSections.vue` 里（主推、`HomeSquads`、`HomeCollections`、工具栏 `ShelfToolbar`、分组 `RoleGroup`、页尾）。全站页脚 `SiteFooter` 挂在主题 Layout 的 `layout-bottom` 插槽里（§2.6）。排序、分组、地址栏读写是纯函数，在 `theme/shelf.ts`（有单测）。
 
-### 2.1 悬浮玻璃导航条
+### 2.1 三岛分离页眉
 
 VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡菜单、主题切换、GitHub 图标照常可用。
 
-- 全宽度固定在顶部（`.VPNav` 在所有宽度 `position: fixed`）；条本身距顶 16px、左右各留 16px、最大宽 1204px、水平居中，圆角 16px。
-- 高 64px（<768px 时 56px）。半透明底（深 `rgba(14,15,17,.72)`、浅 `rgba(255,255,255,.74)`）+ `backdrop-filter: blur(18px) saturate(160%)`，`--bz-hairline` 细边 + 内高光 + 一层向下的柔和投影。
-- `--vp-nav-height` 设为「16 + 条高 + 8」，正文和 /submit 的粘性预览按它让位；条内部把它改回条高，默认主题的子元素照常排版。
-- 左：自绘的小吉祥物（CSS 里一段内联 SVG：橙色圆团 + 两只竖眼，28px，悬停歪一下头）+ 站名，圆体 16px/600。右侧顺序：「我要投稿」、主题开关、GitHub。「我要投稿」是次级小按钮，和 `.bz-btn.sm` 同一套数（高 32px、左右 12px、13px/600、圆角 8px、中性玻璃：`--bz-surface-2` 底 + `--bz-border-strong` 边 + 内高光；悬停底换 `--bz-surface-3`），文字前面一个 16px 的 `plus` 图标（和 `icons.ts` 同一条路径，在 `nav.css` 里用遮罩画，颜色跟着文字走；手机菜单里那一项也带），链到 `/submit`。主题开关和 GitHub 是 32px 的幽灵图标按钮（图标 18px、`--bz-text-2`，悬停底 `--bz-surface-3`、图标变墨色）；默认主题的胶囊开关和分隔线都去掉了。触摸设备这三个都是 44px。
-- <768px：右侧收成汉堡；点开后菜单是导航条下面的一块圆角面板（距条 8px、左右 16px、圆角 16px、`--bz-card` 实底、细边、浮层投影），不再铺满全屏。
+- 固定距顶 16px，高 44px，最大宽 1140px 居中，外框透明、无边无影。根 `--vp-nav-height` 保留原来的 88px（窄屏 80px），正文、球池、投稿预览不挪位。
+- 左：28px 吉祥物 + 站名，胶囊内边距 6px 12px 6px 6px，悬停歪头。右：「我要投稿」带 plus，无边框、高 32px、水平内边距 12px、`--bz-fs-sm`/600；主题和 GitHub 是 32px 幽灵按钮。按钮平时用 `--bz-text-2`，悬停变墨色和 `--bz-surface-3` 底。
+- 左右两块在顶部透明；滚动超过 8px 才浮出 `--bz-nav-bg` 底、16px 模糊、160% 饱和度、细边阴影，过渡 240ms。
+- 中间是常驻 40px 玻璃胶囊：内边距 4px、`--bz-hairline` 边、`--bz-nav-bg` 底、20px 模糊、180% 饱和度。三个链接高 32px、水平内边距 16px、`--bz-fs-sm`/550，当前项墨色/650；滑块用 `--bz-seg-active` 和 `--bz-seg-shadow`，280ms 弹性移动和变宽，减弱动态时不动效过渡。无当前模块就隐藏。
+- <768px：收紧模块链接，右侧改汉堡，下拉圆角面板距页眉 8px。粗指针的点击区至少 44px；≤359px 左侧只显示吉祥物，保留站名供读屏。
 - 站内没有文档页，滚动后才出现的 `.VPLocalNav`（「回到顶部」条）全站隐藏。
 
 ### 2.2 首屏：球池（`HeroBallpit.vue`，`<header class="ballpit" data-testid="ballpit">`）
