@@ -496,10 +496,10 @@ for (const width of [1280, 390])
         s = await box(p, '.bz-search'),
         f = await box(p, '.ix-cats'),
         e = await box(p, '.entry')
-      close(bar.x, mobile ? 16 : 38)
+      close(bar.x, mobile ? 16 : 70)
       close(bar.y, 16)
-      close(bar.height, mobile ? 56 : 64)
-      close(bar.width, mobile ? 358 : 1204)
+      close(bar.height, 44)
+      close(bar.width, mobile ? 358 : 1140)
       // AB/skills.html，getBoundingClientRect，DPR=1。不断言内容驱动的行高。
       close(header.x, mobile ? 24 : 70)
       close(header.y, mobile ? 128 : 160)
