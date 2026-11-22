@@ -1,0 +1,28 @@
+slug: openai-ad-hook-variants
+title: 同一条广告的五种写法
+titleOriginal: Generate ad copy variations
+category: 营销
+purpose: 告诉它广告投在哪、写给谁，它用不同切入点或语气写出五版文案。
+scenarios:
+- 花店店主为同一款节日花束挑广告开头
+- 独立开发者比较工具上线广告的几种口吻
+tags:
+- 广告文案
+- 文案测试
+lang: en
+body: |-
+  Create 5 ad copy variations for a [channel] campaign. Here’s the campaign theme and audience info: [insert context]. Each version should test a different hook or tone.
+bodyZh: |
+  为投放在【投放渠道】的推广活动写 5 版广告文案。活动主题和受众信息如下：【活动背景】。每一版都要测试一种不同的切入点或语气。
+summary: 五版广告写的是同一场活动，面对的也是同一群人。变化在于用什么吸引读者，或者用什么口气说。把几版放在一起，就能挑出值得拿去测试的写法。
+usage: 复制到对话式 AI，在【投放渠道】填广告要投在哪里，在【活动背景】填活动主题、目标读者、他们关心的问题和已确认的卖点。先看五版是不是只换了几个近义词，再逐条核对价格、优惠条件和效果描述，改准确后再投放。
+source:
+  url: https://web.archive.org/web/20261030065318/https://academy.openai.com/public/clubs/work-users-ynjqu/resources/use-cases-marketing
+  name: OpenAI Academy（Wayback 存档）
+author:
+  name: OpenAI
+  url: https://academy.openai.com/
+license: 未声明
+licenseUrl: https://openai.com/policies/terms-of-use/
+copyright: 版权归原作者，原页未声明许可
+addedAt: '2026-11-22'
