@@ -1,0 +1,34 @@
+slug: guizang-poem-illustration
+title: 古诗词竖排国风插画
+category: 出图
+purpose: 给它一句古诗词，它按诗意生成中国风传统主题插画，并在图上用竖排宋体写上对应诗句。
+scenarios:
+- 语文老师备课时给古诗词课文做意境配图
+- 学生做古诗手抄报或背诵卡时生成对应插画
+- 国风自媒体给诗词解说内容配带字竖版插图
+summary: 不用先把古诗词改写成“画什么景物、什么配色”的白话画面描述，直接把原句交给模型去理解诗意并构图。提示词只有一句话，包含两项要求：按诗词内容生成中国风传统主题插画，并在图上用竖排宋体写上这句诗。提示词里给出的示例诗句是“火冷灯稀霜露下，昏昏雪意云垂野”，套用时只需要替换末尾引号里的诗句。
+usage: 不用上传参考图。把末尾引号里的“火冷灯稀霜露下，昏昏雪意云垂野”换成你想配图的古诗词原句即可。推荐选用约 3:4 的竖版比例，方便在画面里排下竖排诗句。可在豆包的出图功能（Seedream 4.0）中使用。出图后对照原诗逐字检查图上的竖排宋体字有没有错字、漏字或笔画粘连，并看画面意境是否贴合诗意。
+tags:
+- 古诗词
+- 国风插画
+- 诗词配图
+- 竖排文字
+models:
+- Seedream 4.0
+lang: zh
+body: |-
+  根据这句诗词内容生成中国风传统主题插画，并且用竖排宋体写上对应的诗句，诗句为：“火冷灯稀霜露下，昏昏雪意云垂野”
+source:
+  url: https://github.com/op7418/guizang-s-prompt/blob/f6ced226627e7175120f19f6e278b592209ab72f/image/%E5%8F%A4%E8%AF%97%E8%AF%8D%E6%84%8F%E5%A2%83%E6%8F%92%E7%94%BB.md
+  name: op7418/guizang-s-prompt
+author:
+  name: 歸藏（@op7418）
+  url: https://github.com/op7418
+license: MIT
+licenseUrl: https://github.com/op7418/guizang-s-prompt/blob/f6ced226627e7175120f19f6e278b592209ab72f/LICENSE
+copyright: Copyright (c) 2025 op7418
+addedAt: '2026-11-22'
+images:
+- file: guizang-poem-illustration-1.jpg
+  alt: 四格水墨插画拼图，每格右上角均配有竖排宋体诗句，画面包含枯荷、月色、落日林木与雪野枝头旁的暖黄灯笼。
+  credit: 歸藏（op7418），guizang-s-prompt，MIT

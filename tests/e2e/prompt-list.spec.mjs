@@ -15,8 +15,8 @@ test.beforeEach(async ({ page }) => {
 })
 
 test('每条都能直接用；剪贴板保留原文和译文，正文可选词', async ({ page }) => {
-  await expect(page.locator('.entry')).toHaveCount(70)
-  await expect(page.locator('.entry:has(.ix-snip):has(.copy)')).toHaveCount(70)
+  await expect(page.locator('.entry')).toHaveCount(db.prompts.length)
+  await expect(page.locator('.entry:has(.ix-snip):has(.copy)')).toHaveCount(db.prompts.length)
   expect(await page.locator('.ix-snip-text').allTextContents()).toEqual(db.prompts.map(i => i.bodyZh ?? i.body))
   for (const [slug, field] of [[socratic, 'body'], ['campaign-brief-sketch', 'bodyZh']]) {
     const button = row(page, slug).getByRole('button', { name: '复制', exact: true })

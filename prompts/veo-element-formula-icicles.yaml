@@ -1,0 +1,33 @@
+slug: veo-element-formula-icicles
+title: 视频镜头六要素公式
+category: 视频
+purpose: 按构图、主体、环境、氛围、运镜和动作六项替换词句，写出一句话单镜头视频提示词。
+scenarios:
+- 新手第一次写视频提示词时照着六项要素凑齐画面
+- 自媒体作者给短视频补一段带运镜的空镜画面
+- 小店店主用一句话写出商品特写和变焦拉近效果
+summary: 刚学写视频提示词时，如果只写一个主语，剩下的画面细节全靠模型自己猜。这条官方示例在一句话里用括号标出六个要素：用「特写镜头（构图）」定画面景别，用「正在融化的冰柱（主体）」点明拍什么，用「位于结冰的岩壁上（环境）」交代所在场景，用「带有冷蓝色调（氛围）」给出色彩与光线基调，再用「镜头变焦拉近（运镜）」和「保持水滴的特写细节（动作）」分别说清镜头怎么变焦或移动、画面里有什么动作变化。
+usage: 把六个括号前的词句逐一换成你的画面：「特写镜头」换构图景别，「正在融化的冰柱」换主体，「位于结冰的岩壁上」换所处环境，「带有冷蓝色调」换画面氛围，「镜头变焦拉近」换运镜方式，「保持水滴的特写细节」换具体动作；改好后删掉六个括号及里面的标签。无需上传参考图。若账户有相应权限，可在提供 Veo 3 或 Veo 3.1 的 Google Cloud 视频生成工具中使用（不保证所有账户都有），推荐比例 16:9，时长可选 4、6 或 8 秒。出片后检查景别、色调、变焦运镜和主体动作是否与描述一致。
+tags:
+- 视频入门
+- 镜头公式
+- 单镜头
+- 运镜
+models:
+- Veo 3
+- Veo 3.1
+lang: en
+body: |-
+  Close up shot (composition) of melting icicles (subject) on a frozen rock wall (context) with cool blue tones (ambiance), zoomed in (camera motion) maintaining close-up detail of water drips (action).
+bodyZh: |
+  特写镜头（构图）拍正在融化的冰柱（主体），位于结冰的岩壁上（环境），带有冷蓝色调（氛围），镜头变焦拉近（运镜），保持水滴的特写细节（动作）。
+source:
+  url: https://aistudio.google.com/docs/veo#icicles
+  name: Google AI Studio 文档
+author:
+  name: Google（Gemini API / AI Studio 视频文档）
+  url: https://aistudio.google.com/docs
+license: CC-BY-4.0
+licenseUrl: https://aistudio.google.com/docs/documentation-policy
+copyright: Google，CC BY 4.0
+addedAt: '2026-11-22'

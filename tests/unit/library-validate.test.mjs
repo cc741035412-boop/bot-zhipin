@@ -73,6 +73,10 @@ it('不允许转载的条目，摘要或用法里的长引文被拒', () => {
   const item = change(prompt, { body: undefined, license: '未声明', usage: quote })
   expect(problems(item)).toContainEqual(at(item, 'usage', '30 字'))
 })
+it('未声明许可但有正文时，用法里的长引文不报错', () => {
+  const item = change(prompt, { license: '未声明', usage: `“${'引'.repeat(31)}”` })
+  expect(problems(item)).toEqual([])
+})
 it('文件名必须等于 slug', () => {
   const item = change(prompt, {}, 'other-file.yaml')
   expect(problems(item)).toContainEqual(at(item, 'slug', '文件名'))

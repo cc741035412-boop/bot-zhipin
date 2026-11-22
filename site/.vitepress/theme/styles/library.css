@@ -76,6 +76,7 @@
 .ix-thumb { grid-column: 2; }
 .ix-thumb img, .ix-gallery img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--bz-hairline); }
 .ix-thumb img { max-height: 168px; object-fit: cover; }
+.ix-gallery img { width: auto; max-width: 100%; max-height: 560px; object-fit: contain; margin-inline: auto; }
 .ix-gallery figure { margin: var(--bz-sp-4) 0 0; }
 .ix-gallery figcaption { margin-top: var(--bz-sp-1); font-size: var(--bz-fs-sm); color: var(--bz-text-3); }
 @media (width < 820px) {

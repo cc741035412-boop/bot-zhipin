@@ -1,0 +1,37 @@
+slug: oai-virtual-tryon
+title: 人物照片服装虚拟试穿
+category: 出图
+purpose: 给它一张人物照和几张衣服照片，它在保留原貌与取景范围的前提下把新衣服换到人身上。
+scenarios:
+- 网购下单前用自己的全身照试试几件衣服搭不搭
+- 服装小店店主把新款平铺图穿到同一模特身上看效果
+- 造型师在确定穿搭方案前快速对比不同外套和靴子
+summary: 这段来自 OpenAI 官方指南的提示词把换装拆成「锁定不变量」和「自然贴合」两部分：先明确禁止改动人物的脸部、五官特征、肤色、体型、姿势、身份、表情、发型和身材比例，规定只替换衣物；接着要求新服装顺着现有的姿势和身体结构呈现逼真的布料褶皱与垂坠形态，让光线、阴影和色温对齐原照片，同时保持背景、机位角度、取景范围与画质不变，不额外添加配饰、文字、徽标或水印。
+usage: 提示词没有方括号占位符，默认按女性编写；若照片里是男性或其他人，把「图中的女性」和文中的「她」改成「图中的男性」或「图中的人物」及对应代词。上传一张人物照片和一到多张单品服装照；若试穿鞋靴、长裤等需要完整露出的单品，建议选用全身照。推荐画幅跟随人物照比例（官方示例为 1024×1536 竖版），发给 ChatGPT 生图或支持多图输入的 GPT Image 工具。出图后检查人脸、发型和身材比例是否与原图一致，衣服褶皱与光影是否自然贴合，取景范围和背景有无走样。
+tags:
+- 虚拟试穿
+- AI换装
+- 穿搭预览
+- 服装电商
+models:
+- GPT Image
+lang: en
+body: |-
+  Edit the image to dress the woman using the provided clothing images. Do not change her face, facial features, skin tone, body shape, pose, or identity in any way. Preserve her exact likeness, expression, hairstyle, and proportions. Replace only the clothing, fitting the garments naturally to her existing pose and body geometry with realistic fabric behavior. Match lighting, shadows, and color temperature to the original photo so the outfit integrates photorealistically, without looking pasted on. Do not change the background, camera angle, framing, or image quality, and do not add accessories, text, logos, or watermarks.
+bodyZh: |
+  编辑图像，用所提供的服装图片为图中的女性换装。不要以任何方式改变她的脸部、五官特征、肤色、体型、姿势或身份。严格保留她的原有相貌、表情、发型和身材比例。只替换衣物，让服装自然贴合她现有的姿势和身体结构，并呈现出逼真的布料褶皱与垂坠形态。使光线、阴影和色温与原照片保持一致，让整套穿搭真实融入画面，不要显得像硬贴上去的。不要改变背景、机位角度、取景范围或画质，也不要添加配饰、文字、徽标或水印。
+titleOriginal: Virtual Clothing Try-On
+source:
+  url: https://github.com/openai/openai-cookbook/blob/dfd760b4de0bd175b51ad05b9b5260c36dfea09c/examples/multimodal/image-gen-models-prompting-guide.ipynb
+  name: openai/openai-cookbook
+author:
+  name: OpenAI（Mandeep Singh、Emre Okcular、Tiger He，据 cookbook registry.yaml）
+  url: https://github.com/openai/openai-cookbook
+license: MIT
+licenseUrl: https://github.com/openai/openai-cookbook/blob/dfd760b4de0bd175b51ad05b9b5260c36dfea09c/LICENSE
+copyright: Copyright (c) 2025 OpenAI
+addedAt: '2026-11-22'
+images:
+- file: oai-virtual-tryon-1.png
+  alt: 博物馆展厅里，一位黑发女子双臂交叉站立，身穿浅色西装外套、白色内搭上衣、深色长裤和灰色高筒靴，身后左侧有白色雕像，右侧墙上挂着金色画框油画。
+  credit: OpenAI，OpenAI Cookbook，MIT
