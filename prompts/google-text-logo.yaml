@@ -1,0 +1,42 @@
+slug: google-text-logo
+title: 带文字的 Logo 与海报
+category: 出图
+purpose: 给它品牌主题、要印的字、字体外观和配色，它生成带指定文字的标志或宣传图。
+scenarios:
+- 小店店主做带店名的圆形招牌图标
+- 学校社团做写明活动名称的招新海报
+- 网店卖家设计印有标语的包装贴纸
+summary: 这个 Google 官方模板把带字图片拆成六个槽位：先定图片类型和品牌或概念，再把画面里要写的字放进引号，单独用描述性的词写明字体外观，最后交代整体设计风格与配色方案。把引号里“要写什么字”和后面的“字体长什么样”“图案走什么风格”分开交代，能避免把文字内容和视觉描述混成一团。Google 官方文档同时说明，制作正式物料可使用 Gemini 3 Pro Image（即 Nano Banana Pro）。
+usage: 不用上传参考图。把【图片类型】换成现代标志、海报等类型，【品牌或概念】填店铺或活动主题，引号里的【要显示的文字】填画面上要出现的字，【字体风格】用描述性的词填干净粗体无衬线等字体外观，【风格描述】填极简等画面设计风格，【配色方案】填黑白等配色。做标志推荐 1:1 方图，做海报可改用竖版。可在 Gemini 或 Google AI Studio 的出图功能（Nano Banana，制作正式物料可选 Nano Banana Pro）中使用。出图后逐字核对文字拼写、笔划和排版是否准确。
+tags:
+- Logo
+- 海报设计
+- 文字渲染
+- 品牌视觉
+models:
+- Nano Banana
+- Nano Banana Pro
+lang: en
+body: |-
+  Create a [image type] for [brand/concept] with the text "[text to render]"
+  in a [font style]. The design should be [style description], with a
+  [color scheme].
+bodyZh: |
+  为【品牌或概念】生成一张【图片类型】，带有文字“【要显示的文字】”，
+  采用【字体风格】。设计应为【风格描述】，并采用
+  【配色方案】。
+titleOriginal: Accurate text in images
+source:
+  url: https://aistudio.google.com/docs/image-generation#3-accurate-text-in-images
+  name: Google AI Studio 文档
+author:
+  name: Google（Gemini API / AI Studio 出图文档）
+  url: https://aistudio.google.com/docs
+license: CC-BY-4.0
+licenseUrl: https://aistudio.google.com/docs/documentation-policy
+copyright: Google，CC BY 4.0
+addedAt: '2026-11-22'
+images:
+- file: google-text-logo-1.jpg
+  alt: 白底黑色圆形标志，外圈上下环绕大写英文字母“THE DAILY”和“GRIND”，中央是齿轮造型套着一颗咖啡豆图案。
+  credit: Google，官方出图文档，CC BY 4.0

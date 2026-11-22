@@ -41,6 +41,9 @@ export function summarizePrompt(entry) {
   const body = str(data.body)
   return {
     ...common(data, 'prompt'),
+    ...(data.models && { models: strings(data.models) }),
+    ...(entry.imageSizes && { images: data.images.flatMap((image, i) => entry.imageSizes[i]
+      ? [{ ...image, ...entry.imageSizes[i], src: `/media/prompts/${image.file}` }] : []) }),
     titleOriginal: str(data.titleOriginal),
     lang: str(data.lang),
     copyright: str(data.copyright),

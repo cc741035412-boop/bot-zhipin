@@ -118,6 +118,23 @@ it('运行依赖每项最多 80 字，仍限五项且不能重复', () => {
     expect(validate(bad).some(e => e.where.startsWith('requires'))).toBe(true)
   }
 })
+it('模型列表接受 1～5 项、每项 1～30 字', () => {
+  for (const models of [['A'], Array(5).fill('模'.repeat(30))]) expect(problems(change(prompt, { models }))).toEqual([])
+  for (const models of [[], Array(6).fill('A'), [''], [' '], ['模'.repeat(31)], [2], '即梦']) expect(problems(change(prompt, { models })).length).toBeGreaterThan(0)
+})
+it('效果图数量、文件名、说明与署名均有边界，错误能定位到图片', () => {
+  const image = { file: 'sample-1.png', alt: '色卡', credit: '本站' }
+  function check(images) {
+    return problems({ ...change(prompt, { images }), imageSizes: images.map(() => ({ width: 8, height: 4 })) })
+  }
+  expect(check(['png', 'jpg', 'gif', 'webp'].map(ext => ({ file: `a-1.${ext}`, alt: '图'.repeat(120), credit: '名'.repeat(80) })))).toEqual([])
+  expect(check([image])).toEqual([])
+  for (const images of [[], Array(5).fill(image)]) expect(check(images)).toContainEqual(at(prompt, 'images', ''))
+  for (const patch of [{ file: '../a.png' }, { file: 'A.png' }, { file: 'a.jpeg' }, { alt: '图' }, { alt: 'xx' }, { alt: '图'.repeat(121) }, { credit: '名' }, { credit: '名'.repeat(81) }, { credit: undefined }, { file: undefined }, { alt: undefined }, { extra: true }]) {
+    expect(check([image, { ...image, ...patch }])[0]).toMatchObject({ file: `prompts/${prompt.name}`, where: expect.stringContaining('第2张图'), fix: expect.any(String) })
+  }
+  expect(problems(change(prompt, { images: [image] }))).toContainEqual(at(prompt, '第1张图.file', '找不到'))
+})
 it('两份 schema 中的许可枚举一致，均可放正文，仅可转载许可缺链接时提醒', () => {
   expect(enums.prompt.licenses).toEqual(enums.skill.licenses)
   for (const license of enums.prompt.licenses) {
