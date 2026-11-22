@@ -16,6 +16,7 @@ export interface Env {
   SESSION_SECRET_PREV?: string
   SUBMIT_DRY_RUN_USER_IDS?: string
   ALLOW_TEST_ENDPOINTS?: string
+  GITHUB_AVATAR_BASE?: string
   GITHUB_API_BASE?: string
   GITHUB_OAUTH_BASE?: string
 }

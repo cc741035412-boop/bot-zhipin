@@ -1,5 +1,7 @@
 // 小队摘要：纯函数，不读盘。成员信息从 Bot 摘要里并进来，页面不用再去货架上找一遍。
 
+import { authorPagePath } from './authors.mjs'
+
 const text = (value) => typeof value === 'string' && value ? value : null
 const texts = (value) => Array.isArray(value) ? value.filter((item) => typeof item === 'string' && item) : []
 const rows = (value) => Array.isArray(value) ? value.filter((item) => item !== null && typeof item === 'object' && !Array.isArray(item)) : []
@@ -38,6 +40,7 @@ export function summarizeSquad(squad, { bots, enums }) {
     origin: data.origin,
     author: {
       name: author.name,
+      page: authorPagePath(author.github),
       github: author.github || null,
       url: author.url || null,
       link: author.github ? `https://github.com/${author.github}` : author.url || null,

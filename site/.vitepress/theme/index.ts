@@ -13,6 +13,7 @@ import './styles/hero.css'
 import './styles/home.css'
 import './styles/detail.css'
 import './styles/squad.css'
+import './styles/author.css'
 import './styles/misc.css'
 import './styles/library.css'
 

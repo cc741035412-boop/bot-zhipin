@@ -1,6 +1,8 @@
 <script setup>
 import { computed, inject, ref } from 'vue'
 import { previewMode, previewDetail, previewCardActive } from '../submit/preview-mode'
+import { currentAuthorPage } from '../author-context'
+const authorPagePath = inject(currentAuthorPage, null)
 const preview = inject(previewMode, false)
 const active = inject(previewCardActive, ref(true))
 const showDetail = inject(previewDetail, () => {})
@@ -39,8 +41,9 @@ const origin = computed(() => props.bot.external ? (props.bot.official ? '官方
           <span v-if="!bot.external" class="bz-tag source-tag">作者投稿</span>
         </div>
         <p class="bot-byline">
-          <span v-if="preview" class="bot-author">by {{ bot.author.name }}</span>
-          <a v-else data-testid="author-link" class="bot-author" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
+          <span v-if="preview || (authorPagePath && bot.author.page === authorPagePath)" class="bot-author">by {{ bot.author.name }}</span>
+          <a v-else-if="bot.author.page" data-testid="author-link" class="bot-author" :href="bot.author.page">by {{ bot.author.name }}</a>
+          <a v-else data-track-kind="author" data-testid="author-link" class="bot-author" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
           <span v-if="origin" class="bot-origin">· {{ origin }}</span>
         </p>
       </div>

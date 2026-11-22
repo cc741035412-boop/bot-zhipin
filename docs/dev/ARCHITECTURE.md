@@ -2,7 +2,7 @@
 
 ## 一句话
 
-`bots/` 里一个 Bot 一个文件夹，`squads/` 里一支小队一个文件，`curation/shelf.yaml` 是维护者的策展 → 构建时读成静态网站（VitePress）→ 线上后端只有两块：点击计数，和网站投稿（Pages Functions + D1）。
+`bots/` 里一个 Bot 一个文件夹，`squads/` 里一支小队一个文件，`curation/shelf.yaml` 是维护者的策展 → 构建时读成静态网站（VitePress）→ Pages Functions 处理点击计数、网站投稿、GitHub 头像转发和下架兜底，计数和投稿用 D1。
 
 ## 目录
 
@@ -27,10 +27,11 @@
 | `scripts/validate.mjs` + `scripts/lib/validate/` | `npm run validate`：Bot、小队、策展及两个收录库的全量校验；`validate/squads.mjs` 是小队和策展的校验内核 | 维护者 |
 | `scripts/gen-schema-validator.mjs` | `npm run gen:schema`：把五份 schema 各预编译成 `scripts/lib/validate/generated/<名字>-schema.mjs` | 维护者 |
 | `scripts/og/` | 构建结束时用本地字体子集生成 Bot、小队和全站的 PNG 分享图 | 维护者 |
-| `scripts/sync-assets.mjs` | 构建前把截图、头像复制到 `site/public/bot-assets/`，并生成 `site/public/api-data/slugs.json`、`squad-slugs.json` | 维护者 |
+| `scripts/sync-assets.mjs` | 构建前把截图、头像复制到 `site/public/bot-assets/`，并生成 `site/public/api-data/slugs.json`、`squad-slugs.json`、`authors.json`（头像转发与作者页兜底共用） | 维护者 |
 | `site/` | VitePress 站点根目录；`site/.vitepress/meta.mjs` 放站名、仓库地址、安装提示词、默认台词、每个分组的一句说明（`CATEGORY_COPY`） | 维护者 |
 | `site/.vitepress/data/` | 数据加载器：`bots.data`（列表数据：Bot 摘要 + 装饰，不带 `about` 全文）、`squads.data`（小队摘要）、`curation.data`（策展）；三份都由 `bots.mjs` 的 `shelfData()` 一次算出，保证对得上 | 维护者 |
 | `site/squads/[slug].md` + `[slug].paths.mjs` | 小队页的动态路由 `/squads/<slug>` | 维护者 |
+| `site/authors/[login].md` + `[login].paths.mjs` | 作者主页的动态路由 `/authors/<login>`，按小写 GitHub 登录名汇集 Bot 和小队 | 维护者 |
 | `site/.vitepress/theme/components/SquadDetail.vue` | 小队页组件（目前是只渲染数据的占位版） | 维护者 |
 | `site/.vitepress/theme/vendor/bloub/` | 第三方 MIT 头像引擎，**不要改** | 只能整体升级 |
 | `site/.vitepress/theme/live/` | 单 rAF 时钟 clock.ts、视线 gaze.ts、帧与反应接线；离屏/隐藏/减少动效暂停 | 维护者 |
@@ -57,6 +58,8 @@
 | `functions/_lib/events.ts` | **埋点事件名和字段的唯一真源**，前端 `theme/track.ts`、后端、`scripts/report.mjs` 共用；改了同步 `TRACKING.md` 第 3 节（单测核对） | 维护者 |
 | `site/.vitepress/theme/track.ts` | 埋点前端：排队、批量发送、页面类型、站外链接分类；组件里调用 `track(事件名, 字段)` | 维护者 |
 | `scripts/report.mjs` | `npm run report`：只读查 D1 的 `events`，打印中文埋点报告 | 维护者 |
+| `functions/api/avatar/[login].ts` | GitHub 头像转发，只服务 `/api-data/authors.json` 白名单内的作者 | 维护者 |
+| `functions/authors/[login].ts` | 作者页下架兜底：登录名不在作者清单内就返回 404 | 维护者 |
 | `functions/bots/[slug].ts`、`functions/squads/[slug].ts` | 下架兜底：不在清单里的 Bot / 小队立即返回 404，不让边缘缓存继续给旧页面 | 维护者 |
 | `functions/data/{prompts,skills,bots}/[slug].ts` + `functions/_lib/data-route.ts` | 给 AI 用的每条完整数据的下架兜底：不在清单里的立即返回 JSON 404（决策 70） | 维护者 |
 | `migrations/` | D1 表结构 | 维护者 |
@@ -75,13 +78,15 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
    ├──────────────────────────────────────────┴───────────────────────────┤
    ├──► scripts/validate.mjs（PR 时在 CI 里跑：Bot + 小队 + 策展，小队和策展引用的 slug 必须在货架上）
    └──► site/.vitepress/data/bots.mjs 的 shelfData() ──► bots.data（列表，不带 about）、squads.data、curation.data
-            + 动态路由 /bots/<slug>（参数里是完整摘要，带 about）、/squads/<slug> ──► site/.vitepress/dist/
+            + 动态路由 /bots/<slug>（参数里是完整摘要，带 about）、/squads/<slug>、/authors/<login> ──► site/.vitepress/dist/
                                                                           │
 浏览器 ── GET /api/stats、POST /api/click ──► functions/api/* ──► D1（DB） │
                                      └─ 读 /api-data/slugs.json（ASSETS）─┘
 浏览器 theme/track.ts ── POST /api/events（批量）──► functions/api/events.ts ──► D1 events ──► npm run report（只读）
 浏览器 ── GET /bots/<slug>、/squads/<slug> ──► functions/{bots,squads}/[slug].ts
                                      └─ 读 /api-data/slugs.json、squad-slugs.json，不在清单里就 404
+浏览器 ── GET /authors/<login> ──► functions/authors/[login].ts ──► 读 /api-data/authors.json：名单外返回 404；名单内登录名含大写时先 308 到小写，否则交给静态页；清单读不到时不拦截
+浏览器 ── GET /api/avatar/<login> ──► functions/api/avatar/[login].ts ──► 读 /api-data/authors.json：在清单内才查缓存或取 GitHub 头像，否则 404
 ```
 
 ### 网站拿到的数据长什么样
@@ -114,6 +119,7 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 |---|---|
 | `detailUrl` | `/squads/<slug>` |
 | `author.link` | GitHub 主页，没有就用 `author.url`，都没有是 `null` |
+| `author.page` | 站内作者主页 `/authors/<小写登录名>`，没有 GitHub 是 `null`（Bot 摘要同理） |
 | `members[]` | `{ bot, title, does, lead, optional }` 加上对应 Bot 摘要的 `name`、`nameZh`、`tagline`、`category`、`detailUrl`、`templateUrl`、`quotaCost`、`permissions`、`prerequisites`、`avatar`、`needsAccount`、`selfRunning`；`bot` 是 slug |
 | `leader` | 队长的 slug，没有是 `null` |
 | `quota` | `{ max, perMember: [{ bot, quotaCost }] }`，`max` 是成员里最高的一档 |
@@ -123,6 +129,10 @@ bots/*/bot.yaml, *.md, screenshots/        squads/*/squad.yaml        curation/s
 `flow` 里的 `from`、`to` 是成员的 slug，或 `you`（代表用户本人）。
 
 **策展**（`curation.data`，对象）：`{ featured: [{ bot, note }], picks: [slug], collections: [{ slug, title, blurb, bots: [slug] }], editorNotes: { slug: 一句话 } }`。里面的 `bot`、`bots` 都是 slug，Bot 的信息按 slug 去 `bots.data` 里取。没有策展文件时四项都是空的。首页的主推读的就是这里的 `featured`（没写主推时退回热度前三）。
+
+### 作者路由与摘要
+
+`site/authors/[login].paths.mjs` 用 `buildAuthors(shelfData())` 为公开 Bot 和小队的 GitHub 作者生成 `/authors/<小写登录名>`。跨作品按日期降序、同日 Bot 优先、slug 升序取首条昵称和登录名。摘要 `author.page` 是站内作者路径，无 GitHub 时为 `null`；`author.link` 仍是给目录和机读接口用的外链。
 
 ### Prompt / Skills 收录库
 

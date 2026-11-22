@@ -117,3 +117,17 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | FS1 | 构建时输出 `/data/index.json` 和每条完整数据，llms.txt 补 Prompt、Skills | 维护者 | — | `scripts/lib/{agent-data,llms}.mjs`、`site/.vitepress/config.mts`、单测 | ✅ |
 | FS2 | skill 本体：SKILL.md、`find.py`、Claude Code 插件清单 | 编码 agent | FS1 的数据格式 | `integrations/bot-zhipin/`、`.claude-plugin/` | ✅ |
 | FS3 | README、架构、决策；验收后推送开 PR，上线后线上核对 | 维护者 | FS1、FS2 | 文档 | 🟡 |
+
+# 投稿人的作者主页（2026-11-22）
+
+目标：有 GitHub 的作者都有 `/authors/<登录名>`，头像由本站转发 GitHub 头像，作者链接改到站内。决策 73。任务书和验收脚本在维护者本地的派活目录。
+
+| # | 任务 | 执行 | 前置 | 写入范围 | 状态 |
+|---|---|---|---|---|---|
+| P | 头像转发 `/api/avatar/<登录名>`、作者白名单 `authors.json`、作者页下架兜底 | 编码 agent | — | `functions/api/avatar/`、`functions/authors/`、`functions/_lib/{authors,slugs,types}.ts`、`scripts/sync-assets.mjs` | ✅ |
+| A | 作者主页（数据、路由、页面、头像兜底）和四处作者链接改向 | 编码 agent | — | `scripts/lib/authors.mjs`、`site/authors/`、`AuthorPage.vue`、`AuthorAvatar.vue`、`author.css`、四个组件 | ✅ |
+| R1 | 审查修正·后端：大写地址 308、空正文 502、类型防护、白名单复用 `buildAuthors`、单测补强 | 编码 agent | P、A | `functions/authors/`、`functions/api/avatar/`、`scripts/lib/authors.mjs`、`scripts/sync-assets.mjs` | ✅ |
+| R2 | 审查修正·前端：作者页归 Bot 模块、拉热度、本页卡片署名改纯文字、首字按字形且图片态透明、e2e 确定测水合两条分支 | 编码 agent | P、A | 四个组件、`author.css`、`tests/e2e/` | ✅ |
+| R3 | 审查修正·冒名：fork PR 新增条目的 `author.github` 必须是 PR 作者；投稿文档写明作者主页 | 编码 agent | P、A | `scripts/check-pr-scope.mjs`、`ci.yml`、文档 | ✅ |
+| R4 | 第二轮审查收尾：缓存键小写测试、⚠ 改 Actions 注释、撤主页只限外部收录、fork PR 改越界文件一律不合、首字大写按长度、Symbol 注入键 | 编码 agent | R1、R2、R3 | 见 PR | ✅ |
+| M | 集成到最新 main，多 agent 对抗审查三轮，真后端加真 GitHub 头像实测，截图目视，然后合并 | 维护者 | R1–R4 | — | 🟡 |

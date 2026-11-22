@@ -1,4 +1,12 @@
 // 站点级配置：站名、仓库地址、安装提示词、默认台词。全站只在这里改。
+export const AUTHOR_COPY = {
+  botsTitle: 'Bot', squadsTitle: '小队',
+  botCount: (n) => `${n} 个`, squadCount: (n) => `${n} 支`,
+  handle: (login) => `@${login}`,
+  pageTitle: (a) => `${a.name} 的${a.bots.length && a.squads.length ? ' Bot 和小队' : a.bots.length ? ' Bot' : '小队'}`,
+  description: (a) => `${a.name}（@${a.login}）在 Bot 直聘上架的 ${[a.bots.length && `${a.bots.length} 个 Bot`, a.squads.length && `${a.squads.length} 支小队`].filter(Boolean).join('、')}。`,
+}
+
 export const SITE = {
   // 占位站名，正式名字定了改这里
   name: 'Bot 直聘',

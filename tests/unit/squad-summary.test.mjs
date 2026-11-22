@@ -51,13 +51,13 @@ describe('小队摘要', () => {
     ])
     expect(result).toMatchObject({
       slug: 'test-squad', name: '测试小队', tagline: '一个队长带两个帮手干活', formation: '带队', origin: '本站编队',
-      author: { name: '作者', github: 'someone', url: null, link: 'https://github.com/someone' }, addedAt: '2026-11-10',
+      author: { name: '作者', github: 'someone', url: null, link: 'https://github.com/someone', page: '/authors/someone' }, addedAt: '2026-11-10',
       flow: [], setup: [], kickoff: null, tryout: null, notes: [], missing: [], detailUrl: '/squads/test-squad',
     })
   })
   it('作者链接：GitHub 优先，其次主页，都没有就是 null', () => {
     expect(summary((d) => { d.author = { name: '作者', github: 'someone', url: 'https://example.com' } }).author.link).toBe('https://github.com/someone')
-    expect(summary((d) => { d.author = { name: '作者', url: 'https://example.com' } }).author).toEqual({ name: '作者', github: null, url: 'https://example.com', link: 'https://example.com' })
+    expect(summary((d) => { d.author = { name: '作者', url: 'https://example.com' } }).author).toEqual({ name: '作者', github: null, url: 'https://example.com', link: 'https://example.com', page: null })
     expect(summary((d) => { d.author = { name: '作者' } }).author.link).toBe(null)
   })
   it('成员并入对应 Bot 摘要的 12 个字段（含中文叫法），不多带别的', () => {
@@ -196,7 +196,7 @@ describe('网站数据：bots、squads、curation 三份对得上', () => {
     expect(data.squads).toHaveLength(1)
     expect(squad).toMatchObject({
       slug: 'demo-squad', name: '示例·周会小队', formation: '带队', origin: '本站编队', leader: 'demo-prd-reviewer',
-      author: { name: '示例作者', github: 'example-user', url: null, link: 'https://github.com/example-user' },
+      author: { name: '示例作者', github: 'example-user', url: null, link: 'https://github.com/example-user', page: '/authors/example-user' },
       quota: { max: '中', perMember: [{ bot: 'demo-prd-reviewer', quotaCost: '中' }, { bot: 'demo-weekly-digest', quotaCost: '低' }, { bot: 'demo-external', quotaCost: '低' }] },
       permissions: [
         { permission: '云电脑文件', bots: ['demo-weekly-digest'] },

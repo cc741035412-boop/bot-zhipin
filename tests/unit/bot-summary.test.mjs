@@ -15,7 +15,7 @@ const model = (extra = {}) => ({
 it('摘要完整字段和默认值稳定', () => {
   expect(summarizeBot(model())).toEqual({
     slug: 'demo', name: '示例', nameZh: null, tagline: '一句真实介绍', category: undefined,
-    author: { name: '作者', github: 'demo', url: null, link: 'https://github.com/demo' },
+    author: { name: '作者', github: 'demo', url: null, link: 'https://github.com/demo', page: '/authors/demo' },
     templateUrl: 'https://x.ai/bot/demo', addedAt: undefined, prerequisites: ['无'], quotaCost: undefined,
     permissions: [], needsAccount: false, selfRunning: false, pitch: null, pitches: [], about: null,
     forkedFrom: null, forkedFromName: null, forkedFromNameZh: null, external: false, official: false,

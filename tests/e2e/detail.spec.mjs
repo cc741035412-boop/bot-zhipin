@@ -90,7 +90,7 @@ test('侧栏：导入、三项属性、作者来源上架热度；宽屏两栏�
   await expect(rail.locator('.rail-meta dt')).toHaveText(['作者', '来源', '上架', '热度'])
   await expect(rail.getByTestId('fact-account')).toHaveText('要连')
   await expect(rail.getByTestId('fact-account').locator('svg')).toHaveAttribute('data-icon', 'plug')
-  await expect(rail.getByTestId('author-link')).toHaveAttribute('href', 'https://github.com/example-user')
+  await expect(rail.getByTestId('author-link')).toHaveAttribute('href', '/authors/example-user')
   await expect(rail.locator('.bot-origin')).toHaveText('作者投稿')
   await expect(rail.locator('time')).toHaveText('2026-11-01')
   await expect(rail.getByTestId('heat')).toHaveText('7')

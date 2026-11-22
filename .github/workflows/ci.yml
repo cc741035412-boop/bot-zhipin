@@ -36,7 +36,11 @@ jobs:
           cache: npm
       - run: npm ci
       - name: 检查投稿范围与上架日期
-        run: node scripts/check-pr-scope.mjs --base HEAD^1 --head HEAD --association "${{ github.event_name == 'pull_request' && github.event.pull_request.author_association || 'CONTRIBUTOR' }}"
+        env:
+          ASSOCIATION: ${{ github.event_name == 'pull_request' && github.event.pull_request.author_association || 'CONTRIBUTOR' }}
+          PR_AUTHOR: ${{ github.event_name == 'pull_request' && github.event.pull_request.user.login || '' }}
+          APP_BOTS: ${{ vars.SUBMIT_APP_BOT_LOGIN || 'bot-zhipin-submit[bot]' }},github-actions[bot]
+        run: node scripts/check-pr-scope.mjs --base HEAD^1 --head HEAD --association "$ASSOCIATION" --pr-author "$PR_AUTHOR" --app-bots "$APP_BOTS"
       - name: 校验所有 Bot
         run: npm run validate
       - name: 单元测试

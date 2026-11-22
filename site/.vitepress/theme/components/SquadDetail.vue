@@ -31,7 +31,7 @@ interface Member {
 }
 interface Squad {
   slug: string; name: string; tagline: string; formation: string; origin: string; addedAt: string
-  author: { name: string; link: string | null }
+  author: { name: string; link: string | null; page: string | null }
   members: Member[]; leader: string | null
   flow: { from: string; to: string; what: string | null }[]
   setup: { title: string | null; detail: string | null }[]
@@ -167,7 +167,8 @@ onBeforeUnmount(() => {
             <span class="bz-tag" data-testid="squad-formation">{{ squad.formation }}</span>
             <span class="squad-count" data-testid="squad-count">{{ SQUAD_COPY.count(squad.members.length) }}</span>
             <span class="squad-byline">
-              <a v-if="squad.author.link" data-testid="squad-author" :href="squad.author.link" target="_blank" rel="noopener noreferrer">by {{ squad.author.name }}<ExternalHint /></a>
+              <a v-if="squad.author.page" data-testid="squad-author" :href="squad.author.page">by {{ squad.author.name }}</a>
+              <a v-else-if="squad.author.link" data-track-kind="author" data-testid="squad-author" :href="squad.author.link" target="_blank" rel="noopener noreferrer">by {{ squad.author.name }}<ExternalHint /></a>
               <span v-else data-testid="squad-author">by {{ squad.author.name }}</span>
               <span data-testid="squad-origin"> · {{ squad.origin }}</span>
             </span>

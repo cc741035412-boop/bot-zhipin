@@ -350,7 +350,7 @@ CREATE TABLE IF NOT EXISTS bot_owners (
   6. 超时时退出码 1，工作流失败，GitHub 会发邮件提醒维护者。
 - `scripts/check-pr-scope.mjs`：修改已存在的 `bot.yaml` 时，`author.github` 不许变（忽略大小写）。
 - `.github/CODEOWNERS`：`* @jakob52123`。
-- `ci.yml`：加一步打印 `author_association`，方便联调核对。只打印枚举值，不插值其他事件字段。
+- `ci.yml`：通过 `env` 传入 PR 作者和 `author_association`，方便联调核对，不把事件字段直接插值进 `run`。范围检查用 `--pr-author` 核对人工 fork PR 的新增署名；`--app-bots` 里的 `bot-zhipin-submit[bot]`（网站已将 `author.github` 改写为登录人）和 `github-actions[bot]`（Issue 工作流已核对署名是 Issue 作者）只跳过这项检查，手动派发没有 PR 作者时也一样。
 
 ## 7. 安全边界
 
