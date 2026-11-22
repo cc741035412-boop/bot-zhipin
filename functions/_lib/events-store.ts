@@ -2,7 +2,7 @@ import type { D1Database } from '@cloudflare/workers-types'
 import { DAY_MS, hashIp, isValidSlug } from './clicks'
 import { ApiError } from './errors'
 import { EVENTS, EVENT_LIMITS, EVENT_RETENTION_DAYS, PAGE_TYPES, type EventName, type PropSpec } from './events'
-import { hit } from './ratelimit'
+import { hit, RATE_LIMITS } from './ratelimit'
 
 const badRequest = () => new ApiError(400, 'bad_request')
 const record = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -34,6 +34,12 @@ export async function readEventBatch(request: Pick<Request, 'headers' | 'body'>)
   }
 }
 
+const beijingDay = (at: number) => new Date(at + 8 * 3600_000).toISOString().slice(0, 10)
+
+function prefix(value: string, max: number) {
+  return Array.from(value.slice(0, max * 2)).slice(0, max).join('')
+}
+
 function cleanProps(name: EventName, raw: unknown) {
   const props: Record<string, string | number | boolean> = {}
   if (!record(raw)) return '{}'
@@ -47,10 +53,11 @@ function cleanProps(name: EventName, raw: unknown) {
       case 'int': if (typeof value === 'number' && Number.isInteger(value) && value >= spec.min && value <= spec.max) props[key] = value; break
       case 'str': {
         if (typeof value !== 'string') break
-        let text = value.replace(/\p{Cc}/gu, '').trim().replace(/\s+/gu, ' ')
-        if (key === 'q' && (name === 'search' || name === 'library_search')) {
-          text = text.replace(/\S+@\S+\.\S+/g, '【邮箱】').replace(/\d{7,}/g, '【数字】')
-        }
+        const query = key === 'q' && (name === 'search' || name === 'library_search')
+        let text = prefix(value, query ? 200 : spec.max * 4)
+        if (query) text = text.normalize('NFKC')
+        text = text.replace(/\p{Cc}/gu, '').trim().replace(/\s+/gu, ' ')
+        if (query) text = text.replace(/[^\s@]+@[^\s@]+\.[^\s@]+/g, '【邮箱】').replace(/\d(?:[ -]*\d){6,}/g, '【数字】')
         if (text) props[key] = [...text].slice(0, spec.max).join('')
       }
     }
@@ -61,24 +68,27 @@ function cleanProps(name: EventName, raw: unknown) {
 export async function ingestEvents({ db, salt, ip, ua, country, batch, now }: {
   db: D1Database; salt: string; ip: string; ua: string; country: unknown; batch: Awaited<ReturnType<typeof readEventBatch>>; now: number
 }) {
-  const key = await hashIp(salt, ip, 'events')
-  if (!(await hit(db, { bucket: 'events', key, windowMs: 60_000, limit: 60 }, now)).ok) return
   const insert = db.prepare('INSERT INTO events (at,day,name,page,path,slug,sid,vid,device,country,props) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
   const statements = [], visitors = new Map<string, string>()
   for (const event of batch.events) {
     if (!record(event) || typeof event.name !== 'string' || !Object.hasOwn(EVENTS, event.name)
       || typeof event.path !== 'string' || !event.path.startsWith('/') || [...event.path].length > EVENT_LIMITS.pathMax) continue
     const ago = typeof event.ago === 'number' && Number.isInteger(event.ago) ? Math.min(EVENT_LIMITS.agoMaxMs, Math.max(0, event.ago)) : 0
-    const at = now - ago, day = new Date(at + 8 * 3600_000).toISOString().slice(0, 10)
+    const at = now - ago, day = beijingDay(at)
     if (!visitors.has(day)) visitors.set(day, (await hashIp(salt, ip, 'v|' + day + '|' + ua)).slice(0, 16))
     const page = typeof event.page === 'string' && (PAGE_TYPES as readonly string[]).includes(event.page) ? event.page : 'other'
     statements.push(insert.bind(at, day, event.name, page, event.path.split(/[?#]/, 1)[0], isValidSlug(event.slug) ? event.slug : null,
       batch.sid, visitors.get(day)!, batch.device, typeof country === 'string' && /^[A-Z]{2}$/.test(country) ? country : null,
       cleanProps(event.name as EventName, event.props)))
   }
-  if (statements.length) await db.batch(statements)
+  const bytes = statements.length
+  if (!bytes) return
+  const key = await hashIp(salt, ip, 'events')
+  if (!(await hit(db, { bucket: 'events', key, bytes, ...RATE_LIMITS.events }, now)).ok) return
+  if (!(await hit(db, { bucket: 'events-day', key: 'all', bytes, ...RATE_LIMITS['events-day'] }, now)).ok) return
+  await db.batch(statements)
 }
 
 export function scheduleEventCleanup(db: D1Database, now: number, waitUntil: (p: Promise<unknown>) => void, random = Math.random) {
-  if (random() < 1 / 200) waitUntil(db.prepare('DELETE FROM events WHERE at < ?').bind(now - EVENT_RETENTION_DAYS * DAY_MS).run().catch(() => {}))
+  if (random() < 1 / 200) waitUntil(db.prepare('DELETE FROM events WHERE day < ?').bind(beijingDay(now - EVENT_RETENTION_DAYS * DAY_MS)).run().catch(() => {}))
 }

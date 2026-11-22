@@ -1,4 +1,5 @@
 -- 埋点事件表（docs/dev/TRACKING.md 第 6 节，决策 72）。只新建表和索引，不碰现有任何表。
+-- 只留一个索引，每条事件比两个索引少写一行。
 -- name 不加 CHECK：事件表在 functions/_lib/events.ts 里，加事件不用迁移（决策 60 的教训）。
 CREATE TABLE IF NOT EXISTS events (
   id INTEGER PRIMARY KEY,
@@ -16,4 +17,3 @@ CREATE TABLE IF NOT EXISTS events (
 );
 
 CREATE INDEX IF NOT EXISTS events_day_name ON events (day, name);
-CREATE INDEX IF NOT EXISTS events_at ON events (at);

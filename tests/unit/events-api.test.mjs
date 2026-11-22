@@ -129,7 +129,7 @@ it.each([
   ['bot_import', { from: ' Card', direct: 0 }, {}], ['filter', { results: 0, value: '  x\u0000   y  ' }, { value: 'x y', results: 0 }],
   ['page_view', { ref: '   ', utm_source: '😀'.repeat(41) }, { utm_source: '😀'.repeat(40) }],
   ['search', JSON.parse('{"__proto__":{"q":"bad"},"constructor":true}'), {}],
-  ['search', { q: '123456 1234567 ' + 'x'.repeat(45) + '@example.test' }, { q: '123456 【数字】 【邮箱】' }],
+  ['search', { q: '123456 1234567 ' + 'x'.repeat(45) + '@example.test' }, { q: '【数字】 【邮箱】' }],
   ['library_search', { q: '123456789', cat: '123456789' }, { q: '【数字】', cat: '123456789' }],
 ])('字段白名单和清洗：%s %#', async (name, props, expected) => {
   await success(await send({ name, props }))
@@ -153,6 +153,41 @@ it('同 IP 第 61 批不写；换 IP、换窗口恢复', async () => {
   clock.mockReturnValue(time + 60000)
   await success(await post())
   expect(await count('events')).toBe(62)
+})
+it.each([['@', 16000], ['a@', 5000]])('长搜索词限制处理范围：%s', async (fragment, n) => {
+  const start = performance.now()
+  const response = await send({ name: 'search', props: { q: fragment.repeat(n) } })
+  expect(performance.now() - start).toBeLessThan(500)
+  await success(response)
+  expect(JSON.parse((await rows())[0].props).q).toBe(fragment.repeat(n).slice(0, 40))
+})
+it.each(['138 1234 5678', '138-1234-5678', '１３８１２３４５６７８', '123456'])('数字清洗：%s', async q => {
+  await success(await send({ name: 'search', props: { q } }))
+  expect(JSON.parse((await rows())[0].props).q).toBe(q.length === 6 ? q : '【数字】')
+})
+it('每分钟允许 300 条，再来一批不写', async () => {
+  for (let i = 0; i < 10; i++) await success(await post({ ...batch, events: Array(30).fill(event) }))
+  await success(await send(event, event))
+  expect(await count('events')).toBe(300)
+})
+it('全站按合格条数共享 UTC 日额度', async () => {
+  await db.prepare("INSERT INTO rate_limits VALUES ('events-day','all',?,1,9999)").bind(Math.floor(time / 86400000) * 86400000).run()
+  await success(await send(event, { name: 'invalid' }))
+  await success(await post(batch, { 'CF-Connecting-IP': '192.0.2.4' }))
+  expect(await count('events')).toBe(1)
+})
+it('无合格条目不占任何桶', async () => {
+  await success(await send({ path: 'invalid' }))
+  expect(await count('rate_limits')).toBe(0)
+})
+it('清理保留边界日期的较早事件', async () => {
+  clock.mockReturnValue(time - 400 * 86400000)
+  await success(await send({ ago: 1 }, {}))
+  clock.mockReturnValue(time + 3600000)
+  random.mockReturnValue(0)
+  await success(await post())
+  await Promise.all(pending)
+  expect((await rows()).map(r => r.at)).toEqual([time - 400 * 86400000, time + 3600000])
 })
 it('相同 IP 或 IPv6 /64 同日同 UA 的 vid 相同，换 UA 不同', async () => {
   for (const [address, agent] of [['2001:db8::1', ua], ['2001:db8::1', ua], ['2001:db8::2', ua], ['2001:db8::2', ua + 'x']]) {

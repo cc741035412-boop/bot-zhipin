@@ -1,6 +1,8 @@
 import type { D1Database } from '@cloudflare/workers-types'
 
 export const RATE_LIMITS = {
+  events: { windowMs: 60_000, limit: 60, byteLimit: 300 },
+  'events-day': { windowMs: 86_400_000, limit: 1_000_000, byteLimit: 10_000 },
   login: { windowMs: 3_600_000, limit: 120 },
   shot: { windowMs: 86_400_000, limit: 60, byteLimit: 60 * 1024 * 1024 },
   'shot-all': { windowMs: 86_400_000, limit: 1000 },

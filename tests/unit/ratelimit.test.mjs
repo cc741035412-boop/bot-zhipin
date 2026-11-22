@@ -31,8 +31,10 @@ const options = { bucket: 'login', key: 'hashed-test-ip', ...RATE_LIMITS.login }
 const now = 1_800_000_000_000
 
 describe('真实临时 D1 限流', () => {
-  it('完整九个 bucket 的固定窗口和限额', () => {
+  it('完整十一个 bucket 的固定窗口和限额', () => {
     expect(RATE_LIMITS).toEqual({
+      events: { windowMs: 60_000, limit: 60, byteLimit: 300 },
+      'events-day': { windowMs: 86_400_000, limit: 1_000_000, byteLimit: 10_000 },
       login: { windowMs: 3_600_000, limit: 120 },
       shot: { windowMs: 86_400_000, limit: 60, byteLimit: 62_914_560 },
       'shot-all': { windowMs: 86_400_000, limit: 1000 },
@@ -87,7 +89,7 @@ describe('真实临时 D1 限流', () => {
     }
     await db.prepare("INSERT INTO web_submissions VALUES (123, 'demo', 1, 'submission/web-123-demo', ?1, ?1)").bind(now).run()
     await deleteExpiredLimits(db, now)
-    expect((await db.prepare('SELECT * FROM rate_limits').all()).results).toHaveLength(9)
+    expect((await db.prepare('SELECT * FROM rate_limits').all()).results).toHaveLength(11)
     expect(await db.prepare('SELECT COUNT(*) AS n FROM web_submissions').first('n')).toBe(1)
   })
 

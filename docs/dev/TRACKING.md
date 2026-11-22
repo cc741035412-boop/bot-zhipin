@@ -87,8 +87,15 @@
 
 - **不用 cookie，不用 localStorage 存身份，不跨天追踪同一个人，不加第三方脚本。**
 - 会话号 `sid`：浏览器 `crypto.getRandomValues` 生成 16 字节随机数，存在 `sessionStorage`，关掉标签页就没了。sessionStorage 不可用时只存在内存里。
+  - **会话会过期**（独立审查后加）：会话号连同它的北京日期、最后一次活动时间一起存。换了北京日期，或者闲置超过 30 分钟，就换一个新会话号，同时清掉「本会话已落地」的标记，下一次浏览重新算 landing。只有这次是整页加载时才带 ref 和 utm；页面没刷新、只是闲置后续上的，ref 和 utm 不带，因为它们属于原来那次进站。
+  - 只在正式域名 `bot.jiachengbo.com`、`localhost`、`127.0.0.1` 上发埋点；旧域名和预览部署（`*.pages.dev`）一律不发，免得预览站的数据写进线上库。
 - 当天访客号 `vid`：服务器用现成的 `hashIp(IP_SALT, ip, "v|" + 北京日期 + "|" + User-Agent)`（即 `hex(HMAC-SHA256(key = IP_SALT, normalizeIp(ip) + "|v|" + 日期 + "|" + UA))`），取前 16 位。第二天换日期就对不上了，只能数「当天有几个人」。不存原始 IP 和 UA。
-- 搜索词存原文（用户定）：去掉首尾空白、合并连续空白、截到 40 字；服务器把邮箱换成「【邮箱】」，连续 7 位以上的数字换成「【数字】」，防止有人在搜索框里输手机号。
+- 搜索词存原文（用户定）：去掉首尾空白、合并连续空白、截到 40 字。服务器依次这样处理：
+  1. 先截到 200 字，防止超长输入让正则耗尽 CPU；
+  2. 做 NFKC 归一，全角转半角；
+  3. 邮箱换成「【邮箱】」；
+  4. 数字之间只夹空格或横线、合计 7 位以上的，整段换成「【数字】」，例如 `13812345678`、`138 1234 5678`、`138-1234-5678`；
+  5. 最后截到 40 字。
 - 你自己的访问照样会算进去（用户没选排除）。流量还小的时候，自己点的会明显拉高数字，看报告时心里有数。
 - 线上不设 `ALLOW_TEST_IP`。本地设了它时，后端接受 `X-Test-IP`，并且不过滤无头浏览器，方便测试。
 
@@ -123,11 +130,18 @@
 
 **不写库、直接 204**：User-Agent 为空，或匹配爬虫和无头浏览器（`bot|crawl|spider|slurp|headless|lighthouse|preview|facebookexternalhit|curl|wget|python|httpclient|go-http`，不分大小写）；本地 `ALLOW_TEST_IP=1` 时不做这一步过滤。
 
-**限流**：复用 `rate_limits` 表和 `hit()`，桶名 `events`，键是 `hashIp(IP_SALT, ip, "events")`，每个 IP 每分钟 60 批，超了返回 204 也不写库（前端不需要知道）。限流在 UA 过滤之后、解析请求体之后做，爬虫和坏请求不占限流表。
+**限流**：复用 `rate_limits` 表和 `hit()`，两个桶都登记在 `RATE_LIMITS` 里。超了都返回 204，不写事件，前端不需要知道。
+
+1. 先清洗整批。一条合格的都没有，直接 204，一行都不写。
+2. 每个 IP 的桶 `events`：键是 `hashIp(IP_SALT, ip, "events")`，每分钟最多 60 批、300 条，按合格条数计，用 `hit()` 的 `bytes` 和 `byteLimit` 记。
+3. 全站每日总量桶 `events-day`：键固定 `all`，每个 UTC 日最多 1 万条。这是为了把埋点能用的写额度锁住：D1 免费版每天 10 万行写入，计数和投稿也要用。
+4. 写入。每条事件写 2 行：表本身和 `events_day_name` 索引。
+
+爬虫在 UA 过滤那步就挡掉了，坏请求在解析那步挡掉，都不占限流表。
 
 **响应**：成功 204 无正文；400 `bad_request`；403 `forbidden`；415 `unsupported_media_type`；405 `method_not_allowed`（带 `Allow: POST`）；没配 `IP_SALT` 或数据库出错 500 `server_error`。错误响应和 `/api/click` 一样带 JSON 类型和 `no-store`。
 
-**清理**：每次请求以 1/200 概率通过 `waitUntil` 删除 `at < now - 400 天` 的行，失败不影响响应。
+**清理**：每次请求以 1/200 概率通过 `waitUntil` 删除 `day` 早于「400 天前那天的北京日期」的行，走 `events_day_name` 索引。失败不影响响应。
 
 ## 6. 表结构（迁移 0005）
 
@@ -147,8 +161,9 @@ CREATE TABLE IF NOT EXISTS events (
   props TEXT NOT NULL DEFAULT '{}'
 );
 CREATE INDEX IF NOT EXISTS events_day_name ON events (day, name);
-CREATE INDEX IF NOT EXISTS events_at ON events (at);
 ```
+
+只留一个索引：每多一个索引，每条事件就多写一行。
 
 `name` 不加 CHECK：事件表在代码里，加事件不用迁移（`click_counts` 改 CHECK 要重建表的教训，见决策 60）。只新建表，不碰现有任何表。
 
@@ -161,12 +176,12 @@ npm run report -- --local      # 查 dev:full 的本地库
 npm run report -- --json       # 输出 JSON，给以后做看板用
 ```
 
-只读：脚本里每条 SQL 都必须以 `SELECT` 或 `WITH` 开头，否则直接报错退出。按北京日期取最近 N 天（含今天），和前 N 天对比。报告内容：
+只读：脚本里每条 SQL 都必须以 `SELECT` 或 `WITH` 开头，否则直接报错退出。报告脚本直接 import `.ts`，要 Node 22.18 以上。按北京日期取最近 N 天（含今天），和前 N 天对比。报告内容：
 
 1. **概览**：访客（按天去重 `vid` 再求和）、会话（去重 `sid`）、浏览量、拿走次数、拿走会话数、拿走率；每项带和上一期的对比。
 2. **来源**：落地页的外站来源域名前 10、utm 来源前 10、国内（`CN`）和海外占比、手机和电脑占比。
-3. **三个模块**：Bot（`home`、`bot`、`squad`）、Prompt（`prompts`、`prompt`）、Skills（`skills`、`skill`）各自的浏览量、拿走次数、拿走会话占该模块会话的比例。
-4. **条目**：拿走次数前 10（slug、事件、次数）；详情页浏览前 10 里拿走为 0 的。
+3. **三个模块**：Bot（`home`、`bot`、`squad`、`author`）、Prompt（`prompts`、`prompt`）、Skills（`skills`、`skill`）各自的浏览量、拿走次数，以及拿走率。拿走率 = 在该模块既浏览又拿走的会话数 ÷ 在该模块浏览过的会话数。按会话先聚合、再按模块汇总，不用相关子查询，读的行数和事件数成正比。
+4. **条目**：拿走次数前 10（slug、事件、次数）；本期一次都没被拿走的详情页里，按浏览量排的前 10。
 5. **搜索**：搜索词前 20（两种搜索合起来，标出来源）；`results=0` 的词全部列出。
 6. **筛选**：各 `where` 下 `value` 的次数前 5；`results=0` 的组合。
 7. **导入**：`direct` 占比、`trial` 分布、`bot_no_app` 次数占 `bot_import` 的比例。

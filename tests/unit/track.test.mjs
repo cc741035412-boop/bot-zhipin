@@ -36,6 +36,12 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+function seedSession() {
+  store.set('bz-sid', savedSid)
+  store.set('bz-session-day', '1970-01-01')
+  store.set('bz-last-active', '1000')
+}
+
 const batches = () => fetch.mock.calls.map(([, request]) => JSON.parse(request.body))
 const sent = () => batches().flatMap(batch => batch.events)
 const history = () => browser.__bzTrack
@@ -104,6 +110,7 @@ it.each(['', 'https://bot.jiachengbo.com/internal', 'not a URL'])('不记录 ref
 })
 
 it.each(['https://example.com/', '', 'not a URL'])('本会话重载时来源 %j 不补上一页，也不重复记录来源', referrer => {
+  seedSession()
   store.set('bz-landed', '1')
   doc.referrer = referrer
   loc.search = '?utm_medium=radio'
@@ -113,6 +120,7 @@ it.each(['https://example.com/', '', 'not a URL'])('本会话重载时来源 %j 
 })
 
 it('本会话重载时从同站来源补上一页类型，之后优先使用内存里的上一页', () => {
+  seedSession()
   store.set('bz-landed', '1')
   doc.referrer = `https://${loc.host}/prompts/`
   tracker.trackPageView('/')
@@ -209,8 +217,39 @@ it.each(['(max-width: 767px)', '(pointer: coarse)'])('媒体条件 %s 命中则�
   expect(batches().map(b => b.device)).toEqual(['mobile', 'desktop'])
 })
 
+it.each([['x.bot-zhipin.pages.dev', 0], ['example.com', 0], ['localhost', 1], ['127.0.0.1', 1]])('%s 按白名单发送', (hostname, expected) => {
+  loc.hostname = hostname
+  add(1); tracker.flush()
+  expect(fetch).toHaveBeenCalledTimes(expected)
+})
+it.each([[29, false], [30, false], [31, true]])('闲置 %i 分钟后处理队列和 landing', (minutes, expired) => {
+  seedSession()
+  doc.referrer = 'https://news.example/path'
+  loc.search = '?utm_source=paper'
+  tracker.trackPageView('/')
+  vi.setSystemTime(1000 + minutes * 60000)
+  add(1)
+  tracker.trackPageView('/skills/')
+  tracker.flush()
+  expect(batches()[0].sid).toBe(savedSid)
+  expect(batches().at(-1).sid !== savedSid).toBe(expired)
+  expect(sent()[0].props).toEqual({ landing: true, ref: 'news.example', utm_source: 'paper' })
+  expect(sent().at(-1).props).toEqual(expired ? { landing: true } : { landing: false, prev: 'home' })
+})
+it('跨北京午夜，同一路径也重新落地', () => {
+  vi.setSystemTime(Date.parse('1970-01-01T15:59:59Z'))
+  seedSession()
+  store.set('bz-last-active', String(Date.now()))
+  tracker.trackPageView('/')
+  vi.setSystemTime(Date.now() + 1000)
+  tracker.trackPageView('/')
+  tracker.flush()
+  expect(batches()).toHaveLength(2)
+  expect(batches()[1].sid).not.toBe(batches()[0].sid)
+  expect(sent()[1].props).toEqual({ landing: true })
+})
 it('有效存量 sid 直接复用', () => {
-  store.set('bz-sid', savedSid)
+  seedSession()
   add(10)
   expect(batches()[0].sid).toBe(savedSid)
   expect(random).not.toHaveBeenCalled()

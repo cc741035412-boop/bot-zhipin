@@ -111,21 +111,20 @@ export async function buildReport({ runSql, today, days }) {
     devices: sourceGroup([['mobile', 'mobile'], ['desktop', 'desktop'], ['unknown', 'unknownDevice']]),
   }
 
-  const moduleRows = await inPeriod(`, tagged AS (
-    SELECT *, CASE
+  const moduleRows = await inPeriod(`, tagged AS MATERIALIZED (
+    SELECT name, sid, CASE
       WHEN page IN ('home', 'bot', 'squad', 'author') THEN 'Bot'
       WHEN page IN ('prompts', 'prompt') THEN 'Prompt'
       WHEN page IN ('skills', 'skill') THEN 'Skills' END AS module
     FROM period
-  )
-    SELECT module, COUNT(*) FILTER (WHERE name = 'page_view') AS pageViews,
-      COUNT(*) FILTER (WHERE ${take}) AS takes,
-      COUNT(DISTINCT sid) FILTER (WHERE name = 'page_view') AS viewSessions,
-      COUNT(DISTINCT sid) FILTER (WHERE ${take} AND EXISTS (
-        SELECT 1 FROM tagged AS viewed
-        WHERE viewed.module = tagged.module AND viewed.sid = tagged.sid AND viewed.name = 'page_view'
-      )) AS takeSessions
-    FROM tagged WHERE module IS NOT NULL GROUP BY module`)
+  ), per AS (
+    SELECT module, sid, COUNT(*) FILTER (WHERE name = 'page_view') AS views,
+      COUNT(*) FILTER (WHERE ${take}) AS takes
+    FROM tagged WHERE module IS NOT NULL GROUP BY module, sid
+  ) SELECT module, SUM(views) AS pageViews, SUM(takes) AS takes,
+      COUNT(*) FILTER (WHERE views > 0) AS viewSessions,
+      COUNT(*) FILTER (WHERE views > 0 AND takes > 0) AS takeSessions
+    FROM per GROUP BY module`)
   const modules = ['Bot', 'Prompt', 'Skills'].map((module) => {
     const row = moduleRows.find((r) => r.module === module)
       ?? { module, pageViews: 0, takes: 0, viewSessions: 0, takeSessions: 0 }

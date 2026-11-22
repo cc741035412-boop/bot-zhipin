@@ -154,6 +154,19 @@ it('三个模块按事件页面归属，作者页归 Bot', () => {
   ])
 })
 
+it.each([1, 3])('逐模块对照改写前的浏览与拿走会话交集（%i 天）', async periodDays => {
+  const report = await buildReport({ runSql: runner(proxy.env.DB), today, days: periodDays })
+  const { TAKE_EVENTS } = await import('../../functions/_lib/events.ts')
+  for (const [module, pages] of Object.entries({ Bot: ['home','bot','squad','author'], Prompt: ['prompts','prompt'], Skills: ['skills','skill'] })) {
+    const events = (await proxy.env.DB.prepare('SELECT page, name, sid FROM events WHERE day BETWEEN ? AND ?')
+      .bind(report.periods.current.start, today).all()).results.filter(e => pages.includes(e.page))
+    const views = events.filter(e => e.name === 'page_view'), takes = events.filter(e => TAKE_EVENTS.includes(e.name))
+    const viewers = new Set(views.map(e => e.sid)), takers = new Set(takes.filter(e => viewers.has(e.sid)).map(e => e.sid))
+    expect(report.modules.find(row => row.module === module)).toEqual({ module, pageViews: views.length, takes: takes.length,
+      viewSessions: viewers.size, takeSessions: takers.size, takeRate: takers.size / viewers.size })
+  }
+})
+
 it('条目按 slug 和事件分组，跳过 NULL slug', () => {
   expect(data.items.topTakes).toEqual([
     { slug: 'alpha', name: 'bot_import', count: 3 }, { slug: 'alpha', name: 'bot_copy_prompt', count: 2 },

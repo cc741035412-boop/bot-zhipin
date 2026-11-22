@@ -2,6 +2,9 @@ import type { Router } from 'vitepress'
 import { EVENTS, EVENT_LIMITS } from '../../../functions/_lib/events'
 import type { Device, EventName, EventProps, PageType } from '../../../functions/_lib/events'
 
+import { SITE } from '../meta.mjs'
+
+const hosts = new Set([new URL(SITE.url).hostname, 'localhost', '127.0.0.1'])
 const ENDPOINT = '/api/events'
 const FLUSH_AT = 10
 const FLUSH_DELAY = 2000
@@ -21,6 +24,9 @@ type Outbound = Required<EventProps<'outbound'>>
 let current: PageContext | undefined
 let sid: string | undefined
 let landed = false
+let firstPageView = true
+let sessionDay: string | null | undefined
+let lastActivity: number
 let debug = false
 let installed = false
 let sending = false
@@ -28,7 +34,7 @@ let timer: ReturnType<typeof setTimeout> | undefined
 let queue: QueuedEvent[] = []
 
 function enabled() {
-  return typeof window !== 'undefined' && location.hostname !== 'bot-zhipin.pages.dev'
+  return typeof window !== 'undefined' && hosts.has(location.hostname)
 }
 
 function storage<T>(action: (store: Storage) => T): T | undefined {
@@ -73,15 +79,33 @@ function pageContext(path: string, isNotFound?: boolean): PageContext {
   return { page, path, slug: page === '404' ? null : slugOf(path) }
 }
 
-function sessionId() {
-  if (sid !== undefined) return sid
-  const saved = storage(store => store.getItem('bz-sid'))
-  if (saved && /^[A-Za-z0-9_-]{16,32}$/.test(saved)) return sid = saved
-  const bytes = crypto.getRandomValues(new Uint8Array(16))
-  const generated = btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-  sid = generated
-  storage(store => store.setItem('bz-sid', generated))
-  return generated
+function touchSession() {
+  const now = Date.now()
+  const day = new Date(now + 8 * 3600_000).toISOString().slice(0, 10)
+  const restoring = !sid
+  if (restoring) {
+    sid = storage(store => store.getItem('bz-sid')) ?? undefined
+    sessionDay = storage(store => store.getItem('bz-session-day'))
+    lastActivity = Number(storage(store => store.getItem('bz-last-active')) ?? NaN)
+    landed = storage(store => store.getItem('bz-landed')) === '1'
+  }
+  if (!sid || !/^[A-Za-z0-9_-]{16,32}$/.test(sid) || day !== sessionDay ||
+      !Number.isFinite(lastActivity) || now - lastActivity > 30 * 60_000) {
+    if (!restoring) firstPageView = false
+    flush() // 已排队的事件仍属于旧会话。
+    const bytes = crypto.getRandomValues(new Uint8Array(16))
+    const generated = btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    sid = generated
+    sessionDay = day
+    landed = false
+    storage(store => {
+      store.setItem('bz-sid', generated)
+      store.setItem('bz-session-day', day)
+      store.removeItem('bz-landed')
+    })
+  }
+  lastActivity = now
+  storage(store => store.setItem('bz-last-active', String(now)))
 }
 
 function recordDebug(event: QueuedEvent) {
@@ -107,35 +131,41 @@ function recordDebug(event: QueuedEvent) {
 export function track<N extends EventName>(name: N, props?: EventProps<N>, opts?: { slug?: string | null }): void {
   try {
     if (!enabled() || !Object.hasOwn(EVENTS, name)) return
-    const cleanProps: Record<string, unknown> = {}
-    for (const [key, value] of Object.entries(props ?? {})) {
-      if (value !== undefined && Object.hasOwn(EVENTS[name], key)) cleanProps[key] = value
-    }
-    const context = current ?? pageContext(location.pathname)
-    const slug = opts?.slug === undefined ? context.slug : opts.slug
-    const event: QueuedEvent = {
-      name, page: context.page, path: context.path, ...(slug !== null ? { slug } : {}),
-      props: cleanProps, queuedAt: Date.now(),
-    }
-    if (queue.length === 0) timer = setTimeout(() => flush(), FLUSH_DELAY)
-    queue.push(event)
-    recordDebug(event)
-    if (queue.length >= FLUSH_AT) flush()
+    touchSession()
+    enqueue(name, props, opts)
   } catch { /* 埋点不能影响页面功能 */ }
+}
+
+function enqueue<N extends EventName>(name: N, props?: EventProps<N>, opts?: { slug?: string | null }) {
+  const cleanProps: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(props ?? {})) {
+    if (value !== undefined && Object.hasOwn(EVENTS[name], key)) cleanProps[key] = value
+  }
+  const context = current ?? pageContext(location.pathname)
+  const slug = opts?.slug === undefined ? context.slug : opts.slug
+  const event: QueuedEvent = {
+    name, page: context.page, path: context.path, ...(slug !== null ? { slug } : {}),
+    props: cleanProps, queuedAt: Date.now(),
+  }
+  if (queue.length === 0) timer = setTimeout(() => flush(), FLUSH_DELAY)
+  queue.push(event)
+  recordDebug(event)
+  if (queue.length >= FLUSH_AT) flush()
 }
 
 export function trackPageView(path: string, isNotFound?: boolean): void {
   try {
     if (!enabled()) return
+    touchSession()
     path = pathOnly(path)
-    if (current?.path === path) return
+    if (landed && current?.path === path) return
     const prev = current?.page
     current = pageContext(path, isNotFound)
-    const landing = !landed && storage(store => store.getItem('bz-landed')) == null
+    const landing = !landed
     const props: EventProps<'page_view'> = { landing }
     landed = true
-    if (landing) {
-      storage(store => store.setItem('bz-landed', '1'))
+    if (landing) storage(store => store.setItem('bz-landed', '1'))
+    if (landing && firstPageView) {
       try {
         const ref = new URL(document.referrer).host
         if (ref && ref !== location.host) props.ref = ref
@@ -145,15 +175,16 @@ export function trackPageView(path: string, isNotFound?: boolean): void {
         const value = params.get(key)?.trim().slice(0, 40)
         if (value) props[key] = value
       }
-    } else if (prev !== undefined) {
+    } else if (!landing && prev !== undefined) {
       props.prev = prev
-    } else {
+    } else if (!landing) {
       try {
         const referrer = new URL(document.referrer)
         if (referrer.host === location.host) props.prev = pageTypeOf(referrer.pathname)
       } catch { /* 空来源或无效地址 */ }
     }
-    track('page_view', props)
+    firstPageView = false
+    enqueue('page_view', props)
   } catch { /* 埋点不能影响页面功能 */ }
 }
 
@@ -207,7 +238,7 @@ export function flush(beacon = false): void {
     queue = []
     sending = true
     try {
-      const id = sessionId()
+      const id = sid!
       const now = Date.now()
       for (let i = 0; i < pending.length; i += EVENT_LIMITS.perBatch) {
         sendBatch(pending.slice(i, i + EVENT_LIMITS.perBatch), id, now, beacon)
