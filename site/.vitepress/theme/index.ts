@@ -1,3 +1,4 @@
+import { installTracking } from './track'
 import DefaultTheme from 'vitepress/theme'
 import { h } from 'vue'
 import NotFound from './components/NotFound.vue'
@@ -24,7 +25,8 @@ export default {
     // 全站页脚接在内容后面；搜索面板是浮层，放哪都一样
     'layout-bottom': () => [h(SiteFooter), h(SearchPalette)],
   }),
-  enhanceApp() {
+  enhanceApp({ router }) {
+    if (inBrowser) installTracking(router)
     // 标签页小图标换成一只随机变化的 Bot；单独成块，不拖慢首屏。
     if (inBrowser) void import('./live/favicon').then(({ startFavicon }) => startFavicon())
   },

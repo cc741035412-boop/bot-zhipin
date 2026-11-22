@@ -56,7 +56,7 @@
 | `squad_copy` | 复制口令或试一句 | 小队 | `which` `kickoff`/`tryout`；`ok` |
 | `prompt_copy` | 复制 Prompt | 该 Prompt | `from`：`list` 列表行标题旁 · `list_open` 列表展开后的工具条 · `detail_side` 详情侧栏 · `detail_body` 详情正文区 · `detail_en` 英文原文区；`lang` `translated` 复制的是本站中文译文 / `original` 复制的是原文；`ok` |
 | `prompt_open` | 列表里展开一条长文（收起不记） | 该 Prompt | — |
-| `skill_copy` | 复制 Skill 安装命令或正文 | 该 Skill | `what` `command`/`body`；`agent` 命令对应的工具名；`index` 第几条命令；`ok` |
+| `skill_copy` | 复制 Skill 安装命令、正文或作者示例里的提问 | 该 Skill | `what` `command`/`body`/`example`；`agent` 命令对应的工具名；`index` 第几条命令或第几个示例；`ok` |
 | `outbound` | 点站外链接（全站统一监听，左键和中键都算） | 当前页的 slug | `host`；`to` 域名加路径；`kind` `download` `author` `source` `license` `repo` `pr` `other` |
 | `filter` | 首页切分组、切排序、点专题、清除专题；Prompt/Skills 列表切分类 | — | `where` `shelf_role`/`shelf_sort`/`collection`/`library_cat`；`value`；`results` 切完列表里有几条 |
 | `library_search` | Prompt/Skills 列表搜索框停手 1.5 秒，或离开页面时还有没发的词；同一个词不重复发 | — | `q`；`cat` 当时的分类；`results` |

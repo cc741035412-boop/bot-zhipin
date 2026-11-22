@@ -387,6 +387,15 @@ it.each(['onAfterRouteChange', 'onAfterRouteChanged'])('先执行并等待原路
   expect(history().at(-1)).toMatchObject({ page: 'author', slug: 'jakob52123', props: { prev: 'home' } })
 })
 
+it('原路由钩子的异常继续抛出，仍记录当前页', async () => {
+  const router = routerAt(false)
+  const error = new Error('route failed')
+  router.onAfterRouteChange = async () => { throw error }
+  tracker.installTracking(router)
+  await expect(router.onAfterRouteChange('/')).rejects.toBe(error)
+  expect(history().at(-1)).toMatchObject({ name: 'page_view' })
+})
+
 it.each([[false, 'bot'], [true, '404']])('只安装一次，首屏钩子按 isNotFound=%s 记为 %s', async (isNotFound, page) => {
   loc.pathname = '/bots/first-bot'
   const router = routerAt(true)

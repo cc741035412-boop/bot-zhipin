@@ -4,7 +4,7 @@ import BzIcon from './BzIcon.vue'
 import ExampleText from './ExampleText.vue'
 import LibraryCopy from './LibraryCopy.vue'
 import LibrarySource from './LibrarySource.vue'
-defineProps<{ examples: NonNullable<LibraryItem['examples']> }>()
+defineProps<{ slug: string; examples: NonNullable<LibraryItem['examples']> }>()
 const imageUrl = (file: string) => `/media/skills/${file}`
 </script>
 <template>
@@ -12,7 +12,7 @@ const imageUrl = (file: string) => `/media/skills/${file}`
     <div v-for="(e, i) in examples" :key="i" class="ix-example">
       <p class="ix-text">{{ e.caption }}</p>
       <div v-if="e.ask" class="ix-ask">
-        <LibraryCopy compact class="sm" :value="e.askZh ?? e.ask" :target="`ask-${i}`" />
+        <LibraryCopy compact class="sm" :track="{ name: 'skill_copy', slug, props: { what: 'example', index: i } }" :value="e.askZh ?? e.ask" :target="`ask-${i}`" />
         <ExampleText :id="`ask-${i}`" :text="e.askZh ?? e.ask" :lines="6" />
       </div>
       <div v-if="e.reply" class="ix-sheet ix-reply">

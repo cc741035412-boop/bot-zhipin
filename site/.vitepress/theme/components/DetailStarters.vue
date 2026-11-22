@@ -2,6 +2,7 @@
 import { inject, onBeforeUnmount, ref } from 'vue'
 import { previewMode } from '../submit/preview-mode'
 import { announce } from '../announce'
+import { track } from '../track'
 import { reportClick } from '../heat'
 import { useBotAction } from '../live/scope'
 import BzIcon from './BzIcon.vue'
@@ -36,7 +37,9 @@ async function copy(index: number, text: string, event: MouseEvent) {
   if (preview) return
   reportClick(props.slug, 'starter')
   const button = event.currentTarget as HTMLElement
-  if (!await write(text)) {
+  const ok = await write(text)
+  track('bot_copy_starter', { index, ok }, { slug: props.slug })
+  if (!ok) {
     // 两条路都不通：把这句话选中，按 ⌘C / Ctrl+C 就能带走。
     const range = document.createRange()
     range.selectNodeContents(button.querySelector('.starter-text')!)

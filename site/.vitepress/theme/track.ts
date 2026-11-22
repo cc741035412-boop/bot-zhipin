@@ -283,8 +283,9 @@ export function installTracking(router: Router): void {
     installed = true
     const previous = router.onAfterRouteChange ?? router.onAfterRouteChanged
     const afterRouteChange = async (to: string) => {
-      try { await previous?.call(router, to) } catch { /* 保留执行顺序，不影响埋点 */ }
-      try { trackPageView(location.pathname, router.route.data?.isNotFound) } catch { /* 路由或页面可能不可用 */ }
+      try { await previous?.call(router, to) } finally {
+        try { trackPageView(location.pathname, router.route.data?.isNotFound) } catch { /* 路由或页面可能不可用 */ }
+      }
     }
     if (router.onAfterRouteChange == null && router.onAfterRouteChanged != null) {
       router.onAfterRouteChanged = afterRouteChange

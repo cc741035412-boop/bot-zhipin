@@ -29,6 +29,7 @@ async function mock(page, options = {}) {
   await page.route('**/api-data/submit-context.json', (r) => control.noContext ? r.fulfill({ status: 503, body: '' }) : r.fulfill({ json: control.context || context }))
   await page.route('**/api/**', async (r) => {
     const path = new URL(r.request().url()).pathname
+    if (path === '/api/events') return r.fulfill({ status: 204 })
     if (path === '/api/auth/me') return r.fulfill(control.user ? { json: { ok: true, ...control.user } } : { status: 401, json: { error: 'unauthenticated' } })
     if (path === '/api/auth/start') return r.fulfill({ contentType: 'text/html', body: '<p>模拟登录页</p>' })
     if (path === '/api/auth/logout') { control.user = null; return r.fulfill({ status: 204 }) }

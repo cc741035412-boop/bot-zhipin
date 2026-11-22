@@ -50,7 +50,7 @@ export const EVENTS = {
     ok: bool,
   },
   prompt_open: {}, // 在 Prompt 列表里展开一条长文（收起不记）
-  skill_copy: { what: oneOf('command', 'body'), agent: str(30), index: int(0, 20), ok: bool },
+  skill_copy: { what: oneOf('command', 'body', 'example'), agent: str(30), index: int(0, 20), ok: bool }, // example = 复制作者示例里的提问（决策 67 的示例区）
   // 点站外链接（全站统一监听）。已经由上面的事件记过的链接（导入按钮）不再记。
   outbound: {
     host: str(60),

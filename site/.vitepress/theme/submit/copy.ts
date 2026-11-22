@@ -14,7 +14,8 @@ export function useSubmitCopy() {
       clearTimeout(timer)
       timer = setTimeout(() => { state.copied = '' }, 1800)
       void announce(spoken)
-    } catch { state.text = text; state.open = true }
+      return true
+    } catch { state.text = text; state.open = true; return false }
   }
   function close() { state.open = false; opener?.focus() }
   onBeforeUnmount(() => clearTimeout(timer))

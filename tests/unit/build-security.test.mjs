@@ -18,6 +18,7 @@ beforeEach(() => {
       filter: (path) => !/(?:^|\/)(?:dist|cache|bot-assets|api-data)(?:\/|$)/.test(path),
     })
   }
+  cpSync(join(ROOT, 'functions/_lib/events.ts'), join(work, 'functions/_lib/events.ts'))
   cpSync(join(ROOT, 'package.json'), join(work, 'package.json'))
   symlinkSync(join(ROOT, 'node_modules'), join(work, 'node_modules'))
   botsDir = join(temp, 'bots')

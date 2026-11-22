@@ -7,6 +7,7 @@ import ExternalHint from './ExternalHint.vue'
 import RoleMascot from './RoleMascot.vue'
 import { avatarColor } from '../avatar'
 import { botPalette, categoryStyle } from '../color'
+import { track } from '../track'
 import { reportClick } from '../heat'
 import { nextPoke } from '../pitch'
 
@@ -31,9 +32,10 @@ function enter(event: PointerEvent) {
 }
 function leave(event: PointerEvent) { if (event.pointerType === 'mouse') hovered.value = false }
 function poke() { portrait.value?.play({ state: nextPoke(props.bot.slug).state }) }
-function importBot() {
+function importBot(event: MouseEvent) {
   portrait.value?.play({ state: 'comet' })
   reportClick(props.bot.slug, 'import')
+  track('bot_import', { from: 'featured', direct: false, trial: 'none', mod: event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1 }, { slug: props.bot.slug })
 }
 </script>
 
@@ -64,7 +66,7 @@ function importBot() {
         <span class="bz-tag role category-tag" :style="categoryStyle(bot.category)"><RoleMascot :category="bot.category" :size="12" />{{ bot.category }}</span>
         <span class="bot-stat stat-quota" :data-quota="bot.quotaCost"><BzIcon name="bolt" />额度 {{ bot.quotaCost }}</span>
       </div>
-      <a data-testid="featured-import" class="bz-btn sm" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot"><BzIcon name="arrow-up-right" />导入<span class="bz-sr-only">（在新标签页打开）</span></a>
+      <a data-testid="featured-import" class="bz-btn sm" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" data-track-own @click="importBot" @auxclick.middle="importBot"><BzIcon name="arrow-up-right" />导入<span class="bz-sr-only">（在新标签页打开）</span></a>
     </div>
   </article>
 </template>

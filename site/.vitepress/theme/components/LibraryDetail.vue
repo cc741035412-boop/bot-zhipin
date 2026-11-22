@@ -10,6 +10,11 @@ import BzIcon from './BzIcon.vue'
 const props = defineProps<{ item: LibraryItem }>()
 const summaryOnly = computed(() => props.item.kind === 'prompt' && !props.item.hasBody)
 const readingBody = computed(() => props.item.bodyZh ?? props.item.body)
+function bodyEvent(from: 'detail_side' | 'detail_body') {
+  const { slug, kind, bodyZh } = props.item
+  return kind === 'skill' ? { name: 'skill_copy', slug, props: { what: 'body' } } as const
+    : { name: 'prompt_copy', slug, props: { from, lang: bodyZh ? 'translated' : 'original' } } as const
+}
 const suffix = ref('')
 function restore() { const {q, cat} = readQuery(categoriesFor(props.item.kind)); suffix.value = listQuery(q, cat) }
 onMounted(() => { restore(); window.addEventListener('popstate', restore) })
@@ -21,14 +26,14 @@ onBeforeUnmount(() => window.removeEventListener('popstate', restore))
       <a class="bz-btn ghost ix-back" :href="`/${item.kind}s/${suffix}`"><BzIcon name="arrow-left" />返回</a>
       <LibraryTile class="ix-id" :kind="item.kind" :category="item.category" :size="96" />
       <div class="ix-actions">
-        <LibraryCopy v-if="item.body && readingBody" class="primary block lg" :value="readingBody" target="body" />
+        <LibraryCopy v-if="item.body && readingBody" class="primary block lg" :track="bodyEvent('detail_side')" :value="readingBody" target="body" />
         <LibrarySource class="bz-btn block lg" :class="{ primary: summaryOnly }" :href="item.source.url" />
       </div>
       <dl class="ix-meta">
         <div v-if="item.agents"><dt>能用在</dt><dd>{{ item.agents.join('、') }}</dd></div>
         <div v-if="item.models?.length"><dt>能用在</dt><dd>{{ item.models.join('、') }}</dd></div>
-        <div><dt>作者</dt><dd><LibrarySource v-if="item.author.url" class="ext" :href="item.author.url">{{ item.author.name }}</LibrarySource><template v-else>{{ item.author.name }}</template></dd></div>
-        <div><dt>许可证</dt><dd><LibrarySource v-if="item.licenseUrl" class="ext" :href="item.licenseUrl">{{ item.license }}</LibrarySource><template v-else>{{ item.license }}</template><small v-if="item.copyright">{{ item.copyright }}</small></dd></div>
+        <div><dt>作者</dt><dd><LibrarySource data-track-kind="author" v-if="item.author.url" class="ext" :href="item.author.url">{{ item.author.name }}</LibrarySource><template v-else>{{ item.author.name }}</template></dd></div>
+        <div><dt>许可证</dt><dd><LibrarySource data-track-kind="license" v-if="item.licenseUrl" class="ext" :href="item.licenseUrl">{{ item.license }}</LibrarySource><template v-else>{{ item.license }}</template><small v-if="item.copyright">{{ item.copyright }}</small></dd></div>
         <div><dt>收录</dt><dd><time>{{ item.addedAt }}</time></dd></div>
       </dl>
     </aside>
@@ -40,11 +45,11 @@ onBeforeUnmount(() => window.removeEventListener('popstate', restore))
       </header>
       <div class="ix-body">
         <section v-if="item.install?.length" class="ix-sec"><header><h2>安装</h2></header>
-          <div v-for="(s,n) in item.install" :key="n" class="ix-term"><header><span>{{ s.agent }}</span><LibraryCopy class="sm" :class="{ primary: !n }" :value="s.command" :target="`command-${n}`" /></header>
+          <div v-for="(s,n) in item.install" :key="n" class="ix-term"><header><span>{{ s.agent }}</span><LibraryCopy class="sm" :class="{ primary: !n }" :track="{ name: 'skill_copy', slug: item.slug, props: { what: 'command', agent: s.agent, index: n } }" :value="s.command" :target="`command-${n}`" /></header>
             <pre><code :id="`command-${n}`" v-text="s.command" /></pre><p v-if="s.note">{{ s.note }}</p>
           </div>
         </section>
-        <SkillExamples v-if="item.kind === 'skill' && item.examples?.length" :examples="item.examples" />
+        <SkillExamples v-if="item.kind === 'skill' && item.examples?.length" :slug="item.slug" :examples="item.examples" />
         <section v-if="item.requires?.length" class="ix-sec"><header><h2>运行依赖</h2></header><ul class="ix-points"><li v-for="r in item.requires" :key="r">{{ r }}</li></ul></section>
         <section v-if="item.images?.length" class="ix-sec ix-gallery"><header><h2>效果图</h2></header>
           <figure v-for="(image,n) in item.images" :key="n">
@@ -53,11 +58,11 @@ onBeforeUnmount(() => window.removeEventListener('popstate', restore))
           </figure>
         </section>
         <section v-if="item.body && readingBody" class="ix-sec">
-          <header><h2>正文</h2><LibraryCopy class="sm ghost" :value="readingBody" target="body" /></header>
+          <header><h2>正文</h2><LibraryCopy class="sm ghost" :track="bodyEvent('detail_body')" :value="readingBody" target="body" /></header>
           <div id="body" class="ix-sheet" :lang="item.bodyZh ? 'zh' : item.lang" v-text="readingBody" />
           <details v-if="item.bodyZh" class="ix-original">
             <summary>英文原文</summary>
-            <LibraryCopy class="sm ghost" :value="item.body" target="body-en" />
+            <LibraryCopy class="sm ghost" :track="{ name: 'prompt_copy', slug: item.slug, props: { from: 'detail_en', lang: 'original' } }" :value="item.body" target="body-en" />
             <div id="body-en" class="ix-sheet" lang="en" v-text="item.body" />
           </details>
         </section>
