@@ -62,7 +62,10 @@ function escape(e: KeyboardEvent) { if (!e.isComposing && e.keyCode !== 229) q.v
               <LibraryCopy v-if="i.copyText" class="sm" compact :value="i.copyText" :target="`snip-${i.slug}`" />
             </header>
             <span class="bz-sr-only">{{ i.category }}</span><p>{{ i.purpose }}</p>
-            <PromptSnippet v-if="i.copyText" :id="`snip-${i.slug}`" :text="i.copyText" />
+            <div :class="i.images?.length ? 'ix-preview' : 'ix-plain-preview'">
+              <div v-if="i.copyText"><PromptSnippet :id="`snip-${i.slug}`" :text="i.copyText" /></div>
+              <a v-if="i.images?.[0]" class="ix-thumb" :href="i.detailUrl + suffix"><img :src="i.images[0].src" :alt="i.images[0].alt" :width="i.images[0].width" :height="i.images[0].height" loading="lazy"></a>
+            </div>
           </div>
           <template v-else>
             <div><h2><a class="entry-link" :href="i.detailUrl + suffix">{{ i.title }}</a><code v-if="i.name">{{ i.name }}</code></h2><span class="bz-sr-only">{{ i.category }}</span><p>{{ i.purpose }}</p></div>

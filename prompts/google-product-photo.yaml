@@ -1,0 +1,45 @@
+slug: google-product-photo
+title: 影棚质感商品图
+category: 出图
+purpose: 给它商品、台面、打光、机位和焦点细节，它生成一张影棚质感的商品照片。
+scenarios:
+- 网店店主给新品做干净的商品主图
+- 手作卖家给饰品或器皿做详情页配图
+- 自媒体作者为测评文章配一张产品静物图
+summary: 这个 Google 官方棚拍模板把商品摄影拆成前后呼应的七个槽位：先定【商品描述】与摆放的【背景台面/描述】；接着把布光拆成「怎么打」和「为什么这样打」——填完【布光方式，例如三点柔光箱布光】后紧跟【布光目的】，让光线服务于压暗反光或勾勒轮廓；再把【机位角度】与想突出的【特定特征】绑在一起，配合超写实质感和锁定在【关键细节】上的清晰焦点，最后填上【画面比例】，把光位、镜头和焦点拧成同一套拍摄方案。
+usage: 不用上传参考图。逐一替换文中的【】占位符：【商品描述】填商品名、颜色与材质，【背景台面/描述】填摆放台面，【布光方式，例如三点柔光箱布光】和【布光目的】填打光方式与具体作用，【机位角度】和【特定特征】填拍摄角度与要展示的部位，【关键细节】填对焦细节，末尾【画面比例】推荐采用 1:1 方形画幅（填方形图或 1:1，也可按需改填其他比例）。贴进 Gemini 或 Google AI Studio 用 Nano Banana 出图，生成后检查商品造型、台面光影和焦点细节是否清晰自然。
+tags:
+- 商品图
+- 电商主图
+- 棚拍
+- 静物摄影
+models:
+- Nano Banana
+lang: en
+body: |-
+  A high-resolution, studio-lit product photograph of a [product description]
+  on a [background surface/description]. The lighting is a [lighting setup,
+  e.g., three-point softbox setup] to [lighting purpose]. The camera angle is
+  a [angle type] to showcase [specific feature]. Ultra-realistic, with sharp
+  focus on [key detail]. [Aspect ratio].
+bodyZh: |
+  高分辨率、影棚布光的商品照片：一件【商品描述】
+  摆在【背景台面/描述】上。灯光采用【布光方式，例如三点柔光箱布光】，
+  用来【布光目的】。机位采用
+  【机位角度】，以展示【特定特征】。超写实质感，清晰
+  对焦在【关键细节】上。【画面比例】。
+titleOriginal: Product mockups & commercial photography
+source:
+  url: https://aistudio.google.com/docs/image-generation#4-product-mockups-commercial-photography
+  name: Google AI Studio 文档
+author:
+  name: Google（Gemini API / AI Studio 出图文档）
+  url: https://aistudio.google.com/docs
+license: CC-BY-4.0
+licenseUrl: https://aistudio.google.com/docs/documentation-policy
+copyright: Google，CC BY 4.0
+addedAt: '2026-11-22'
+images:
+- file: google-product-photo-1.png
+  alt: 灰色背景前，一只手柄朝右的哑光黑色马克杯摆在灰色方形石板上，杯口正升起一缕白汽。
+  credit: Google，官方出图文档，CC BY 4.0

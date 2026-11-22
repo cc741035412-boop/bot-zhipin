@@ -71,6 +71,20 @@
 .bz-empty .bz-tile > svg { width: 28px; height: 28px; }
 
 /* Prompt 行：沿用分类砖的栅格，正文从标题起一直排到行尾。 */
+.ix-plain-preview { display: contents; }
+.ix-preview { display: grid; grid-template-columns: minmax(0, 1fr) 168px; gap: var(--bz-sp-4); align-items: start; margin-top: var(--bz-sp-4); }
+.ix-preview .ix-snip { margin-top: 0; }
+.ix-thumb { grid-column: 2; }
+.ix-thumb img, .ix-gallery img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--bz-hairline); }
+.ix-thumb img { max-height: 168px; object-fit: cover; }
+.ix-gallery img { width: auto; max-width: 100%; max-height: 560px; object-fit: contain; margin-inline: auto; }
+.ix-gallery figure { margin: var(--bz-sp-4) 0 0; }
+.ix-gallery figcaption { margin-top: var(--bz-sp-1); font-size: var(--bz-fs-sm); color: var(--bz-text-3); }
+@media (width < 820px) {
+  .ix-preview { grid-template-columns: minmax(0, 1fr); }
+  .ix-thumb { grid-column: 1; }
+  .ix-thumb img { max-height: 220px; }
+}
 .ix-prompt { grid-column: 2 / -1; min-width: 0; }
 .ix-prompt-head { display: flex; align-items: flex-start; gap: var(--bz-sp-3); }
 .ix-prompt-head h2 { flex: 1; align-self: center; flex-wrap: wrap; }

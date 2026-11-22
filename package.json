@@ -22,6 +22,7 @@
     "gen:og-fonts": "node scripts/gen-og-fonts.mjs"
   },
   "dependencies": {
+    "image-size": "2.1.0",
     "yaml": "^2.9.1"
   },
   "devDependencies": {

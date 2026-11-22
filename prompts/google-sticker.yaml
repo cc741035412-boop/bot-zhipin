@@ -1,0 +1,41 @@
+slug: google-sticker
+title: 带动作与配饰的风格贴纸
+category: 出图
+purpose: 给它画风、主体配饰、具体动作、视觉特征和色彩背景偏好，它生成一张风格化贴纸图。
+scenarios:
+- 自媒体作者做一套统一的聊天表情包或频道小贴纸
+- 学生做电子手账时生成卡通动物或美食贴纸
+- 小店店主画一个印在包装封口贴上的吉祥物小图案
+summary: 这个 Google 官方插画与贴纸模板用两句话把画面要素固定成五个槽位：第一句定下整体【风格】、带配饰或动作细节的【主体，带配饰或动作细节】，以及角色正在进行的【具体动作】（如官方示例里戴竹帽啃竹叶的小熊猫）；第二句指定【视觉特征，例如粗轮廓线、赛璐璐平涂上色等】的线条与上色手法，并在末尾交代【色彩/背景偏好】，把画风、角色动态、笔触特征和背景要求一次说清。
+usage: 不用上传参考图。把【风格】换成「可爱卡通贴纸」等画风，【主体，带配饰或动作细节】换成角色及随身小物件，【具体动作】换成角色正在做的动作（如「啃竹叶」），【视觉特征，例如粗轮廓线、赛璐璐平涂上色等】填线条粗细与上色手法，【色彩/背景偏好】按需填写色调与背景要求（例如明快配色、纯白背景或透明底）。推荐采用 1:1 方形画幅，发给 Gemini 或 Google AI Studio 里的 Nano Banana 出图。出图后检查角色配饰和动作是否完整，线条风格与背景是否符合所填要求。
+tags:
+- 贴纸
+- 表情包
+- 手账素材
+- 卡通插画
+models:
+- Nano Banana
+lang: en
+body: |-
+  A [style] of a [subject, with details about accessories or actions]
+  doing [activity]. The design features [visual qualities, e.g., bold outlines,
+  cel-shading, etc.] and [color/background preference].
+bodyZh: |
+  一张【风格】图案，画着【主体，带配饰或动作细节】
+  正在【具体动作】。设计采用【视觉特征，例如粗轮廓线、赛璐璐平涂上色等】，
+  搭配【色彩/背景偏好】。
+titleOriginal: Stylized illustrations & stickers
+source:
+  url: https://aistudio.google.com/docs/image-generation#2-stylized-illustrations-stickers
+  name: Google AI Studio 文档
+author:
+  name: Google（Gemini API / AI Studio 出图文档）
+  url: https://aistudio.google.com/docs
+license: CC-BY-4.0
+licenseUrl: https://aistudio.google.com/docs/documentation-policy
+copyright: Google，CC BY 4.0
+addedAt: '2026-11-22'
+images:
+- file: google-sticker-1.png
+  alt: 白色背景上有一圈贴纸白边的卡通小熊猫，头戴插着绿叶的竹编斗笠，正坐着双手捧着竹叶在啃。
+  credit: Google，官方出图文档，CC BY 4.0

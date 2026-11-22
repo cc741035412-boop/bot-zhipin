@@ -4,6 +4,7 @@ import { resolvePages } from 'vitepress'
 import { BOTS_DIR } from '../../scripts/lib/load-bots.mjs'
 import { SQUADS_DIR } from '../../scripts/lib/load-squads.mjs'
 import { CURATION_FILE } from '../../scripts/lib/load-curation.mjs'
+import { syncMedia } from '../../scripts/lib/media-assets.mjs'
 import { PROMPTS_DIR, SKILLS_DIR } from '../../scripts/lib/load-prompts-skills.mjs'
 
 // VitePress 1.6 动态 paths 不支持 watch 配置。定点监听后重启 dev server，
@@ -15,6 +16,10 @@ export function botWatch() {
   const targets = [BOTS_DIR, SQUADS_DIR, CURATION_FILE, PROMPTS_DIR, SKILLS_DIR].map(real)
   return {
     name: 'bot-directory-watch',
+    // 在 Vite dev server 扫描 publicDir 前放好文件，否则首次请求可能回退到 HTML。
+    configResolved(config) {
+      if (config.command === 'serve' && !config.isPreview) syncMedia(PROMPTS_DIR, resolve(config.publicDir, 'media/prompts'))
+    },
     configureServer(server) {
       let timer
       server.watcher.add(targets)
