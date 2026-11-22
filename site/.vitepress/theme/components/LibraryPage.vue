@@ -32,9 +32,6 @@ onBeforeUnmount(() => window.removeEventListener('popstate', pop))
 watch(suffix, writeUrl)
 function reset() { q.value = ''; cat.value = ''; search.value?.focus() }
 function escape(e: KeyboardEvent) { if (!e.isComposing && e.keyCode !== 229) q.value = '' }
-function by(i: LibraryCard) {
-  return i.agents?.length ? i.agents[0] + (i.agents.length > 1 ? ` +${i.agents.length - 1}` : '') : i.author.name
-}
 </script>
 <template>
   <main class="ix lib-page" :style="{ '--lib-ambient': cat ? markFor(kind, cat).color : 'transparent' }">
@@ -65,7 +62,7 @@ function by(i: LibraryCard) {
           </div>
           <template v-else>
             <div><h2><a class="entry-link" :href="i.detailUrl + suffix">{{ i.title }}</a><code v-if="i.name">{{ i.name }}</code></h2><span class="bz-sr-only">{{ i.category }}</span><p>{{ i.purpose }}</p></div>
-            <span class="ix-row-by" :title="i.agents?.join('、')">{{ by(i) }}</span><BzIcon name="arrow-right" class="ix-row-go" />
+            <span class="ix-row-by">{{ i.author.name }}</span><BzIcon name="arrow-right" class="ix-row-go" />
           </template>
         </article>
       </div>
