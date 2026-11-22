@@ -71,6 +71,13 @@ async function shot(page, info, name) {
   await page.screenshot({path:join(dir, `${name}.png`), animations:'disabled'})
 }
 
+test('作者页归属 Bot 模块，显示活动滑块', async ({ page }) => {
+  await page.route('**/api/avatar/**', route => route.fulfill({ status: 404, body: '' }))
+  await page.goto('/authors/example-user')
+  await expect(page.locator('.module-nav [aria-current="page"]')).toHaveAttribute('href', '/')
+  await expect(page.locator('.module-slider')).toBeVisible()
+})
+
 test.describe('桌面三岛', () => {
   test.use({ viewport:{width:1280,height:900}, colorScheme:'light' })
   test('透明外框、滑块、滚动和键盘顺序', async ({page}) => {

@@ -7,7 +7,7 @@
 ## 先读
 
 - `docs/dev/ARCHITECTURE.md`：目录、数据流、约定
-- `docs/dev/API.md`：点击计数接口约定（前后端共用）
+- `docs/dev/API.md`：点击计数、头像转发和作者页兜底的接口约定（前后端共用）
 - `docs/dev/DECISIONS.md`：已经定下的决策，改之前先问
 - `docs/dev/TASKS.md`：任务看板
 - `docs/dev/MAINTAINING.md`：审核投稿、下架、清计数的操作步骤

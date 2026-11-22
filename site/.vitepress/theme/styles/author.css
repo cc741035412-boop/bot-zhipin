@@ -1,0 +1,13 @@
+.author-page > section, .author-header { margin-top: var(--bz-sp-8); }
+.author-header { --author-size: 112px; display: flex; align-items: center; gap: var(--bz-sp-6); }
+.author-header h1 { font: 700 var(--bz-fs-h1)/1.15 var(--bz-font-display); letter-spacing: -.01em; text-wrap: balance; }
+.author-handle { display: inline-block; margin-top: var(--bz-sp-2); color: var(--bz-text-2); font-size: var(--bz-fs-sm); }
+.author-avatar {
+  display: grid; place-items: center; position: relative; overflow: hidden; flex: none;
+  border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-pill);
+  background: var(--bz-surface-2); color: var(--bz-text-2); font: 700 var(--bz-fs-h1)/1 var(--bz-font-display);
+}
+.author-avatar img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+.author-avatar[data-state="image"] { color: transparent; }
+.author-avatar[data-state="image"] img { opacity: 1; }
+@media (max-width: 640px) { .author-header { --author-size: 80px; } }

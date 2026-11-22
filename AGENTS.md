@@ -85,7 +85,7 @@
 其他规则：
 
 - **slug**（英文短名）由你按名字定，只能用小写字母、数字和短横线，2 到 40 个字符。先确认主仓库 `bots/` 下没有同名文件夹，告诉用户你定的是什么，不用征求意见。
-- **作者**：`author.name` 填用户希望显示的名字（不知道就先用用户的称呼）；`author.github` **不用填**，提交时系统会自动填成用户登录的 GitHub 账号。
+- **作者**：`author.name` 填用户希望显示的名字（不知道就先用用户的称呼）；`author.github` **不用填**，提交时系统会自动填成用户登录的 GitHub 账号。`author.name` 也是作者主页上显示的昵称；同一个 GitHub 账号投了多个 Bot 或小队时，主页取最近上架那一条的 `author.name`，所以每次最好填一样的。
 - 中文叫法 `nameZh`（可选）：`name` 不是中文时（比如 `Idea Stress Test`），可以另起一个中文叫法。逛货架的人多半看不出英文名是干什么的，页面会以中文叫法为主，原名小字跟在后面（方便和模板页对上），两个名字都能搜到。
   - 起得像岗位名，一眼看出它是干什么的，2 到 20 个字，里面要有中文，不能有 `<`、`>` 和英文双引号。好：`点子拆解员`、`竞品盯梢员`。不好：`创意压力测试`（照字面翻译，看不出干什么）、`超级智能助手`（哪个 Bot 都能叫）。
   - `name` 仍然照原样填，不要把翻译写进 `name`。
@@ -244,7 +244,7 @@ BOT-ZHIPIN-BUNDLE v1
 === end ===
 ```
 
-**熟悉 git 的用户**也可以自己 fork 提 PR。需要用户在自己电脑上用 `gh auth login` 走浏览器授权；只提交 `bots/<slug>/`，`bot.yaml` 里要自己填 `author.github`，并且一定要带 `--repo jakob52123/bot-zhipin`：
+**熟悉 git 的用户**也可以自己 fork 提 PR。需要用户在自己电脑上用 `gh auth login` 走浏览器授权；只提交 `bots/<slug>/`，`bot.yaml` 里要自己填 `author.github`。`author.github` 必须是你自己、也就是提 PR 的账号；填别人的账号，CI 会拦下来。提 PR 时一定要带 `--repo jakob52123/bot-zhipin`：
 
 ```bash
 gh repo fork jakob52123/bot-zhipin --remote
@@ -275,7 +275,7 @@ tagline: 一个评审员带两个帮手，把周会前后的事包了   # 4 到 
 formation: 带队                      # 队形：带队（一个队长派活）/ 接力（一个做完交给下一个）/ 搭伙（各干各的，放一起用）
 origin: 社区投稿                     # 社区投稿 / 本站编队 / 原作者成套；你投稿就写「社区投稿」
 author:
-  name: 你的名字
+  name: 你的名字                       # 同一个 GitHub 账号投了多个 Bot 或小队时，主页取最近上架那一条的 author.name，所以每次最好填一样的
   github: your-github-username       # 你的 GitHub 用户名，不带 @
 addedAt: 2026-01-01                  # 提交那天，YYYY-MM-DD
 members:                             # 2 到 6 个（Grok Bot 一个群最多 6 个 Bot）

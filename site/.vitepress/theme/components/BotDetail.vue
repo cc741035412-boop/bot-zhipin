@@ -134,7 +134,8 @@ onBeforeUnmount(() => watcher?.disconnect())
             <dt>作者</dt>
             <dd>
               <span v-if="preview || !bot.author?.link">{{ bot.author?.name }}</span>
-              <a v-else data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">{{ bot.author.name }}<ExternalHint /></a>
+              <a v-else-if="bot.author.page" data-testid="author-link" :href="bot.author.page">{{ bot.author.name }}</a>
+              <a v-else data-track-kind="author" data-testid="author-link" :href="bot.author.link" target="_blank" rel="noopener noreferrer">{{ bot.author.name }}<ExternalHint /></a>
             </dd>
           </div>
           <div>

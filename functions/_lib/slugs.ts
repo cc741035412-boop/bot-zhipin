@@ -8,6 +8,7 @@ const cache = new WeakMap<Env['ASSETS'], Map<string, { expiresAt: number; slugs:
 
 export async function loadSlugs(
   assets: Env['ASSETS'], requestUrl: string, now: number, path = '/api-data/slugs.json',
+  validate = isValidSlug,
 ): Promise<ReadonlySet<string>> {
   const url = new URL(path, requestUrl)
   const key = url.origin + url.pathname
@@ -18,7 +19,7 @@ export async function loadSlugs(
     const response = await assets.fetch(url)
     if (!response.ok) throw new ApiError(500, 'server_error')
     const data: unknown = await response.json()
-    if (!Array.isArray(data) || !data.every(isValidSlug)) throw new ApiError(500, 'server_error')
+    if (!Array.isArray(data) || !data.every(validate)) throw new ApiError(500, 'server_error')
     const slugs = new Set<string>(data)
     const entries = cache.get(assets) ?? new Map()
     entries.set(key, { expiresAt: now + TTL_MS, slugs })

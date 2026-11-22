@@ -7,7 +7,7 @@ const active = computed(() => {
   if (page.value.isNotFound) return null
   const dir = route.path.split('/')[1]
   if (dir === 'prompts' || dir === 'skills') return `/${dir}/`
-  return ['', 'index.html', 'bots', 'squads', 'collections'].includes(dir) ? '/' : null
+  return ['', 'index.html', 'bots', 'squads', 'collections', 'authors'].includes(dir) ? '/' : null
 })
 const close = inject<() => void>('close-screen')
 const menu = () => document.querySelector<HTMLButtonElement>('.VPNavBarHamburger[aria-expanded="true"]')

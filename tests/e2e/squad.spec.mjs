@@ -127,7 +127,7 @@ test.describe('小队详情页', () => {
     await expect(page.getByTestId('squad-tagline')).toHaveText('一个评审员带两个帮手，把周会前后的事包了')
     await expect(page.getByTestId('squad-formation')).toHaveText('带队')
     await expect(page.getByTestId('squad-count')).toHaveText('3 个 Bot')
-    await expect(page.getByTestId('squad-author')).toHaveAttribute('href', 'https://github.com/example-user')
+    await expect(page.getByTestId('squad-author')).toHaveAttribute('href', '/authors/example-user')
     await expect(page.getByTestId('squad-origin')).toContainText('本站编队')
     await expect(detail.locator('.bz-btn.primary')).toHaveCount(1)
     await expect(page.getByTestId('squad-start')).toHaveText(SQUAD_COPY.start)

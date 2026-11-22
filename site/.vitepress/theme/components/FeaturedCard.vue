@@ -16,7 +16,7 @@ import { nextPoke } from '../pitch'
 const props = defineProps<{
   bot: {
     slug: string; name: string; nameZh?: string | null; tagline: string; avatar: string | null; category: string; quotaCost: string
-    templateUrl: string; detailUrl: string; author: { name: string; link: string }; external?: boolean; official?: boolean
+    templateUrl: string; detailUrl: string; author: { name: string; link: string; page: string | null }; external?: boolean; official?: boolean
   }
   note?: string | null
 }>()
@@ -49,7 +49,8 @@ function importBot() {
           <span v-if="!bot.external" class="bz-tag source-tag">作者投稿</span>
         </div>
         <p class="bot-byline">
-          <a class="bot-author" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
+          <a v-if="bot.author.page" class="bot-author" :href="bot.author.page">by {{ bot.author.name }}</a>
+          <a v-else class="bot-author" data-track-kind="author" :href="bot.author.link" target="_blank" rel="noopener noreferrer">by {{ bot.author.name }}<ExternalHint /></a>
           <span v-if="origin" class="bot-origin">· {{ origin }}</span>
         </p>
       </div>

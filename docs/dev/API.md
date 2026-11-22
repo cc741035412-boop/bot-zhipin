@@ -1,10 +1,11 @@
-# 点击计数接口约定
+# 点击计数、头像转发与作者页兜底约定
 
 前端（`site/`）和后端（`functions/`）按这份约定各自实现，谁改约定谁同步改这份文档。
 
 ## 部署形态
 
 - Cloudflare Pages Functions：`functions/api/click.ts` → `POST /api/click`，`functions/api/stats.ts` → `GET /api/stats`
+- 同一部署中，`functions/api/avatar/[login].ts` 转发 `GET /api/avatar/<login>` 的头像，`functions/authors/[login].ts` 为 `GET /authors/<login>` 兜底；两者共用 `/api-data/authors.json`。
 - 数据库：D1，绑定名 `DB`（见 `wrangler.toml`），表结构在 `migrations/`
 - 环境变量：`IP_SALT`（必填，线上是加密变量，本地在 `.dev.vars`）；`ALLOW_TEST_IP`（只在本地 `.dev.vars` 里设成 `1`，线上不设）
 - 本地完整运行：`npm run dev:full`（构建 → 本地 D1 建表 → `wrangler pages dev`，端口 8788）
@@ -13,9 +14,9 @@
 
 **线上要先迁移再合并代码。** 由维护者手动应用 `migrations/0004_click_kinds.sql`，确认成功后再合并触发部署。否则新按钮写入时会被旧表的 CHECK 拒绝。SQLite 不能直接改 CHECK，0004 用四种 kind 的约束重建 `click_counts`，复制全部旧行，再替换原表；保留 `(slug, kind)` 主键和 `WITHOUT ROWID`。不改 `click_dedupe`、其他表或 `IP_SALT`，已经生效的窗口无需重算。
 
-## 合法 slug 清单
+## 路由清单
 
-构建时 `scripts/sync-assets.mjs` 生成两份与站点路由一致的清单：`/api-data/slugs.json` 列 Bot（含外部收录），`/api-data/squad-slugs.json` 列小队。后端根据下表只用 `ASSETS.fetch` 读本次点击对应的清单，不查另一份兜底。同一个 slug 可以既是 Bot 又是小队。
+构建时 `scripts/sync-assets.mjs` 生成与站点路由一致的清单：`/api-data/slugs.json` 列 Bot（含外部收录），`/api-data/squad-slugs.json` 列小队，`/api-data/authors.json` 列公开 Bot 和小队的作者登录名；另有 `prompt-slugs.json`、`skill-slugs.json` 给 Prompt、Skill 页兜底，不在本文范围。点击接口根据下表只用 `ASSETS.fetch` 读本次点击对应的清单，不查另一份兜底。同一个 slug 可以既是 Bot 又是小队。
 
 ## POST /api/click
 
@@ -44,6 +45,28 @@
 | 404 | `{"ok":false,"error":"unknown_slug"}` | slug 不在该 kind 的清单里 |
 | 405 | `{"ok":false,"error":"method_not_allowed"}` | 不是 POST（带 `Allow: POST`） |
 | 500 | `{"ok":false,"error":"server_error"}` | 数据库或清单读取出错，或没配置 `IP_SALT` |
+
+## 头像转发 `/api/avatar/<login>`
+
+国内浏览器经常无法连接 GitHub 头像服务，因此由本站边缘节点代取 256 像素头像。只接受 GET；先检查 GitHub 登录名，再按小写查 `/api-data/authors.json`（公开 Bot 和公开小队的 GitHub 作者并集，内存缓存 60 秒）。不在白名单内，即使已有图片缓存也不会返回，更不会请求 GitHub。
+
+| 状态 | 含义 |
+|---|---|
+| 200 | 原始图片和上游 Content-Type；缓存键为当前 origin 下不带查询串的小写头像 URL。`Cache-Control: public, max-age=86400, stale-while-revalidate=604800` |
+| 404 | 登录名非法或不在白名单 |
+| 500 | 无法读取或解析白名单 |
+| 502 | 上游请求失败、超过 5 秒、非 200、非 JPEG/PNG/GIF/WebP，声明长度为 0、实际正文为空，或声明/实际长度超过 1 MiB |
+| 405 | 非 GET；`Allow: GET`，JSON 正文 `{"ok":false,"error":"method_not_allowed"}` |
+
+404、500、502 均为空正文。所有错误响应均为 `no-store`、`nosniff`，不写入边缘缓存。
+
+## 作者页兜底 `/authors/<login>`
+
+GET 请求先去掉末尾的 `.html`，再用小写登录名查作者白名单：
+
+- 在名单内但登录名含大写：返回 308，跳到 `/authors/<小写登录名>`，保留原查询串。
+- 不在名单内：直接返回站点的 404 页面，不跳转、不缓存。
+- 在名单内且已经小写（含小写名加 `.html`），或清单不可读：调用 `next()`，交由静态层处理。
 
 ## GET /api/stats
 
@@ -85,7 +108,7 @@
 - 1 KB 指 **1024 字节**，边界值可接受；先检查 `Content-Length`，再累计实际读取的请求体字节数（UTF-8），不信任客户端声明。没有该头、声明偏小或分块传输也受限；读取超限立即取消后续读取，返回 400。
 - body 必须是 JSON 对象；slug 长度 2–40，匹配 `^[a-z0-9]+(-[a-z0-9]+)*$`。额外字段不参与计数。
 - 本地显式开启 `ALLOW_TEST_IP === "1"` 时，非空 `X-Test-IP` 优先于 `CF-Connecting-IP`；否则不读取测试头。空头值按缺失处理。
-- 两份清单都必须是合法 slug 的 JSON 数组；模块作用域按 ASSETS 绑定、请求 origin 和清单路径缓存成功结果 60 秒。HTTP 失败、读取失败、JSON/结构错误均返回通用 500，不缓存失败，也不回退到已过期的清单。
+- 用于点击计数的两份清单都必须是合法 slug 的 JSON 数组；模块作用域按 ASSETS 绑定、请求 origin 和清单路径缓存成功结果 60 秒。HTTP 失败、读取失败、JSON/结构错误均返回通用 500，不缓存失败，也不回退到已过期的清单。
 - `GET /api/stats` 用 `Object.create(null)` 建 `heat`、`byKind`、`squads` 三个映射，以支持 `constructor` 等合法 slug。读库失败返回 `500 {"ok":false,"error":"server_error"}`。
 - 两个接口的成功及错误响应都带统一 JSON Content-Type 和 `no-store`。click 非 POST 返回 `Allow: POST`，stats 非 GET 返回 `Allow: GET`，包括 OPTIONS 和 HEAD；HEAD 在 HTTP 传输层不发送响应体。
 - POST 先检查媒体类型（415）、再检查来源（403），拒绝时不读取 body、IP 或 slug 清单、不记录点击。通过请求头检查后，缺失或空 `IP_SALT` 时优先返回 500，不读取 IP、不计算哈希、不记录点击。盐有效后先校验 body（400），再按 kind 查清单（不在清单内为 404）。数据库/资源读取错误的内部详情不写日志、不返回客户端。

@@ -1,7 +1,7 @@
 import { cp, mkdir, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { defineConfig, type HeadConfig, type PageData } from 'vitepress'
-import { SITE, CONTRIBUTE_URL, HERO_MASCOTS } from './meta.mjs'
+import { SITE, CONTRIBUTE_URL, HERO_MASCOTS, AUTHOR_COPY } from './meta.mjs'
 import faces from './data/faces.json'
 import { shelfData } from './data/bots.mjs'
 import { ROOT, loadEnums } from '../../scripts/lib/load-bots.mjs'
@@ -91,7 +91,7 @@ export default defineConfig({
   },
   transformPageData(pageData) {
     if (pageData.relativePath === '404.md') return
-    const { bot, squad, entryJson } = pageData.params ?? {}
+    const { bot, squad, author, entryJson } = pageData.params ?? {}
     if (bot || squad) {
       // Bot 详情页：「中文叫法（原名）怎么用、值不值得装」+ 一句话介绍接编辑点评第一句（规则在 share.mjs，决策 56）。
       // 小队页仍用队名和一句话介绍。
@@ -100,6 +100,10 @@ export default defineConfig({
       // 客户端路由切换时 VitePress 用 setAttribute 写入 description（安全）；服务端那行不转义的
       // description 会因下面 transformHead 已提供 description 而被跳过（isDescriptionOverridden）。
       pageData.description = bot ? share.botDescription(bot) : squad.tagline
+      delete pageData.frontmatter.description
+    } else if (author) {
+      pageData.title = pageData.frontmatter.title = AUTHOR_COPY.pageTitle(author)
+      pageData.description = AUTHOR_COPY.description(author)
       delete pageData.frontmatter.description
     } else if (entryJson) {
       const { title, description } = entryHead(JSON.parse(entryJson))

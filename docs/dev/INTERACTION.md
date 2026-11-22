@@ -250,7 +250,7 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 - **选哪三个**：由编辑定，写在策展文件 `curation/shelf.yaml` 的 `featured`（最多三个，按写的顺序排，每个带一句点评 `note`）。里面的 Bot 不在货架上的那一项直接跳过；一个都没有时整个区块不显示。不再按热度兜底。不受分组筛选和排序影响。
 - **网格** `.featured-grid`：3 张等宽卡，≥900px 一排、间距 16；<900px 竖排、间距 16。
 - **主推卡** `[data-testid="featured-card"]`（带 `data-slug`、class `bz-bot-scope`，**不带** `data-testid="bot-card"`）：圆角 12、细边 + 内高光、内边距 24，深色底色透明、浅色 `--bz-surface-1`；左上常驻一团 Bot 色柔光（`::before`，深色 22%、浅色 16%，不透明度 .7），悬停时更亮、细边染 Bot 色（42%）。**左对齐**，三张等高，底行贴底：
-  1. 头行：72px 头像砖（`.featured-tile.bz-tile`，活 Bot 占砖 68%，`aria-hidden`，点它是戳）+ 右边名字（`h3.bot-name > a`，链到详情页，title 档 16px/600 圆体；有中文叫法的写成「中文叫法 + 原名」，只占一行，§3.4）和作者行（13px `--bz-text-3`：`by 作者 ↗`，后面跟「· 官方市场」或「· 社区收录」）。作者自己投稿的，名字右边一个「作者投稿」标签。
+  1. 头行：72px 头像砖（`.featured-tile.bz-tile`，活 Bot 占砖 68%，`aria-hidden`，点它是戳）+ 右边名字（`h3.bot-name > a`，链到详情页，title 档 16px/600 圆体；有中文叫法的写成「中文叫法 + 原名」，只占一行，§3.4）和作者行（13px `--bz-text-3`：`by 作者`（链接规则见「作者主页」），后面跟「· 官方市场」或「· 社区收录」）。作者自己投稿的，名字右边一个「作者投稿」标签。
   2. 介绍 `.bot-tagline`（15px/1.6，`--bz-text-2`，固定两行高，多了省略），到头行 16。
   3. **编辑点评** `blockquote.featured-note[data-testid="featured-note"]`（有 `note` 才有），到介绍 16：一块圆角 8 的底（Bot 色 7% 混 `--bz-surface-2`），内边距 12；左边一个 20px 的 `quote` 图标（Bot 色 70% 混墨色），右边点评本身（13px/1.5，墨色 85%）。**只显示点评，不写「编辑说」。** 点评不拦点击，点它和点卡片别处一样进详情。
   4. 底行 `.featured-foot`：左边分组标签（前面一只 12px 的分组吉祥物）+ 额度（`bolt` +「额度 低/中/高」，「高」用 `--bz-quota-high`）；右边「导入」`[data-testid="featured-import"]`（`.bz-btn.sm`，`arrow-up-right` + 文字，上报和动画逻辑同列表）。
@@ -333,7 +333,7 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 | 区域 | 规格 |
 |---|---|
 | 外壳 `.bot-card` | 保留 `data-slug`、`bz-bot-scope`。圆角 **12**，`--bz-hairline` 细边 + 内高光，不带投影；深色底色透明，浅色 `--bz-surface-1`。article 是容器查询的容器，版式网格在里面的 `.bot-card-body`：三列 `52px / 1fr / auto`，三行，间距 12，内边距 20×24 |
-| 第一行 | 左：52 的格子里一只 44 的 Bot（头像按钮 `[data-testid=avatar]`，不用方砖）。中：名字 `h3.bot-name > a[data-testid="detail-link"]`（title 档 16px/600 圆体；有中文叫法的写成「中文叫法 + 原名」，只占一行，放不下先截原名，§3.4）；作者自己投稿的，名字右边一个「作者投稿」标签（橙）。名字下面是**作者行** `.bot-byline`（13px `--bz-text-3`，只占一行）：`author-link`「by 作者 ↗」，后面跟**来源**「· 官方市场」或「· 社区收录」；作者名太长就省略，来源始终留着。**右上角**：「导入」`btn-import`（`.bz-btn.sm`，`arrow-up-right` + 文字） |
+| 第一行 | 左：52 的格子里一只 44 的 Bot（头像按钮 `[data-testid=avatar]`，不用方砖）。中：名字 `h3.bot-name > a[data-testid="detail-link"]`（title 档 16px/600 圆体；有中文叫法的写成「中文叫法 + 原名」，只占一行，放不下先截原名，§3.4）；作者自己投稿的，名字右边一个「作者投稿」标签（橙）。名字下面是**作者行** `.bot-byline`（13px `--bz-text-3`，只占一行）：「by 作者」（`author-link` 或纯文字，见「作者主页」），后面跟**来源**「· 官方市场」或「· 社区收录」；作者名太长就省略，来源始终留着。**右上角**：「导入」`btn-import`（`.bz-btn.sm`，`arrow-up-right` + 文字） |
 | 第二行 | 介绍 `.bot-tagline`（15px/1.6，`--bz-text-2`），固定两行高（48px），多了省略；气泡也落在这一格 |
 | 第三行 | 左 `.bot-stats`（**属性**，13px `--bz-text-3`，图标 16，项间距 16，tabular-nums）：分组标签（前面一只 12px 的分组吉祥物；**首页按分组分段、选中单个分组时不出现**，专题筛选和投稿预览里出现，由 `BotCard` 的 `showCategory` 控制，默认显示）→ 额度（`bolt` +「额度 低/中/高」，「高」用 `--bz-quota-high`）→ 门槛（`plug` +「要连账号」或 `plug-off` +「不用连账号」）→「会自己跑」（`clock`，有才显示）→ 热度（`flame` + 数字，大于 0 才显示，「热度」两个字只给读屏）。门槛和「会自己跑」在组件里从 `bot.permissions` 现算：含「外部账号」或「浏览器 Cookie」算要连账号，含「定时自动运行」算会自己跑。右：「复制安装提示词」`btn-prompt`（`.bz-btn.ghost.sm`，`copy` + 文字；外部收录没有这个按钮） |
 | 窄卡片 | 卡片自己窄于 400px 时（手机、/submit 预览；用 `@container`，不看视口）：内边距 20px，「导入」挪到第四行，和「复制安装提示词」并排，各自撑开、高 44；窄于 320px 各占一行 |
@@ -529,7 +529,7 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 - 拆词：查询先统一写法（全角转半角、小写），再按空白和「汉字与两个字符以上的英文、数字段（+ # 算在内）的交界」拆词，「做PPT」等于「做 PPT」；单个字母不拆，「B站」「K线」整个当一个词，匹配时再拿去掉空白的文字比一次（「B站」命中「B 站」，不命中 Website）。规则在 `search.ts` 的 `queryWords`、`matchWord`，库页的本库搜索也用它们。收录条目不显示的原名、slug 按词头匹配，整词和驼峰切开的两套都认（PDFs 搜 pdf、ChatGPT 搜 chatgpt 或 gpt 都行），+ 和 # 算词里的字；同一档里只在适用场景里找到的词少的排前面。
 - 搜索：中文叫法和原名都算「名字」（`search.ts` 的 `searchBots`），搜哪个都能找到，分量一样：某个名字以整句查询开头排最前，其次是每个词都在名字里（可以一个词在中文叫法、一个词在原名）。条目里的名字按 §3.4 写成「中文叫法 + 原名」（`small`）。
 - 搜索入口只有首屏搜索框一个按钮（外加快捷键），派发 `bz-search-open`。搜索面板本身（⌘K / Ctrl+K、「/」、键盘操作、读屏播报）由 `SearchPalette.vue` 负责，规格见 LB9 契约；面板颜色全部引用 `--bz-*` token，条目里的小 Bot 身体约 32px。输入框占位字「搜索」（和首屏同一个 `SHELF_COPY.searchPlaceholder`）；一次最多列 8 条，多出来的只写「还有 N 个」；底部的键帽提示（↑↓ 选择、↵ 打开、esc 关闭）保留。
-- 新标签链接有读屏文本「（在新标签页打开）」及 `rel="noopener noreferrer"`。「导入」「一键导入」是按钮，图标用 `BzIcon` 的 `arrow-up-right`（放在文字前面）；作者、技能源码、定时任务这些文字链接沿用后面一个 12px 的「↗」（`ExternalHint`，aria-hidden）。「我要投稿」是站内链接（`/submit`），不带这些。
+- 新标签链接有读屏文本「（在新标签页打开）」及 `rel="noopener noreferrer"`。「导入」「一键导入」是按钮，图标用 `BzIcon` 的 `arrow-up-right`（放在文字前面）；作者外链、技能源码、定时任务这些文字链接沿用后面一个 12px 的「↗」（`ExternalHint`，aria-hidden）。「我要投稿」是站内链接（`/submit`），不带这些。
 
 ## 8. 手动复制对话框
 
@@ -564,7 +564,7 @@ DOM 顺序：「返回货架」→ `.detail-layout`（头部 `header.detail-head
    - **额度**：`[data-testid="quota-meter"]`，三根由矮到高的小柱（4 宽，高 6、10、14，像信号格）加一个字「低 / 中 / 高」。低亮 1 根、中亮 2 根、高亮 3 根；没亮的是 `--bz-border-strong`，亮的是 `--bz-ink`，只有「高」把柱子和字都换成 `--bz-quota-high`。档位的含义（`quotaCopy`）在 `title` 和 `.bz-sr-only` 里。
    - **账号**（`fact-account`）：权限里有「外部账号」或「浏览器 Cookie」是 `plug` +「要连」，否则 `plug-off` +「不用连」。和列表卡同一套判断。
    - **定时任务**（`fact-routines`）：`clock` +「N 个」（`about.routines` 的条数；0 个时这一格是三级灰）。只知道有、数不出几个的（有 `routines.md`，或带「定时自动运行」权限但没写 `about.routines`）显示一个对勾，读屏读「有」。
-3. **一组小字**（`dl.rail-meta`，13px，左边名称 `--bz-text-3`、右边值 `--bz-text-2`，行距 12）：作者（`author-link`，新标签页打开，带「↗」）、来源（`.bot-origin`：官方市场 / 社区收录 / 作者投稿）、上架（`<time>`）、热度（`data-testid="heat"`：`flame` + 数字；没取到是「…」，失败是「—」）；有 `forkedFrom` 时再加一行「改编自」（`data-testid="forked-from"`，链到原 Bot 的详情页；原 Bot 有中文叫法的写成「中文叫法 + 原名」，`small`）。
+3. **一组小字**（`dl.rail-meta`，13px，左边名称 `--bz-text-3`、右边值 `--bz-text-2`，行距 12）：作者（`author-link`，链接规则见「作者主页」）、来源（`.bot-origin`：官方市场 / 社区收录 / 作者投稿）、上架（`<time>`）、热度（`data-testid="heat"`：`flame` + 数字；没取到是「…」，失败是「—」）；有 `forkedFrom` 时再加一行「改编自」（`data-testid="forked-from"`，链到原 Bot 的详情页；原 Bot 有中文叫法的写成「中文叫法 + 原名」，`small`）。
 
 **探头的小 Bot**（`data-testid="rail-peek"`，只在两栏时有）：头部整个滚到导航条下面以后，侧栏卡片的上沿右侧探出一只 28px 的它（露出上半身，弹簧 280ms 升上来），头部回到视野它就缩回去。侧栏吸顶跟着走的时候，一眼还认得出这是谁的导入按钮。它是活的（会眨眼、跟着光标看），鼠标移到侧栏上会睁大眼；纯装饰，`aria-hidden`、不接鼠标。用 `IntersectionObserver` 看头部，不监听滚动。减少动效时没有升降过渡。
 
@@ -607,6 +607,14 @@ DOM 顺序：「返回货架」→ `.detail-layout`（头部 `header.detail-head
 ### 9.5 投稿预览
 
 /submit 的「投稿预览」复用 `BotCard` 和 `BotDetail`（`preview` 注入）。预览容器只有 380px 左右宽：卡片靠容器查询自动用窄卡片版式（投稿包里写了 `nameZh`，名字照 §3.4 写成「中文叫法 + 原名」，窄了先截原名）；详情永远是单栏（根节点带 `.is-preview`，两栏的规则不对它生效），没有探头的小 Bot。预览里链接不跳走、不请求热度、数据不完整也不报错（数组和字符串都先验类型，不对的当作没写）；按钮是禁用的，下面一行「上架后可用」；开场白不可点；热度那一行新投稿显示「新上架」、更新显示「—」。**预览里缺内容的提示照旧显示**（「截图 1（待放入）」「暂无截图。」「暂无技能说明。」「暂无设计说明。」「上架后可查看源码」「上架后可查看」）：这是投稿流程的一部分，告诉投稿者还缺什么。`styles/misc.css`、`home.css`、`detail.css` 里各有一小段专门把 `submit.css` 里针对旧版式的偏移归零。
+
+### 作者主页
+
+返回货架按钮下留 `--bz-sp-8`。圆头像在左，昵称和 GitHub handle 在右，垂直居中，间距 `--bz-sp-6`；头像宽屏 112px，≤640px 为 80px。Bot 和小队分别用原卡片网格，只显示非空区块，区块前留 `--bz-sp-8`。
+
+作者主页归入 Bot 模块，页眉高亮 Bot 并显示滑块。直接打开也会加载卡片热度。卡片里指向本页的「by 作者」只显示纯文字。
+
+头像 `loading` 时显示昵称首字：去掉前导空白，按字形取首字（不支持时按码点取），转大写（大写后会变成多个字母的，比如 ß、ﬁ，保持原样），空昵称显示 `?`。`image` 时首字留在 DOM 里但颜色透明，`fallback` 时移除失败的图片。水合时也核对加载结果。卡片及详情页不加头像；有 `author.page` 就在同页进入作者主页，不加外链提示或打点。其余作者外链及作者页的 handle 在新标签页打开，带外链提示、`noopener noreferrer` 和 `data-track-kind="author"`；投稿预览保持纯文字。
 
 ## 10. 空状态与出错
 
@@ -752,7 +760,7 @@ DOM 顺序：「返回货架」→ `.detail-layout`（头部 `header.detail-head
 
 最大宽 1140，单栏。`data-testid="squad-detail"`（带 `data-slug`）。块与块之间 64（<680px 48），正中一条 `--bz-hairline` 细线；区块标题 h3 档 20px/600 圆体，到内容 24。全页只有一个实心主按钮「开始组队」。
 
-**头部** `squad-header`：「← 返回货架」（幽灵小按钮）→ 合影舞台 `[data-testid="squad-stage"]`（整宽，高 280、<680px 200，圆角 16，`stage` 尺寸）。每只脚下一块小名牌（`.photo-plate`，12px/600，高 22，最宽 96）写着它**在队里的岗位**；队长那块是实心的（墨底），和阵容表里的「队长」标签同一种画法。<680px 不画名牌。悬停某只：它睁大眼跳一下；点谁戳谁（和货架共用同一个 slug 的戳历史）。舞台下面一行两栏：左边是标签行（「小队」、队形 `squad-formation`、「N 个 Bot」`squad-count`、`by 作者 ↗` `squad-author`、「· 来源」`squad-origin`）→ 小队名 `h1`（h1 档）→ 一句话介绍（16px `--bz-text-2`，`squad-tagline`）；右边贴底是「开始组队」`squad-start`（`.bz-btn.primary`，高 44，`arrow-down` 图标）：平滑滚到组队步骤（减少动效时直接跳），焦点移过去，地址栏写上 `#setup`。<680px 上下排，按钮撑满。
+**头部** `squad-header`：「← 返回货架」（幽灵小按钮）→ 合影舞台 `[data-testid="squad-stage"]`（整宽，高 280、<680px 200，圆角 16，`stage` 尺寸）。每只脚下一块小名牌（`.photo-plate`，12px/600，高 22，最宽 96）写着它**在队里的岗位**；队长那块是实心的（墨底），和阵容表里的「队长」标签同一种画法。<680px 不画名牌。悬停某只：它睁大眼跳一下；点谁戳谁（和货架共用同一个 slug 的戳历史）。舞台下面一行两栏：左边是标签行（「小队」、队形 `squad-formation`、「N 个 Bot」`squad-count`、`by 作者` `squad-author`（见「作者主页」）、「· 来源」`squad-origin`）→ 小队名 `h1`（h1 档）→ 一句话介绍（16px `--bz-text-2`，`squad-tagline`）；右边贴底是「开始组队」`squad-start`（`.bz-btn.primary`，高 44，`arrow-down` 图标）：平滑滚到组队步骤（减少动效时直接跳），焦点移过去，地址栏写上 `#setup`。<680px 上下排，按钮撑满。
 
 **阵容** `squad-roster`：一张编制表（圆角 12 的面板，行与行之间细线），一行一个成员 `[data-testid="squad-member"]`（带 `data-slug`、`data-lead`），行高约 72：
 

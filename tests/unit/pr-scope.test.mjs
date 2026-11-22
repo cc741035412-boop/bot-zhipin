@@ -115,7 +115,14 @@ it('CI 只读 PR/手动派发，拉取两层历史并按首父严格检查范围
   const checkout = steps.find((step) => step.uses?.startsWith('actions/checkout@'))
   expect(checkout.with).toMatchObject({ 'fetch-depth': 2, 'persist-credentials': false })
   const scope = steps.find((step) => step.run?.includes('check-pr-scope.mjs'))
-  expect(scope.run).toBe('node scripts/check-pr-scope.mjs --base HEAD^1 --head HEAD --association "${{ github.event_name == \'pull_request\' && github.event.pull_request.author_association || \'CONTRIBUTOR\' }}"')
+  expect(scope).toMatchObject({
+    env: {
+      ASSOCIATION: "${{ github.event_name == 'pull_request' && github.event.pull_request.author_association || 'CONTRIBUTOR' }}",
+      PR_AUTHOR: "${{ github.event_name == 'pull_request' && github.event.pull_request.user.login || '' }}",
+      APP_BOTS: "${{ vars.SUBMIT_APP_BOT_LOGIN || 'bot-zhipin-submit[bot]' }},github-actions[bot]",
+    },
+    run: 'node scripts/check-pr-scope.mjs --base HEAD^1 --head HEAD --association "$ASSOCIATION" --pr-author "$PR_AUTHOR" --app-bots "$APP_BOTS"',
+  })
   expect(steps.indexOf(scope)).toBeLessThan(steps.findIndex((step) => step.run === 'npm run validate'))
 })
 

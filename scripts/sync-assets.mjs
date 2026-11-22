@@ -2,7 +2,8 @@
 // 同时生成 site/public/api-data/slugs.json（全部 slug），计数接口靠它判断 slug 是否存在，见 docs/dev/API.md；
 // 以及 squad-slugs.json（全部小队 slug），小队页的下架兜底（functions/squads/[slug].ts）靠它；
 // prompt-slugs.json、skill-slugs.json 同理，给 functions/prompts/[slug].ts、functions/skills/[slug].ts 用。
-// 这两个目录都是生成物，已 gitignore；每次 dev / build 前重建。
+// authors.json 是头像转发接口和作者页下架兜底共用的作者白名单。
+// bot-assets、api-data 和 media 都是生成物，已 gitignore；每次 dev / build 前重建。
 import { copyFileSync, lstatSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, join, relative, resolve, sep } from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -12,6 +13,7 @@ import { SCHEMA_SHA256 } from './lib/validate/generated/bot-schema.mjs'
 import { MAX_IMAGE_BYTES } from './lib/validate/images.mjs'
 import { LIMITS } from './submission/bundle-core.mjs'
 import { explanations, shelfData } from '../site/.vitepress/data/bots.mjs'
+import { buildAuthors } from './lib/authors.mjs'
 import { isPublicBot, isPublicSquad } from './lib/public-bot.mjs'
 import { loadAllSquads, squadsDirFor } from './lib/load-squads.mjs'
 import { promptsDirFor, skillsDirFor, loadEntries } from './lib/load-prompts-skills.mjs'
@@ -40,8 +42,11 @@ export function syncAssets({
   mkdirSync(apiData, { recursive: true })
   writeFileSync(join(apiData, 'slugs.json'), JSON.stringify(bots.map((b) => b.slug)) + '\n')
   // 和网站生成页面用同一个口径（shelfData），清单里有的小队才有页面。
-  const squads = shelfData(bots, { squads: loadAllSquads(squadsDir).filter(isPublicSquad), curation: {} }).squads.map((squad) => squad.slug)
-  writeFileSync(join(apiData, 'squad-slugs.json'), JSON.stringify(squads) + '\n')
+  const shelf = shelfData(bots, { squads: loadAllSquads(squadsDir).filter(isPublicSquad), curation: {} })
+  const { squads } = shelf
+  writeFileSync(join(apiData, 'squad-slugs.json'), JSON.stringify(squads.map((squad) => squad.slug)) + '\n')
+  const keys = buildAuthors(shelf).map(author => author.key)
+  writeFileSync(join(apiData, 'authors.json'), JSON.stringify(keys) + '\n')
   // 收录的 Prompt 和 Skill：和网站生成页面同一个口径（isPublicEntry），有页面的才进清单。
   syncMedia(promptsDir, resolve(out, '../media/prompts'))
   const slugsByKind = {}
@@ -87,5 +92,5 @@ export function syncAssets({
 
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const { bots, squads, prompts, skills, images } = syncAssets()
-  console.log(`[sync-assets] ${bots} 个 Bot、${squads} 支小队、${prompts} 条 Prompt、${skills} 个 Skill；已复制 ${images} 个图片文件到 site/public/bot-assets/，已写 site/public/api-data/ 下的 slugs.json、squad-slugs.json、prompt-slugs.json、skill-slugs.json`)
+  console.log(`[sync-assets] ${bots} 个 Bot、${squads} 支小队、${prompts} 条 Prompt、${skills} 个 Skill；已复制 ${images} 个图片文件到 site/public/bot-assets/，已写 site/public/api-data/ 下的 slugs.json、squad-slugs.json、prompt-slugs.json、skill-slugs.json、authors.json`)
 }
