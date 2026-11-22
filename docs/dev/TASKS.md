@@ -97,7 +97,7 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | TR-API | `POST /api/events`、迁移 0005、单测（真实本地 D1） | 编码 agent | — | `functions/api/events.ts`、`functions/_lib/events-store.ts`、`migrations/0005` | ✅ |
 | TR-RPT | `npm run report` 只读报告、单测 | 编码 agent | — | `scripts/report.mjs`、`scripts/lib/report.mjs` | ✅ |
 | TR-WEB-CORE | `theme/track.ts` 模块和单测，不接组件 | 编码 agent | — | `site/.vitepress/theme/track.ts` | ✅ |
-| TR-WEB-HOOK | 接进主题入口和各组件、e2e 核对每个事件 | 编码 agent | #34、#35、#36、搜索面板线合进 main；TR-WEB-CORE | `theme/index.ts`、各组件、`theme/submit/`、`tests/e2e/tracking*` | ⬜ |
+| TR-WEB-HOOK | 接进主题入口和各组件、e2e 核对每个事件 | 编码 agent | #34、#35、#36 已合进 main；TR-WEB-CORE 已完成。搜索面板线尚未合进 main，`search` 事件等该线合并后再接 | `theme/index.ts`、各组件、`theme/submit/`、`tests/e2e/tracking*` | ✅ |
 | TR-INT | 集成、文档、开 PR；线上先备份再迁移，然后合并 | 维护者 | 全部 | — | 🟡 |
 
 # 让 AI 来找：bot-zhipin skill（2026-11-22）
