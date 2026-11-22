@@ -1,13 +1,15 @@
-import { writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { cp, mkdir, writeFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
 import { defineConfig, type HeadConfig, type PageData } from 'vitepress'
 import { SITE, CONTRIBUTE_URL, HERO_MASCOTS } from './meta.mjs'
 import faces from './data/faces.json'
 import { shelfData } from './data/bots.mjs'
-import { loadEnums } from '../../scripts/lib/load-bots.mjs'
+import { ROOT, loadEnums } from '../../scripts/lib/load-bots.mjs'
 import * as share from '../../scripts/lib/share.mjs'
 import { buildCatalog } from '../../scripts/lib/catalog.mjs'
 import { renderLlms } from '../../scripts/lib/llms.mjs'
+import { INDEX_PATH, SKILL_DIR, buildAgentData } from '../../scripts/lib/agent-data.mjs'
+import { promptData, skillData } from './data/prompts-skills.mjs'
 import { generateOgImages } from '../../scripts/og/index.mjs'
 import { generateHeaders } from '../../scripts/gen-headers.mjs'
 import { skillMedia } from './skill-media.mjs'
@@ -64,14 +66,27 @@ export default defineConfig({
   appearance: true,
   vite: { plugins: [botWatch(), skillMedia()] },
   lastUpdated: false,
-  // 构建产物里补四样：分享图（og/）、catalog.json、llms.txt，以及按投稿页内联脚本算出的 CSP（_headers）。
+  // 构建产物里补这些：分享图（og/）、catalog.json、llms.txt、按投稿页内联脚本算出的 CSP（_headers），
+  // 以及给 AI 用的 Prompt、Skill、Bot 数据（data/）和 bot-zhipin skill 的文件（skill/bot-zhipin/，决策 70）。
   async buildEnd({ outDir }) {
     const shelf = shelfData()
+    const catalog = buildCatalog(shelf)
+    const prompts = promptData()
+    const skills = skillData()
+    const agentData = buildAgentData({ prompts, skills, bots: catalog.bots })
+    const json = (data: unknown) => JSON.stringify(data, null, 2) + '\n'
+    const out = (path: string) => join(outDir, path.slice(1))
     await generateOgImages(outDir)
+    await Promise.all(['/data/prompts/', '/data/skills/', '/data/bots/'].map((dir) => mkdir(out(dir), { recursive: true })))
     await Promise.all([
       generateHeaders(outDir),
-      writeFile(join(outDir, 'catalog.json'), JSON.stringify(buildCatalog(shelf), null, 2) + '\n'),
-      writeFile(join(outDir, 'llms.txt'), renderLlms(shelf, loadEnums().categories)),
+      writeFile(join(outDir, 'catalog.json'), json(catalog)),
+      writeFile(join(outDir, 'llms.txt'), renderLlms(shelf, loadEnums().categories, { prompts, skills })),
+      writeFile(out(INDEX_PATH), json(agentData.index)),
+      ...agentData.files.map(({ path, data }) => writeFile(out(path), json(data))),
+      mkdir(dirname(out(SKILL_DIR)), { recursive: true }).then(() => cp(join(ROOT, 'integrations/bot-zhipin/skills/bot-zhipin'), out(SKILL_DIR), {
+        recursive: true, filter: (src) => !/(__pycache__|\.pyc$|\.DS_Store$)/.test(src),
+      })),
     ])
   },
   transformPageData(pageData) {

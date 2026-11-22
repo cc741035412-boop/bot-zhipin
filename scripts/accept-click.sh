@@ -141,7 +141,7 @@ try:
     require(1 <= port <= 65535 and 1 <= inspector <= 65535 and port != inspector, '端口配置无效')
     require(not listening(port) and not listening(inspector), '验收端口已被占用，未启动或清理任何已有进程')
     work.mkdir()
-    for name in ('functions', 'migrations', 'scripts', 'site', 'schema', 'bots', 'tests/fixtures'):
+    for name in ('functions', 'migrations', 'scripts', 'site', 'schema', 'bots', 'integrations', 'tests/fixtures'):
         shutil.copytree(root / name, work / name,
                         ignore=shutil.ignore_patterns('dist', 'cache', 'bot-assets', 'api-data', '__pycache__'))
     for name in ('package.json', 'package-lock.json', 'wrangler.toml'):

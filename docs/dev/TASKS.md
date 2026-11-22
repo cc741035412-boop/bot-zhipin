@@ -87,3 +87,13 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | B | 构建时出分享图：Bot、小队、全站各一张，Noto Sans SC 子集；换行标点优先、行宽均衡 | 编码 agent | — | `scripts/og/`、`scripts/gen-og-fonts.mjs`、依赖 | ✅ |
 | C | 计数加 starter / kickoff：迁移 0004、接口、前端、测试、文档 | 编码 agent | — | `functions/`、`migrations/0004`、`heat.ts`、三个组件 | ✅ |
 | M | 集成、复跑验收、目视分享图；线上 D1 先备份再迁移，然后合并 | 维护者 | A、B、C | — | ✅ |
+
+# 让 AI 来找：bot-zhipin skill（2026-11-22）
+
+目标：任何人的 AI 助手装上 `bot-zhipin` skill 后能搜本站的 Prompt、Skills 和 Bot，Prompt 给原文，Skill 给安装命令。决策 70。
+
+| # | 任务 | 执行 | 前置 | 写入范围 | 状态 |
+|---|---|---|---|---|---|
+| FS1 | 构建时输出 `/data/index.json` 和每条完整数据，llms.txt 补 Prompt、Skills | 维护者 | — | `scripts/lib/{agent-data,llms}.mjs`、`site/.vitepress/config.mts`、单测 | ✅ |
+| FS2 | skill 本体：SKILL.md、`find.py`、Claude Code 插件清单 | 编码 agent | FS1 的数据格式 | `integrations/bot-zhipin/`、`.claude-plugin/` | ✅ |
+| FS3 | README、架构、决策；验收后推送开 PR，上线后线上核对 | 维护者 | FS1、FS2 | 文档 | 🟡 |

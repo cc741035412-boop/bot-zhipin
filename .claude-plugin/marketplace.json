@@ -1,0 +1,20 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "bot-zhipin",
+  "description": "Bot 直聘：在收录库里找现成的 Prompt、Agent Skill 和 Grok Bot 模板",
+  "owner": {
+    "name": "Bot 直聘"
+  },
+  "plugins": [
+    {
+      "name": "bot-zhipin",
+      "description": "在 Bot 直聘（bot.jiachengbo.com）的收录库里找现成的 Prompt、Agent Skill 和 Grok Bot 模板，拿来就用",
+      "author": {
+        "name": "Bot 直聘"
+      },
+      "source": "./integrations/bot-zhipin",
+      "category": "productivity",
+      "homepage": "https://bot.jiachengbo.com/"
+    }
+  ]
+}

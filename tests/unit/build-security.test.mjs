@@ -12,7 +12,7 @@ beforeEach(() => {
   temp = mkdtempSync(join(tmpdir(), 'bot-build-security-'))
   work = join(temp, 'work')
   mkdirSync(work)
-  for (const name of ['scripts', 'schema', 'site', 'bots']) {
+  for (const name of ['scripts', 'schema', 'site', 'bots', 'integrations']) {
     cpSync(join(ROOT, name), join(work, name), {
       recursive: true,
       filter: (path) => !/(?:^|\/)(?:dist|cache|bot-assets|api-data)(?:\/|$)/.test(path),
