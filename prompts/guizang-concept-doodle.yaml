@@ -1,0 +1,43 @@
+slug: guizang-concept-doodle
+title: 手绘涂鸦风概念讲解卡
+category: 出图
+purpose: 给它要解释的概念和目标受众，它按统一的手绘涂鸦风格、带边框卡片和统一标题格式生成概念讲解图。
+scenarios:
+- 老师把抽象的经济学或科学名词做成一套课堂引入卡
+- 学生做读书汇报时生成几张手绘风的同系列配图
+- 科普自媒体用涂鸦卡片把陌生概念拆开讲清
+summary: 这是歸藏根据“一图读懂”思路改写给 Nano Banana 的提示词。它用两句话定下任务和版式：第一句点明生成多张 16:9 涂鸦图、要解释的概念（如“期货”）以及目标受众（如中学生）；第二句统一画面规矩，要求保持一致的彩色粗铅笔手绘风格、信息量丰富、使用英文文字、纯色背景、卡片四周带边框线，并采用类似 PowerPoint 演示文稿的统一标题格式。在支持单次输出多张图的模型入口中，可用同一套版式连续生成多张卡片；配图展示了把“期货”分成定义、用途和案例三张卡的示例。
+usage: 不用上传参考图。把第一句里的“期货”换成你要解释的概念，把“中学生”换成目标受众。推荐采用 16:9 横版比例；提示词默认要求“使用英文文字”，若想换其他画幅或尝试让图内显示中文，可相应改动“16:9”和“使用英文文字”。可在 Gemini 或 Google AI Studio 等提供 Nano Banana 的入口使用；若要一次生成整组卡片，需所用的模型入口支持单轮输出多张图片，否则可分次生成。出图后检查各张卡片的解释内容是否清楚，并逐处核对图内英文单词有无拼写错误或重复词。
+tags:
+- 概念讲解
+- 涂鸦卡片
+- 科普配图
+- 手绘插画
+- 课件
+models:
+- Nano Banana
+lang: en
+body: |-
+  Help me generate multiple 16:9 doodle-style images to explain the concept of "futures" to middle school students. The images should have a consistent colorful, thick-pencil hand-drawn style, be rich in information, feature English text, use solid color backgrounds, have outlines around the cards, and include uniform titles, similar to a PowerPoint presentation.
+bodyZh: |
+  帮我生成多张 16:9 的涂鸦风格图片，用来向中学生解释“期货”的概念。这些图片需要保持一致的彩色粗铅笔手绘风格，信息量丰富，使用英文文字，采用纯色背景，卡片四周带有边框线，并包含统一格式的标题，类似 PowerPoint 演示文稿。
+source:
+  url: https://github.com/op7418/guizang-s-prompt/blob/f6ced226627e7175120f19f6e278b592209ab72f/image/%E4%B8%80%E5%9B%BE%E8%AF%BB%E6%87%82%E6%A6%82%E5%BF%B5%E6%B6%82%E9%B8%A6%E5%9B%BE.md
+  name: op7418/guizang-s-prompt
+author:
+  name: 歸藏（@op7418）
+  url: https://github.com/op7418
+license: MIT
+licenseUrl: https://github.com/op7418/guizang-s-prompt/blob/f6ced226627e7175120f19f6e278b592209ab72f/LICENSE
+copyright: Copyright (c) 2025 op7418
+addedAt: '2026-11-22'
+images:
+- file: guizang-concept-doodle-1.jpg
+  alt: 黄色背景竖图，上方黑框内是“什么是期货？”的中文定义，下方手绘边框卡片标题为“WHAT ARE FUTURES?”，画着买卖双方人物、时钟和日历。
+  credit: 歸藏（op7418），guizang-s-prompt，MIT
+- file: guizang-concept-doodle-2.jpg
+  alt: 黄色背景竖图，上方黑框内是“为什么要使用期货？”的中文用途说明，下方是标题为“WHY USE FUTURES?”的英文涂鸦卡，分左右两栏对比卖家与买家。
+  credit: 歸藏（op7418），guizang-s-prompt，MIT
+- file: guizang-concept-doodle-3.jpg
+  alt: '黄色背景竖图，上方黑框内是农民和烘焙师的中文案例说明，下方英文卡片标题为“FUTURES IN ACTION: THE FARMER & BAKER”，内有四格彩色手绘小图。'
+  credit: 歸藏（op7418），guizang-s-prompt，MIT

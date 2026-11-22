@@ -2,6 +2,7 @@
 import { lstatSync, readdirSync, readFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { BOTS_DIR, ROOT } from './load-bots.mjs'
+import { measureImage } from './media-assets.mjs'
 import { LIBRARY_KINDS, buildEntryModel } from './library-model.mjs'
 
 export const PROMPT_SCHEMA_PATH = join(ROOT, 'schema', 'prompt.schema.json')
@@ -56,11 +57,16 @@ export function loadEntries(kind, dir = libraryDirFor(kind)) {
     const stat = lstatSync(path, { throwIfNoEntry: false })
     if (!stat) return null
     if (stat.isSymbolicLink()) return buildEntryModel(kind, name, { stray: 'symlink' })
+    if (kind === 'prompt' && name === 'media' && stat.isDirectory()) return null
     if (stat.isDirectory()) return buildEntryModel(kind, name, { stray: 'directory' })
     if (!stat.isFile() || !name.endsWith('.yaml')) return buildEntryModel(kind, name, { stray: 'extension' })
     // 超限的文件不读进内存：给一个刚好超限的占位，让内核报「文件太大」。
     const raw = stat.size > yamlBytes ? ' '.repeat(yamlBytes + 1) : readFileSync(path, 'utf8')
-    return { ...buildEntryModel(kind, name, { raw }), path }
+    const entry = buildEntryModel(kind, name, { raw })
+    if (kind === 'prompt' && Array.isArray(entry.data?.images)) {
+      entry.imageSizes = entry.data.images.map(image => measureImage(dir, image?.file))
+    }
+    return { ...entry, path }
   }).filter(Boolean)
 }
 

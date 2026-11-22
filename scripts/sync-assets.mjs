@@ -15,6 +15,7 @@ import { explanations, shelfData } from '../site/.vitepress/data/bots.mjs'
 import { isPublicBot, isPublicSquad } from './lib/public-bot.mjs'
 import { loadAllSquads, squadsDirFor } from './lib/load-squads.mjs'
 import { promptsDirFor, skillsDirFor, loadEntries } from './lib/load-prompts-skills.mjs'
+import { syncMedia } from './lib/media-assets.mjs'
 import { isPublicEntry } from './lib/entry-summary.mjs'
 
 const OUT = join(ROOT, 'site', 'public', 'bot-assets')
@@ -42,6 +43,7 @@ export function syncAssets({
   const squads = shelfData(bots, { squads: loadAllSquads(squadsDir).filter(isPublicSquad), curation: {} }).squads.map((squad) => squad.slug)
   writeFileSync(join(apiData, 'squad-slugs.json'), JSON.stringify(squads) + '\n')
   // 收录的 Prompt 和 Skill：和网站生成页面同一个口径（isPublicEntry），有页面的才进清单。
+  syncMedia(promptsDir, resolve(out, '../media/prompts'))
   const slugsByKind = {}
   for (const [kind, dir] of [['prompt', promptsDir], ['skill', skillsDir]]) {
     slugsByKind[kind] = loadEntries(kind, dir).filter(isPublicEntry).map((entry) => entry.slug)

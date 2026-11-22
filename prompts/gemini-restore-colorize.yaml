@@ -1,0 +1,40 @@
+slug: gemini-restore-colorize
+title: 老照片修复与上色
+category: 出图
+purpose: 给它一张黑白或褪色的老照片，它修复画面并添上自然逼真的色彩与富有氛围感的光线。
+scenarios:
+- 整理家里旧相册时把长辈的黑白老照片修复上色
+- 逢年过节把老屋或全家福旧照修好印出来送长辈
+- 校史或地方文史爱好者为老建筑旧照做彩色参考图
+summary: 这句来自 Google 官方 Gemini cookbook 的提示词把老照片处理拆成两步：先对画面做「修复」与「上色」，再明确要求添上「自然、逼真的色彩」和「富有氛围感的光线」，让翻新后的照片在色彩质感和光影氛围上协调统一。需要注意，AI 填上的颜色和光线效果是模型根据画面内容推测生成的，并不代表拍摄当年的真实原色。
+usage: 没有要替换的占位符。先将要修复的黑白或褪色老照片扫描或翻拍清楚（尽量避开反光与斜拍变形），作为参考图上传，再粘贴提示词。推荐画幅跟随老照片原有比例，发给 Gemini 或 Google AI Studio 里的 Nano Banana 出图。生成后对照原照检查人物五官和原有细节有没有被改走样、破损处修补是否自然，以及模型推测的配色与光线是否顺眼。
+tags:
+- 老照片修复
+- 黑白上色
+- 旧照翻新
+- 家庭相册
+models:
+- Nano Banana
+lang: en
+body: |-
+  Restore and colorize this photograph, adding natural, realistic colors and atmospheric lighting.
+bodyZh: |
+  修复这张照片并为其上色，添上自然、逼真的色彩和富有氛围感的光线。
+titleOriginal: Colorize and restore images
+source:
+  url: https://github.com/google-gemini/cookbook/blob/61250eb5652b90eeefc9d0f5aba5bd55cd21c803/quickstarts/Get_Started_Nano_Banana.ipynb
+  name: google-gemini/cookbook
+author:
+  name: Google LLC（google-gemini/cookbook）
+  url: https://github.com/google-gemini/cookbook
+license: Apache-2.0
+licenseUrl: https://github.com/google-gemini/cookbook/blob/61250eb5652b90eeefc9d0f5aba5bd55cd21c803/LICENSE
+copyright: Copyright 2026 Google LLC
+addedAt: '2026-11-22'
+images:
+- file: gemini-restore-colorize-1.jpg
+  alt: 修复上色后的老照片：照相馆布景前的一家三口，旗袍、中山装和背景园林都有了自然的颜色
+  credit: 本站用 GPT Image 跑
+- file: gemini-restore-colorize-2.jpg
+  alt: 原图：泛黄、有折痕和破损的黑白老照片，一家三口在照相馆合影
+  credit: 原图也是 AI 生成的虚构老照片

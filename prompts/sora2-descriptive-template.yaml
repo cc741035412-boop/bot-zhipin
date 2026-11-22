@@ -1,0 +1,57 @@
+slug: sora2-descriptive-template
+title: 视频分镜描述模板
+category: 视频
+purpose: 照着场景、摄影、动作和对白四块填空，写出一份单镜头视频生成提示词。
+scenarios:
+- 自媒体创作者把脑海里的画面写成单镜头视频提示词
+- 小店店主拍产品短片前梳理机位角度和动作节点
+- 学生做视频作业时练习拆分景别、情绪和台词
+summary: 这份官方模板把单个视频镜头的描述拆成四块：开头先用一段通顺直白的话交代人物、服装、布景、天气等场景细节；接着在「摄影」里分别定好「镜头」（景别与机位角度，如远景定场镜头、平视）和「情绪」（整体基调）；再在「动作」里用三条列表写出片段内清晰分明的动作节点、手势或穿插其中的台词；最后在「对白」里附上同片段时长相配的简短自然台词。四块共七处填空各司其职，照着填写就能把画面、机位、动作和台词交代清楚。
+usage: 按四块逐一替换 7 处【】占位：开头第一段填人物、服装、布景和天气等场景描述；「摄影」下的「镜头」填景别与机位角度，「情绪」填画面整体基调；「动作」下三行依次填动作 1（具体动作节点或手势）、动作 2（片段内另一动作节点）、动作 3（另一动作或一句台词）；「对白」填匹配片段时长的简短自然台词（无对白可删去）。无需参考图，也可传首帧图。在仍可访问 Sora 2 的入口使用，可选 16:9 或 9:16，时长 4–20 秒（默认 4 秒）。出片后检查动作节点和台词是否都在片段时长内完成。
+tags:
+- 视频提示词
+- 分镜模板
+- 镜头设计
+- 对白
+models:
+- Sora 2
+lang: en
+body: |-
+  [Prose scene description in plain language. Describe characters, costumes, scenery, weather and other details. Be as descriptive to generate a video that matches your vision.]
+
+  Cinematography:
+  Camera shot: [framing and angle, e.g. wide establishing shot, eye level]
+  Mood: [overall tone, e.g. cinematic and tense, playful and suspenseful, luxurious anticipation]
+
+  Actions:
+  - [Action 1: a clear, specific beat or gesture]
+  - [Action 2: another distinct beat within the clip]
+  - [Action 3: another action or dialogue line]
+
+  Dialogue:
+  [If the shot has dialogue, add short natural lines here or as part of the actions list. Keep them brief so they match the clip length.]
+bodyZh: |
+  【用通顺直白的语句描述场景。交代人物、服装、布景、天气及其他细节。写得尽量具体，以便生成符合你设想的视频。】
+
+  摄影：
+  镜头：【景别与机位角度，如远景定场镜头、平视】
+  情绪：【整体基调，如电影感且紧张、俏皮又悬疑、精致奢华而引人期待】
+
+  动作：
+  - 【动作 1：一个清晰具体的动作节点或手势】
+  - 【动作 2：片段内另一个清楚分明的动作节点】
+  - 【动作 3：另一个动作或一句台词】
+
+  对白：
+  【如果镜头里有对白，在这里或动作列表中加入简短自然的台词。台词要短，和片段时长相配。】
+titleOriginal: Descriptive Prompt Template
+source:
+  url: https://github.com/openai/openai-cookbook/blob/dfd760b4de0bd175b51ad05b9b5260c36dfea09c/examples/sora/sora2_prompting_guide.ipynb
+  name: openai/openai-cookbook
+author:
+  name: OpenAI（Robin Koenig、Joanne Shin、Annika Brundyn，据 registry.yaml）
+  url: https://github.com/openai/openai-cookbook
+license: MIT
+licenseUrl: https://github.com/openai/openai-cookbook/blob/dfd760b4de0bd175b51ad05b9b5260c36dfea09c/LICENSE
+copyright: Copyright (c) 2025 OpenAI
+addedAt: '2026-11-22'

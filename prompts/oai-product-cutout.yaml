@@ -1,0 +1,45 @@
+slug: oai-product-cutout
+title: 透明底商品抠图
+category: 出图
+purpose: 给它一张商品照片，它把商品完整抠出并单独放到干净的透明背景上。
+scenarios:
+- 小店店主把手机拍的货品抠出来做商品主图
+- 摆摊卖家把饮品或手作抠成透明底排进价目表
+- 学生做课程展板时把实物素材去背贴进版面
+summary: 这段来自 OpenAI 官方指南的提示词从正反两面约束抠图输出：正面规定商品居中、轮廓利落、边缘无光晕或毛边，只做轻微润饰，严格保持商品原有的几何形状、外观风格与标签文字原有的清晰可读程度；反面明确禁止添加纯色背景、棋盘格、场景或阴影，要求去掉原背景并保留干净的 Alpha 透明通道。
+usage: 没有要替换的占位符。上传一张商品主体清楚的参考图，搭配这段提示词提交。推荐画幅跟随原图比例（官方示例采用 1024×1536 竖版）。普通用户可在 ChatGPT 生图功能里尝试，但不保证能导出带透明通道的图片；确需输出带 Alpha 透明通道的真透明底，需在支持 GPT Image 的接口或工具中将背景设为透明（background="transparent"），并选择 PNG 或 WebP 输出格式。出图后检查背景是否为真透明而非白底或棋盘格，商品边缘有无毛边，几何形状和标签文字是否与原图一致。
+tags:
+- 商品抠图
+- 透明背景
+- 电商素材
+- 去背景
+models:
+- GPT Image
+lang: en
+body: |-
+  Extract the product from the input image and isolate it on a fully transparent background.
+  Output: centered product, crisp silhouette, no halos/fringing.
+  Preserve product geometry and label legibility exactly.
+  Add only light polishing. Do not add a solid backdrop, checkerboard, scenery, or shadow.
+  Do not restyle the product; remove the background and preserve clean alpha transparency.
+bodyZh: |
+  从输入图片中抠出商品，单独放在完全透明的背景上。
+  输出要求：商品居中，轮廓利落，无光晕或毛边。
+  严格保持商品原有的几何形状，以及标签文字原有的清晰可读程度。
+  只做轻微润饰。不要添加纯色背景、棋盘格、场景或阴影。
+  不要改变商品原有的外观风格；去掉背景并保留干净的 Alpha 透明通道。
+titleOriginal: Product Mockups
+source:
+  url: https://github.com/openai/openai-cookbook/blob/dfd760b4de0bd175b51ad05b9b5260c36dfea09c/examples/multimodal/image-gen-models-prompting-guide.ipynb
+  name: openai/openai-cookbook
+author:
+  name: OpenAI（Mandeep Singh、Emre Okcular、Tiger He，据 cookbook registry.yaml）
+  url: https://github.com/openai/openai-cookbook
+license: MIT
+licenseUrl: https://github.com/openai/openai-cookbook/blob/dfd760b4de0bd175b51ad05b9b5260c36dfea09c/LICENSE
+copyright: Copyright (c) 2025 OpenAI
+addedAt: '2026-11-22'
+images:
+- file: oai-product-cutout-1.png
+  alt: 画面中央单独竖立一只橘棕色洗发水瓶，瓶盖与瓶身同色，正面标签印有粗体“SHAMPOO”字样。
+  credit: OpenAI，OpenAI Cookbook，MIT
