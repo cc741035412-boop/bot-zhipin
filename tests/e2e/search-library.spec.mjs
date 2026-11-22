@@ -75,7 +75,7 @@ test.describe('样例站', () => {
         await expect(page.getByTestId('search-item')).toHaveCount(3)
         await expect(page.getByTestId('search-squad')).toHaveCount(1)
         await expect(prompts(page)).toHaveCount(4)
-        await expect(page.locator('.sp-sr')).toHaveText('找到 3 个 Bot，1 支小队，5 条 Prompt（列出前 4 条），3 个 Skill')
+        await expect(page.locator('.sp-sr')).toHaveText('找到 3 个 Bot，1 支小队，7 条 Prompt（列出前 4 条），3 个 Skill')
         const order = await page.locator('[data-testid="search-panel"] [role="option"]').evaluateAll((nodes) => nodes.map((node) => node.dataset.testid))
         expect(order).toEqual([
           ...Array(3).fill('search-item'), 'search-squad', ...Array(4).fill('search-prompt'), ...Array(3).fill('search-skill'),
