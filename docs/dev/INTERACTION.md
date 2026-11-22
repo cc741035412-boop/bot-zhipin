@@ -29,7 +29,7 @@
 ### Prompt / Skills：找条目、判定授权、复制或去出处
 
 - 「Bot / Prompt / Skills」是品牌后的普通链接，详情与所属库共用唯一 `aria-current`。手机只折叠工具，不藏三个入口；320–359px 保留站标和可访问名。
-- 左栏刊头依次放库名、总数、48px 搜索框和按 schema 顺序的分类列表。只省略整库没有的类；查询使计数降到 0 时分类仍可点。先按 NFKC、trim、小写和空白分词匹配标题、原名、类、用途、场景、标签、作者和 agents（每词命中任一字段即可），再交当前类；计数是可见卡数。IME 组合结束后生效。按日期倒序、同日按 slug 的 FNV-1a 32 位散列升序，无排序开关。
+- 左栏刊头依次放库名、总数、48px 搜索框和按 schema 顺序的分类列表。只省略整库没有的类；查询使计数降到 0 时分类仍可点。先按 NFKC、trim、小写和空白分词（汉字和两个字符以上的英文、数字段交界处也断开，「做PPT」等于「做 PPT」；单个字母不断开，「B站」整个比，也认「B 站」）匹配标题、原名、类、用途、场景、标签、作者和 agents（每词命中任一字段即可），再交当前类；计数是可见卡数。IME 组合结束后生效。按日期倒序、同日按 slug 的 FNV-1a 32 位散列升序，无排序开关。
 - `q` 和 `cat` 用 replaceState，详情和返回链接带有效条件；清空恢复裸列表。桌面搜索框共用 `/` 键帽；不在输入、菜单、面板或 IME 中时，`/` 聚焦本库搜索。Esc 只清词；⌘K 仍开全站搜索。未命中在条目区显示搜索砖和空态，「看看全部」清条件并还焦。
 - 1280px 时版心 1140px：280px 刊头、100px 间距、760px 内容。条目不装框，48px 分类砖、标题和一句用途、行尾作者（Prompt 和 Skills 均显示作者名）；每行上下留 28px，发丝线从文字列开始，行高随内容。Skills 整行可进详情；Prompt 的「仅摘要」描边标签保留独立原文外链。分类用同色吉祥物砖；选类和详情才在左上角加淡色光（浅 12%、深 13%），全部时透明。
 - Prompt 只有标题进详情，正文可以选词。用途下默认露出四行，超出才显示「展开」，也可原地收起；【】和 {} 占位符用分类色标出。标题右侧直接复制完整纯文本，有 `bodyZh` 优先用译文，库内搜索也匹配这份正文。手机复制按钮只显示图标；仅摘要条目不放正文和复制按钮。
@@ -204,7 +204,7 @@ VitePress 默认顶栏（`.VPNavBar`）换肤，不另写导航组件，汉堡�
 - **高度**：`clamp(520px, 100svh − 导航让位 − 124px, 800px)`；<680px 是 `clamp(460px, 100svh − 导航让位 − 176px, 620px)`。地板是这块的底边。1440×900 时「本周主推」的标题在首屏底部露头。
 - **站名和搜索框**（`.pit-copy`）：水平居中，顶边在首屏高度的 33% 处（<680px 27%），上方留出让 Bot 落下来的空间。`h1`（站名）圆体 `--bz-fs-display`（`clamp(44px, 5.6vw, 72px)`）/ 700，行高 1.05，字距 −0.02em；视口 1440 时 72px，390 时 44px。站名到搜索框 32px（<680px 24px）。
 - **没有副标题**。首屏的字只有站名和搜索框。站点 tagline（`meta.mjs` 的 `SITE.tagline`）只给页面的 `meta description` 用，界面上不显示。
-- **搜索框**（`SearchTrigger`，`<button data-testid="search-trigger">`）：≥680px **476×51、圆角 12**（窄屏撑满）；`--bz-card` 底、1px `--bz-border-strong`、内高光。左边 16px 的放大镜（`BzIcon`）+ 占位字「搜索」（15px，`--bz-text-3`；`meta.mjs` 的 `SHELF_COPY.searchPlaceholder`，搜索面板的输入框用同一个），右边两个键帽「⌘」「K」（24px 高、圆角 8、12px/600；非苹果设备挂载后显示「Ctrl」；<680px 不显示键帽）。读屏名称是「搜索 Bot」。悬停只把描边加深到 `--bz-border-hover`。点击派发 `window.dispatchEvent(new CustomEvent('bz-search-open'))`，由 `SearchPalette` 打开；关闭后焦点回到这个按钮。
+- **搜索框**（`SearchTrigger`，`<button data-testid="search-trigger">`）：≥680px **476×51、圆角 12**（窄屏撑满）；`--bz-card` 底、1px `--bz-border-strong`、内高光。左边 16px 的放大镜（`BzIcon`）+ 占位字「搜索」（15px，`--bz-text-3`；`meta.mjs` 的 `SHELF_COPY.searchPlaceholder`，搜索面板的输入框用同一个），右边两个键帽「⌘」「K」（24px 高、圆角 8、12px/600；非苹果设备挂载后显示「Ctrl」；<680px 不显示键帽）。读屏名称是「搜索 Bot、Prompt 和 Skills」（决策 71）。悬停只把描边加深到 `--bz-border-hover`。点击派发 `window.dispatchEvent(new CustomEvent('bz-search-open'))`，由 `SearchPalette` 打开；关闭后焦点回到这个按钮。
 - 首屏不放投稿按钮（和导航重复）；`[data-testid="contribute-link"]` 在页尾（§2.5 末尾）。
 - **舞台宽度**：视口宽于 1204px 时舞台**收进版心**——两面墙在版心两边（各离中线 602px，和悬浮导航条同宽），地板线只画在版心里、两端淡出，Bot 往中间收一点，堆成中间高两头矮的小丘。视口不宽于 1204px 时墙在视口外 28px（两边的 Bot 被屏幕边切掉一截），地板线横贯视口。场景层（`.pit-world`、`.pit-floor`）本身铺满视口宽，靠 `.shelf-page` 的 `overflow-x: clip` 不产生横向滚动。
 
@@ -522,6 +522,9 @@ SSR 不访问 window/document/matchMedia；输出 `sample(0)` 静态首帧，挂
 - 分组切换和排序的样子见 §2.4，规则见 §2.5。三种排序的比较函数在 `theme/shelf.ts`：推荐 = `pick` 有值的按序号在前，其余按最热；最热 = heat 降序、再 addedAt 降序、再名字；最新 = addedAt 降序、再名字。默认推荐。「名字」是界面上显示的那个：有中文叫法按中文叫法，没有按原名（§3.4）。
 - 首次热度改变顺序时列表淡入 200ms；之后点击只改数字，不重排，切换排序或刷新才重排。主推是编辑定的，不随热度变。热度不是导入成功数。
 - 搜索面板里 Bot 后面还有一组「小队」，见 §14.6。
+- 输入了字以后，小队后面还有「Prompt」「Skills」两组（各最多 4 条，决策 71）：条目 `[data-testid="search-prompt"]`、`[data-testid="search-skill"]`（带 `data-slug`），32px 头像位里放 28px 的分类砖（`LibraryTile`，吉祥物占 74%），标题 + 一句话用途，右边分类标签用分类色（`library-marks.ts`，浅色、深色同一个颜色；选中行的标签字是「该色 40% 混 ink」）。上下键在 Bot、小队、Prompt、Skills 之间连着走，回车或点击进 `/prompts/<slug>`、`/skills/<slug>`。没输入时不出现这两组；数据第一次打开面板才加载，没到时这两组先不出现、也不显示「没找到」。读屏播报加上「N 条 Prompt」「N 个 Skill」，超过 4 条补「（列出前 4 条 / 个）」。
+- 面板里四组（Bot、小队、Prompt、Skills）都在滚动区里，各是一个 `role="group"`（`aria-label` 是组名，`data-group` 是 bot / squad / prompt / skill）。组名高 32px、`position: sticky` 吸在滚动区顶上，面板实底；每行 `isolation: isolate`，行里的 Bot 名字（`.bz-name` z-index 2）、队长小头像不会压到组名上、也不会隔着组名接住鼠标；滚动区 `scroll-padding-top: 40px`，键盘翻到的条目停在组名下面。
+- 拆词：查询先统一写法（全角转半角、小写），再按空白和「汉字与两个字符以上的英文、数字段（+ # 算在内）的交界」拆词，「做PPT」等于「做 PPT」；单个字母不拆，「B站」「K线」整个当一个词，匹配时再拿去掉空白的文字比一次（「B站」命中「B 站」，不命中 Website）。规则在 `search.ts` 的 `queryWords`、`matchWord`，库页的本库搜索也用它们。收录条目不显示的原名、slug 按词头匹配，整词和驼峰切开的两套都认（PDFs 搜 pdf、ChatGPT 搜 chatgpt 或 gpt 都行），+ 和 # 算词里的字；同一档里只在适用场景里找到的词少的排前面。
 - 搜索：中文叫法和原名都算「名字」（`search.ts` 的 `searchBots`），搜哪个都能找到，分量一样：某个名字以整句查询开头排最前，其次是每个词都在名字里（可以一个词在中文叫法、一个词在原名）。条目里的名字按 §3.4 写成「中文叫法 + 原名」（`small`）。
 - 搜索入口只有首屏搜索框一个按钮（外加快捷键），派发 `bz-search-open`。搜索面板本身（⌘K / Ctrl+K、「/」、键盘操作、读屏播报）由 `SearchPalette.vue` 负责，规格见 LB9 契约；面板颜色全部引用 `--bz-*` token，条目里的小 Bot 身体约 32px。输入框占位字「搜索」（和首屏同一个 `SHELF_COPY.searchPlaceholder`）；一次最多列 8 条，多出来的只写「还有 N 个」；底部的键帽提示（↑↓ 选择、↵ 打开、esc 关闭）保留。
 - 新标签链接有读屏文本「（在新标签页打开）」及 `rel="noopener noreferrer"`。「导入」「一键导入」是按钮，图标用 `BzIcon` 的 `arrow-up-right`（放在文字前面）；作者、技能源码、定时任务这些文字链接沿用后面一个 12px 的「↗」（`ExternalHint`，aria-hidden）。「我要投稿」是站内链接（`/submit`），不带这些。

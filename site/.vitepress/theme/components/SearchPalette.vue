@@ -1,20 +1,23 @@
 <!--
   搜索命令面板：⌘K / Ctrl+K、「/」或 window 事件 bz-search-open 打开。
   关着的时候不渲染任何东西（SSR 也是），所以条目里的 LiveBot 只在打开期间存在。
+  Prompt、Skills 的数据第一次打开时才加载（library-search.data 单独成块，不进首屏 JS）。
 -->
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vitepress'
 import { data as bots } from '../../data/bots.data.mjs'
 import { data as squadData } from '../../data/squads.data.mjs'
 import { SHELF_COPY, SQUAD_COPY } from '../../meta.mjs'
-import { searchBots, searchSquads } from '../search'
+import { searchBots, searchLibrary, searchSquads } from '../search'
 import { displayName } from '../../../../scripts/lib/bot-name.mjs'
 import { avatarColor } from '../avatar'
 import { faceColors } from '../face'
+import { markFor, type Kind } from '../library-marks'
 import BotName from './BotName.vue'
 import BotPortrait from './BotPortrait.vue'
 import SquadStill from './SquadStill.vue'
+import LibraryTile from './LibraryTile.vue'
 
 interface PaletteBot {
   slug: string
@@ -37,12 +40,33 @@ interface PaletteSquad {
   members: { bot: string; name: string; nameZh?: string | null; title: string | null; avatar: string | null; lead: boolean }[]
 }
 
+/** 收录条目（Prompt、Skill）里面板要用的字段，见 data/library-search.data.mjs。 */
+interface PaletteEntry {
+  slug: string
+  title: string
+  titleOriginal?: string
+  name?: string
+  purpose: string
+  category: string
+  author: { name: string }
+  scenarios: string[]
+  tags: string[]
+  agents?: string[]
+  detailUrl: string
+}
+interface PaletteLibrary { prompts: PaletteEntry[]; skills: PaletteEntry[] }
+
 // 一次最多列 8 条：再多就该接着输入，而不是往下翻。小队单独一组，排在 Bot 后面，最多 3 支。
+// 输入了字才有 Prompt、Skills 两组，排在小队后面，各最多 4 条。
 const LIMIT = 8
 const SQUAD_LIMIT = 3
+const LIBRARY_LIMIT = 4
 const LIST_ID = 'bz-search-list'
 const optionId = (slug: string) => `bz-search-option-${slug}`
 const squadOptionId = (slug: string) => `bz-search-squad-${slug}`
+const entryOptionId = (kind: Kind, slug: string) => `bz-search-${kind}-${slug}`
+// 小标题和导航栏（config.mts 的 modules）一致。
+const LIBRARY_TITLES: Record<Kind, string> = { prompt: 'Prompt', skill: 'Skills' }
 const squads = squadData as PaletteSquad[]
 /** 小队条目前面的小合影：队长在前，再带两个队员。 */
 function faces(squad: PaletteSquad) {
@@ -79,26 +103,100 @@ const panel = ref<HTMLElement>()
 const input = ref<HTMLInputElement>()
 const scroller = ref<HTMLElement>()
 
+// Prompt、Skills 的数据：第一次打开面板时 import()，之后一直用这一份。没到之前这两组先不出现，到了再补在最后，
+// 前面的条目和选中项都不动。加载失败就当没有收录条目，下次打开再试。
+const NO_LIBRARY: PaletteLibrary = { prompts: [], skills: [] }
+const library = shallowRef<PaletteLibrary | null>(null)
+const loadingLibrary = ref(false)
+async function loadLibrary() {
+  if (loadingLibrary.value || (library.value && library.value !== NO_LIBRARY)) return
+  loadingLibrary.value = true
+  try {
+    library.value = (await import('../../data/library-search.data.mjs')).data as PaletteLibrary
+  } catch {
+    // 部署后还开着的旧标签页：带 hash 的数据块可能已经没了，改读每次部署都是最新的 /data/index.json。
+    // 两样都失败才算失败。开发时没有这个文件，不退。
+    try {
+      if (!import.meta.env.PROD) throw new Error('开发环境没有 /data/index.json')
+      library.value = await fetchIndex()
+    } catch {
+      library.value = NO_LIBRARY
+    }
+  } finally {
+    loadingLibrary.value = false
+  }
+}
+
+/** /data/index.json 里的一条（字段见那份清单）；只取 Prompt、Skill，映射成面板用的形状。 */
+interface IndexItem {
+  kind?: unknown; slug?: unknown; title?: unknown; titleOriginal?: unknown; name?: unknown; agents?: unknown
+  category?: unknown; purpose?: unknown; scenarios?: unknown; tags?: unknown; author?: unknown; detailUrl?: unknown
+}
+async function fetchIndex(): Promise<PaletteLibrary> {
+  const response = await fetch('/data/index.json')
+  if (!response.ok) throw new Error(`HTTP ${response.status}`)
+  const { items } = (await response.json()) as { items?: unknown }
+  if (!Array.isArray(items)) throw new Error('index.json 没有 items')
+  const text = (value: unknown) => typeof value === 'string' ? value : ''
+  const texts = (value: unknown) => Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+  const pick = (kind: string) => (items as IndexItem[])
+    .filter((item) => item?.kind === kind && text(item.slug) && text(item.title) && text(item.detailUrl))
+    .map((item): PaletteEntry => {
+      const agents = texts(item.agents)
+      return {
+        slug: text(item.slug), title: text(item.title),
+        ...(text(item.titleOriginal) ? { titleOriginal: text(item.titleOriginal) } : {}),
+        ...(text(item.name) ? { name: text(item.name) } : {}),
+        purpose: text(item.purpose), category: text(item.category), author: { name: text(item.author) },
+        scenarios: texts(item.scenarios), tags: texts(item.tags), ...(agents.length ? { agents } : {}),
+        // 清单里是绝对地址（正式域名），面板里用站内路径。
+        detailUrl: new URL(text(item.detailUrl), location.origin).pathname,
+      }
+    })
+  return { prompts: pick('prompt'), skills: pick('skill') }
+}
+
 const matches = computed(() => searchBots(shelf, query.value, Infinity))
 const results = computed(() => matches.value.slice(0, LIMIT))
 const more = computed(() => matches.value.length - results.value.length)
 const squadResults = computed(() => searchSquads(squads, query.value, SQUAD_LIMIT))
 const typed = computed(() => query.value.trim() !== '')
-// 键盘上下键走的是同一串：先 Bot，后小队。
+const botTitle = computed(() => typed.value ? 'Bot' : '全部 Bot')
+// 输入了字、收录数据还没到（或失败后正在重试）：先不下「没找到」的结论，免得数据一到空状态又换成结果。
+const libraryPending = computed(() => typed.value && (!library.value || loadingLibrary.value))
+const promptMatches = computed(() => searchLibrary(library.value?.prompts ?? [], query.value, Infinity))
+const skillMatches = computed(() => searchLibrary(library.value?.skills ?? [], query.value, Infinity))
+/** 收录的两组，start 是这组第一条在整串选项里的位置。 */
+const libraryGroups = computed(() => {
+  let start = results.value.length + squadResults.value.length
+  return (['prompt', 'skill'] as const).map((kind) => {
+    const items = (kind === 'prompt' ? promptMatches : skillMatches).value.slice(0, LIBRARY_LIMIT)
+    const group = { kind, title: LIBRARY_TITLES[kind], items, start }
+    start += items.length
+    return group
+  })
+})
+// 键盘上下键走的是同一串：Bot、小队、Prompt、Skills。
 const options = computed(() => [
   ...results.value.map((bot) => ({ id: optionId(bot.slug), url: bot.detailUrl })),
   ...squadResults.value.map((squad) => ({ id: squadOptionId(squad.slug), url: squad.detailUrl })),
+  ...libraryGroups.value.flatMap((group) => group.items.map((entry) => ({ id: entryOptionId(group.kind, entry.slug), url: entry.detailUrl }))),
 ])
 const activeId = computed(() => options.value[active.value]?.id)
 const emptyText = computed(() => typed.value ? '没找到，换个词试试' : '货架上还没有 Bot')
+const showEmpty = computed(() => !options.value.length && !libraryPending.value)
 /** 念给读屏用户听的结果数。这个节点一直在，只换文字，读屏才会稳定播报。 */
 const status = computed(() => {
   const total = matches.value.length
   const teams = squadResults.value.length
-  if (!total && !teams) return emptyText.value
+  const prompts = promptMatches.value.length
+  const skills = skillMatches.value.length
+  if (!total && !teams && !prompts && !skills) return libraryPending.value ? '' : emptyText.value
   const parts = [
     ...(total ? [`${total} 个 Bot${more.value > 0 ? `（列出前 ${LIMIT} 个）` : ''}`] : []),
     ...(teams ? [`${teams} 支小队`] : []),
+    ...(prompts ? [`${prompts} 条 Prompt${prompts > LIBRARY_LIMIT ? `（列出前 ${LIBRARY_LIMIT} 条）` : ''}`] : []),
+    ...(skills ? [`${skills} 个 Skill${skills > LIBRARY_LIMIT ? `（列出前 ${LIBRARY_LIMIT} 个）` : ''}`] : []),
   ]
   return `${typed.value ? '找到' : '共'} ${parts.join('，')}`
 })
@@ -108,6 +206,11 @@ function tint(bot: PaletteBot) {
   if (bot.avatar) return undefined
   const { light, dark } = faceColors(avatarColor(bot.slug))
   return { '--sp-tint-light': light, '--sp-tint-dark': dark }
+}
+/** 收录条目的分类标签和砖底柔光用分类色，和收录库页面同一套（library-marks.ts）。 */
+function entryTint(kind: Kind, entry: PaletteEntry) {
+  const { color } = markFor(kind, entry.category)
+  return { '--sp-tint-light': color, '--sp-tint-dark': color, '--bz-bot-color': color }
 }
 
 let opener: HTMLElement | null = null
@@ -133,6 +236,7 @@ function show() {
   active.value = 0
   unlock = lockScroll()
   open.value = true
+  loadLibrary()
   void nextTick(() => input.value?.focus({ preventScroll: true }))
 }
 
@@ -266,7 +370,7 @@ onBeforeUnmount(() => {
 <template>
   <Teleport v-if="open" to="body">
     <div
-      class="sp" data-testid="search-palette" role="dialog" aria-modal="true" aria-label="搜索 Bot"
+      class="sp" data-testid="search-palette" role="dialog" aria-modal="true" aria-label="搜索 Bot、Prompt 和 Skills"
       @pointerdown="onBackdropDown" @click="onBackdropClick"
     >
       <div ref="panel" class="sp-panel" data-testid="search-panel" @mousedown="keepFocus">
@@ -278,7 +382,7 @@ onBeforeUnmount(() => {
           </span>
           <input
             ref="input" v-model="query" class="sp-input" data-testid="search-input" type="text"
-            role="combobox" aria-label="搜索 Bot" aria-expanded="true" aria-haspopup="listbox" aria-autocomplete="list"
+            role="combobox" aria-label="搜索 Bot、Prompt 和 Skills" aria-expanded="true" aria-haspopup="listbox" aria-autocomplete="list"
             :aria-controls="LIST_ID" :aria-activedescendant="activeId"
             :placeholder="SHELF_COPY.searchPlaceholder"
             autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go"
@@ -286,31 +390,33 @@ onBeforeUnmount(() => {
           <button type="button" class="sp-esc" aria-label="关闭搜索" @click="hide"><kbd class="sp-key">esc</kbd></button>
         </div>
 
-        <!-- 小标题在滚动区外面：列表滚动时它不会被切掉半行。 -->
-        <div v-if="results.length" class="sp-heading">{{ typed ? 'Bot' : '全部 Bot' }}</div>
+        <!-- 四组（Bot、小队、Prompt、Skills）都在滚动区里，组名吸在滚动区顶上：滚到哪组，顶上就是哪组的名字。 -->
         <div ref="scroller" class="sp-scroll">
           <div :id="LIST_ID" class="sp-list" role="listbox" :aria-label="typed ? '结果' : '全部 Bot 和小队'">
-            <div
-              v-for="(bot, index) in results" :id="optionId(bot.slug)" :key="bot.slug"
-              class="sp-item" data-testid="search-item" :data-slug="bot.slug" :style="tint(bot)"
-              role="option" :aria-selected="index === active"
-              @pointermove="onHover($event, index)" @click="choose(index)"
-            >
-              <span class="sp-face" aria-hidden="true">
-                <BotPortrait :bot="bot" :rest="index === active ? 'wide' : 'idle'" />
-              </span>
-              <span class="sp-text">
-                <span data-part="name"><BotName :bot="bot" small /></span>
-                <span data-part="tagline">{{ bot.tagline }}</span>
-              </span>
-              <span class="sp-tag">{{ bot.category }}</span>
-              <span class="sp-enter" aria-hidden="true">
-                <kbd class="sp-key"><svg class="sp-glyph" viewBox="0 0 16 16"><path :d="GLYPHS.enter" /></svg></kbd>
-              </span>
+            <div v-if="results.length" class="sp-group" role="group" :aria-label="botTitle" data-group="bot">
+              <div class="sp-heading" aria-hidden="true">{{ botTitle }}</div>
+              <div
+                v-for="(bot, index) in results" :id="optionId(bot.slug)" :key="bot.slug"
+                class="sp-item" data-testid="search-item" :data-slug="bot.slug" :style="tint(bot)"
+                role="option" :aria-selected="index === active"
+                @pointermove="onHover($event, index)" @click="choose(index)"
+              >
+                <span class="sp-face" aria-hidden="true">
+                  <BotPortrait :bot="bot" :rest="index === active ? 'wide' : 'idle'" />
+                </span>
+                <span class="sp-text">
+                  <span data-part="name"><BotName :bot="bot" small /></span>
+                  <span data-part="tagline">{{ bot.tagline }}</span>
+                </span>
+                <span class="sp-tag">{{ bot.category }}</span>
+                <span class="sp-enter" aria-hidden="true">
+                  <kbd class="sp-key"><svg class="sp-glyph" viewBox="0 0 16 16"><path :d="GLYPHS.enter" /></svg></kbd>
+                </span>
+              </div>
+              <p v-if="more > 0" class="sp-more" role="presentation">还有 {{ more }} 个</p>
             </div>
-            <p v-if="more > 0" class="sp-more" role="presentation">还有 {{ more }} 个</p>
             <!-- 小队单独一组，排在 Bot 后面；条目前面是一小张合影。 -->
-            <div v-if="squadResults.length" class="sp-group" role="group" :aria-label="SQUAD_COPY.title">
+            <div v-if="squadResults.length" class="sp-group" role="group" :aria-label="SQUAD_COPY.title" data-group="squad">
               <div class="sp-heading" aria-hidden="true">{{ SQUAD_COPY.title }}</div>
               <div
                 v-for="(squad, index) in squadResults" :id="squadOptionId(squad.slug)" :key="squad.slug"
@@ -331,8 +437,32 @@ onBeforeUnmount(() => {
                 </span>
               </div>
             </div>
+            <!-- Prompt、Skills 各一组，排在小队后面；条目前面是收录库同款的分类砖，标签用分类色。 -->
+            <template v-for="group in libraryGroups" :key="group.kind">
+              <div v-if="group.items.length" class="sp-group" role="group" :aria-label="group.title" :data-group="group.kind">
+                <div class="sp-heading" aria-hidden="true">{{ group.title }}</div>
+                <div
+                  v-for="(entry, index) in group.items" :id="entryOptionId(group.kind, entry.slug)" :key="entry.slug"
+                  class="sp-item" :data-testid="`search-${group.kind}`" :data-slug="entry.slug" :style="entryTint(group.kind, entry)"
+                  role="option" :aria-selected="group.start + index === active"
+                  @pointermove="onHover($event, group.start + index)" @click="choose(group.start + index)"
+                >
+                  <span class="sp-mark" aria-hidden="true">
+                    <LibraryTile :kind="group.kind" :category="entry.category" :size="28" />
+                  </span>
+                  <span class="sp-text">
+                    <span data-part="name">{{ entry.title }}</span>
+                    <span data-part="tagline">{{ entry.purpose }}</span>
+                  </span>
+                  <span class="sp-tag">{{ entry.category }}</span>
+                  <span class="sp-enter" aria-hidden="true">
+                    <kbd class="sp-key"><svg class="sp-glyph" viewBox="0 0 16 16"><path :d="GLYPHS.enter" /></svg></kbd>
+                  </span>
+                </div>
+              </div>
+            </template>
           </div>
-          <div v-if="!options.length" class="sp-empty" data-testid="search-empty">
+          <div v-if="showEmpty" class="sp-empty" data-testid="search-empty">
             <span class="sp-sleeper" aria-hidden="true"><BotPortrait :bot="SLEEPER" rest="sleep" /></span>
             <span>{{ emptyText }}</span>
           </div>
@@ -442,15 +572,31 @@ onBeforeUnmount(() => {
   min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scroll-padding-block: 8px;
+  /* 顶上留出吸顶组名的高度（32px）：键盘翻到的条目不会藏在组名下面。 */
+  scroll-padding: 40px 0 8px;
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--bz-ink) 18%, transparent) transparent;
 }
-.sp-heading { flex: none; padding: 14px 18px 6px; font-size: 12px; line-height: 16px; color: var(--bz-text-3); }
-.sp-list { padding: 0 8px 8px; }
+/* 组名：高 32px，吸在滚动区顶上，实底盖住滚过去的条目；下一组的组名到了会把它顶走。 */
+.sp-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 10px 10px 6px;
+  background: var(--bz-card);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--bz-text-3);
+}
+.sp-list { padding: 4px 8px 8px; }
 
+/*
+  每一行自成一层（isolation）：行里 Bot 名字（.bz-name 的 z-index 2）、队长小头像（z-index 1）只在行内比高低，
+  不会压到吸顶的组名上，也不会隔着组名接住鼠标。
+*/
 .sp-item {
   --sp-tint: var(--sp-tint-light);
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -486,20 +632,30 @@ onBeforeUnmount(() => {
   font: 600 11px/20px var(--bz-font-display);
   white-space: nowrap;
 }
+/*
+  选中（悬停）行底色又加深一层，深色主题下二级灰字压在亮色（琥珀、薄荷绿）的标签底上不到 4.5。
+  照 §1b 标签的规矩，字换成「该色 40% 混 ink」：浅色下是深一档的同色，深色下是浅一档的同色。
+*/
+.sp-item[aria-selected="true"] .sp-tag { color: color-mix(in srgb, var(--sp-tint, var(--bz-text-3)) 40%, var(--bz-ink)); }
 /* 「↵」的位置一直留着，选中项换来换去时分类标签不会左右跳。 */
 .sp-enter { flex: none; display: grid; visibility: hidden; }
 .sp-item[aria-selected="true"] .sp-enter { visibility: visible; }
 
 .sp-more { margin: 0; padding: 6px 10px 4px; font-size: 12px; line-height: 16px; color: var(--bz-text-3); }
-/* 小队那一组：小标题在列表里面，和上面那组隔开一点 */
-.sp-group > .sp-heading { padding: 10px 10px 6px; }
-.sp-list > .sp-group:first-child > .sp-heading { padding-top: 14px; }
 /* 小合影：32px 的头像位里放三只小 Bot，队长在前面正中，两个队员在后面左右 */
 .sp-team :deep(.squad-still) { position: absolute; width: 18px; height: 18px; pointer-events: none; }
 .sp-team :deep(.squad-still:nth-child(1)) { z-index: 1; left: 5px; top: 12px; width: 22px; height: 22px; }
 .sp-team :deep(.squad-still:nth-child(2)) { left: -2px; top: 0; }
 .sp-team :deep(.squad-still:nth-child(3)) { left: 16px; top: 0; }
 .sp-team :deep(.squad-still:nth-child(1):last-child) { left: 2px; top: 2px; width: 28px; height: 28px; }
+/*
+  Prompt、Skills 的分类砖：28px 的砖（砖的固定档位）居中放在 32px 的头像位里，方砖比圆头像显大，
+  小一号看起来和 Bot 一样重。吉祥物占砖的 74%，和收录库左栏的分类砖一样。
+*/
+.sp-mark { flex: none; display: grid; place-items: center; width: 32px; height: 32px; }
+.sp-mark :deep(.bz-tile > svg) { width: 74%; height: 74%; }
+.sp-item[aria-selected="true"] .sp-mark { animation: sp-hop 360ms var(--bz-ease-pop); }
+.sp-item[aria-selected="true"] .sp-mark :deep(.bz-tile::before) { opacity: 1; }
 .sp-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 16px 16px 36px; color: var(--bz-text-2); }
 /*
   睡着的 Bot 是一颗上下弹的小球，一有输入会惊醒成「!」再睡回去。
@@ -552,9 +708,8 @@ onBeforeUnmount(() => {
 
 @media (max-width: 480px) {
   .sp-field { padding: 0 8px 0 14px; gap: 10px; }
-  .sp-heading, .sp-foot { padding-inline: 14px; }
-  .sp-more { padding-inline: 8px; }
-  .sp-group > .sp-heading { padding-inline: 8px; }
+  .sp-foot { padding-inline: 14px; }
+  .sp-more, .sp-heading { padding-inline: 8px; }
   .sp-list { padding-inline: 6px; }
   .sp-item { gap: 10px; padding-inline: 8px; }
 }
@@ -562,7 +717,7 @@ onBeforeUnmount(() => {
   .sp-esc { min-width: 44px; height: 44px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .sp-panel, .sp-item[aria-selected="true"] .sp-face { animation: none; }
+  .sp-panel, .sp-item[aria-selected="true"] .sp-face, .sp-item[aria-selected="true"] .sp-mark { animation: none; }
   /* 减少动效时 LiveBot 停在醒着的静态脸，比小球大得多：画布缩一号，去掉给小球配的影子。 */
   .sp-sleeper :deep(svg) { top: -1px; left: -1px; width: 74px; height: 74px; }
   .sp-sleeper::before { display: none; }

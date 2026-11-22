@@ -454,7 +454,7 @@ test.describe('搜索面板里的小队', () => {
     await expect(item.locator('[data-part="tagline"]')).toHaveText('一个评审员带两个帮手，把周会前后的事包了')
     await expect(item.locator('.sp-tag')).toHaveText(SQUAD_COPY.tag)
     await expect(item.locator('.squad-still')).toHaveCount(3)
-    await expect(page.getByTestId('search-panel').locator('.sp-group .sp-heading')).toHaveText(SQUAD_COPY.title)
+    await expect(page.getByTestId('search-panel').locator('.sp-group[data-group="squad"] .sp-heading')).toHaveText(SQUAD_COPY.title)
     // 排在所有 Bot 后面。
     const tops = await page.locator('[data-testid="search-item"], [data-testid="search-squad"]').evaluateAll((nodes) => nodes.map((node) => node.dataset.testid))
     expect(tops).toEqual(['search-item', 'search-item', 'search-item', 'search-squad'])
