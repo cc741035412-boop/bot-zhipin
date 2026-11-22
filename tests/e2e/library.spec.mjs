@@ -432,6 +432,32 @@ for (const width of [1280, 390])
       await expect(p.locator('.ix-title h1')).toBeVisible()
       await expect(p.getByRole('heading', { name: '示例', exact: true })).toHaveCount(0)
     })
+    if (mobile) fixtureTest('Skill 示例回复卡片不越出示例栏，两边对齐本条请求', async ({ page: p, fixtureURL }) => {
+      await p.emulateMedia({ colorScheme: 'light' })
+      async function edges(el) {
+        await expect(el).toBeVisible()
+        const { x, width, height } = await el.boundingBox()
+        expect(width).toBeGreaterThan(0)
+        expect(height).toBeGreaterThan(0)
+        return { left: x, right: x + width }
+      }
+      for (const [url, indices] of [
+        [fixtureURL + '/skills/demo-pdf-toolkit', [0]],
+        ['/skills/pdf', [1]], ['/skills/human-writing', [0, 1]], ['/skills/explore-data', [0]],
+      ]) {
+        await gotoReady(p, url)
+        const section = p.locator('.ix-examples'), column = await edges(section)
+        await expect(section.locator('.ix-reply')).toHaveCount(indices.length)
+        for (const i of indices) {
+          const item = section.locator('.ix-example').nth(i), label = `${url} 示例 ${i + 1}`
+          const ask = await edges(item.locator('.ix-ask')), reply = await edges(item.locator('.ix-reply'))
+          expect.soft(reply.left, label).toBeGreaterThanOrEqual(column.left - 0.5)
+          expect.soft(reply.right, label).toBeLessThanOrEqual(column.right + 0.5)
+          expect.soft(reply.left, label).toBeCloseTo(ask.left, 0)
+          expect.soft(reply.right, label).toBeCloseTo(ask.right, 0)
+        }
+      }
+    })
     fixtureTest('作者示例：中文复制、折叠、原文与媒体', async ({ page: p, fixtureURL }, info) => {
       await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
       await gotoReady(p, fixtureURL + '/skills/demo-pdf-toolkit')
