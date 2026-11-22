@@ -1,0 +1,29 @@
+slug: openai-cold-outreach
+title: 给潜在客户写第一封介绍信
+titleOriginal: Draft a personalized cold outreach email
+category: 营销
+purpose: 给它对方的公司、职位和产品卖点，它起草一封有针对性的初次联系邮件。
+scenarios:
+- 独立开发者向潜在客户介绍自己的软件
+- 小厂业务员第一次给零售商的采购负责人写信
+tags:
+- 开发信
+- 商务邮件
+- 客户拓展
+lang: en
+body: |-
+  Write a short, compelling cold email to a [job title] at [company name] introducing our product. Use the background below to customize it. Background: [insert value props or ICP info]. Format it in email-ready text.
+bodyZh: |
+  给【公司名】的【职位】写一封简短、有吸引力的初次联系邮件，介绍我们的产品。根据以下背景，为这位收件人定制邮件内容。背景：【产品卖点或理想客户特征】。请按电子邮件的格式写出完整文本。
+summary: 第一次给不认识的人写信，关键是说清产品和对方有什么关系。它根据收件人的公司、职位，以及你提供的卖点或客户特征来写，把介绍压在一封短邮件里，而不是列一串写信建议。
+usage: 在对话式 AI 里，把【职位】换成收件人的职位，【公司名】换成对方公司名，【产品卖点或理想客户特征】换成产品能带来的具体好处或理想客户的特征。补上产品名称、与该岗位相关的用途，以及希望对方下一步做什么。发送前核对公司、称呼和产品说法，删掉对收件人需求的无根据推测。
+source:
+  url: https://web.archive.org/web/20261030065324/https://academy.openai.com/public/clubs/work-users-ynjqu/resources/use-cases-sales
+  name: OpenAI Academy（Wayback 存档）
+author:
+  name: OpenAI
+  url: https://academy.openai.com/
+license: 未声明
+licenseUrl: https://openai.com/policies/terms-of-use/
+copyright: 版权归原作者，原页未声明许可
+addedAt: '2026-11-22'

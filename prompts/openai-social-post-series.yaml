@@ -1,0 +1,30 @@
+slug: openai-social-post-series
+title: 把一次宣传写成三条系列帖
+titleOriginal: Create a social post series
+category: 营销
+purpose: 给它活动、新品或重要进展的详情，它写三条系列帖，并为每条建议配图。
+scenarios:
+- 学生社团为校园市集准备系列宣传帖
+- 手作店主给新品写帖子、挑配图
+- 作者在个人账号分享新书出版的消息
+tags:
+- 社交媒体
+- 系列帖
+- 配图建议
+lang: en
+body: |-
+  Draft a 3-post social media series promoting [event, product, or milestone]. Use this background for context: [paste details]. Each post should include copy and a suggested visual description.
+bodyZh: |
+  起草一组共 3 条的社交媒体帖子，宣传【活动、产品或重要进展】。请参考以下背景信息：【宣传详情】。每条帖子都要写出文案，并描述建议搭配的画面。
+summary: 同一件事要连发三条，难的是既围绕一个主题，又不把同一段话发三遍。这条提示词把三条当作一组来写，每条都给出正文，再描述适合搭配什么画面，方便你准备素材。
+usage: 在【活动、产品或重要进展】填要宣传的事项，在【宣传详情】填具体信息，补上发布平台、读者、已确定的日期和手头的图片素材，一起发给对话式 AI。核对三条的名称、日期和参与方式是否准确一致，再看各条有没有重复、建议的画面是否符合实物或现场情况。
+source:
+  url: https://web.archive.org/web/20261030065318/https://academy.openai.com/public/clubs/work-users-ynjqu/resources/use-cases-marketing
+  name: OpenAI Academy（Wayback 存档）
+author:
+  name: OpenAI
+  url: https://academy.openai.com/
+license: 未声明
+licenseUrl: https://openai.com/policies/terms-of-use/
+copyright: 版权归原作者，原页未声明许可
+addedAt: '2026-11-22'
