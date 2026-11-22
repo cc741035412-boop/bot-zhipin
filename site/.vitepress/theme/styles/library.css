@@ -92,10 +92,21 @@
   display: inline-flex; align-items: center; gap: var(--bz-sp-1); padding: var(--bz-sp-2) 0; border-radius: var(--bz-r-control);
   font-size: var(--bz-fs-sm); font-weight: 600; color: var(--bz-text-3);
 }
+.ix-row:has(.ix-prompt) { scroll-margin-top: var(--vp-nav-height); }
+.ix-prompt :is(.copy, .ix-snip-toggle):not(:focus-visible) { outline: none; }
+.ix-snip-toolbar {
+  position: sticky; bottom: var(--bz-sp-4); display: flex; align-items: center; justify-content: space-between;
+  margin-top: var(--bz-sp-3); padding: var(--bz-sp-2) var(--bz-sp-3); border: 1px solid var(--bz-border); border-radius: var(--bz-r-card);
+  background: var(--bz-nav-bg); backdrop-filter: blur(var(--bz-sp-4)); box-shadow: var(--bz-shadow-float);
+}
 .ix-snip-toggle:hover { color: var(--bz-ink); }
 .ix-snip-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
 @media (max-width: 640px) {
-  .ix .ix-prompt .copy { min-width: 44px; min-height: 44px; }
+  .ix .ix-prompt .bz-btn.copy {
+    --copy-size: calc(var(--bz-sp-6) + var(--bz-sp-2));
+    width: var(--copy-size); height: var(--copy-size); min-width: 0; min-height: 0; padding: 0; background: var(--bz-glass);
+  }
+  .ix .ix-prompt .copy.copied { color: var(--bz-success); border-color: var(--bz-success); background: color-mix(in srgb, var(--bz-success) 16%, var(--bz-glass)); }
   .ix-prompt .copy [role="status"] { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 }
 

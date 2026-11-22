@@ -1,12 +1,23 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import BzIcon from './BzIcon.vue'
+import LibraryCopy from './LibraryCopy.vue'
 
 const props = defineProps<{ text: string; id: string }>()
 // 两种片段都只插值成文本节点，SSR 时由 Vue 转义；绝不把正文当 HTML 解析。
-const parts = computed(() => props.text.split(/(【[^【】\n]+】|\{[^{}\n]+\})/u))
+const parts = computed(() => props.text.split(/(【[^【】\n]+】|\{[^{}\n]+\}|<(?=[^<>\r\n\u2028\u2029]{1,30}>)[^<>\r\n\u2028\u2029]*\p{Script=Han}[^<>\r\n\u2028\u2029]*>)/u))
 const content = ref<HTMLElement>()
 const expanded = ref(false), overflows = ref(false), fullHeight = ref(0)
+const openButton = ref<HTMLButtonElement>(), closeButton = ref<HTMLButtonElement>()
+async function toggle() {
+  const row = content.value?.closest('article')
+  const returnToRow = expanded.value && row && row.getBoundingClientRect().top < 0
+  expanded.value = !expanded.value
+  await nextTick()
+  const trigger = expanded.value ? closeButton : openButton
+  trigger.value?.focus({ preventScroll: true })
+  if (returnToRow) row.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' })
+}
 let observer: ResizeObserver | undefined
 onMounted(() => {
   const el = content.value!
@@ -25,8 +36,12 @@ onBeforeUnmount(() => observer?.disconnect())
     <div class="ix-snip-window" :class="{ faded: overflows && !expanded }" :style="{ maxHeight: expanded ? `${fullHeight}px` : undefined }">
       <div :id="id" ref="content" class="ix-snip-text"><template v-for="(part, n) in parts" :key="n"><mark v-if="n % 2">{{ part }}</mark><template v-else>{{ part }}</template></template></div>
     </div>
+    <div v-if="expanded" class="ix-snip-toolbar">
+      <button ref="closeButton" type="button" class="ix-snip-toggle" aria-expanded="true" :aria-controls="id" @click="toggle">收起<BzIcon name="chevron-down" :size="14" /></button>
+      <LibraryCopy class="sm" compact :value="text" :target="id" />
+    </div>
   </div>
-  <button v-if="overflows" type="button" class="ix-snip-toggle" :aria-expanded="expanded" :aria-controls="id" @click="expanded = !expanded">
-    {{ expanded ? '收起' : '展开' }}<BzIcon name="chevron-down" :size="14" />
+  <button v-if="overflows && !expanded" ref="openButton" type="button" class="ix-snip-toggle" aria-expanded="false" :aria-controls="id" @click="toggle">
+    展开<BzIcon name="chevron-down" :size="14" />
   </button>
 </template>
