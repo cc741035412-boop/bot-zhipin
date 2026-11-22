@@ -22,3 +22,16 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 指定周报是写给高管团队的，得到一份汇总进展、决策、风险和下一阶段里程碑的摘要。
+    lang: en
+    ask: Weekly update for the exec team
+    reply: "[Generates executive summary with progress, decisions, risks, and next milestones]"
+    askZh: 给高管团队写一份周报。
+    replyZh: "[生成面向高管的摘要，列出进展、决策、风险和接下来的里程碑]"
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/README.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）

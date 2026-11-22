@@ -22,3 +22,43 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 贴入销售数据，得到一份能按地区和时段筛选的 HTML 看板，可在浏览器里查看月收入和热销产品。
+    lang: en
+    ask: |-
+      /build-dashboard Create a sales dashboard with monthly revenue, top products,
+           and regional breakdown. Here's the data: [pastes CSV]
+    reply: |-
+      [Generates self-contained HTML file]
+             → [Includes interactive Chart.js visualizations]
+             → [Adds dropdown filters for region and time period]
+             → [Opens in browser for review]
+    askZh: |-
+      /build-dashboard 做一份销售看板，展示月收入、热销产品
+           和各地区的销售情况。数据在这里：[pastes CSV]
+    replyZh: |-
+      [生成可独立使用的 HTML 文件]
+             → [包含用 Chart.js 绘制的交互式图表]
+             → [添加地区和时段下拉筛选框]
+             → [在浏览器中打开以供查看]
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/README.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）
+  - caption: 贴入客服工单数据，请它做一份看板，按优先级统计工单量，并展示响应时长趋势和解决率。
+    lang: en
+    ask: /build-dashboard Here's our support ticket data [pastes CSV]. Build a dashboard showing volume by priority, response time trends, and resolution rates.
+    askZh: /build-dashboard 这是我们的客服工单数据 [pastes CSV]。请做一份看板，展示各优先级的工单量、响应时长的变化趋势和工单解决率。
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/skills/build-dashboard/SKILL.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）
+  - caption: 请它用样例数据做一份 SaaS 高管看板模板，把收入、客户流失、新客和净推荐值放在一起看。
+    lang: en
+    ask: /build-dashboard Create a template executive dashboard for a SaaS company showing MRR, churn, new customers, and NPS. Use sample data.
+    askZh: /build-dashboard 为一家 SaaS 公司的管理层做一份看板模板，展示月度经常性收入（MRR）、客户流失情况、新增客户和净推荐值（NPS）。用样例数据。
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/skills/build-dashboard/SKILL.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）

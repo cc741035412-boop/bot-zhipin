@@ -99,6 +99,11 @@ it('示例数量、字段、翻译和图片引用', () => {
   for (const fields of [{}, { images: [] }, { lang: 'en', ask: 'Go' }, { lang: 'en', reply: 'Done' }, { ask: '请求', askZh: '请求' }, { reply: '产出', replyZh: '产出' }, { images: [{ ...image, file: 'missing.png' }] }, { images: [{ ...image, file: '../demo-blue.png' }] }, { images: [{ ...image, alt: 'blue' }] }, { images: Array(5).fill(image) }, { ask: 'a'.repeat(3001) }, { reply: 'r'.repeat(6001) }, { video: 'http://example.com' }, { file: 'local' }, { ask: '请求', caption: 'No Chinese' }, { ask: '请求', rights: '' }, { ask: '请求', source: {} }]) {
     expect(check({ ...base, ...fields }).length).toBeGreaterThan(0)
   }
+  for (const key of ['ask', 'reply']) {
+    const command = { ...base, lang: 'en', [key]: ' /start  \n\n/next' }
+    expect(check(command)).toEqual([])
+    expect(check({ ...command, [key]: `${command[key]}\nSummarize the notes.` })).toContainEqual(at(skill, `第 1 个示例 · ${key}Zh`, '英文原文缺少译文'))
+  }
   expect(check()).not.toEqual([])
   expect(check(...Array(4).fill({ ...base, ask: '目录' }))).not.toEqual([])
 })

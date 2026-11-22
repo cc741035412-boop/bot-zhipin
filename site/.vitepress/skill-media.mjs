@@ -1,10 +1,10 @@
 import { lstatSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import sharp from 'sharp'
+import { imageSizeFromFile } from 'image-size/fromFile'
 import { SKILLS_DIR } from '../../scripts/lib/load-prompts-skills.mjs'
 import { schema } from '../../scripts/lib/validate/generated/skill-schema.mjs'
 
-const prefix = '/library/skills/'
+const prefix = '/media/skills/'
 const directory = join(SKILLS_DIR, 'media')
 const valid = new RegExp(schema.properties.examples.items.properties.images.items.properties.file.pattern)
 const stat = path => lstatSync(path, { throwIfNoEntry: false })
@@ -18,12 +18,12 @@ export async function sizeExamples(skill) {
   for (const example of skill.examples ?? []) for (const image of example.images ?? []) {
     const path = imagePath(image.file)
     if (!path) throw Error(`skills/${skill.slug}.yaml: 找不到 media/${image.file}`)
-    const { width, height } = await sharp(path).metadata()
+    const { width, height } = await imageSizeFromFile(path)
     Object.assign(image, { width, height })
   }
   return skill
 }
-// Dev serves only its own library. Never stage fixture assets in shared site/public.
+// Dev serves only its own media. Never stage fixture assets in shared site/public.
 export function skillMedia() {
   let ssr = false
   return {

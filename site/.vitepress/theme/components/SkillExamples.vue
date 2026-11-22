@@ -5,7 +5,7 @@ import ExampleText from './ExampleText.vue'
 import LibraryCopy from './LibraryCopy.vue'
 import LibrarySource from './LibrarySource.vue'
 defineProps<{ examples: NonNullable<LibraryItem['examples']> }>()
-const imageUrl = (file: string) => `/library/skills/${file}`
+const imageUrl = (file: string) => `/media/skills/${file}`
 </script>
 <template>
   <section class="ix-sec ix-examples"><header><h2>示例</h2></header>

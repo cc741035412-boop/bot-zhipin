@@ -48,7 +48,7 @@ function checkExamples(entry, say) {
       issue('内容', '没有可展示的示例内容', '至少填写 ask、reply、images、video 或 file 之一。')
     for (const key of ['ask', 'reply']) {
       const zh = `${key}Zh`
-      if (example.lang === 'en' && filled(example[key]) && !filled(example[zh])) issue(zh, '英文原文缺少译文', `在 ${zh} 填写本站中文译文。`)
+      if (example.lang === 'en' && filled(example[key]) && example[key].split(/\r?\n/).some(line => line.trim() && !/^\s*\/\S+\s*$/.test(line)) && !filled(example[zh])) issue(zh, '英文原文缺少译文', `在 ${zh} 填写本站中文译文。`)
       if (zh in example && (example.lang === 'zh' || !filled(example[key]))) issue(zh, '译文没有对应的英文原文', `删掉 ${zh}，或补上相应的英文原文并核对 lang。`)
     }
     if (Array.isArray(example.images)) for (const image of example.images) {

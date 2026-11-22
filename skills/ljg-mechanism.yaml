@@ -29,3 +29,19 @@ author:
 license: MIT
 licenseUrl: https://github.com/lijigang/ljg-skills/blob/76b5fb9b657f420287a421737a3a9778c9e53379/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 用机制分析追问：AI 降低了创作难度，为什么创作者的收入没跟着涨？
+    lang: zh
+    ask: /ljg-mechanism AI 让创作容易了，为什么收入没有同步增长？
+    source:
+      url: https://raw.githubusercontent.com/lijigang/ljg-skills/76b5fb9b657f420287a421737a3a9778c9e53379/skills/ljg-mechanism/SKILL.md
+      name: lijigang/ljg-skills
+    rights: MIT（lijigang/ljg-skills）
+  - caption: 请它按四步框架分析，为什么群里没人统一指挥，提问仍能找到回答者。
+    lang: zh
+    ask: 没人统一指挥，为什么群里的问题仍能找到回答者？走一遍这个框架。
+    source:
+      url: https://raw.githubusercontent.com/lijigang/ljg-skills/76b5fb9b657f420287a421737a3a9778c9e53379/skills/ljg-mechanism/SKILL.md
+      name: lijigang/ljg-skills
+    rights: MIT（lijigang/ljg-skills）

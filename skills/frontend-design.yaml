@@ -22,3 +22,40 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/frontend-design/LICENSE.txt
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 用一句话指定应用类型和页面用途，请它设计音乐流媒体应用的仪表盘。
+    lang: en
+    ask: Create a dashboard for a music streaming app
+    askZh: 给音乐流媒体应用做一个仪表盘
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/anthropics/claude-plugins-official/73c8cf3ea7e296057b467990f2f5d61b4c922260/plugins/frontend-design/README.md
+      name: anthropics/claude-plugins-official
+    rights: Apache-2.0（anthropics/claude-plugins-official 的 frontend-design 插件目录 LICENSE）
+  - caption: 用同一句需求生成项目管理工具的落地页，对比启用前端设计技能前后的布局、字体和配色。
+    lang: en
+    images:
+      - file: frontend-design-2-1.png
+        alt: 未启用技能的 TaskFlow 落地页采用浅色双栏布局，左边是标题和按钮，右边是写有「仪表盘预览」的蓝紫色占位框。
+      - file: frontend-design-2-2.png
+        alt: 启用技能后的 Momentum 落地页采用深色背景，居中的大标题末行是彩色渐变字，下方是试用和观看演示按钮。
+    source:
+      url: https://claude.com/resources/articles/improving-frontend-design-through-skills
+      name: Anthropic 官网
+    rights: © 2026 Anthropic PBC
+  - caption: 给项目管理工具做 SaaS 落地页，加入视觉设计提示词后，首屏从浅色双栏变为深底居中的大标题。
+    lang: en
+    ask: Create a SaaS landing page for a project management tool
+    reply: "![Enhanced output with distilled aesthetics prompt](../images/frontend_aesthetics/distilled_saas.png)"
+    askZh: 为一款项目管理工具做一个 SaaS 落地页
+    replyZh: "![使用提炼后的视觉设计提示词生成的改进版页面](../images/frontend_aesthetics/distilled_saas.png)"
+    images:
+      - file: frontend-design-3-1.jpg
+        alt: TaskFlow 首屏左侧是项目管理标语、产品说明和两个按钮，右侧是蓝紫色预览框，下方露出功能介绍标题。
+      - file: frontend-design-3-2.jpg
+        alt: Momentum 首屏把三行粗体标题放在深色背景中央，最后一行从青色渐变到橙色，试用和演示按钮并列在下方。
+    source:
+      url: https://raw.githubusercontent.com/anthropics/claude-cookbooks/8ad5de647d4f0f50c95d74aabc8aa20a3f70cdd3/coding/prompting_for_frontend_aesthetics.ipynb
+      name: anthropics/claude-cookbooks
+    rights: MIT（anthropics/claude-cookbooks）

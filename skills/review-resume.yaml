@@ -29,3 +29,24 @@ author:
 license: MIT
 licenseUrl: https://github.com/phuryn/pm-skills/blob/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 附上职位描述，请它审阅产品经理简历，并针对这个岗位调整内容。
+    lang: en
+    ask: Review my PM resume and tailor it to the attached job description
+    askZh: 帮我看看我的产品经理简历，对照附件里的职位描述改一改
+    images:
+      - file: review-resume-1-1.png
+        alt: 三栏示例图左栏标为「技能」，输入框里请求按所附职位描述修改产品经理简历；另两栏是写产品需求文档和上线前审查代码的命令。
+    source:
+      url: https://raw.githubusercontent.com/phuryn/pm-skills/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/README.md
+      name: phuryn/pm-skills
+    rights: MIT（phuryn/pm-skills）
+  - caption: 附上 PDF 简历，请它对照产品经理简历的十条写作准则逐项点评。
+    lang: en
+    ask: Review my PM resume against best practices [attach PDF]
+    askZh: 请对照最佳实践审阅我的产品经理简历 [附上 PDF]
+    source:
+      url: https://raw.githubusercontent.com/phuryn/pm-skills/9af7bfd0bc47fdad43c2eaa7a43cd13918e7aaef/README.md
+      name: phuryn/pm-skills
+    rights: MIT（phuryn/pm-skills）

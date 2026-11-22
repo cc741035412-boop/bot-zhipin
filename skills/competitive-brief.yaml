@@ -22,3 +22,16 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 把自家的新用户引导流程与两家竞品作对比，得到一份列出功能差异、优劣势及战略影响的简报。
+    lang: en
+    ask: Compare our onboarding flow to [competitor A] and [competitor B]
+    reply: "[Generates brief with feature comparison, strengths/weaknesses, and strategic implications]"
+    askZh: 请把我们的新用户引导流程和 [competitor A]、[competitor B] 的流程比一比。
+    replyZh: "[生成简报，列出功能对比、优劣势以及这些差异对战略的影响]"
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/README.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）

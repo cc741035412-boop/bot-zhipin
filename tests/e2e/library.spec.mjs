@@ -301,10 +301,30 @@ for (const width of [1280, 390])
       await expect(small).toBeVisible()
       expect(await small.textContent()).toBe(i.copyright)
     })
-    fixtureTest('作者示例：中文复制、折叠、原文与媒体', async ({ page: p, fixtureURL }, info) => {
+    test('正式作者示例：复制 xlsx 的中文请求，无示例不显示章节', async ({ page: p }, info) => {
+      await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
       await p.goto('/skills/xlsx')
+      const section = p.locator('.ix-examples')
+      await expect(section.getByRole('heading', { name: '示例', exact: true })).toBeVisible()
+      const shot = async name => {
+        const dir = process.env.EXAMPLE_SHOTS_DIR || info.outputPath('shots')
+        await mkdir(dir, { recursive: true })
+        await section.evaluate(el => window.scrollBy(0, el.getBoundingClientRect().top - 88))
+        await p.screenshot({ path: join(dir, `example-real-${name}.png`), animations: 'disabled' })
+      }
+      if (!mobile) await shot('xlsx-1280-light')
+      await copy(p, section.locator('.ix-ask .copy').first(), 'Enter', '我想给妻子一个惊喜，带她去意大利旅行！我有 6 个月可以攒钱，这是我最近的收支情况。帮我用 Excel 做个计划，再列一份预算。我能从哪些开销里省出这笔钱呢？！')
+      if (!mobile) {
+        await p.emulateMedia({ colorScheme: 'dark' })
+        await p.goto('/skills/notion-meeting-intelligence')
+        await expect(p.locator('html')).toHaveClass(/dark/)
+        await shot('notion-meeting-intelligence-1280-dark')
+      }
+      await p.goto('/skills/design-handoff')
       await expect(p.locator('.ix-title h1')).toBeVisible()
       await expect(p.getByRole('heading', { name: '示例', exact: true })).toHaveCount(0)
+    })
+    fixtureTest('作者示例：中文复制、折叠、原文与媒体', async ({ page: p, fixtureURL }, info) => {
       await p.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' })
       await p.goto(fixtureURL + '/skills/demo-pdf-toolkit')
       const section = p.locator('.ix-examples'), reply = section.locator('.ix-reply')

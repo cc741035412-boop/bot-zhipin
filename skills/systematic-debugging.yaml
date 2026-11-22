@@ -30,3 +30,83 @@ author:
 license: MIT
 licenseUrl: https://github.com/obra/superpowers/blob/22f0b463e7a5e579904dd6211a520321035526f7/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 从源码目录里多出的 .git 倒查五层，发现测试过早读取了临时目录，于是改成提前读取就报错。
+    lang: en
+    ask: "`.git` created in `packages/core/` (source code)"
+    reply: |-
+      **Trace chain:**
+      1. `git init` runs in `process.cwd()` ← empty cwd parameter
+      2. WorktreeManager called with empty projectDir
+      3. Session.create() passed empty string
+      4. Test accessed `context.tempDir` before beforeEach
+      5. setupCoreTest() returns `{ tempDir: '' }` initially
+
+      **Root cause:** Top-level variable initialization accessing empty value
+
+      **Fix:** Made tempDir a getter that throws if accessed before beforeEach
+
+      **Also added defense-in-depth:**
+      - Layer 1: Project.create() validates directory
+      - Layer 2: WorkspaceManager validates not empty
+      - Layer 3: NODE_ENV guard refuses git init outside tmpdir
+      - Layer 4: Stack trace logging before git init
+    askZh: 源码目录 `packages/core/` 里多出了一个 `.git` 目录。
+    replyZh: |-
+      **沿调用链倒查：**
+      1. `git init` 在 `process.cwd()` 中运行 ← cwd 参数为空
+      2. 调用 WorktreeManager 时传入了空的 projectDir
+      3. Session.create() 传入的是空字符串
+      4. 测试在 beforeEach 执行前就读取了 `context.tempDir`
+      5. setupCoreTest() 最初返回的是 `{ tempDir: '' }`
+
+      **根因：** 顶层变量初始化时读到了空值。
+
+      **修复：** 把 tempDir 改为 getter，如果在 beforeEach 执行前读取它，就抛出异常。
+
+      **另外加了四层防护：**
+      - 第 1 层：Project.create() 校验目录
+      - 第 2 层：WorkspaceManager 检查目录是否为空
+      - 第 3 层：通过 NODE_ENV 检查，禁止在 tmpdir 之外运行 git init
+      - 第 4 层：在运行 git init 前记录调用栈
+    source:
+      url: https://raw.githubusercontent.com/obra/superpowers/22f0b463e7a5e579904dd6211a520321035526f7/skills/systematic-debugging/root-cause-tracing.md
+      name: obra/superpowers
+    rights: MIT（obra/superpowers）
+  - caption: 顺着空目录参数的传递路径补上四层防护后，1847 个测试全部通过，源码目录里误建 Git 仓库的问题也无法再现。
+    lang: en
+    ask: Empty `projectDir` caused `git init` in source code
+    reply: |-
+      **Data flow:**
+      1. Test setup → empty string
+      2. `Project.create(name, '')`
+      3. `WorkspaceManager.createWorkspace('')`
+      4. `git init` runs in `process.cwd()`
+
+      **Four layers added:**
+      - Layer 1: `Project.create()` validates not empty/exists/writable
+      - Layer 2: `WorkspaceManager` validates projectDir not empty
+      - Layer 3: `WorktreeManager` refuses git init outside tmpdir in tests
+      - Layer 4: Stack trace logging before git init
+
+      **Result:** All 1847 tests passed, bug impossible to reproduce
+    askZh: "`projectDir` 为空，导致 `git init` 在源码目录里运行。"
+    replyZh: |-
+      **数据流：**
+      1. 测试初始化 → 空字符串
+      2. `Project.create(name, '')`
+      3. `WorkspaceManager.createWorkspace('')`
+      4. `git init` 在 `process.cwd()` 中运行
+
+      **新增的四层防护：**
+      - 第 1 层：`Project.create()` 检查目录参数是否非空、目录是否存在且可写
+      - 第 2 层：`WorkspaceManager` 检查 projectDir 是否非空
+      - 第 3 层：测试期间，`WorktreeManager` 禁止在 tmpdir 之外运行 git init
+      - 第 4 层：在运行 git init 前记录调用栈
+
+      **结果：** 1847 个测试全部通过，问题无法再现。
+    source:
+      url: https://raw.githubusercontent.com/obra/superpowers/22f0b463e7a5e579904dd6211a520321035526f7/skills/systematic-debugging/defense-in-depth.md
+      name: obra/superpowers
+    rights: MIT（obra/superpowers）

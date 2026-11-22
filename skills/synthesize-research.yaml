@@ -22,3 +22,15 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 把 8 份访谈记录放在一起分析，得到关键发现、用户画像、值得探索的机会及相应证据。
+    lang: en
+    ask: /synthesize-research
+    reply: "[Generates synthesis with key findings, personas, opportunity areas, and evidence]"
+    replyZh: "[生成研究总结，列出关键发现、用户画像、值得探索的机会以及相关证据]"
+    excerpt: true
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/product-management/README.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）
