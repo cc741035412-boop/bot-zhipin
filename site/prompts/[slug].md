@@ -9,4 +9,4 @@ import LibraryDetail from '../.vitepress/theme/components/LibraryDetail.vue'
 const { params } = useData()
 </script>
 
-<LibraryDetail :key="params.slug" :item="params.prompt" />
+<LibraryDetail :key="params.slug" :item="JSON.parse(params.entryJson)" />

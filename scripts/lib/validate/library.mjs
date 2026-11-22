@@ -97,7 +97,7 @@ export function validateLibrary(kind, entries, { now = new Date() } = {}) {
       }
       validateDate({ data, yamlPath: name }, now, report)
       checkSource(data.source?.url, say)
-      if (!isReusable(data.license)) checkQuotes(data, say)
+      if (!Object.hasOwn(data, 'body') && !isReusable(data.license)) checkQuotes(data, say)
 
       if (kind === 'prompt') {
         const body = Object.hasOwn(data, 'body')

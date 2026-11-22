@@ -75,7 +75,7 @@ export default defineConfig({
   },
   transformPageData(pageData) {
     if (pageData.relativePath === '404.md') return
-    const { bot, squad, prompt, skill } = pageData.params ?? {}
+    const { bot, squad, entryJson } = pageData.params ?? {}
     if (bot || squad) {
       // Bot 详情页：「中文叫法（原名）怎么用、值不值得装」+ 一句话介绍接编辑点评第一句（规则在 share.mjs，决策 56）。
       // 小队页仍用队名和一句话介绍。
@@ -85,8 +85,8 @@ export default defineConfig({
       // description 会因下面 transformHead 已提供 description 而被跳过（isDescriptionOverridden）。
       pageData.description = bot ? share.botDescription(bot) : squad.tagline
       delete pageData.frontmatter.description
-    } else if (prompt || skill) {
-      const { title, description } = entryHead(prompt || skill)
+    } else if (entryJson) {
+      const { title, description } = entryHead(JSON.parse(entryJson))
       pageData.title = pageData.frontmatter.title = title
       pageData.description = description
       delete pageData.frontmatter.description
