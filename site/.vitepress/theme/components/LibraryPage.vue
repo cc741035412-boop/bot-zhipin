@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
-import { categoriesFor, fieldsFor, listQuery, norm, readQuery, type LibraryCard } from '../library'
+import { categoriesFor, fieldsFor, listQuery, readQuery, type LibraryCard } from '../library'
+import { matchWord, queryWords } from '../search'
 import { markFor, tint } from '../library-marks'
 import LibraryCopy from './LibraryCopy.vue'
 import PromptSnippet from './PromptSnippet.vue'
@@ -13,8 +14,9 @@ const categories = computed(() => categoriesFor(kind.value).filter(c => props.it
 const q = ref(''), cat = ref(''), search = ref<HTMLInputElement>()
 const index = computed(() => props.items.map(item => ({ item, values: fieldsFor(item) })))
 const matches = computed(() => {
-  const words = norm(q.value).split(/\s+/).filter(Boolean)
-  return index.value.filter(({ values }) => words.every(w => values.some(v => v.includes(w)))).map(row => row.item)
+  // 和全站搜索面板同一套拆词和比对：中英文不打空格也行（「做PPT」等于「做 PPT」，「B站」能命中「B 站」）。
+  const words = queryWords(q.value)
+  return index.value.filter(({ values }) => words.every(w => values.some(v => matchWord(v, w)))).map(row => row.item)
 })
 const counts = computed(() => matches.value.reduce((acc, i) => acc.set(i.category, (acc.get(i.category) || 0) + 1), new Map<string, number>()))
 const visible = computed(() => matches.value.filter(item => !cat.value || item.category === cat.value))
