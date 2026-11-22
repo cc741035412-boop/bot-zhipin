@@ -471,7 +471,7 @@ for (const width of [1280, 390])
     test('DETAIL-03 Skill 安装顺序、说明和可选依赖', async ({ page: p }) => {
       for (const i of new Set([skill, db.skills.find((i) => !i.requires?.length)].filter(Boolean))) {
         await gotoReady(p, pathFor(i))
-        expect(await normText(p, '.ix-body h2')).toEqual(['安装', ...(i.requires?.length ? ['运行依赖'] : []), '摘要', '适用场景', '来源'])
+        expect(await normText(p, '.ix-body h2')).toEqual(['安装', ...(i.examples?.length ? ['示例'] : []), ...(i.requires?.length ? ['运行依赖'] : []), '摘要', '适用场景', '来源'])
         expect(await normText(p, '.ix-term header > span')).toEqual(i.install.map((s) => s.agent))
         expect(await normText(p, '.ix-term code')).toEqual(i.install.map((s) => s.command))
         expect(await normText(p, '.ix-term p')).toEqual(i.install.flatMap((s) => (s.note ? [s.note] : [])))

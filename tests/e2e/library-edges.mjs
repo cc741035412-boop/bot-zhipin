@@ -25,7 +25,7 @@ export async function exerciseEdges(page, copy) {
     { agent: skill.agents[0], command: skill.install[0].command },
     { agent: '通用', command: 'printf "example"\n  printf "two"\n' },
   ]
-  const s = { ...skill, install, requires: [] }
+  const s = { ...skill, install, requires: [], examples: undefined }
   const file = (dir, i) => join(root, dir, i.slug + '.yaml')
   try {
     for (const [dir, i] of [
