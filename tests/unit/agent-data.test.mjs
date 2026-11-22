@@ -4,6 +4,7 @@ import { buildCatalog } from '../../scripts/lib/catalog.mjs'
 import { buildAgentData, creditLine, dataPath } from '../../scripts/lib/agent-data.mjs'
 import { renderLlms } from '../../scripts/lib/llms.mjs'
 import { ROOT } from '../../scripts/lib/load-bots.mjs'
+import { loadLibraryEnums } from '../../scripts/lib/load-prompts-skills.mjs'
 import { promptData, readPrompts, readSkills, skillData } from '../../site/.vitepress/data/prompts-skills.mjs'
 import { SITE } from '../../site/.vitepress/meta.mjs'
 
@@ -117,7 +118,7 @@ it('llms.txt 带上 Prompt、Skills 两节，按分类枚举顺序分组', () =>
   const promptPart = text.slice(text.indexOf('## Prompt\n'), text.indexOf('## Skills\n'))
   expect(promptPart).toContain(`- [${prompts[0].title}](${SITE.url}/prompts/${prompts[0].slug})：${prompts[0].purpose}`)
   const headings = [...promptPart.matchAll(/^### (.+)$/gm)].map((m) => m[1])
-  expect(headings).toEqual(['写作', '编程', '学习', '营销', '效率'].filter((c) => prompts.some((p) => p.category === c)))
+  expect(headings).toEqual(loadLibraryEnums().prompt.categories.filter((c) => prompts.some((p) => p.category === c)))
   expect(text.slice(text.indexOf('## Skills\n'))).toContain(`${SITE.url}/skills/${skills[0].slug}`)
   expect(text.endsWith('\n') && !text.endsWith('\n\n')).toBe(true)
 })
