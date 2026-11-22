@@ -79,8 +79,10 @@ it('Prompt 的署名带原版权行；给的是中文译文时注明本站翻译
   expect(tutor.copyright).toBeTruthy()
   expect(tutor.credit).toContain(`版权：${tutor.copyright}`)
   expect(tutor.credit).toContain(`中文由 ${SITE.name}翻译`)
+  expect(tutor.creditOriginal).toBe(tutor.credit.replace(` · 中文由 ${SITE.name}翻译`, ''))
   const zh = file('prompt', 'demo-code-review-checklist')
   expect(zh.credit).not.toContain('翻译')
+  expect(zh.creditOriginal).toBe(zh.credit)
 })
 
 it('署名行：缺的段落省掉', () => {

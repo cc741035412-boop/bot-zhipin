@@ -13,3 +13,4 @@ artifacts/
 *.log
 site/public/api-data/
 .vitest/
+__pycache__/

@@ -23,16 +23,16 @@ export function creditLine({ author, sourceUrl, license, copyright, translated, 
 
 function promptDetail(p) {
   const detailUrl = absoluteUrl(p.detailUrl)
+  const credit = { author: p.author.name, sourceUrl: p.source.url, license: p.license, copyright: p.copyright, detailUrl }
   return {
     kind: 'prompt', slug: p.slug, title: p.title, titleOriginal: p.titleOriginal, category: p.category,
     purpose: p.purpose, scenarios: p.scenarios, tags: p.tags, lang: p.lang,
     text: p.bodyZh ?? p.body, body: p.body, bodyZh: p.bodyZh, usage: p.usage, summary: p.summary,
     source: p.source, author: p.author, license: p.license, licenseUrl: p.licenseUrl, copyright: p.copyright,
     addedAt: p.addedAt, detailUrl,
-    credit: creditLine({
-      author: p.author.name, sourceUrl: p.source.url, license: p.license, copyright: p.copyright,
-      translated: Boolean(p.bodyZh), detailUrl,
-    }),
+    // credit 配 text（有译文时注明本站翻译）；creditOriginal 配 body（英文原文），不带译文说明。
+    credit: creditLine({ ...credit, translated: Boolean(p.bodyZh) }),
+    creditOriginal: creditLine(credit),
   }
 }
 

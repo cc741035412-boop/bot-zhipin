@@ -78,7 +78,7 @@ Windows 的 PowerShell 里写 `curl.exe -s ...`，或者用 `Invoke-RestMethod h
 
 `items` 里每条都有这些字段：`kind`、`slug`、`title`、`purpose`、`scenarios`、`category`、`author`、`detailUrl`、`dataUrl`。按标题、用途、场景挑出合适的几条，再拉选中那条的 `dataUrl`，就是详情 JSON。详情里的字段：
 
-- Prompt：`text`（要给用户的正文）、`usage`、`credit`
+- Prompt：`text`（要给用户的正文）、`usage`、`credit`；给英文原文 `body` 时署名用 `creditOriginal`
 - Skill：`install`（数组，每项有 `agent`、`command`、`note`）、`requires`、`credit`
 - Grok Bot：`templateUrl`、`starters`、`credit`
 

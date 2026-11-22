@@ -30,15 +30,16 @@ RETRY_AFTER = 600  # 联网失败后 10 分钟内直接用旧缓存，不再每�
 TIMEOUT = 10
 KIND_LABEL = {'prompt': 'Prompt', 'skill': 'Skill', 'bot': 'Grok Bot'}
 SLUG = re.compile(r'^[a-z0-9][a-z0-9-]*$')
-# 字段分组和权重：名字 > 用途 > 场景/标签/分类/开场白 > 作者、slug > 适用工具。
-# 适用工具（Claude Code、Codex……）是筛选属性，几乎每个 Skill 都有，只给很低的分，免得 code 之类的词全中。
+# 字段分组和权重：名字 > 用途 > 场景/标签/分类/开场白 > 作者、slug。
 GROUPS = (
     (5.0, ('title', 'name', 'nameZh', 'titleOriginal')),
     (3.0, ('purpose',)),
     (2.0, ('scenarios', 'tags', 'category', 'starters')),
     (1.0, ('author', 'slug')),
-    (0.5, ('agents',)),
 )
+# 适用工具（Claude Code、Codex……）是筛选属性，几乎每个 Skill 都有：只认整个名字或名字的第一个词
+# （claude code、claude、codex），给很低的分，免得单独一个 code 让所有 Skill 都算命中。
+AGENT_WEIGHT = 0.5
 CJK_RUN = r'[\u3400-\u9fff\uf900-\ufaff]+'
 SPLIT = re.compile(r'[\s,;:!?/|、。，；：！？]+')
 
@@ -109,7 +110,7 @@ def touch(path, remove=False):
 
 
 def load_index(refresh=False):
-    """返回 (索引, 是不是本机缓存)。"""
+    """返回 (索引, 来源)：'online' 刚从网上拉的，'cache' 还新鲜的本机缓存，'stale' 连不上、退回的旧缓存。"""
     path = cache_path()
     cached = read_cache(path)
     if cached is not None and not refresh:
@@ -118,10 +119,10 @@ def load_index(refresh=False):
         except OSError:
             fresh = False
         if fresh:
-            return cached, True
+            return cached, 'cache'
         if recently_failed(path):
             print('（刚才连不上 Bot 直聘，先用本机缓存的旧索引；加 --refresh 强制重新拉）', file=sys.stderr)
-            return cached, True
+            return cached, 'stale'
     try:
         data = fetch(BASE + '/data/index.json')
         if not isinstance(data, dict) or not isinstance(data.get('items'), list):
@@ -130,7 +131,7 @@ def load_index(refresh=False):
         if cached is not None:
             touch(fail_mark(path))
             print('{}\n（这次先用本机缓存的旧索引，可能不是最新的）'.format(error), file=sys.stderr)
-            return cached, True
+            return cached, 'stale'
         fail(str(error))
     touch(fail_mark(path), remove=True)
     try:
@@ -141,7 +142,7 @@ def load_index(refresh=False):
         os.replace(temp, path)
     except OSError:
         pass  # 缓存写不进去不影响这次搜索
-    return data, False
+    return data, 'online'
 
 
 def fold(value):
@@ -175,42 +176,59 @@ def variants(term):
             overlap.append(run)
             chunks.append(run)
         else:
-            overlap.extend(run[i:i + 2] for i in range(len(run) - 1))
-            chunks.extend(run[i:i + 2] for i in range(0, len(run) - 1, 2))
+            pairs = [run[i:i + 2] for i in range(len(run) - 1)]
+            overlap.extend(pairs)
+            if len(run) >= 4:
+                chunks.extend(run[i:i + 2] for i in range(0, len(run) - 1, 2))
+                if len(run) % 2:
+                    chunks.append(run[-2:])
+            else:
+                chunks.extend(pairs)
     return [parts for parts in (overlap, chunks) if parts]
 
 
-def term_score(term, texts):
-    """整词命中：每个命中的字段组都加分。没有整词命中：按片段算整条的覆盖率，每个片段取它命中的最高权重，打六折；
-    命中的片段不到四成不算（只中一两个零碎片段多半是巧合）。"""
+def term_score(term, texts, agents):
+    """整词命中：每个命中的字段组都加分。再按片段算整条的覆盖率：每个片段取它命中的最高权重，打六折，
+    命中的片段不到四成不算（只中一两个零碎片段多半是巧合）。两部分相加，原词完整出现的条目总排在只凑上半截的前面。"""
     full = sum(weight for weight, text in texts if contains(term, text))
-    if full:
-        return full
+    if term in agents:
+        full += AGENT_WEIGHT
     best = 0.0
     for parts in variants(term):
         weights = [max([weight for weight, text in texts if contains(part, text)] or [0.0]) for part in parts]
         if sum(1 for weight in weights if weight) / len(parts) >= 0.4:
             best = max(best, sum(weights) / len(parts) * 0.6)
-    return best
+    return full + best
+
+
+def agent_names(item):
+    names = set()
+    for agent in item.get('agents') or []:
+        name = fold(agent)
+        if name:
+            names.add(name)
+            names.add(name.split(' ')[0])
+    return names
 
 
 def score(item, terms, phrase):
     texts = [(weight, '\n'.join(fold(item.get(key)) for key in keys)) for weight, keys in GROUPS]
+    agents = agent_names(item)
     total, missed = 0.0, 0
     for term in terms:
-        points = term_score(term, texts)
+        points = term_score(term, texts, agents)
         if not points:
             missed += 1
         total += points
     if not total:
         return 0.0
-    if len(terms) > 1 and phrase in texts[0][1]:
+    if len(terms) > 1 and (phrase in texts[0][1] or phrase in fold(item.get('slug')).replace('-', ' ')):
         total += 3.0
     return total * (0.5 ** missed)
 
 
 def search(args):
-    index, cached = load_index(args.refresh)
+    index, origin = load_index(args.refresh)
     terms = [term for term in SPLIT.split(fold(' '.join(args.words))) if term]
     if not terms:
         fail('给几个关键词，比如：python3 find.py 周报')
@@ -224,7 +242,8 @@ def search(args):
     if not hits:
         print('「{}」没找到{}。{}换个说法再搜，或者打开 {}/prompts/、{}/skills/、{}/ 自己翻。'.format(
             ' '.join(args.words), ' ' + KIND_LABEL[args.kind] if args.kind else '',
-            '用的是本机缓存的索引，先加 --refresh 用最新的再搜一次；还是没有就' if cached else '',
+            {'cache': '用的是本机缓存的索引，先加 --refresh 用最新的再搜一次；还是没有就',
+             'stale': '连不上 Bot 直聘，只查了本机的旧索引，没搜到不代表站上没有。可以'}.get(origin, ''),
             BASE, BASE, BASE))
         return
     shown = hits[:args.limit]
@@ -283,7 +302,7 @@ def show_prompt(data, original):
         print('\n这条只收了摘要，没有正文，原文在：' + source)
         section('摘要', data.get('summary'))
     section('怎么用', data.get('usage'))
-    section('署名', data.get('credit'))
+    section('署名', (data.get('creditOriginal') or data.get('credit')) if original else data.get('credit'))
 
 
 def show_skill(data):
