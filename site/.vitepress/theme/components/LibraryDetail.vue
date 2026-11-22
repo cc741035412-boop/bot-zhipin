@@ -3,6 +3,7 @@ import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
 import { categoriesFor, listQuery, readQuery, type LibraryItem } from '../library'
 import { tint } from '../library-marks'
 import LibraryTile from './LibraryTile.vue'
+import SkillExamples from './SkillExamples.vue'
 import LibraryCopy from './LibraryCopy.vue'
 import LibrarySource from './LibrarySource.vue'
 import BzIcon from './BzIcon.vue'
@@ -43,6 +44,7 @@ onBeforeUnmount(() => window.removeEventListener('popstate', restore))
             <pre><code :id="`command-${n}`" v-text="s.command" /></pre><p v-if="s.note">{{ s.note }}</p>
           </div>
         </section>
+        <SkillExamples v-if="item.kind === 'skill' && item.examples?.length" :examples="item.examples" />
         <section v-if="item.requires?.length" class="ix-sec"><header><h2>运行依赖</h2></header><ul class="ix-points"><li v-for="r in item.requires" :key="r">{{ r }}</li></ul></section>
         <section v-if="item.images?.length" class="ix-sec ix-gallery"><header><h2>效果图</h2></header>
           <figure v-for="(image,n) in item.images" :key="n">

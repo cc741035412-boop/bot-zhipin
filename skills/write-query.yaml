@@ -22,3 +22,41 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 指定按注册月份分组看留存，得到一段 Snowflake SQL，附有逐步注释和分区裁剪的性能说明。
+    lang: en
+    ask: |-
+      /write-query I need a cohort retention analysis -- users grouped by signup month,
+           showing what % are still active 1, 3, 6, and 12 months later. We use Snowflake.
+    reply: |-
+      [Writes optimized Snowflake SQL with CTEs]
+             → [Adds comments explaining each step]
+             → [Includes performance notes about partition pruning]
+    askZh: |-
+      /write-query 我想做分组留存分析：按注册月份把用户分组，
+           看看 1、3、6 和 12 个月后仍然活跃的用户各占多少。我们用的是 Snowflake。
+    replyZh: |-
+      [用公用表表达式（CTE）写出经过优化的 Snowflake SQL]
+             → [添加注释，解释每一步]
+             → [附上分区裁剪对性能的影响说明]
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/README.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）
+  - caption: 请它写一条查询，按订单状态分别统计近 30 天的订单数。
+    lang: en
+    ask: /write-query Count of orders by status for the last 30 days
+    askZh: /write-query 按状态统计最近 30 天的订单数。
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/skills/write-query/SKILL.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）
+  - caption: 给出事件表的规模和分区方式，请它查询近 7 天事件数最多的 100 位用户及其各自最近一次事件的类型。
+    lang: en
+    ask: /write-query We have a 500M row events table partitioned by date. Find the top 100 users by event count in the last 7 days with their most recent event type.
+    askZh: /write-query 我们有一张按日期分区的事件表，共 5 亿行。请找出最近 7 天事件数最多的 100 位用户，并列出每位用户最近一次事件的类型。
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/data/skills/write-query/SKILL.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）

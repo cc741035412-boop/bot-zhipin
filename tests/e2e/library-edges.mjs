@@ -25,7 +25,7 @@ export async function exerciseEdges(page, copy) {
     { agent: skill.agents[0], command: skill.install[0].command },
     { agent: '通用', command: 'printf "example"\n  printf "two"\n' },
   ]
-  const s = { ...skill, install, requires: [] }
+  const s = { ...skill, install, requires: [], examples: undefined }
   const file = (dir, i) => join(root, dir, i.slug + '.yaml')
   try {
     for (const [dir, i] of [
@@ -74,9 +74,11 @@ export async function exerciseEdges(page, copy) {
 
 // 和正式库的 4205 预览隔离，只在指定目录加载测试数据。
 export async function withLibraryServer(root, use) {
-  const base = 'http://127.0.0.1:4192'
+  // 保留约定的样例端口；用 IPv6 回环，避免并行工作树在 IPv4 同端口返回别的夹具。
+  const host = '::1'
+  const base = `http://[${host}]:4192`
   const server = spawn(process.execPath, [
-    'node_modules/vitepress/bin/vitepress.js', 'dev', 'site', '--host', '127.0.0.1', '--port', '4192', '--strictPort',
+    'node_modules/vitepress/bin/vitepress.js', 'dev', 'site', '--host', host, '--port', '4192', '--strictPort',
   ], {
     env: { ...process.env, BOTS_DIR: 'tests/fixtures/bots', PROMPTS_DIR: join(root, 'prompts'), SKILLS_DIR: join(root, 'skills') },
     stdio: 'ignore',

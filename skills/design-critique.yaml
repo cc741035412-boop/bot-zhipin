@@ -22,3 +22,13 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 给出一张界面设计稿，请它找出使用中可能遇到的问题，并核对设计稿是否符合现有设计系统。
+    lang: en
+    ask: Review this mockup for usability issues and consistency with our design system
+    askZh: 请评审这份设计稿，看看有没有可用性问题，以及它跟我们的设计系统是否一致。
+    source:
+      url: https://claude.com/plugins/design
+      name: Anthropic 官网
+    rights: © 2026 Anthropic PBC

@@ -24,3 +24,417 @@ author:
 license: MIT
 licenseUrl: https://github.com/openai/plugins/blob/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-knowledge-capture/LICENSE.txt
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 把部署排错对话整理成三条 FAQ，分别讲端口占用、数据库连接失败和通用排查步骤。
+    lang: en
+    ask: Save this conversation about deployment troubleshooting to the FAQ
+    reply: |-
+      ## FAQ Entries Created ✅
+
+      ### Conversation Captured
+      Transformed deployment troubleshooting conversation into 3 comprehensive FAQ entries.
+
+      ### FAQ Entries Created
+
+      1. **Port Already in Use Error**
+         - Problem: Deployment fails due to occupied port
+         - Solutions: Kill process, use PM2, check node processes
+         - Prevention: Use process managers, graceful shutdown
+         - Link: <mention-page url="...">Port already in use FAQ</mention-page>
+
+      2. **Database Connection Errors**
+         - Problem: Cannot connect to database during deployment
+         - Troubleshooting: 4-step systematic approach
+         - Solutions: By error type (credentials, network, limits)
+         - Prevention: Connection pooling, health checks, retry logic
+         - Link: <mention-page url="...">Database connection FAQ</mention-page>
+
+      3. **General Troubleshooting Approach**
+         - Best practice: Always check logs first
+         - Tools: PM2 logs, Docker logs, application logs
+         - Systematic approach: 6-step debugging process
+         - Common errors: Module not found, permissions, ports
+         - Link: <mention-page url="...">Troubleshooting first steps FAQ</mention-page>
+
+      ### Content Structure
+
+      Each FAQ includes:
+      ✅ Short answer (quick reference)
+      ✅ Detailed explanation (full context)
+      ✅ Multiple solution options
+      ✅ Code examples and commands
+      ✅ Prevention strategies
+      ✅ Links to related FAQs
+      ✅ Last updated date
+
+      ### Database Integration
+
+      - ✅ Added to FAQ database (not standalone pages)
+      - ✅ Properties set: Category (Troubleshooting), Tags, Date
+      - ✅ FAQ index page updated with links
+      - ✅ Cross-references between related questions
+
+      ### Value Added
+
+      **From conversation** → **To structured knowledge**:
+      - Casual Q&A → Professional FAQ entries
+      - Implicit knowledge → Explicit documentation
+      - One-time help → Reusable resource
+      - 5-minute conversation → Permanent team knowledge
+
+      **Future benefit**:
+      - Team can self-serve on common issues
+      - New team members can onboard faster
+      - Reduces repeated questions
+      - Improves troubleshooting speed
+
+      **Knowledge captured and preserved! 📚**
+    askZh: 把这段关于部署排错的对话存进 FAQ。
+    replyZh: |-
+      ## FAQ 条目已创建 ✅
+
+      ### 对话已整理
+      已将这段部署排错对话整理成 3 条内容完整的 FAQ。
+
+      ### 新建的 FAQ 条目
+
+      1. **端口已被占用**
+         - 问题：端口被占用，导致部署失败
+         - 解决办法：结束占用端口的进程、使用 PM2、检查 Node 进程
+         - 预防措施：使用进程管理器，让进程正常退出
+         - 链接：<mention-page url="...">端口占用 FAQ</mention-page>
+
+      2. **数据库连接错误**
+         - 问题：部署期间无法连接数据库
+         - 排查方法：分 4 步系统排查
+         - 解决办法：按错误类型处理（凭据、网络、连接数限制）
+         - 预防措施：使用连接池、健康检查和重试机制
+         - 链接：<mention-page url="...">数据库连接 FAQ</mention-page>
+
+      3. **通用排错方法**
+         - 最佳实践：遇到问题先看日志
+         - 工具：PM2 日志、Docker 日志、应用日志
+         - 排查方法：分 6 步调试
+         - 常见错误：找不到模块、权限问题、端口问题
+         - 链接：<mention-page url="...">排错起步 FAQ</mention-page>
+
+      ### 内容结构
+
+      每条 FAQ 都包含：
+      ✅ 简短回答（方便速查）
+      ✅ 详细说明（交代完整背景）
+      ✅ 多种解决办法
+      ✅ 代码示例和命令
+      ✅ 预防措施
+      ✅ 相关 FAQ 链接
+      ✅ 最近更新日期
+
+      ### 数据库更新
+
+      - ✅ 条目已加入 FAQ 数据库，而非单独建页
+      - ✅ 已设置属性：分类（故障排查）、标签、日期
+      - ✅ 已在 FAQ 索引页补上链接
+      - ✅ 相关问题之间已添加交叉引用
+
+      ### 整理后的变化
+
+      **从对话** → **到结构化知识**：
+      - 随手问答 → 正式的 FAQ 条目
+      - 隐性经验 → 写明白的文档
+      - 一次性帮助 → 可反复查阅的资源
+      - 5 分钟的对话 → 团队长期保留的知识
+
+      **今后的用处**：
+      - 团队成员遇到常见问题可以自行查解法
+      - 新成员可以更快上手
+      - 减少重复提问
+      - 加快故障排查
+
+      **这些经验已经整理好并保存下来了！📚**
+    source:
+      url: https://raw.githubusercontent.com/openai/plugins/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-knowledge-capture/examples/conversation-to-faq.md
+      name: openai/plugins
+    rights: MIT（Notion Labs，见该 Skill 目录 LICENSE.txt；所在仓库 openai/plugins）
+  - caption: 把对外 API 改用 GraphQL 的决定写成记录，比较三个方案的利弊，并列出迁移步骤和衡量成效的指标。
+    lang: en
+    ask: Document our decision to move from REST to GraphQL API
+    reply: |-
+      # Migrate Customer-Facing API to GraphQL
+
+      ## Context
+      Our REST API has grown to 50+ endpoints with inconsistent patterns. Frontend and mobile teams request new endpoints frequently, leading to:
+      - API bloat and maintenance burden
+      - Over-fetching/under-fetching data
+      - Slow iteration on client features
+      - Inconsistent error handling
+
+      ## Decision
+      Migrate customer-facing API from REST to GraphQL while maintaining REST for internal services.
+
+      ## Rationale
+      **Why GraphQL**:
+      - Clients fetch exactly what they need (no over/under-fetching)
+      - Single endpoint, self-documenting schema
+      - Type safety with code generation
+      - Better developer experience
+      - Industry standard for client-facing APIs
+
+      ## Options Considered
+
+      ### Option A: Keep REST (Status Quo)
+      **Pros**: No migration cost, team familiar
+      **Cons**: Doesn't solve core problems, maintenance keeps growing
+      **Decision**: Rejected - doesn't address root cause
+
+      ### Option B: gRPC
+      **Pros**: Performance, strong typing
+      **Cons**: Browser support issues, steeper learning curve, not designed for client-facing
+      **Decision**: Rejected - better for internal services
+
+      ### Option C: GraphQL
+      **Pros**: Solves over/under-fetching, great DX, strong ecosystem
+      **Cons**: Learning curve, caching complexity, migration effort
+      **Decision**: **Accepted**
+
+      ## Consequences
+
+      **Positive**:
+      - Faster frontend/mobile development
+      - Reduced API maintenance burden
+      - Better type safety and tooling
+      - Single endpoint simplifies deployment
+
+      **Negative**:
+      - 3-4 month migration timeline
+      - Team needs training
+      - Need to solve caching strategy
+      - Monitoring/debugging patterns different
+
+      ## Implementation Plan
+      1. GraphQL server setup (Apollo Server)
+      2. Schema design workshop
+      3. Gradual migration (start with new features)
+      4. Dual-run period (both REST and GraphQL)
+      5. Deprecate old REST endpoints
+
+      **Timeline**: Start Q4 2025, complete Q1 2026
+      **Owner**: Backend team lead
+
+      ## Success Metrics
+      - API response times improve 30%
+      - Client fetch efficiency (less data transferred)
+      - Reduced new endpoint requests
+      - Developer satisfaction scores
+    askZh: 把我们决定将 API 从 REST 迁到 GraphQL 的事记录下来。
+    replyZh: |-
+      # 将面向客户的 API 迁移到 GraphQL
+
+      ## 背景
+      我们的 REST API 已有 50 多个端点，设计方式不统一。前端和移动端团队经常要求新增端点，由此带来以下问题：
+      - API 越来越臃肿，维护负担加重
+      - 一次请求取回的数据要么太多，要么不够
+      - 客户端功能迭代缓慢
+      - 错误处理方式不一致
+
+      ## 决定
+      将面向客户的 API 从 REST 迁移到 GraphQL，内部服务继续使用 REST。
+
+      ## 理由
+      **为什么选 GraphQL**：
+      - 客户端可以按需获取数据，不多取也不少取
+      - 只需一个端点，模式定义本身就是文档
+      - 通过代码生成保障类型安全
+      - 开发体验更好
+      - 是面向客户端的 API 的行业标准
+
+      ## 考虑过的方案
+
+      ### 方案 A：继续使用 REST（维持现状）
+      **优点**：没有迁移成本，团队也熟悉
+      **缺点**：解决不了核心问题，维护负担还会继续增加
+      **决定**：不采用，无法解决根本问题
+
+      ### 方案 B：gRPC
+      **优点**：性能好，支持强类型
+      **缺点**：浏览器支持存在问题，学习门槛更高，也并非为面向客户端的场景而设计
+      **决定**：不采用，更适合内部服务
+
+      ### 方案 C：GraphQL
+      **优点**：解决数据取多或取少的问题，开发体验好，生态成熟
+      **缺点**：需要学习，缓存较复杂，迁移需要投入人力
+      **决定**：**采用**
+
+      ## 影响
+
+      **有利影响**：
+      - 加快前端和移动端开发
+      - 减轻 API 维护负担
+      - 类型安全保障和工具支持更好
+      - 单一端点简化部署
+
+      **不利影响**：
+      - 迁移需要 3 至 4 个月
+      - 团队需要培训
+      - 需要确定缓存策略
+      - 监控和调试方式与以往不同
+
+      ## 实施计划
+      1. 搭建 GraphQL 服务器（Apollo Server）
+      2. 开会共同设计模式
+      3. 逐步迁移（从新功能开始）
+      4. 新旧 API 并行运行一段时间（REST 和 GraphQL 同时提供服务）
+      5. 弃用旧的 REST 端点
+
+      **时间安排**：2025 年第四季度开始，2026 年第一季度完成
+      **负责人**：后端团队负责人
+
+      ## 成效指标
+      - API 响应时间缩短 30%
+      - 客户端取数效率提高（传输的数据更少）
+      - 要求新增端点的请求减少
+      - 开发者满意度评分
+    source:
+      url: https://raw.githubusercontent.com/openai/plugins/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-knowledge-capture/examples/decision-capture.md
+      name: openai/plugins
+    rights: MIT（Notion Labs，见该 Skill 目录 LICENSE.txt；所在仓库 openai/plugins）
+  - caption: 把生产环境部署讨论整理成操作指南，从打发布标签的命令写到上线后的验证清单和回滚办法。
+    lang: en
+    ask: Save our discussion about deploying to production as a how-to guide
+    reply: |-
+      # How to Deploy to Production
+
+      ## Overview
+      Production deployment using GitHub Actions with zero-downtime rolling updates.
+      **Time Required**: 15-20 minutes | **Complexity**: Intermediate
+
+      ## Prerequisites
+      - [ ] PR approved and merged to main
+      - [ ] All CI tests passing
+      - [ ] Database migrations reviewed
+      - [ ] Feature flags configured
+
+      ## Deployment Steps
+
+      1. **Verify main branch is ready**
+         ```bash
+         git checkout main && git pull
+         ```
+
+      2. **Tag release**
+         ```bash
+         git tag -a v1.2.3 -m "Release v1.2.3"
+         git push origin v1.2.3
+         ```
+
+      3. **Trigger deployment**
+         - GitHub Actions auto-starts from tag push
+         - Monitor: https://github.com/org/repo/actions
+
+      4. **Database migrations** (if needed)
+         - Auto-run in GitHub Actions
+         - Check logs for completion
+
+      5. **Verify deployment**
+         - Wait for health checks (2-3 min)
+         - Test key endpoints
+         - Check error rates in Datadog
+
+      ## Verification Checklist
+      - [ ] All pods healthy in k8s dashboard
+      - [ ] Error rate < 0.1% in last 10 min
+      - [ ] Response time p95 < 500ms
+      - [ ] Test login flow
+      - [ ] Check Slack #alerts channel
+
+      ## Troubleshooting
+
+      **Health checks failing**
+      → Check pod logs: `kubectl logs -f deployment/api -n production`
+
+      **Migration errors**
+      → Rollback: Revert tag, migrations auto-rollback
+
+      **High error rate**
+      → Emergency rollback: Previous tag auto-deploys via GitHub Actions
+
+      ## Best Practices
+      - Deploy during low-traffic hours (2-4am PST)
+      - Have 2 engineers available
+      - Monitor for 30 min post-deploy
+      - Update #engineering Slack with deploy notice
+
+      ## Related Docs
+      - <mention-page url="...">Rollback Procedure</mention-page>
+      - <mention-page url="...">Database Migration Guide</mention-page>
+    askZh: 把我们关于如何部署到生产环境的讨论整理成一份操作指南并保存下来。
+    replyZh: |-
+      # 如何部署到生产环境
+
+      ## 概述
+      使用 GitHub Actions 部署到生产环境，通过滚动更新实现零停机。
+      **所需时间**：15 至 20 分钟 | **难度**：中等
+
+      ## 前置条件
+      - [ ] PR 已获批准并合并到 main 分支
+      - [ ] 所有 CI 测试均已通过
+      - [ ] 数据库迁移已通过审查
+      - [ ] 功能开关已配置
+
+      ## 部署步骤
+
+      1. **确认 main 分支已准备好**
+         ```bash
+         git checkout main && git pull
+         ```
+
+      2. **给发布版本打标签**
+         ```bash
+         git tag -a v1.2.3 -m "Release v1.2.3"
+         git push origin v1.2.3
+         ```
+
+      3. **触发部署**
+         - 推送标签后，GitHub Actions 会自动启动
+         - 在此查看进度：https://github.com/org/repo/actions
+
+      4. **数据库迁移**（如有需要）
+         - 迁移会在 GitHub Actions 中自动执行
+         - 查看日志，确认迁移完成
+
+      5. **验证部署**
+         - 等待健康检查完成（2 至 3 分钟）
+         - 测试关键端点
+         - 在 Datadog 中查看错误率
+
+      ## 验证清单
+      - [ ] k8s 控制面板上所有 Pod 均为健康状态
+      - [ ] 过去 10 分钟的错误率 < 0.1%
+      - [ ] 响应时间 p95 < 500ms
+      - [ ] 测试登录流程
+      - [ ] 查看 Slack 的 #alerts 频道
+
+      ## 故障排查
+
+      **健康检查失败**
+      → 查看 Pod 日志：`kubectl logs -f deployment/api -n production`
+
+      **迁移出错**
+      → 回滚：撤销标签，数据库迁移会自动回滚
+
+      **错误率过高**
+      → 紧急回滚：GitHub Actions 会自动部署上一个标签对应的版本
+
+      ## 最佳实践
+      - 在流量较低的时段部署（太平洋标准时间凌晨 2 点至 4 点）
+      - 确保有 2 名工程师可随时处理问题
+      - 部署后持续监控 30 分钟
+      - 在 Slack 的 #engineering 频道发布部署通知
+
+      ## 相关文档
+      - <mention-page url="...">回滚流程</mention-page>
+      - <mention-page url="...">数据库迁移指南</mention-page>
+    source:
+      url: https://raw.githubusercontent.com/openai/plugins/981b02c0c44058b595f3b4180002c3ae3c806d40/plugins/notion/skills/notion-knowledge-capture/examples/how-to-guide.md
+      name: openai/plugins
+    rights: MIT（Notion Labs，见该 Skill 目录 LICENSE.txt；所在仓库 openai/plugins）

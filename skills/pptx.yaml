@@ -32,3 +32,65 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/skills/blob/e4bb5d960d87126ff3b3a8af1a104b7db67560ba/skills/pptx/LICENSE.txt
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 上传游戏设定文档，按公司的品牌规范做成一份介绍故事、角色和世界观的游戏提案 PPT。
+    lang: en
+    video: https://www.youtube.com/watch?v=IoqpBKrNaZI
+    source:
+      url: https://www.youtube.com/watch?v=IoqpBKrNaZI
+      name: Anthropic 官方 YouTube 频道
+    rights: Anthropic 官方 YouTube 视频，未声明开源许可
+  - caption: 给出三个季度的营收数字，请 Claude 做两页业绩汇报 PPT，在第二页用柱状图比较营收。
+    lang: en
+    ask: |-
+      Create a simple 2-slide PowerPoint presentation:
+
+      Slide 1: Title slide
+      - Title: "Q3 2025 Results"
+      - Subtitle: "Acme Corporation"
+
+      Slide 2: Revenue Overview
+      - Title: "Quarterly Revenue"
+      - Add a simple column chart showing:
+        - Q1: $12M
+        - Q2: $13M
+        - Q3: $14M
+
+      Use clean, professional formatting.
+    askZh: |-
+      做一份简单的 PowerPoint 演示文稿，共两页：
+
+      第 1 页：封面
+      - 标题：
+        ```text
+        Q3 2025 Results
+        ```
+      - 副标题：
+        ```text
+        Acme Corporation
+        ```
+
+      第 2 页：营收概览
+      - 标题：
+        ```text
+        Quarterly Revenue
+        ```
+      - 加一张简单的柱状图，展示以下数据：
+        - 第一季度：1,200 万美元
+        - 第二季度：1,300 万美元
+        - 第三季度：1,400 万美元
+
+      排版要简洁、专业。
+    source:
+      url: https://raw.githubusercontent.com/anthropics/claude-cookbooks/8ad5de647d4f0f50c95d74aabc8aa20a3f70cdd3/skills/notebooks/01_skills_introduction.ipynb
+      name: anthropics/claude-cookbooks
+    rights: MIT（anthropics/claude-cookbooks）
+  - caption: 只指定可再生能源这个主题和页数，请 Claude 做五页幻灯片。
+    lang: en
+    ask: Create a presentation about renewable energy with 5 slides
+    askZh: 做一份关于可再生能源的演示文稿，共五页幻灯片。
+    source:
+      url: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/quickstart.md
+      name: Anthropic 官网
+    rights: Anthropic 官方文档，未声明开源许可

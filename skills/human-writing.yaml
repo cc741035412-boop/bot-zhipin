@@ -30,3 +30,51 @@ author:
 license: MIT
 licenseUrl: https://github.com/KKKKhazix/human-writing/blob/288297b6c2d9b6df23e0ceb64888443f15cfbcc3/human-writing/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 口述想推荐语音日记的理由，请 ChatGPT 写篇 3000 字文章，成文从照片和账单没记下的那些念头谈起。
+    lang: zh
+    ask: 我想给大家安利一个写日记的习惯。我觉得AI时代记录自己，用语音的方式来写日记，记录下自己每天的变化，是我觉得在这个世界上，未来你可能最宝贵的资产。大概就是这件事吧，你帮我写一篇3000字的文章呗。
+    reply: |-
+      这就是语音日记。
+
+      日记当然不是什么新鲜事。新鲜的是，到了 AI 时代，记录自己这件事，正在获得一种过去没有的价值。
+    excerpt: true
+    images:
+      - file: human-writing-1-1.png
+        alt: ChatGPT 输入框里已选 Human Writing Zh，用户请它把推荐语音日记的想法写成一篇 3000 字文章。
+      - file: human-writing-1-2.png
+        alt: 写作过程里，ChatGPT 说明不会虚构个人经历，把文章落点从「语音日记更方便」转到「给未来留下未经润色的自己」。
+      - file: human-writing-1-3.png
+        alt: 文章片段从「这就是语音日记」写起，以照片、日历和购物记录为例，区分做过的事和当时的想法，再谈语音记录和 AI 回查。
+    source:
+      url: https://www.woshipm.com/ai/6440993.html
+      name: 人人都是产品经理
+    rights: 作者在人人都是产品经理的原创文章（页面声明「未经作者许可，禁止转载」），未声明开源许可
+  - caption: 请 Qwen 写一篇推荐语音日记的文章，它先追问平时怎么记、哪次觉得值得，以及凭什么说这些记录是资产。
+    lang: zh
+    ask: 我想给大家安利一个写日记的习惯。我觉得AI时代记录自己，用语音的方式来写日记，记录下自己每天的变化，是我觉得在这个世界上，未来你可能最宝贵的资产。大概就是这件事吧，你帮我写一篇3000字的文章呗。
+    reply: |-
+      这个题目我接了，但先不急着动笔。3000字要站得住，光靠“语音日记很值得”这个判断撑不起来，我需要从你这里拿点实际的东西，不然写出来只能是把一个道理来回讲。三个问题，一次问完：
+
+      第一，你自己现在是怎么记的？用什么工具、从什么时候开始、大概什么频率？如果其实你还没真正开始记，只是认定这件事值得做，也直接告诉我，我就换一种写法，去查真实的产品和使用案例来搭这篇文章。
+
+      第二，有没有哪个具体瞬间让你觉得这事值？比如回听旧录音找回了一段自己忘掉的想法，发现自己半年前后的变化，或者某天AI用上了你记录的内容。这种瞬间哪怕很小，也比十句“很有意义”管用。
+
+      第三，你说它是“未来最宝贵的资产”，这个判断最硬的依据是什么？是AI会越来越懂你、你的记录会变成只属于你的语料，还是别的？你最想说服读者的到底是哪一层。
+
+      你把这三点回我，我再动笔。
+    images:
+      - file: human-writing-2-1.png
+        alt: 用户请写 3000 字的语音日记推荐文章，回复列出三个问题，分别询问记录习惯、感到有价值的具体瞬间和判断依据。
+    source:
+      url: https://www.woshipm.com/ai/6440993.html
+      name: 人人都是产品经理
+    rights: 作者在人人都是产品经理的原创文章（页面声明「未经作者许可，禁止转载」），未声明开源许可
+  - caption: 在请求里点名「活人感写作」，让它把接下来提供的材料写成一篇知乎回答。
+    lang: zh
+    ask: 用活人感写作，把下面这些材料写成一篇知乎回答。
+    source:
+      url: https://raw.githubusercontent.com/KKKKhazix/human-writing/288297b6c2d9b6df23e0ceb64888443f15cfbcc3/README.md
+      name: KKKKhazix/human-writing
+    rights: MIT（KKKKhazix/human-writing）

@@ -22,3 +22,21 @@ author:
 license: Apache-2.0
 licenseUrl: https://github.com/anthropics/knowledge-work-plugins/blob/0e0fcacddcc892eb92a1b7873ff9d68159c47571/LICENSE
 addedAt: '2026-11-20'
+
+examples:
+  - caption: 用一条命令指定支付场景，请它为支付流程写报错提示。
+    lang: en
+    ask: /ux-copy error messages for payment flow
+    askZh: /ux-copy 为支付流程写报错提示。
+    source:
+      url: https://raw.githubusercontent.com/anthropics/knowledge-work-plugins/0e0fcacddcc892eb92a1b7873ff9d68159c47571/design/README.md
+      name: anthropics/knowledge-work-plugins
+    rights: Apache-2.0（anthropics/knowledge-work-plugins）
+  - caption: 请它为结账时出现的错误写简短的界面提示语。
+    lang: en
+    ask: Write microcopy for our checkout flow error states
+    askZh: 请为我们的结账流程写些简短的文案，在出错时显示。
+    source:
+      url: https://claude.com/plugins/design
+      name: Anthropic 官网
+    rights: © 2026 Anthropic PBC
