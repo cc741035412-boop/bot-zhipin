@@ -145,8 +145,13 @@ export function trackPageView(path: string, isNotFound?: boolean): void {
         const value = params.get(key)?.trim().slice(0, 40)
         if (value) props[key] = value
       }
-    } else {
+    } else if (prev !== undefined) {
       props.prev = prev
+    } else {
+      try {
+        const referrer = new URL(document.referrer)
+        if (referrer.host === location.host) props.prev = pageTypeOf(referrer.pathname)
+      } catch { /* 空来源或无效地址 */ }
     }
     track('page_view', props)
   } catch { /* 埋点不能影响页面功能 */ }
@@ -240,16 +245,15 @@ export function outboundFromClick(event: MouseEvent): void {
   } catch { /* 埋点不能影响点击 */ }
 }
 
+// 安装时路由还用默认的 404 数据，首屏等路由加载完成后由钩子记录。
 export function installTracking(router: Router): void {
   try {
     if (!enabled() || installed) return
     installed = true
-    const pageView = () => trackPageView(location.pathname, router.route.data?.isNotFound)
-    pageView()
     const previous = router.onAfterRouteChange ?? router.onAfterRouteChanged
     const afterRouteChange = async (to: string) => {
       try { await previous?.call(router, to) } catch { /* 保留执行顺序，不影响埋点 */ }
-      try { pageView() } catch { /* 路由或页面可能不可用 */ }
+      try { trackPageView(location.pathname, router.route.data?.isNotFound) } catch { /* 路由或页面可能不可用 */ }
     }
     if (router.onAfterRouteChange == null && router.onAfterRouteChanged != null) {
       router.onAfterRouteChanged = afterRouteChange

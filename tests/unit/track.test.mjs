@@ -103,13 +103,25 @@ it.each(['', 'https://bot.jiachengbo.com/internal', 'not a URL'])('不记录 ref
   expect(sent()[0].props).toEqual({ landing: true })
 })
 
-it('本会话已落地则页面重载不重复记录来源，且没有上一页', () => {
+it.each(['https://example.com/', '', 'not a URL'])('本会话重载时来源 %j 不补上一页，也不重复记录来源', referrer => {
   store.set('bz-landed', '1')
-  doc.referrer = 'https://example.com/'
+  doc.referrer = referrer
   loc.search = '?utm_medium=radio'
   tracker.trackPageView('/')
   tracker.flush()
   expect(sent()[0].props).toEqual({ landing: false })
+})
+
+it('本会话重载时从同站来源补上一页类型，之后优先使用内存里的上一页', () => {
+  store.set('bz-landed', '1')
+  doc.referrer = `https://${loc.host}/prompts/`
+  tracker.trackPageView('/')
+  tracker.trackPageView('/skills/')
+  tracker.flush()
+  expect(sent().map(e => e.props)).toEqual([
+    { landing: false, prev: 'prompts' },
+    { landing: false, prev: 'home' },
+  ])
 })
 
 it('重复路径以及只改查询串或锚点不再记 page_view', () => {
@@ -225,7 +237,9 @@ it.each(['getItem', 'setItem'])('sessionStorage %s 抛错时 landing 和 sid 使
 })
 
 it('pagehide 发送 JSON Blob beacon，不再 fetch', async () => {
-  tracker.installTracking(routerAt(false))
+  const router = routerAt(false)
+  tracker.installTracking(router)
+  await router.onAfterRouteChange('/')
   listener(browser, 'pagehide')()
   expect(beacon).toHaveBeenCalledExactlyOnceWith('/api/events', expect.any(NodeBlob))
   const blob = beacon.mock.calls[0][1]
@@ -234,8 +248,10 @@ it('pagehide 发送 JSON Blob beacon，不再 fetch', async () => {
   expect(fetch).not.toHaveBeenCalled()
 })
 
-it('visibilitychange 只在 hidden 时发送 beacon', () => {
-  tracker.installTracking(routerAt(false))
+it('visibilitychange 只在 hidden 时发送 beacon', async () => {
+  const router = routerAt(false)
+  tracker.installTracking(router)
+  await router.onAfterRouteChange('/')
   listener(doc, 'visibilitychange')()
   expect(beacon).not.toHaveBeenCalled()
   doc.visibilityState = 'hidden'
@@ -314,7 +330,7 @@ it('安装在捕获阶段只接收左键 click 和中键 auxclick', () => {
     for (const button of [0, 1, 2]) fn(clickAt({ button, href: `https://example.com/${type}/${button}` }))
     expect(history().at(-1).props.to).toBe(`example.com/${type}/${expected}`)
   }
-  expect(history().map(e => e.name)).toEqual(['page_view', 'outbound', 'outbound'])
+  expect(history().map(e => e.name)).toEqual(['outbound', 'outbound'])
 })
 
 it.each(['onAfterRouteChange', 'onAfterRouteChanged'])('先执行并等待原路由钩子 %s，再记页面', async key => {
@@ -326,22 +342,38 @@ it.each(['onAfterRouteChange', 'onAfterRouteChanged'])('先执行并等待原路
   })
   const previous = router[key]
   tracker.installTracking(router)
+  tracker.trackPageView('/')
   await router[key]('/authors/jakob52123.html?ignored=1')
   expect(previous).toHaveBeenCalledExactlyOnceWith('/authors/jakob52123.html?ignored=1')
   expect(history().at(-1)).toMatchObject({ page: 'author', slug: 'jakob52123', props: { prev: 'home' } })
 })
 
-it('只安装一次，首屏读取路由的 404 标记', () => {
-  loc.pathname = '/bots/missing'
+it.each([[false, 'bot'], [true, '404']])('只安装一次，首屏钩子按 isNotFound=%s 记为 %s', async (isNotFound, page) => {
+  loc.pathname = '/bots/first-bot'
   const router = routerAt(true)
   tracker.installTracking(router)
   const hook = router.onAfterRouteChange
   tracker.installTracking(router)
   expect(router.onAfterRouteChange).toBe(hook)
-  expect(history()).toHaveLength(1)
-  expect(history()[0]).toMatchObject({ page: '404', path: '/bots/missing' })
+  expect(history() ?? []).toHaveLength(0)
   expect(doc.addEventListener).toHaveBeenCalledTimes(3)
   expect(browser.addEventListener).toHaveBeenCalledTimes(1)
+
+  router.route.data.isNotFound = isNotFound
+  await hook(loc.pathname)
+  expect(history()).toHaveLength(1)
+  expect(history()[0]).toMatchObject({ name: 'page_view', page, path: '/bots/first-bot', props: { landing: true } })
+})
+
+it('VitePress 首次加载替换默认 404 路由数据后，只记录一条正常的首屏浏览', async () => {
+  loc.pathname = '/prompts/'
+  const router = routerAt(true)
+  tracker.installTracking(router)
+  router.route.data = { isNotFound: false }
+  await router.onAfterRouteChange(loc.pathname)
+  tracker.flush()
+  expect(sent()).toHaveLength(1)
+  expect(sent()[0]).toMatchObject({ name: 'page_view', page: 'prompts', path: '/prompts/' })
 })
 
 it('调试历史最多保留最新 200 条', () => {
