@@ -1,6 +1,6 @@
 // 策展文件的校验（schema + 和货架的交叉校验）、网站用的整理函数、全量校验入口和目录解析规则。
 import { afterEach, describe, expect, it } from 'vitest'
-import { cpSync, mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, mkdtempSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -230,6 +230,8 @@ describe('网站用的策展数据（resolveCuration）', () => {
 
 describe('全量校验（Bot + 小队 + 策展）', () => {
   const fixtures = join(ROOT, 'tests/fixtures')
+  const promptCount = readdirSync(join(fixtures, 'prompts'), { withFileTypes: true })
+    .filter(file => file.isFile() && file.name.endsWith('.yaml')).length
   function sandbox() {
     const dir = temporary()
     for (const name of ['bots', 'squads', 'curation']) cpSync(join(fixtures, name), join(dir, name), { recursive: true })
@@ -251,7 +253,7 @@ describe('全量校验（Bot + 小队 + 策展）', () => {
     const result = validateAll({ botsDir: join(fixtures, 'bots'), now })
     expect(result.errors).toEqual([])
     expect(result.warnings).toEqual([])
-    expect(formatResult(result)).toBe('✓ 校验通过：3 个 Bot（其中 1 个外部收录），1 支小队，5 条 Prompt，3 个 Skill')
+    expect(formatResult(result)).toBe(`✓ 校验通过：3 个 Bot（其中 1 个外部收录），1 支小队，${promptCount} 条 Prompt，3 个 Skill`)
     expect(formatResult(validateBots({ botsDir: join(fixtures, 'bots'), now }))).toBe('✓ 校验通过：3 个 Bot（其中 1 个外部收录）')
   })
   it('Bot 下架后，引用它的小队和策展都报错，汇总里分开数', () => {
@@ -311,9 +313,9 @@ describe('全量校验（Bot + 小队 + 策展）', () => {
     expect(real.stdout).toMatch(/✓ 校验通过：\d+ 个 Bot（其中 \d+ 个外部收录），[1-9]\d* 支小队，\d+ 条 Prompt，\d+ 个 Skill/)
     const fixture = cli([], { BOTS_DIR: 'tests/fixtures/bots' })
     expect(fixture.status).toBe(0)
-    expect(fixture.stdout.trim()).toBe('✓ 校验通过：3 个 Bot（其中 1 个外部收录），1 支小队，5 条 Prompt，3 个 Skill')
+    expect(fixture.stdout.trim()).toBe(`✓ 校验通过：3 个 Bot（其中 1 个外部收录），1 支小队，${promptCount} 条 Prompt，3 个 Skill`)
     const viaDir = cli(['--dir', join(fixtures, 'bots')])
-    expect(viaDir.stdout.trim()).toBe('✓ 校验通过：3 个 Bot（其中 1 个外部收录），1 支小队，5 条 Prompt，3 个 Skill')
+    expect(viaDir.stdout.trim()).toBe(`✓ 校验通过：3 个 Bot（其中 1 个外部收录），1 支小队，${promptCount} 条 Prompt，3 个 Skill`)
   })
   it('CLI：SQUADS_DIR、CURATION_FILE 可以单独覆盖；小队或策展出错退出 1', () => {
     const dir = sandbox()
@@ -331,6 +333,6 @@ describe('全量校验（Bot + 小队 + 策展）', () => {
     // 覆盖成空目录：没有小队，照样通过。
     const empty = cli([], { BOTS_DIR: 'tests/fixtures/bots', SQUADS_DIR: join(temporary(), 'none'), CURATION_FILE: join(temporary(), 'none.yaml') })
     expect(empty.status).toBe(0)
-    expect(empty.stdout.trim()).toBe('✓ 校验通过：3 个 Bot（其中 1 个外部收录），0 支小队，5 条 Prompt，3 个 Skill')
+    expect(empty.stdout.trim()).toBe(`✓ 校验通过：3 个 Bot（其中 1 个外部收录），0 支小队，${promptCount} 条 Prompt，3 个 Skill`)
   })
 })

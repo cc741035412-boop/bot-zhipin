@@ -25,6 +25,7 @@ onBeforeUnmount(() => window.removeEventListener('popstate', restore))
       </div>
       <dl class="ix-meta">
         <div v-if="item.agents"><dt>能用在</dt><dd>{{ item.agents.join('、') }}</dd></div>
+        <div v-if="item.models?.length"><dt>能用在</dt><dd>{{ item.models.join('、') }}</dd></div>
         <div><dt>作者</dt><dd><LibrarySource v-if="item.author.url" class="ext" :href="item.author.url">{{ item.author.name }}</LibrarySource><template v-else>{{ item.author.name }}</template></dd></div>
         <div><dt>许可证</dt><dd><LibrarySource v-if="item.licenseUrl" class="ext" :href="item.licenseUrl">{{ item.license }}</LibrarySource><template v-else>{{ item.license }}</template><small v-if="item.copyright">{{ item.copyright }}</small></dd></div>
         <div><dt>收录</dt><dd><time>{{ item.addedAt }}</time></dd></div>
@@ -43,6 +44,12 @@ onBeforeUnmount(() => window.removeEventListener('popstate', restore))
           </div>
         </section>
         <section v-if="item.requires?.length" class="ix-sec"><header><h2>运行依赖</h2></header><ul class="ix-points"><li v-for="r in item.requires" :key="r">{{ r }}</li></ul></section>
+        <section v-if="item.images?.length" class="ix-sec ix-gallery"><header><h2>效果图</h2></header>
+          <figure v-for="(image,n) in item.images" :key="n">
+            <a :href="image.src" target="_blank" rel="noopener noreferrer"><img :src="image.src" :alt="image.alt" :width="image.width" :height="image.height" loading="lazy"></a>
+            <figcaption>{{ image.credit }}</figcaption>
+          </figure>
+        </section>
         <section v-if="item.body && readingBody" class="ix-sec">
           <header><h2>正文</h2><LibraryCopy class="sm ghost" :value="readingBody" target="body" /></header>
           <div id="body" class="ix-sheet" :lang="item.bodyZh ? 'zh' : item.lang" v-text="readingBody" />

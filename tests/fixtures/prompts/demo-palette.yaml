@@ -1,0 +1,19 @@
+slug: demo-palette
+title: 示例·双色色卡
+category: 出图
+purpose: 按照主色和对照色制作一组纯色色卡，用来比较配色
+scenarios: [挑选海报主色, 比较两款色样]
+lang: zh
+models: [GPT Image, 即梦]
+body: |
+  为【主色】与【对照色】分别绘制一张横向色卡。
+  让色彩铺满画面，不要边框、纹理、阴影或文字。
+images:
+  - { file: demo-rose.png, alt: 玫红色的横向色卡, credit: 本站测试样图，CC0 }
+  - { file: demo-teal.png, alt: 青绿色的横向色卡, credit: 本站测试色卡，CC0 }
+source: { name: 本站测试样例, url: https://example.com/fixtures/demo-palette }
+author: { name: 示例作者 }
+copyright: 本站测试样例
+license: CC0-1.0
+licenseUrl: https://creativecommons.org/publicdomain/zero/1.0/
+addedAt: 2026-11-09
