@@ -1,0 +1,42 @@
+slug: claude-schema-to-sql
+title: 照着表结构把问题写成 SQL
+titleOriginal: How to make SQL queries with Claude — ask_claude() prompt
+category: 编程
+purpose: 给它数据库表结构和想查的问题，它只返回对应的 SQL 查询语句。
+scenarios:
+- 店主按月统计订单金额
+- 学生练习把问题写成多表查询
+- 运营同事按渠道汇总报名人数
+tags:
+- SQL
+- 数据库
+- 数据查询
+lang: en
+body: |-
+  Here is the schema for a database:
+
+  {schema}
+
+  Given this schema, can you output a SQL query to answer the following question? Only output the SQL query and nothing else. Do not wrap it in a code block.
+
+  Question: {query}
+bodyZh: |
+  下面是数据库的表结构：
+
+  {schema}
+
+  请根据这个表结构，写一条能回答以下问题的 SQL 查询语句。只输出 SQL 查询语句，不要输出其他内容，也不要用代码块包裹。
+
+  问题：{query}
+summary: 先告诉 AI 数据放在哪些表、字段之间怎么关联，再问你想查什么。它按给定结构写查询，不附解释，也不用代码块包裹；拿到的是查询语句，而不是执行查询后的数据。
+usage: 把 {schema} 换成相关表的建表语句，或列明表名、字段名、类型和关联关系；把 {query} 换成要查的问题，写清时间范围和统计口径。发给能写 SQL 的 AI。先核对表名、连接条件和筛选范围，再在只读环境里用少量已知数据验证结果。
+source:
+  url: https://github.com/anthropics/claude-cookbooks/blob/8ad5de647d4f0f50c95d74aabc8aa20a3f70cdd3/misc/how_to_make_sql_queries.ipynb?plain=1#L106-L112
+  name: anthropics/claude-cookbooks
+author:
+  name: Anthropic
+  url: https://github.com/anthropics
+license: MIT
+licenseUrl: https://github.com/anthropics/claude-cookbooks/blob/8ad5de647d4f0f50c95d74aabc8aa20a3f70cdd3/LICENSE
+copyright: Copyright (c) 2023 Anthropic
+addedAt: '2026-11-22'

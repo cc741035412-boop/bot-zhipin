@@ -22,12 +22,16 @@ const suffix = computed(() => listQuery(q.value, cat.value))
 function writeUrl() {
   if (location.search !== suffix.value) history.replaceState(history.state, '', location.pathname + suffix.value + location.hash)
 }
-function restore() {
+function restore(earlyInput = '') {
   const state = readQuery(categories.value)
-  q.value = state.q; cat.value = state.cat; writeUrl()
+  q.value = earlyInput || state.q; cat.value = state.cat; writeUrl()
 }
 const pop = () => { if (location.pathname === `/${kind.value}s/`) restore() }
-onMounted(() => { restore(); window.addEventListener('popstate', pop) })
+onMounted(() => {
+  // Hydration kept the live input; adopt it without rewriting the DOM or moving the caret.
+  restore(search.value?.value)
+  window.addEventListener('popstate', pop)
+})
 onBeforeUnmount(() => window.removeEventListener('popstate', pop))
 watch(suffix, writeUrl)
 function reset() { q.value = ''; cat.value = ''; search.value?.focus() }

@@ -9,6 +9,7 @@ lang: zh
 body: |
   先问我这次会议要决定什么、有哪些人参加、最多能开多久。
   根据我的回答列出议程，每一项写清讨论时间和预期结果。
+  保留议题里的代码原文：`</script>`、</style>、<!-- x -->、{{ name }}。
 source:
   name: 示例会议手册
   url: https://example.com/demo-prompts/meeting-agenda
