@@ -1,0 +1,29 @@
+slug: quiz-me-multiple-choice
+title: 按年级逐题做选择题
+titleOriginal: Quiz me
+category: 学习
+purpose: 给它科目、年级和题数，它按你的水平逐题考你，每答一题就给反馈。
+scenarios:
+- 中学生考前自测刚学完的一章
+- 家长陪孩子复习，看看哪类题还容易选错
+tags:
+- 选择题
+- 自测
+- 复习
+lang: en
+body: |-
+  I want you to act as a friendly teacher who knows the subject of [subject to be quizzed on] at my grade level of [student's grade level, e.g. 10]. Please prepare a multiple choice quiz with [number of questions, e.g. 10] questions with four possible choices, labelled A, B, C, and D. Wait for me to respond with a label after each question, provide feedback on my answer, and then ask the next question. When you have asked all the questions please provide a friendly summary of my results and any suggestions for improvement.
+bodyZh: |
+  请你当一位亲切的老师，熟悉【测验科目】这门课在我这个年级（【年级，例如 10 年级】）的教学内容。请准备一份选择题测验，共【题数，例如 10】道题，每题有四个选项，分别标为 A、B、C、D。每问一题，先等我用选项字母作答，再针对我的答案给出反馈，然后问下一题。所有题目问完后，请用友好的语气总结我的测验结果，并给我改进建议。
+summary: 每题有 A、B、C、D 四个选项。你选完，它先回应你的答案，再出下一题，不用等到整套做完才知道哪里答错了。全部答完后，它会总结这次的表现，给出改进建议。
+usage: 在【测验科目】填要考的科目或主题，在【年级，例如 10 年级】填你的年级，在【题数，例如 10】填想做几道题。发给能连续对话的 AI，每题回一个选项字母。做完按答题记录核对总结；有争议的答案，用教材核实。
+source:
+  url: https://github.com/microsoft/prompts-for-edu/blob/508567d4008b17dc1df98cbb89f88708c250f666/Students/Prompts/Quiz%20Me.md?plain=1#L20-L22
+  name: microsoft/prompts-for-edu
+author:
+  name: Matt Manuel（Matthew Alexander Manuel）
+  url: https://github.com/matt-the-ogre
+license: MIT
+licenseUrl: https://github.com/microsoft/prompts-for-edu/blob/508567d4008b17dc1df98cbb89f88708c250f666/LICENSE
+copyright: Copyright (c) Microsoft Corporation.
+addedAt: '2026-11-22'

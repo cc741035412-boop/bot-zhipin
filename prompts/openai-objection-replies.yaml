@@ -1,0 +1,29 @@
+slug: openai-objection-replies
+title: 准备回应客户顾虑的话
+titleOriginal: Prepare sales objection rebuttals
+category: 营销
+purpose: 贴出两三条客户常提的顾虑，它逐条拟回应，需要时用数据或故事说明。
+scenarios:
+- 摄影师准备回答客户对报价的疑问
+- 小店店主回应顾客对交货时间的担心
+- 销售在演示前练习回答客户对换用新工具的疑虑
+tags:
+- 客户沟通
+- 销售问答
+lang: en
+body: |-
+  Create rebuttals to these common objections: [insert 2–3 objections]. Make them sound natural and confident, and include a backup stat or story where useful. Output as list.
+bodyZh: |
+  针对以下常见顾虑，逐条写出回应：【两三条客户顾虑】。语气要自然、自信。需要佐证时，用一项统计数据或一个故事来说明。以列表形式输出。
+summary: 客户说「有点贵」时，一句「物有所值」往往没答到点上。这条提示词从客户实际提出的顾虑出发，把回应列成清单。口气要自然、有底气，数据或故事只在能说明问题时才用。
+usage: 把【两三条客户顾虑】换成两三条客户原话，补上产品或服务内容、报价包含什么、你能兑现哪些承诺，以及可以对外引用的数据或真实经历，再发给对话式 AI。逐条看是否答到了客户在意的事；数字和故事要能核实，没有依据就删掉，别当成事实转述。
+source:
+  url: https://web.archive.org/web/20261030065324/https://academy.openai.com/public/clubs/work-users-ynjqu/resources/use-cases-sales
+  name: OpenAI Academy（Wayback 存档）
+author:
+  name: OpenAI
+  url: https://academy.openai.com/
+license: 未声明
+licenseUrl: https://openai.com/policies/terms-of-use/
+copyright: 版权归原作者，原页未声明许可
+addedAt: '2026-11-22'
