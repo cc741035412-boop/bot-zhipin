@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
 import BzIcon from './BzIcon.vue'
-const props = defineProps<{ value: string; target: string }>()
+const props = defineProps<{ value: string; target: string; compact?: boolean }>()
 const label = ref<'复制'|'已复制'|'未复制'>('复制')
 let timer: ReturnType<typeof setTimeout>, version = 0
 async function copy() {
@@ -25,7 +25,7 @@ async function copy() {
 onBeforeUnmount(() => { version++; clearTimeout(timer) })
 </script>
 <template>
-  <button class="bz-btn copy" type="button" :class="{copied: label === '已复制', failed: label === '未复制'}" @click="copy">
+  <button class="bz-btn copy" type="button" :aria-label="compact ? label : undefined" :class="{copied: label === '已复制', failed: label === '未复制'}" @click="copy">
     <BzIcon :name="label === '复制' ? 'copy' : label === '已复制' ? 'check' : 'x'" /><span role="status">{{ label }}</span>
   </button>
 </template>
