@@ -18,7 +18,8 @@ import './styles/library.css'
 export default {
   extends: DefaultTheme,
   Layout: () => h(DefaultTheme.Layout, null, {
-    'nav-bar-content-before': () => h(ModuleNav),
+    'nav-bar-title-before': () => h('span', { class: 'nav-island-glass', 'aria-hidden': 'true' }),
+    'nav-bar-content-before': () => [h('span', { class: 'nav-island-glass', 'aria-hidden': 'true' }), h(ModuleNav)],
     'not-found': () => h(NotFound),
     // 全站页脚接在内容后面；搜索面板是浮层，放哪都一样
     'layout-bottom': () => [h(SiteFooter), h(SearchPalette)],
