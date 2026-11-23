@@ -6,12 +6,13 @@ import LibraryCopy from './LibraryCopy.vue'
 import LibrarySource from './LibrarySource.vue'
 defineProps<{ slug: string; examples: NonNullable<LibraryItem['examples']> }>()
 const imageUrl = (file: string) => `/media/skills/${file}`
+const hasPath = (text: string) => /\S[/\\]\S/.test(text)
 </script>
 <template>
   <section class="ix-sec ix-examples"><header><h2>示例</h2></header>
     <div v-for="(e, i) in examples" :key="i" class="ix-example">
       <p class="ix-text">{{ e.caption }}</p>
-      <div v-if="e.ask" class="ix-ask">
+      <div v-if="e.ask" class="ix-ask" :class="{ 'ix-ask-path': hasPath(e.askZh ?? e.ask) }">
         <LibraryCopy compact class="sm" :track="{ name: 'skill_copy', slug, props: { what: 'example', index: i } }" :value="e.askZh ?? e.ask" :target="`ask-${i}`" />
         <ExampleText :id="`ask-${i}`" :text="e.askZh ?? e.ask" :lines="6" />
       </div>
