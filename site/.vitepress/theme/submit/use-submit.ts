@@ -9,9 +9,11 @@ import * as api from './api'
 import { createStore } from './store'
 import { issueFallbackUrl } from './issue-fallback'
 import { bundleErrorCopy, explainError, countdownText, type Diagnostic } from './errors'
+import { track } from '../track'
 import { announce } from '../announce'
 
 export function useSubmit() {
+  const terminal = new Set<string>()
   const store = createStore()
   const s = reactive({
     phase: 'guide', plaintext: '', token: '', slug: '', bundleError: { reason: '', aiText: '' }, loadingVisible: false,
@@ -40,11 +42,11 @@ export function useSubmit() {
     namesZh: new Map(s.context?.index.flatMap((bot) => bot.nameZh ? [[bot.slug, bot.nameZh]] : []) || []),
   }) : null)
   const blockers = computed(() => {
-    const list: { text: string; target: string }[] = []
-    if (!valid.value) list.push({ text: '投稿包还没通过检查', target: '#check-summary' })
-    if (!s.user) list.push({ text: '还没登录', target: '[data-testid="login-button"]' })
-    if (!s.license) list.push({ text: '还没勾选授权', target: '[data-testid="license-checkbox"]' })
-    if (s.retryAt > s.now) list.push({ text: '请等倒计时结束', target: '#submit-error-title' })
+    const list: { key: string; text: string; target: string }[] = []
+    if (!valid.value) list.push({ key: 'invalid', text: '投稿包还没通过检查', target: '#check-summary' })
+    if (!s.user) list.push({ key: 'unauthenticated', text: '还没登录', target: '[data-testid="login-button"]' })
+    if (!s.license) list.push({ key: 'license_required', text: '还没勾选授权', target: '[data-testid="license-checkbox"]' })
+    if (s.retryAt > s.now) list.push({ key: 'rate_limited', text: '请等倒计时结束', target: '#submit-error-title' })
     return list
   })
   const countdown = computed(() => countdownText((s.retryAt - s.now) / 1000))
@@ -56,6 +58,7 @@ export function useSubmit() {
     if (!s.plaintext || s.phase === 'submitting' || s.error?.error === 'invalid') return
     const checked = checkBundle(s.plaintext, { context: s.context, login: s.user?.login })
     s.errors = checked.errors; s.warnings = checked.warnings
+    track('submit_step', { step: 'checked', ok: valid.value, n: s.errors.length + Number(taken.value), code: taken.value ? 'slug_taken' : undefined })
     s.phase = s.errors.length ? 'invalid' : 'valid'
     if (move && s.errors.length) void focus('#check-summary')
     if (move) void announce(s.errors.length ? `投稿包还有 ${s.errors.length} 处要改` : '投稿包检查通过')
@@ -70,6 +73,7 @@ export function useSubmit() {
     try {
       const decoded = fromLocation ? await readLocationBundle() : await readBundleInput(input || '')
       if (!alive || run !== version || !decoded) return
+      track('submit_step', { step: 'read', via: restore ? 'resume' : fromLocation ? 'link' : 'paste' })
       s.plaintext = decoded.plaintext; s.slug = decoded.bundle.slug
       s.token = fromLocation ? String(store.loadDraft()?.token || '') : ''
       s.phase = 'validating'
@@ -89,6 +93,7 @@ export function useSubmit() {
       if (!alive || run !== version) return
       s.phase = 'bundle-error'; s.plaintext = ''; s.result = null
       s.bundleError = bundleErrorCopy(error)
+      track('submit_step', { step: 'bundle_error', code: 'invalid_bundle' })
       void focus('#bundle-error-title')
     } finally { clearTimeout(timer); if (run === version) s.loadingVisible = false }
   }
@@ -118,6 +123,7 @@ export function useSubmit() {
   }
   function login() {
     if (s.auth === 'redirecting' || s.loginRetryAt > s.now) return
+    track('submit_step', { step: 'login_click' })
     save(); s.auth = 'redirecting'; api.startLogin()
   }
   async function logout() {
@@ -138,6 +144,7 @@ export function useSubmit() {
   }
   async function submit() {
     if (s.phase === 'submitting') return
+    track('submit_step', { step: 'submit_click', ok: !blockers.value.length, code: blockers.value[0]?.key })
     if (blockers.value.length) { const first = blockers.value[0]; void focus(first.target); void announce('还差：' + first.text); return }
     const run = version
     s.phase = 'submitting'; s.error = null; s.submitLong = false
@@ -146,6 +153,7 @@ export function useSubmit() {
     try {
       const result = await api.submit({ plaintext: s.plaintext, license: s.license })
       if (!alive || run !== version) return
+      track('submit_step', { step: 'submitted', mode: result.update ? 'update' : 'new', pr: result.pr.number })
       s.result = result; s.phase = 'submitted'; s.progress = 'waiting_review'; s.stale = false
       save()
       await focus('#result-title')
@@ -156,6 +164,7 @@ export function useSubmit() {
       s.phase = 'valid'
       // 提交的 30 秒无响应按 §10.1 走 GitHub 不可用退路。
       if (error.error === 'timeout') error = { ...error, error: 'github_error' }
+      track('submit_step', { step: 'submit_fail', code: error.error })
       await showError(error)
       if (error.error === 'invalid') { s.errors = error.errors || []; s.warnings = error.warnings || []; s.phase = 'invalid'; await focus('#check-summary'); void announce(`投稿包还有 ${s.errors.length} 处要改`) }
       else if (['unauthenticated', 'session_expired'].includes(error.error)) expire()
@@ -177,6 +186,11 @@ export function useSubmit() {
       s.stale = false; s.statusError = null
       if (response.state !== s.progress) {
         s.progress = response.state
+        const key = `${result.pr.number}:${response.state}`
+        if (['live', 'closed', 'failed'].includes(response.state) && !terminal.has(key)) {
+          terminal.add(key)
+          track('submit_step', { step: 'progress', code: response.state, pr: result.pr.number })
+        }
         const titles = { checking: '已创建 PR（合并请求）', waiting_review: '等待维护者审核', approved: '已上线', merged: '已上线', failed: '自动检查出了点问题', closed: '这个投稿被关闭了' }
         void announce(response.state === 'live' ? '你的 Bot 上线了' : '状态变成：' + titles[response.state as keyof typeof titles])
       }
@@ -191,6 +205,8 @@ export function useSubmit() {
   watch(() => s.license, save)
   onMounted(async () => {
     const url = new URL(location.href), returned = url.searchParams.get('login') || ''
+    track('submit_step', { step: 'view' })
+    if (url.searchParams.has('login')) track('submit_step', { step: 'login_back', ok: returned === 'ok', code: ['ok', 'cancelled', 'failed', 'expired'].includes(returned) ? returned : 'failed' })
     if (['cancelled', 'failed', 'expired'].includes(returned)) s.loginKind = returned
     const retry = Number(url.searchParams.get('retry'))
     if (retry > 0 && Number.isFinite(retry)) s.loginRetryAt = Date.now() + retry * 1000
@@ -198,6 +214,7 @@ export function useSubmit() {
     history.replaceState(history.state, '', url.pathname + url.search + url.hash)
     const ua = navigator.userAgent
     s.inapp = store.inappDismissed() ? '' : [['MicroMessenger', '微信'], [' QQ/', 'QQ'], ['Weibo', '微博'], ['DingTalk', '钉钉'], ['AlipayClient', '支付宝']].find(([match]) => ua.includes(match))?.[1] || ''
+    if (s.inapp) track('submit_step', { step: 'inapp', code: s.inapp })
     const tick = () => { s.now = Date.now(); tickTimer = setTimeout(tick, 1000) }; tick()
     document.addEventListener('visibilitychange', visibility)
     window.addEventListener('hashchange', hashChanged)

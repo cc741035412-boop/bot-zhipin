@@ -3,6 +3,7 @@ import { computed, inject, nextTick, onBeforeUnmount, ref } from 'vue'
 import { previewMode } from '../submit/preview-mode'
 const preview = inject(previewMode, false)
 import { installPrompt } from '../../meta.mjs'
+import { track } from '../track'
 import { reportClick } from '../heat'
 import { announce, announceCopy } from '../announce'
 import { useBotAction } from '../live/scope'
@@ -52,17 +53,20 @@ const dialog = ref<HTMLDialogElement>()
 const field = ref<HTMLTextAreaElement>()
 const copyButton = ref<HTMLButtonElement>()
 let timer: ReturnType<typeof setTimeout> | undefined
+const from = computed(() => props.compact ? 'card' : 'detail')
 async function copyPrompt() {
   if (preview) return
   reportClick(props.bot.slug, 'prompt')
   try {
     await navigator.clipboard.writeText(installPrompt(props.bot.slug))
+    track('bot_copy_prompt', { from: from.value, ok: true }, { slug: props.bot.slug })
     copied.value = true
     play({ state: 'wink' })
     void announceCopy()
     clearTimeout(timer)
     timer = setTimeout(() => { copied.value = false }, 1800)
   } catch {
+    track('bot_copy_prompt', { from: from.value, ok: false }, { slug: props.bot.slug })
     fallback.value = true
     await nextTick()
     dialog.value?.showModal()
@@ -88,7 +92,10 @@ function watchLaunch() {
   }
   getAppTimer = setTimeout(() => {
     stopWatching?.()
-    if (!left) getApp.value = true
+    if (!left && !getApp.value) {
+      getApp.value = true
+      track('bot_no_app', {}, { slug: props.bot.slug })
+    }
   }, 3000)
 }
 // 手机和平板：交给 x.ai 模板页（新标签页）去唤起手机 App，这里只顺手复制试跑句。
@@ -97,12 +104,15 @@ const isTouch = () => typeof window !== 'undefined' && (window.matchMedia?.('(po
 async function importBot(event: MouseEvent) {
   if (preview) return
   play({ state: 'comet' })
-  reportClick(props.bot.slug, 'import')
-  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
-  const direct = Boolean(appUrl.value) && !isTouch()
+  if (event.type !== 'auxclick') reportClick(props.bot.slug, 'import')
+  const mod = event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0
+  const direct = !mod && Boolean(appUrl.value) && !isTouch()
   if (direct) event.preventDefault()
   // 先复制再唤起：浏览器弹「打开 Grok Bot？」以后页面失焦，剪贴板就写不进去了。
-  if (trial.value && await writeClipboard(trial.value)) {
+  const result = mod ? undefined : !trial.value ? 'none' : await writeClipboard(trial.value) ? 'copied' : 'failed'
+  track('bot_import', { from: from.value, direct, ...(mod ? {} : { trial: result }), mod }, { slug: props.bot.slug })
+  if (mod) return
+  if (result === 'copied') {
     launched.value = true
     void announce('已复制开场白')
     clearTimeout(launchTimer)
@@ -128,7 +138,7 @@ onBeforeUnmount(() => { clearTimeout(timer); clearTimeout(launchTimer); clearTim
 <template>
   <div class="bot-actions">
     <button v-if="preview" data-testid="btn-import" type="button" class="bz-btn action-import" :class="compact ? 'sm' : 'primary block'" aria-disabled="true"><BzIcon name="arrow-up-right" />{{ compact ? '导入' : '一键导入' }}</button>
-    <a v-else data-testid="btn-import" class="bz-btn action-import" :class="[compact ? 'sm' : 'primary block', { copied: launched }]" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" @click="importBot"><BzIcon :name="launched ? 'check' : 'arrow-up-right'" />{{ launched ? (compact ? '已复制' : '已复制开场白') : (compact ? '导入' : '一键导入') }}<span v-if="!launched" class="bz-sr-only">（打开 Grok Bot）</span></a>
+    <a v-else data-testid="btn-import" class="bz-btn action-import" :class="[compact ? 'sm' : 'primary block', { copied: launched }]" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" data-track-own @click="importBot" @auxclick.middle="importBot"><BzIcon :name="launched ? 'check' : 'arrow-up-right'" />{{ launched ? (compact ? '已复制' : '已复制开场白') : (compact ? '导入' : '一键导入') }}<span v-if="!launched" class="bz-sr-only">（打开 Grok Bot）</span></a>
     <a v-if="getApp && !preview" data-testid="get-app" class="bz-btn ghost get-app" :class="compact ? 'sm' : 'block'" :href="GET_APP_URL" target="_blank" rel="noopener noreferrer"><BzIcon name="arrow-up-right" />{{ compact ? '下载 Grok Bot' : '没装 Grok Bot？去下载' }}<span class="bz-sr-only">（在新标签页打开）</span></a>
     <button v-if="!bot.external" ref="copyButton" data-testid="btn-prompt" type="button" class="bz-btn action-prompt" :class="[compact ? 'ghost sm' : 'block', { copied }]" :aria-disabled="preview || undefined" @click="copyPrompt"><BzIcon :name="copied ? 'check' : 'copy'" />{{ copied ? '已复制' : '复制安装提示词' }}</button>
   </div>

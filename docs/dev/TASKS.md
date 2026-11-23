@@ -96,6 +96,18 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 |---|---|---|---|---|
 | SP1 | ⌘K 面板输入后加 Prompt、Skills 两组：`searchLibrary`、按需加载的 `library-search.data`（失败退回 `/data/index.json`）、分类砖条目、吸顶组名、读屏播报；中英文交界拆词（库页同用）、原名按词头匹配、场景最低档；单测、样例站 e2e、对比度 e2e、浅深色和 390 手机截图 | 编码 agent | `SearchPalette.vue`、`LibraryPage.vue`、`theme/search.ts`、`data/library-search.data.mjs`、`tests/unit/search*`、`tests/e2e/search-library*` | ✅ |
 
+# 埋点（2026-11-22）
+
+目标：全站埋点自建，存 D1，命令出中文报告。决策 72，设计 `TRACKING.md`。任务书和验收脚本在维护者本地的派活目录 `2026-11-22-bot-zhipin-tracking/`。
+
+| # | 任务 | 执行 | 前置 | 写入范围 | 状态 |
+|---|---|---|---|---|---|
+| TR-API | `POST /api/events`、迁移 0005、单测（真实本地 D1） | 编码 agent | — | `functions/api/events.ts`、`functions/_lib/events-store.ts`、`migrations/0005` | ✅ |
+| TR-RPT | `npm run report` 只读报告、单测 | 编码 agent | — | `scripts/report.mjs`、`scripts/lib/report.mjs` | ✅ |
+| TR-WEB-CORE | `theme/track.ts` 模块和单测，不接组件 | 编码 agent | — | `site/.vitepress/theme/track.ts` | ✅ |
+| TR-WEB-HOOK | 接进主题入口和各组件、e2e 核对每个事件 | 编码 agent | #34、#35、#36 已合进 main；TR-WEB-CORE 已完成。搜索面板已合（#38）；`search` 事件不在本 PR，下一步单独补 | `theme/index.ts`、各组件、`theme/submit/`、`tests/e2e/tracking*` | ✅ |
+| TR-INT | 集成、文档、开 PR；线上先备份再迁移，然后合并 | 维护者 | 全部 | — | 🟡 |
+
 # 让 AI 来找：bot-zhipin skill（2026-11-22）
 
 目标：任何人的 AI 助手装上 `bot-zhipin` skill 后能搜本站的 Prompt、Skills 和 Bot，Prompt 给原文，Skill 给安装命令。决策 70。

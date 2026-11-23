@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import BzIcon from './BzIcon.vue'
+import { track } from '../track'
 import LibraryCopy from './LibraryCopy.vue'
 
-const props = defineProps<{ text: string; id: string }>()
+const props = defineProps<{ text: string; id: string; slug: string; lang: 'translated' | 'original' }>()
 // 两种片段都只插值成文本节点，SSR 时由 Vue 转义；绝不把正文当 HTML 解析。
 const parts = computed(() => props.text.split(/(【[^【】\n]+】|\{[^{}\n]+\}|<(?=[^<>\r\n\u2028\u2029]{1,30}>)[^<>\r\n\u2028\u2029]*\p{Script=Han}[^<>\r\n\u2028\u2029]*>)/u))
 const content = ref<HTMLElement>()
@@ -13,6 +14,7 @@ async function toggle() {
   const row = content.value?.closest('article')
   const returnToRow = expanded.value && row && row.getBoundingClientRect().top < 0
   expanded.value = !expanded.value
+  if (expanded.value) track('prompt_open', {}, { slug: props.slug })
   await nextTick()
   const trigger = expanded.value ? closeButton : openButton
   trigger.value?.focus({ preventScroll: true })
@@ -38,7 +40,7 @@ onBeforeUnmount(() => observer?.disconnect())
     </div>
     <div v-if="expanded" class="ix-snip-toolbar">
       <button ref="closeButton" type="button" class="ix-snip-toggle" aria-expanded="true" :aria-controls="id" @click="toggle">收起<BzIcon name="chevron-down" :size="14" /></button>
-      <LibraryCopy class="sm" compact :value="text" :target="id" />
+      <LibraryCopy class="sm" compact :track="{ name: 'prompt_copy', slug, props: { from: 'list_open', lang } }" :value="text" :target="id" />
     </div>
   </div>
   <button v-if="overflows && !expanded" ref="openButton" type="button" class="ix-snip-toggle" aria-expanded="false" :aria-controls="id" @click="toggle">

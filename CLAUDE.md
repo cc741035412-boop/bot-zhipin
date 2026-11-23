@@ -8,6 +8,7 @@
 
 - `docs/dev/ARCHITECTURE.md`：目录、数据流、约定
 - `docs/dev/API.md`：点击计数、头像转发和作者页兜底的接口约定（前后端共用）
+- `docs/dev/TRACKING.md`：埋点设计（事件表、接口、隐私、报告口径）；事件名和字段只在 `functions/_lib/events.ts` 定义
 - `docs/dev/DECISIONS.md`：已经定下的决策，改之前先问
 - `docs/dev/TASKS.md`：任务看板
 - `docs/dev/MAINTAINING.md`：审核投稿、下架、清计数的操作步骤
@@ -23,6 +24,7 @@
 | `npm run dev` | 只看页面（没有计数后端，热度显示「—」） |
 | `npm run dev:full` | 页面 + 计数接口 + 本地 D1，端口 8788 |
 | `npm run e2e` | Playwright 真浏览器验收（自动起 dev:full） |
+| `npm run report` | 埋点报告：只读查线上库，最近 7 天（`--days`、`--local`、`--json`） |
 | `npm run new-bot -- <slug>` | 从模板新建 Bot |
 
 ## 规则

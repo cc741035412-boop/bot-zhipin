@@ -16,6 +16,7 @@ import LiveAnnouncer from './LiveAnnouncer.vue'
 import { SQUAD_COPY } from '../../meta.mjs'
 import { avatarColor } from '../avatar'
 import { botPalette } from '../color'
+import { track } from '../track'
 import { reportClick } from '../heat'
 import { announce } from '../announce'
 import { nextPoke } from '../pitch'
@@ -79,9 +80,10 @@ const hoveredRow = ref<string | null>(null)
 function enterRow(event: PointerEvent, slug: string) { if (event.pointerType === 'mouse') hoveredRow.value = slug }
 function leaveRow(event: PointerEvent) { if (event.pointerType === 'mouse') hoveredRow.value = null }
 function poke(slug: string) { rowPortraits.get(slug)?.play({ state: nextPoke(slug).state }) }
-function importMember(slug: string) {
-  // 和货架上的「导入」一样：照常上报这个 Bot 的导入，新标签页由链接自己打开。
-  reportClick(slug, 'import')
+function importMember(slug: string, from: 'squad_lineup' | 'squad_setup', event: MouseEvent) {
+  // 和货架上的「导入」一样：只在 click 时上报热度，新标签页由链接自己打开。
+  if (event.type !== 'auxclick') reportClick(slug, 'import')
+  track('bot_import', { from, squad: props.squad.slug, direct: false, trial: 'none', mod: event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button === 1 }, { slug })
   photo.value?.play(slug, { state: 'comet' })
   rowPortraits.get(slug)?.play({ state: 'comet' })
   mark(slug, true)
@@ -90,6 +92,7 @@ function importMember(slug: string) {
 /* ---------- 开始组队：滚到组队步骤 ---------- */
 const setup = ref<HTMLElement>()
 function start() {
+  track('squad_start')
   setup.value?.scrollIntoView({ behavior: isReducedMotion() ? 'auto' : 'smooth', block: 'start' })
   setup.value?.focus({ preventScroll: true })
   history.replaceState(history.state, '', '#setup')
@@ -106,6 +109,7 @@ async function copyText(key: 'kickoff' | 'tryout') {
   if (key === 'kickoff') reportClick(props.squad.slug, 'kickoff')
   try {
     await navigator.clipboard.writeText(text)
+    track('squad_copy', { which: key, ok: true })
     copied.value = key
     if (leader.value) photo.value?.play(leader.value.bot, { state: 'wink' })
     void announce(SQUAD_COPY.copied)
@@ -113,6 +117,7 @@ async function copyText(key: 'kickoff' | 'tryout') {
     timer = setTimeout(() => { copied.value = null }, 1800)
   } catch {
     // 复制不了（权限、旧浏览器）：把这段文字选中，按 ⌘C / Ctrl+C 就能带走。
+    track('squad_copy', { which: key, ok: false })
     const block = blocks.get(key)
     if (!block) return
     const range = document.createRange()
@@ -197,7 +202,7 @@ onBeforeUnmount(() => {
           <p class="roster-does" data-testid="member-does">{{ item.does }}</p>
           <a
             class="bz-btn sm roster-import" data-testid="member-import" :data-done="String(done(item.bot))"
-            :href="item.templateUrl" target="_blank" rel="noopener noreferrer" @click="importMember(item.bot)"
+            :href="item.templateUrl" target="_blank" rel="noopener noreferrer" data-track-own @click="importMember(item.bot, 'squad_lineup', $event)" @auxclick.middle="importMember(item.bot, 'squad_lineup', $event)"
           ><BzIcon :name="done(item.bot) ? 'check' : 'arrow-up-right'" />{{ SQUAD_COPY.import }}<span class="bz-sr-only">{{ displayName(item) }}（在新标签页打开）</span></a>
         </li>
         <li v-for="item in squad.missing" :key="`missing-${item.name}`" class="roster-row is-missing" data-testid="squad-missing">
@@ -243,7 +248,7 @@ onBeforeUnmount(() => {
                 <SquadStill :bot="portrait(item)" />
                 <span class="setup-member-name"><BotName :bot="item" small /></span>
                 <a
-                  class="bz-btn sm ghost" data-testid="setup-import" :href="item.templateUrl" target="_blank" rel="noopener noreferrer" @click="importMember(item.bot)"
+                  class="bz-btn sm ghost" data-testid="setup-import" :href="item.templateUrl" target="_blank" rel="noopener noreferrer" data-track-own @click="importMember(item.bot, 'squad_setup', $event)" @auxclick.middle="importMember(item.bot, 'squad_setup', $event)"
                 ><BzIcon name="arrow-up-right" />{{ SQUAD_COPY.import }}<span class="bz-sr-only">{{ displayName(item) }}（在新标签页打开）</span></a>
               </li>
             </ul>

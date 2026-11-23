@@ -118,6 +118,7 @@ test.describe('首页的小队区块', () => {
 test.describe('小队详情页', () => {
   test('头部和各区块：合影、标签、阵容、步骤、代价、要知道的事；全页只有一个实心主按钮', async ({ page }) => {
     const errors = []
+    await page.route('**/api/events', r => r.fulfill({ status: 204 }))
     page.on('console', (message) => { if (message.type() === 'error' || /hydration/i.test(message.text())) errors.push(message.text()) })
     page.on('pageerror', (error) => errors.push(error.message))
     await page.goto(`/squads/${squad}`)

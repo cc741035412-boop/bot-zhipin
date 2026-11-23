@@ -13,6 +13,7 @@
     "preview": "vitepress preview site",
     "validate": "node scripts/validate.mjs",
     "test": "vitest run --passWithNoTests",
+    "report": "node scripts/report.mjs",
     "e2e": "playwright test",
     "dev:full": "node scripts/ensure-dev-vars.mjs && npm run build && wrangler d1 migrations apply DB --local && wrangler pages dev --port 8788",
     "new-bot": "node scripts/new-bot.mjs",

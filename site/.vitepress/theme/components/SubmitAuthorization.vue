@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { track } from '../track'
 import { SITE } from '../../meta.mjs'
 import SubmitCopyButton from './SubmitCopyButton.vue'
 import ExternalHint from './ExternalHint.vue'
@@ -33,7 +34,7 @@ function reload() { location.reload() }
           <p v-if="s.fallback.needsPaste">打开的页面里，把投稿包粘进「投稿包」一栏</p>
           <textarea v-if="s.fallback.needsPaste" readonly rows="6" aria-label="备用投稿包" :value="s.plaintext" />
           <SubmitCopyButton v-if="s.fallback.needsPaste" id="issue-fallback-paste" :text="s.plaintext" label="复制投稿包" />
-          <a data-testid="issue-fallback" class="bz-btn shelf-button" :href="s.fallback.url" target="_blank" rel="noopener noreferrer"><SubmitIcon name="arrow-up-right" />改用 GitHub Issue 投稿<span class="bz-sr-only">（在新标签页打开）</span></a>
+          <a data-testid="issue-fallback" @click="track('submit_step', { step: 'issue_fallback' })" @auxclick.middle="track('submit_step', { step: 'issue_fallback' })" class="bz-btn shelf-button" :href="s.fallback.url" target="_blank" rel="noopener noreferrer"><SubmitIcon name="arrow-up-right" />改用 GitHub Issue 投稿<span class="bz-sr-only">（在新标签页打开）</span></a>
         </div>
       </template>
     </div>

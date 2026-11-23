@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
+import { track } from '../track'
 import { categoriesFor, fieldsFor, listQuery, readQuery, type LibraryCard } from '../library'
 import { matchWord, queryWords } from '../search'
 import { markFor, tint } from '../library-marks'
@@ -8,7 +9,7 @@ import PromptSnippet from './PromptSnippet.vue'
 import LibrarySource from './LibrarySource.vue'
 import LibraryTile from './LibraryTile.vue'
 import BzIcon from './BzIcon.vue'
-const props = defineProps<{ title: 'Prompt'|'Skills'; items: LibraryCard[] }>()
+const props = defineProps<{ title: 'Prompt'|'Skills'; items: (LibraryCard & { hasTranslation?: boolean })[] }>()
 const kind = computed(() => props.title === 'Prompt' ? 'prompt' : 'skill')
 const categories = computed(() => categoriesFor(kind.value).filter(c => props.items.some(i => i.category === c)))
 const q = ref(''), cat = ref(''), search = ref<HTMLInputElement>()
@@ -34,7 +35,22 @@ onMounted(() => {
   restore(search.value?.value)
   window.addEventListener('popstate', pop)
 })
-onBeforeUnmount(() => window.removeEventListener('popstate', pop))
+let timer: ReturnType<typeof setTimeout> | undefined
+let lastQuery = '', lastCat = ''
+function sendSearch() {
+  clearTimeout(timer); timer = undefined
+  const query = q.value.trim()
+  if (!query || (query === lastQuery && cat.value === lastCat)) return
+  lastQuery = query; lastCat = cat.value
+  track('library_search', { q: query, cat: lastCat || '全部', results: visible.value.length })
+}
+watch([q, cat], () => { clearTimeout(timer); timer = setTimeout(sendSearch, 1500) })
+onBeforeUnmount(() => { if (timer) sendSearch(); window.removeEventListener('popstate', pop) })
+function chooseCategory(value: string) {
+  if (cat.value === value) return
+  cat.value = value
+  track('filter', { where: 'library_cat', value: value || '全部', results: visible.value.length })
+}
 watch(suffix, writeUrl)
 function reset() { q.value = ''; cat.value = ''; search.value?.focus() }
 function escape(e: KeyboardEvent) { if (!e.isComposing && e.keyCode !== 229) q.value = '' }
@@ -45,7 +61,7 @@ function escape(e: KeyboardEvent) { if (!e.isComposing && e.keyCode !== 229) q.v
       <header class="ix-heading"><h1>{{ title }}</h1><p class="bz-count" role="status">共 {{ visible.length }} 条</p></header>
       <label class="bz-search"><BzIcon name="search" :size="18" /><input id="library-search" ref="search" v-model="q" aria-label="搜索" placeholder="搜索" autocomplete="off" @keydown.esc="escape"><kbd aria-hidden="true">/</kbd></label>
       <div class="ix-cats" role="group" aria-label="分类">
-        <button v-for="c in ['', ...categories]" :key="c" :data-cat="c" :style="tint(kind, c)" :aria-pressed="cat === c" :class="{ 'is-zero': c && !counts.get(c) }" @click="cat = c">
+        <button v-for="c in ['', ...categories]" :key="c" :data-cat="c" :style="tint(kind, c)" :aria-pressed="cat === c" :class="{ 'is-zero': c && !counts.get(c) }" @click="chooseCategory(c)">
           <LibraryTile :kind="kind" :category="c" :size="28" /><span>{{ c || '全部' }}</span><small>{{ c ? counts.get(c) || 0 : matches.length }}</small>
         </button>
       </div>
@@ -61,11 +77,11 @@ function escape(e: KeyboardEvent) { if (!e.isComposing && e.keyCode !== 229) q.v
                 <LibrarySource v-if="!i.hasBody" class="bz-tag outline source-link" :href="i.source.url" aria-label="查看原文">仅摘要</LibrarySource>
               </h2>
               <span class="ix-row-by">{{ i.author.name }}</span>
-              <LibraryCopy v-if="i.copyText" class="sm" compact :value="i.copyText" :target="`snip-${i.slug}`" />
+              <LibraryCopy v-if="i.copyText" class="sm" compact :track="{ name: 'prompt_copy', slug: i.slug, props: { from: 'list', lang: i.hasTranslation ? 'translated' : 'original' } }" :value="i.copyText" :target="`snip-${i.slug}`" />
             </header>
             <span class="bz-sr-only">{{ i.category }}</span><p>{{ i.purpose }}</p>
             <div :class="i.images?.length ? 'ix-preview' : 'ix-plain-preview'">
-              <div v-if="i.copyText"><PromptSnippet :id="`snip-${i.slug}`" :text="i.copyText" /></div>
+              <div v-if="i.copyText"><PromptSnippet :slug="i.slug" :lang="i.hasTranslation ? 'translated' : 'original'" :id="`snip-${i.slug}`" :text="i.copyText" /></div>
               <a v-if="i.images?.[0]" class="ix-thumb" :href="i.detailUrl + suffix"><img :src="i.images[0].src" :alt="i.images[0].alt" :width="i.images[0].width" :height="i.images[0].height" loading="lazy"></a>
             </div>
           </div>

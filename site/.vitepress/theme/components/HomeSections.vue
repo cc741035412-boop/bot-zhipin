@@ -16,6 +16,7 @@ function shelfMemory(): ShelfMemory {
 </script>
 
 <script setup lang="ts">
+import { track } from '../track'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 import { inBrowser } from 'vitepress'
 import { data as bots } from '../../data/bots.data.mjs'
@@ -104,13 +105,19 @@ function apply(next: { role: string; collection: string | null }) {
   syncUrl()
   describe()
 }
+async function recordFilter(where: 'shelf_role' | 'shelf_sort' | 'collection', value: string) {
+  await nextTick()
+  track('filter', { where, value, results: list.value?.querySelectorAll('.bot-card').length ?? 0 })
+}
 function chooseRole(value: string) {
   if (role.value === value && !collection.value) return
   apply({ role: value, collection: null })
+  void recordFilter('shelf_role', value === ALL_ROLES ? '全部' : value)
   void settle()
 }
 async function pickCollection(slug: string) {
   apply({ role: ALL_ROLES, collection: slug })
+  void recordFilter('collection', slug)
   await nextTick()
   // 焦点交给「全部 Bot」的标题：键盘和读屏用户跟着来到筛选后的列表。
   title.value?.focus({ preventScroll: true })
@@ -118,6 +125,7 @@ async function pickCollection(slug: string) {
 }
 function clearCollection() {
   apply({ role: ALL_ROLES, collection: null })
+  void recordFilter('collection', 'none')
   title.value?.focus({ preventScroll: true })
   void settle()
 }
@@ -126,6 +134,7 @@ function chooseSort(value: ShelfSort) {
   sort.value = value
   if (memory) memory.sort = value
   reorder()
+  void recordFilter('shelf_sort', value)
   entering.value = !isReducedMotion()
 }
 function resized(event: MediaQueryListEvent) { narrow.value = event.matches }

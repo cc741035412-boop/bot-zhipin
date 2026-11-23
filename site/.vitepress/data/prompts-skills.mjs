@@ -26,7 +26,7 @@ export function skillData(entries = readSkills()) {
 }
 
 /** 本库列表与筛选用：去掉正文、摘要这些长文字。 */
-export const promptList = (entries) => promptData(entries).map(listPrompt)
+export const promptList = (entries) => promptData(entries).map(item => ({ ...listPrompt(item), hasTranslation: Boolean(item.bodyZh) }))
 export const skillList = (entries) => skillData(entries).map(listSkill)
 
 // 数据加载器的监听范围；仓库外的目录不放进来（原因见 bots.mjs 的 shelfWatch），由 bot-watch.mjs 定点监听。
