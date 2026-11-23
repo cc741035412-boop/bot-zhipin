@@ -105,7 +105,8 @@ AI 自动审核、贴链接自动填信息、线上版本比对、点赞评论�
 | TR-API | `POST /api/events`、迁移 0005、单测（真实本地 D1） | 编码 agent | — | `functions/api/events.ts`、`functions/_lib/events-store.ts`、`migrations/0005` | ✅ |
 | TR-RPT | `npm run report` 只读报告、单测 | 编码 agent | — | `scripts/report.mjs`、`scripts/lib/report.mjs` | ✅ |
 | TR-WEB-CORE | `theme/track.ts` 模块和单测，不接组件 | 编码 agent | — | `site/.vitepress/theme/track.ts` | ✅ |
-| TR-WEB-HOOK | 接进主题入口和各组件、e2e 核对每个事件 | 编码 agent | #34、#35、#36 已合进 main；TR-WEB-CORE 已完成。搜索面板已合（#38）；`search` 事件不在本 PR，下一步单独补 | `theme/index.ts`、各组件、`theme/submit/`、`tests/e2e/tracking*` | ✅ |
+| TR-WEB-HOOK | 接进主题入口和各组件、e2e 核对每个事件 | 编码 agent | #34、#35、#36 已合进 main；TR-WEB-CORE 已完成。全站搜索面板见 TR-SEARCH | `theme/index.ts`、各组件、`theme/submit/`、`tests/e2e/tracking*` | ✅ |
+| TR-SEARCH | 全站搜索面板接 `search`：记录打开方式、完整命中数及是否选中，e2e 核对 | 编码 agent | SP1（#38）、TR-WEB-HOOK | `SearchPalette.vue`、`tests/e2e/tracking.spec.mjs`、埋点文档 | ✅ |
 | TR-INT | 集成、文档、开 PR；线上先备份再迁移，然后合并 | 维护者 | 全部 | — | 🟡 |
 
 # 让 AI 来找：bot-zhipin skill（2026-11-22）

@@ -60,7 +60,7 @@
 | `outbound` | 点站外链接（全站统一监听，左键和中键都算） | 当前页的 slug | `host`；`to` 域名加路径；`kind` `download` `author` `source` `license` `repo` `pr` `other` |
 | `filter` | 首页切分组、切排序、点专题、清除专题；Prompt/Skills 列表切分类 | — | `where` `shelf_role`/`shelf_sort`/`collection`/`library_cat`；`value`；`results` 切完列表里有几条 |
 | `library_search` | Prompt/Skills 列表搜索框停手 1.5 秒，或离开页面时还有没发的词；同一个词不重复发 | — | `q`；`cat` 当时的分类；`results` |
-| `search` | 搜索面板已合（#38）；`search` 事件不在本 PR，下一步单独补。⌘K 搜索面板选中结果或关闭时记一次；没输入不记 | 选中的条目 | `q`；`results`；`via` `shortcut`/`slash`/`button`；`picked`；`pick_type`；`pick_rank` 第几个（从 0 起） |
+| `search` | 全站搜索面板选中结果或关闭时记一次；搜索词为空不记 | 选中的条目（未选不带） | `q` 关闭时的词（最多 40 字）；`results` 四组完整命中数之和；`via` 打开方式 `shortcut`/`slash`/`button`；`picked` 是否选中；选中才带 `pick_type` `bot`/`squad`/`prompt`/`skill` 和 `pick_rank`（按显示顺序跨组从 0 起） |
 | `submit_step` | 投稿页每一步，见下表 | — | `step`；`ok`；`code`；`n`；`via`；`mode`；`pr` |
 
 **投稿漏斗的 `step`**：

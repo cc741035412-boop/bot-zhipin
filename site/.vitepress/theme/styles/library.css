@@ -183,6 +183,10 @@
 .ix-example footer { font-size: var(--bz-fs-sm); color: var(--bz-text-3); overflow-wrap: anywhere; }
 @media (max-width: 819px) {
   .ix-ask { max-width: 100%; }
+  /* 路径可用按钮下方的整行；clip 保留六行裁切，又不像 hidden 那样隔开浮动。 */
+  .ix-ask-path { display: flow-root; }
+  .ix-ask-path > .copy { float: right; margin-left: 8px; }
+  .ix-ask-path > .ix-example-window { overflow: clip; }
   /* 成对的问答共用示例栏宽；回复不沿用正文纸面的负外边距。 */
   .ix-example:has(> .ix-reply) > .ix-ask { justify-self: stretch; }
   .ix-example > .ix-reply { margin-inline: 0; }

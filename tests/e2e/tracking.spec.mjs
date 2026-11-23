@@ -96,6 +96,61 @@ test('分类结果数、搜索停手和相同词去重', async ({ page }) => {
   await go(page, '/prompts/'); const cat = page.locator('[data-cat]').nth(1), value = await cat.getAttribute('data-cat'); await cat.click(); await recorded(page, 'filter', { where: 'library_cat', value, results: await page.locator('.ix-row').count() }); const input = page.locator('#library-search'); await input.fill('a'); await input.fill(' no-match-xyz '); await recorded(page, 'library_search', { q: 'no-match-xyz', cat: value, results: 0 }); await input.fill('no-match-xyz'); await page.waitForTimeout(1550); expect(await history(page, 'library_search')).toHaveLength(1)
 })
 
+test('搜索面板：⌘K 选中跨组第 2 条，只记一次完整命中数', async ({ page, wire }) => {
+  await go(page, '/')
+  await page.keyboard.press('ControlOrMeta+k')
+  const panel = page.getByTestId('search-panel'), input = panel.getByRole('combobox')
+  await input.fill('  整理  ')
+  // 样例货架先列一个 Bot 和一支小队；等异步的两库都到了，从播报读全数，而不是数可见选项。
+  const status = panel.getByRole('status')
+  await expect(status).toHaveText(/找到 1 个 Bot，1 支小队，\d+ 条 Prompt.*，\d+ 个 Skill/)
+  const counts = [...(await status.textContent()).matchAll(/(\d+) (?:个 Bot|支小队|条 Prompt|个 Skill)/g)]
+  const results = counts.reduce((sum, match) => sum + Number(match[1]), 0)
+  const options = panel.getByRole('option')
+  expect(results).toBeGreaterThan(await options.count())
+  await input.press('ArrowDown')
+  await expect(options.nth(1)).toHaveAttribute('data-slug', squad)
+  await expect(options.nth(1)).toHaveAttribute('aria-selected', 'true')
+  await input.press('Enter')
+  await recorded(page, 'page_view', { prev: 'home' }, { page: 'squad', slug: squad })
+  await expect.poll(() => wire.events.filter(e => e.name === 'search')).toEqual([
+    expect.objectContaining({ page: 'home', slug: squad, props: { q: '整理', results, via: 'shortcut', picked: true, pick_type: 'squad', pick_rank: 1 } }),
+  ])
+})
+test('搜索面板：点击打开、输入后 Esc，只记最终词，不带选中字段', async ({ page }) => {
+  await go(page, '/')
+  await page.getByTestId('search-trigger').click()
+  const input = page.getByTestId('search-input')
+  await input.fill('先前的词')
+  await input.fill(`  找   ${'🔎'.repeat(41)}  `)
+  await input.press('Escape')
+  await expect(page.getByTestId('search-panel')).toHaveCount(0)
+  expect(await history(page, 'search')).toEqual([
+    expect.objectContaining({ props: { q: '找 ' + '🔎'.repeat(38), results: 0, via: 'button', picked: false } }),
+  ])
+})
+test('搜索面板：斜杠打开、输入后点关闭', async ({ page }) => {
+  await go(page, botPath)
+  await page.keyboard.press('/')
+  const q = '全站无此查询词'
+  await page.getByTestId('search-input').fill(q)
+  await page.getByRole('button', { name: '关闭搜索' }).click()
+  await expect(page.getByTestId('search-panel')).toHaveCount(0)
+  const searches = await history(page, 'search')
+  expect(searches).toEqual([expect.objectContaining({ page: 'bot', props: { q, results: 0, via: 'slash', picked: false } })])
+  expect(searches[0]).not.toHaveProperty('slug') // 没选条目，不拿来源详情页的 slug 充数。
+})
+test('搜索面板：打开不输入就关，不记 search', async ({ page }) => {
+  await go(page, '/')
+  await page.getByTestId('search-trigger').click()
+  const input = page.getByTestId('search-input')
+  await expect(input).toBeFocused()
+  await expect(input).toHaveValue('')
+  await input.press('Escape')
+  await expect(page.getByTestId('search-panel')).toHaveCount(0)
+  expect(await history(page, 'search')).toEqual([])
+})
+
 const bundle = makeWebSubmissionLink('tests/fixtures/bots/demo-prd-reviewer')
 async function submission(p, { loggedOut = false, fail = false, linkBundle = true, query = '' } = {}) {
   const data = JSON.parse(readFileSync('site/public/api-data/submit-context.json', 'utf8'))
