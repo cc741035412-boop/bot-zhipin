@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
+import { constants } from 'node:os'
 import { parseFace, syncFaces, checkFaces } from '../../scripts/sync-faces.mjs'
 import { XAI_SHAPE_IDS, shapeRadii, resolveFace, botFace, faceColors } from '../../site/.vitepress/theme/face'
 import { avatarSeed, avatarColor } from '../../site/.vitepress/theme/avatar'
@@ -7,13 +8,20 @@ import { SHAPES, COLORS } from '../../site/.vitepress/theme/vendor/bloub/skins'
 import { PROFILES } from '../../site/.vitepress/theme/vendor/bloub/profiles'
 
 const REF = '/Users/Admin/Documents/pi-prompts/2026-11-14-bot-zhipin-living/refs/xai-memory-keeper.html'
+// 本机可选样本：只在系统读文件失败时跳过；读到空字符串也要照常验证。
+let referenceHtml = null
+try {
+  referenceHtml = readFileSync(REF, 'utf8')
+} catch (error) {
+  if (!Object.hasOwn(constants.errno, error.code)) throw error
+}
 const snippet = '{"addHref":"grokbot://add/template","color":"#FF9800","shape":"tablet"}'
 const old = { color: '#777777', shape: 'hex', fetchedAt: '2026-01-01' }
 const today = '2026-11-14'
 
 describe('公开页面数据', () => {
-  it.skipIf(!existsSync(REF))('解析真实的 Next.js 转义页面', () => {
-    expect(parseFace(readFileSync(REF, 'utf8'))).toEqual({ color: '#777777', shape: 'hex' })
+  it.skipIf(referenceHtml === null)('解析真实的 Next.js 转义页面', () => {
+    expect(parseFace(referenceHtml)).toEqual({ color: '#777777', shape: 'hex' })
   })
   it('支持原始 JSON 和转义引号；仅取 addHref 旁的字段并统一颜色大小写', () => {
     for (const html of [snippet, snippet.replaceAll('"', '\\"'), snippet.replaceAll('"', '\\\\"')]) {

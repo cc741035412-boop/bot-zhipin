@@ -7,6 +7,13 @@ import { join, resolve } from 'node:path'
 
 test('工作区外 BOTS_DIR：首页及动态详情自动刷新，坏 YAML 跳过并警告', async ({ page }) => {
   test.setTimeout(60_000)
+  // VitePress dev 先返回空的 #app，load 事件不等于路由组件已挂载。只给导航后的首个内容断言延长等待。
+  const firstRender = { timeout: 30_000 }
+  // botWatch 重启前，旧服务就可能更新卡片、打印警告。等当前页自动重载再 goto，避免新页脚本撞上重启。
+  const changeBeforeNavigation = (change) => Promise.all([
+    page.waitForEvent('load', { timeout: 15_000 }),
+    change(),
+  ])
   const temp = await mkdtemp(join(tmpdir(), 'p2-watch-'))
   const bots = join(temp, 'bots')
   await cp('tests/fixtures/bots', bots, { recursive: true })
@@ -27,20 +34,24 @@ test('工作区外 BOTS_DIR：首页及动态详情自动刷新，坏 YAML 跳�
     await page.goto('http://127.0.0.1:4183/')
     // 同一个 Bot 在主推卡和列表卡里各出现一次，这里只看列表卡。
     const card = page.locator('[data-testid="bot-card"][data-slug="demo-weekly-digest"]')
-    await expect(card).toContainText('示例·周报整理员')
+    await expect(card).toContainText('示例·周报整理员', firstRender)
     const yaml = join(bots, 'demo-weekly-digest/bot.yaml')
-    await writeFile(yaml, (await readFile(yaml, 'utf8')).replace('示例·周报整理员', '热刷新测试员'))
-    await expect(card).toContainText('热刷新测试员', { timeout: 15_000 })
+    await changeBeforeNavigation(async () => {
+      await writeFile(yaml, (await readFile(yaml, 'utf8')).replace('示例·周报整理员', '热刷新测试员'))
+      await expect(card).toContainText('热刷新测试员', { timeout: 15_000 })
+    })
     await page.goto('http://127.0.0.1:4183/bots/demo-weekly-digest')
-    await expect(page.locator('h1')).toHaveText('热刷新测试员')
+    await expect(page.locator('h1')).toHaveText('热刷新测试员', firstRender)
     const design = join(bots, 'demo-weekly-digest/DESIGN.md')
     await writeFile(design, (await readFile(design, 'utf8')) + '\n\n## 热刷新设计说明\n\n刷新成功。\n')
     await expect(page.getByTestId('section-design')).toContainText('刷新成功。', { timeout: 15_000 })
-    await mkdir(join(bots, 'broken-bot'))
-    await writeFile(join(bots, 'broken-bot/bot.yaml'), 'name: [未闭合\n')
-    await expect.poll(() => log, { timeout: 15_000 }).toContain('跳过 bots/broken-bot/bot.yaml')
+    await changeBeforeNavigation(async () => {
+      await mkdir(join(bots, 'broken-bot'))
+      await writeFile(join(bots, 'broken-bot/bot.yaml'), 'name: [未闭合\n')
+      await expect.poll(() => log, { timeout: 15_000 }).toContain('跳过 bots/broken-bot/bot.yaml')
+    })
     await page.goto('http://127.0.0.1:4183/')
-    await expect(page.getByTestId('bot-card')).toHaveCount(3)
+    await expect(page.getByTestId('bot-card')).toHaveCount(3, firstRender)
     // 仅清理本测试的临时数据，覆盖空货架的真实数据加载路径。
     for (const slug of ['demo-weekly-digest', 'demo-prd-reviewer', 'demo-external']) {
       await rm(join(bots, slug), { recursive: true })
