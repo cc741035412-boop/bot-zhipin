@@ -4,12 +4,15 @@
   Prompt、Skills 的数据第一次打开时才加载（library-search.data 单独成块，不进首屏 JS）。
 -->
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { computed, inject, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vitepress'
 import { data as bots } from '../../data/bots.data.mjs'
 import { data as squadData } from '../../data/squads.data.mjs'
 import { SHELF_COPY, SQUAD_COPY } from '../../meta.mjs'
 import { searchBots, searchLibrary, searchSquads } from '../search'
+import { track } from '../track'
+import { previewMode } from '../submit/preview-mode'
+import { EVENTS } from '../../../../functions/_lib/events'
 import { displayName } from '../../../../scripts/lib/bot-name.mjs'
 import { avatarColor } from '../avatar'
 import { faceColors } from '../face'
@@ -96,7 +99,9 @@ const shelf: PaletteBot[] = [...(bots as PaletteBot[])].sort((a, b) =>
 
 const router = useRouter()
 const route = useRoute()
+const preview = inject(previewMode, false)
 const open = ref(false)
+let openedVia: (typeof EVENTS.search.via.values)[number]
 const query = ref('')
 const active = ref(0)
 const panel = ref<HTMLElement>()
@@ -159,7 +164,8 @@ async function fetchIndex(): Promise<PaletteLibrary> {
 const matches = computed(() => searchBots(shelf, query.value, Infinity))
 const results = computed(() => matches.value.slice(0, LIMIT))
 const more = computed(() => matches.value.length - results.value.length)
-const squadResults = computed(() => searchSquads(squads, query.value, SQUAD_LIMIT))
+const squadMatches = computed(() => searchSquads(squads, query.value, Infinity))
+const squadResults = computed(() => squadMatches.value.slice(0, SQUAD_LIMIT))
 const typed = computed(() => query.value.trim() !== '')
 const botTitle = computed(() => typed.value ? 'Bot' : '全部 Bot')
 // 输入了字、收录数据还没到（或失败后正在重试）：先不下「没找到」的结论，免得数据一到空状态又换成结果。
@@ -178,19 +184,21 @@ const libraryGroups = computed(() => {
 })
 // 键盘上下键走的是同一串：Bot、小队、Prompt、Skills。
 const options = computed(() => [
-  ...results.value.map((bot) => ({ id: optionId(bot.slug), url: bot.detailUrl })),
-  ...squadResults.value.map((squad) => ({ id: squadOptionId(squad.slug), url: squad.detailUrl })),
-  ...libraryGroups.value.flatMap((group) => group.items.map((entry) => ({ id: entryOptionId(group.kind, entry.slug), url: entry.detailUrl }))),
+  ...results.value.map((bot) => ({ id: optionId(bot.slug), url: bot.detailUrl, kind: 'bot' as const, slug: bot.slug })),
+  ...squadResults.value.map((squad) => ({ id: squadOptionId(squad.slug), url: squad.detailUrl, kind: 'squad' as const, slug: squad.slug })),
+  ...libraryGroups.value.flatMap((group) => group.items.map((entry) => ({ id: entryOptionId(group.kind, entry.slug), url: entry.detailUrl, kind: group.kind, slug: entry.slug }))),
 ])
 const activeId = computed(() => options.value[active.value]?.id)
 const emptyText = computed(() => typed.value ? '没找到，换个词试试' : '货架上还没有 Bot')
 const showEmpty = computed(() => !options.value.length && !libraryPending.value)
+// 读屏播报和埋点共用完整命中数，不取列表截断后的条数。
+const hitCounts = computed(() => ({
+  bots: matches.value.length, squads: squadMatches.value.length,
+  prompts: promptMatches.value.length, skills: skillMatches.value.length,
+}))
 /** 念给读屏用户听的结果数。这个节点一直在，只换文字，读屏才会稳定播报。 */
 const status = computed(() => {
-  const total = matches.value.length
-  const teams = squadResults.value.length
-  const prompts = promptMatches.value.length
-  const skills = skillMatches.value.length
+  const { bots: total, squads: teams, prompts, skills } = hitCounts.value
   if (!total && !teams && !prompts && !skills) return libraryPending.value ? '' : emptyText.value
   const parts = [
     ...(total ? [`${total} 个 Bot${more.value > 0 ? `（列出前 ${LIMIT} 个）` : ''}`] : []),
@@ -229,8 +237,9 @@ function lockScroll() {
   }
 }
 
-function show() {
+function show(via: typeof openedVia) {
   if (open.value) return
+  openedVia = via
   opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
   query.value = ''
   active.value = 0
@@ -240,8 +249,21 @@ function show() {
   void nextTick(() => input.value?.focus({ preventScroll: true }))
 }
 
-function hide() {
+const showFromButton = () => show('button')
+
+// 所有关闭路径（包括 choose）只从这里记一次，在跳转前保留来源页和当前面板的数据。
+function hide(rank?: number) {
   if (!open.value) return
+  const q = (input.value?.value ?? query.value).trim().replace(/\s+/g, ' ')
+  if (q && !preview) {
+    const pick = rank === undefined ? undefined : options.value[rank]
+    track('search', {
+      q: [...q].slice(0, EVENTS.search.q.max).join(''),
+      results: Object.values(hitCounts.value).reduce((sum, n) => sum + n, 0),
+      via: openedVia, picked: !!pick,
+      ...(pick ? { pick_type: pick.kind, pick_rank: rank } : {}),
+    }, { slug: pick?.slug ?? null })
+  }
   open.value = false
   unlock?.()
   unlock = null
@@ -253,7 +275,7 @@ function hide() {
 function choose(index: number) {
   const option = options.value[index]
   if (!option) return
-  hide()
+  hide(index)
   void router.go(option.url)
 }
 
@@ -272,7 +294,7 @@ watch(query, () => {
   if (scroller.value) scroller.value.scrollTop = 0
 }, { flush: 'sync' })
 // 浏览器前进、后退换了页面：面板跟着收起。
-watch(() => route.path, hide)
+watch(() => route.path, () => hide())
 
 function isTyping(target: EventTarget | null) {
   return target instanceof HTMLElement
@@ -286,7 +308,7 @@ function onKeydown(event: KeyboardEvent) {
   if (mod && !event.altKey && !event.shiftKey && event.key.toLowerCase() === 'k') {
     event.preventDefault()
     if (open.value) hide()
-    else show()
+    else show('shortcut')
     return
   }
   if (!open.value) {
@@ -295,7 +317,7 @@ function onKeydown(event: KeyboardEvent) {
       event.preventDefault()
       const localSearch = document.querySelector<HTMLInputElement>('#library-search')
       if (localSearch) localSearch.focus()
-      else show()
+      else show('slash')
     }
     return
   }
@@ -356,12 +378,12 @@ function onHover(event: PointerEvent, index: number) {
 
 onMounted(() => {
   window.addEventListener('keydown', onKeydown)
-  window.addEventListener('bz-search-open', show)
+  window.addEventListener('bz-search-open', showFromButton)
   document.addEventListener('focusin', onFocusin)
 })
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydown)
-  window.removeEventListener('bz-search-open', show)
+  window.removeEventListener('bz-search-open', showFromButton)
   document.removeEventListener('focusin', onFocusin)
   hide()
 })
@@ -387,7 +409,7 @@ onBeforeUnmount(() => {
             :placeholder="SHELF_COPY.searchPlaceholder"
             autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go"
           >
-          <button type="button" class="sp-esc" aria-label="关闭搜索" @click="hide"><kbd class="sp-key">esc</kbd></button>
+          <button type="button" class="sp-esc" aria-label="关闭搜索" @click="hide()"><kbd class="sp-key">esc</kbd></button>
         </div>
 
         <!-- 四组（Bot、小队、Prompt、Skills）都在滚动区里，组名吸在滚动区顶上：滚到哪组，顶上就是哪组的名字。 -->
