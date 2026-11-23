@@ -43,7 +43,8 @@ function cli(args = [], env = {}) {
 function fieldErrors(field) { return run().errors.filter((e) => e.file.endsWith(`${reviewer}/bot.yaml`) && e.where === field) }
 
 it('真实 bots/ 通过', () => {
-  expect(validateBots({ botsDir: join(ROOT, 'bots'), now }).errors).toEqual([])
+  // 真实 Bot 用真实时钟：写死日期会把之后上架的投稿都判成「addedAt 不能晚于今天」（PR #44）
+  expect(validateBots({ botsDir: join(ROOT, 'bots') }).errors).toEqual([])
 })
 it('三个合法示例通过，外部收录不要求正文、技能、截图和 github', () => {
   const result = validateBots({ botsDir: fixtureDir, now })
