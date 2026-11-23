@@ -432,6 +432,22 @@ for (const width of [1280, 390])
       await expect(p.locator('.ix-title h1')).toBeVisible()
       await expect(p.getByRole('heading', { name: '示例', exact: true })).toHaveCount(0)
     })
+    if (mobile) test('PDF 订单表示例的请求气泡不拆开「附件」', async ({ page: p }) => {
+      await gotoReady(p, '/skills/pdf')
+      const ask = p.locator('.ix-example').filter({ hasText: '上传 PDF 订单表' }).locator('.ix-ask .ix-example-window')
+      await expect(ask).toContainText('附件：/mnt/uploads/order_form.pdf')
+      const [first, second] = await ask.evaluate(el => {
+        const text = document.createTreeWalker(el, NodeFilter.SHOW_TEXT).nextNode()
+        const start = text.data.indexOf('附件')
+        return [start, start + 1].map(i => {
+          const r = document.createRange()
+          r.setStart(text, i)
+          r.setEnd(text, i + 1)
+          return r.getBoundingClientRect().top
+        })
+      })
+      expect(first).toBe(second)
+    })
     if (mobile) fixtureTest('Skill 示例回复卡片不越出示例栏，两边对齐本条请求', async ({ page: p, fixtureURL }) => {
       await p.emulateMedia({ colorScheme: 'light' })
       async function edges(el) {
