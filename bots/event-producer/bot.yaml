@@ -8,6 +8,7 @@ author:
   name: "Jenna Nanpei"
   url: https://x.ai/bot/marketplace/bots/event-producer
 templateUrl: https://x.ai/bot/wtEIGNZ8oipDDVQTDHMPB
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "告诉它活动名称和日期就能开始，不用连任何应用"

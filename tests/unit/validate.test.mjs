@@ -37,13 +37,14 @@ function run(options = {}) { return validateBots({ botsDir, now, ...options }) }
 function issues(result = run()) { return result.errors.map((e) => e.problem).join('\n') }
 function cli(args = [], env = {}) {
   return spawnSync(process.execPath, [join(ROOT, 'scripts/validate.mjs'), ...args], {
-    cwd: ROOT, env: { ...process.env, BOTS_DIR: '', ...env }, encoding: 'utf8', timeout: 15000,
+    cwd: ROOT, env: { ...process.env, BOTS_DIR: '', GITHUB_ACTIONS: '', ...env }, encoding: 'utf8', timeout: 15000,
   })
 }
 function fieldErrors(field) { return run().errors.filter((e) => e.file.endsWith(`${reviewer}/bot.yaml`) && e.where === field) }
 
 it('真实 bots/ 通过', () => {
-  expect(validateBots({ botsDir: join(ROOT, 'bots'), now }).errors).toEqual([])
+  // 真实 Bot 用真实时钟：写死日期会把之后上架的投稿都判成「addedAt 不能晚于今天」（PR #44）
+  expect(validateBots({ botsDir: join(ROOT, 'bots') }).errors).toEqual([])
 })
 it('三个合法示例通过，外部收录不要求正文、技能、截图和 github', () => {
   const result = validateBots({ botsDir: fixtureDir, now })
@@ -396,6 +397,16 @@ it('CLI 错误退出 1，只有提醒退出 0 且先列提醒', () => {
   const failure = cli(['--dir', botsDir])
   expect(failure.status).toBe(1)
   expect(failure.stdout).toContain('校验未通过')
+})
+it('CLI 在 GitHub Actions 中于成功汇总之后输出提醒注释', () => {
+  put(skillPath, '---\nname: x\ndescription: 实际技能\n---\n')
+  const result = cli(['--dir', botsDir], { GITHUB_ACTIONS: 'true' })
+  expect(result.status).toBe(0)
+  const lines = result.stdout.split(/\r?\n/)
+  expect(lines.some((line) => line.startsWith('::warning file=bots/'))).toBe(true)
+  const summary = lines.findIndex((line) => line.startsWith('✓ 校验通过'))
+  expect(summary).toBeGreaterThanOrEqual(0)
+  expect(summary).toBeLessThan(lines.findIndex((line) => line.startsWith('::warning')))
 })
 it('CLI 未知参数或缺 --dir 值退出 1 并给用法', () => {
   for (const args of [['--dir'], ['--unknown'], ['--dir', '--other']]) {

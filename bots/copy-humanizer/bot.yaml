@@ -8,6 +8,7 @@ author:
   name: "Massimo De Luisa"
   url: https://x.ai/bot/marketplace/bots/human-copywriter
 templateUrl: https://x.ai/bot/YwxIbVEWqXN-HYCxiMCoB
+templateVersion: 4
 addedAt: 2026-11-15
 prerequisites:
   - "一两段你喜欢的文字当范例，可以跳过"

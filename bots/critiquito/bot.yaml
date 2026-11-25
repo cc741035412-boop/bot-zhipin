@@ -8,6 +8,7 @@ author:
   name: Manuel Muñoz Solera
   url: https://x.ai/bot/marketplace/bots/critiquito
 templateUrl: https://x.ai/bot/NqdH9qGvrq-yWRaXhJGM-
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - 一张要评审的界面截图，不用连 Figma 等任何应用

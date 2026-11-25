@@ -26,7 +26,7 @@
 
 1. **全程用不到 GitHub 令牌或密码。** 不要向用户要；用户只在投稿页上用浏览器登录 GitHub。
 2. **如果你是 Grok Bot（运行在 Grok Bot 的云电脑里）**，更不要在云电脑里放任何令牌：第三方模板能读到那台电脑上的所有文件。
-3. 投稿文件里**不能有任何密钥**（API Key、令牌、密码、Cookie）、公司内部链接、个人隐私数据（手机号、身份证、住址、别人的聊天记录）。从 Bot 输出里摘的原文也一样，隐私值换成「××」。
+3. 投稿文件里**不能有任何密钥**（API Key、令牌、密码、Cookie）、公司内部链接、个人隐私数据（手机号、身份证、住址、别人的聊天记录）。从 Bot 输出里摘的原文也一样，隐私值换成「××」。示例数据里的邮箱用 example.com 这类保留域名，手机号用「××」代替。
 4. **不要编造内容。** 设计说明、实际效果、摘录的输出都必须来自用户的真实情况。查不到就问，不要写一个「看起来合理」的。
 5. 投稿链接**只发给用户本人**。拿到链接的人用自己的 GitHub 账号提交，就会被记成作者。
 
@@ -168,7 +168,7 @@ bots/<slug>/
 
 注意：
 
-- `bot.yaml`：`slug` 和文件夹名一模一样；`category` 只能是 9 个分组之一；`templateUrl` 必须以 `https://x.ai/bot/` 开头；`permissions` 一个都不用就写 `permissions: []`；可选字段不用就整行删掉，不要加 schema 里没有的字段（完整定义见 `schema/bot.schema.json`）。
+- `bot.yaml`：`slug` 和文件夹名一模一样；`category` 只能是 9 个分组之一；`templateUrl` 必须以 `https://x.ai/bot/` 开头；`permissions` 一个都不用就写 `permissions: []`；可选字段不用就整行删掉，不要加 schema 里没有的字段（完整定义见 `schema/bot.schema.json`）。`templateVersion` 不用填，投稿时网站会自动记下模板当前的版本号。
 - `SKILL.md`：开头必须是 frontmatter，`name` 和文件夹名一致（小写字母、数字、短横线）：
 
   ```markdown

@@ -8,6 +8,7 @@ author:
   name: "Miguel Cruz"
   url: https://x.ai/bot/marketplace/bots/leadsworth
 templateUrl: https://x.ai/bot/oPDkINUfpUXhJDdsfRZht
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "一份线索表（导出、表格或直接贴），再说清什么样的线索算好"
@@ -30,10 +31,10 @@ about:
     - 每周出报告，标出没人跟、超时和卡住的
   trial: |-
     全程中文。先拿下面的示例线索走一遍。好线索：物流或电商公司、200 人以上、总监及以上。跟进人小陈、小林轮流分。
-    1. 王磊，华运物流 IT 总监，800 人，wanglei@huayun-wl.com，官网申请演示，11 月 20 日
-    2. 李娜，个人卖家，lina@qq.com，表单问价格，11 月 19 日
-    3. 王磊，华运物流，wanglei@huayun-wl.com，展会扫码，11 月 18 日
-    4. 赵强，优选电商运营经理，300 人，zhaoq@youxuan-ec.com，下载白皮书，11 月 15 日
+    1. 王磊，华运物流 IT 总监，800 人，wanglei@huayun.test，官网申请演示，11 月 20 日
+    2. 李娜，个人卖家，lina@mail.test，表单问价格，11 月 19 日
+    3. 王磊，华运物流，wanglei@huayun.test，展会扫码，11 月 18 日
+    4. 赵强，优选电商运营经理，300 人，zhaoq@youxuan.test，下载白皮书，11 月 15 日
     打分分档、合并重复、配好跟进人，给 A 档写第一封回复，只出稿不发。
   starters:
     - 这是上周的线索导出，帮我打分排个先后

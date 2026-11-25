@@ -8,6 +8,7 @@ author:
   name: "Hiten Shah"
   url: https://x.ai/bot/marketplace/bots/pitch-deck-coach
 templateUrl: https://x.ai/bot/zkVS-PkX1ooTE2nP21DPO
+templateVersion: 16
 addedAt: 2026-11-15
 prerequisites:
   - "一份融资路演稿，PPT 或 PDF"

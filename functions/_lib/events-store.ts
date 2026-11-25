@@ -1,7 +1,7 @@
 import type { D1Database } from '@cloudflare/workers-types'
 import { DAY_MS, hashIp, isValidSlug } from './clicks'
 import { ApiError } from './errors'
-import { EVENTS, EVENT_LIMITS, EVENT_RETENTION_DAYS, PAGE_TYPES, type EventName, type PropSpec } from './events'
+import { EVENTS, EVENT_LIMITS, EVENT_RETENTION_DAYS, PAGE_TYPES, QUERY_EVENTS, QUERY_RETENTION_DAYS, type EventName, type PropSpec } from './events'
 import { hit, RATE_LIMITS } from './ratelimit'
 
 const badRequest = () => new ApiError(400, 'bad_request')
@@ -90,5 +90,11 @@ export async function ingestEvents({ db, salt, ip, ua, country, batch, now }: {
 }
 
 export function scheduleEventCleanup(db: D1Database, now: number, waitUntil: (p: Promise<unknown>) => void, random = Math.random) {
-  if (random() < 1 / 200) waitUntil(db.prepare('DELETE FROM events WHERE day < ?').bind(beijingDay(now - EVENT_RETENTION_DAYS * DAY_MS)).run().catch(() => {}))
+  if (random() >= 1 / 200) return
+  waitUntil(Promise.resolve().then(() => db.batch([
+    db.prepare('DELETE FROM events WHERE day < ?').bind(beijingDay(now - EVENT_RETENTION_DAYS * DAY_MS)),
+    db.prepare(`UPDATE events SET props = json_remove(props, '$.q')
+      WHERE day < ?1 AND name IN (${QUERY_EVENTS.map((_, i) => `?${i + 2}`).join(', ')}) AND json_extract(props, '$.q') IS NOT NULL`)
+      .bind(beijingDay(now - QUERY_RETENTION_DAYS * DAY_MS), ...QUERY_EVENTS),
+  ])).catch(() => {}))
 }

@@ -2,7 +2,8 @@ import { fromBase64Url, toBase64Url } from './bytes'
 import type { Env } from './types'
 
 const encoder = new TextEncoder()
-const SESSION_MS = 2 * 60 * 60 * 1000
+export const SESSION_MS = 2 * 60 * 60 * 1000
+export const OAUTH_MS = 10 * 60 * 1000
 export interface SessionUser { id: number; login: string }
 
 // Bounded isolate-local cache: a 25-receipt submission must not import the same
@@ -101,8 +102,8 @@ export async function sessionSetCookie(env: Env, user: SessionUser, now: number)
 
 export async function oauthSetCookie(env: Env, state: string, verifier: string, now: number): Promise<string> {
   if (!env.SESSION_SECRET) throw new Error('Invalid session configuration')
-  const value = await sign(env.SESSION_SECRET, { t: 'o', state, verifier, exp: now + 600_000 })
-  return setCookie(env, cookieNames(env).oauth, value, 600, 'Lax')
+  const value = await sign(env.SESSION_SECRET, { t: 'o', state, verifier, exp: now + OAUTH_MS })
+  return setCookie(env, cookieNames(env).oauth, value, OAUTH_MS / 1000, 'Lax')
 }
 
 export function clearCookie(env: Env, name: string): string {

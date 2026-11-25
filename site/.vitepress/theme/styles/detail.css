@@ -49,7 +49,7 @@
 .detail-info > .detail-tagline { margin-top: var(--bz-sp-2); font-size: var(--bz-fs-title); line-height: 1.5; color: var(--bz-text-2); text-wrap: pretty; }
 .detail-info > .detail-tags { display: flex; flex-wrap: wrap; align-items: center; gap: var(--bz-sp-2); margin-top: var(--bz-sp-4); }
 
-/* ---------- 侧栏：一张卡。导入按钮 → 三项属性 → 作者、来源、上架、热度 ---------- */
+/* ---------- 侧栏：一张卡。导入按钮 → 四项属性 → 作者、来源、上架、热度 ---------- */
 /* position: relative：单栏时头部那团柔光会漫到侧栏的位置，侧栏要画在它上面（不然白色的导入按钮会被染色） */
 .detail-rail {
   position: relative; min-width: 0; padding: 20px; border: 1px solid var(--bz-hairline); border-radius: var(--bz-r-card);
@@ -70,10 +70,13 @@
 /* 实心的主按钮高 44；下面的次级按钮跟它等高 */
 .detail-rail .bot-actions > .bz-btn { height: 44px; padding-inline: var(--bz-sp-4); }
 .detail-rail .bot-actions-note { margin-top: var(--bz-sp-2); text-align: center; }
-/* 三项属性：三格并排，中间两条细线。上面一行小字是名称，下面一行是图标 + 值 */
+/* 四项属性：四格并排。上面一行小字是名称，下面一行是图标 + 值 */
 .rail-facts { display: flex; margin: 20px 0 0; padding: var(--bz-sp-4) 0; border-block: 1px solid var(--bz-hairline); }
-/* 每格按自己内容的宽度起步，多出来的宽度三格平分：每格的字到下一条细线的留白一样宽 */
+/* 每格按自己内容的宽度起步，多出来的宽度平分。窄手机收紧分隔线后的留白。 */
 .rail-fact { flex: 1 1 auto; min-width: 0; padding-left: var(--bz-sp-4); border-left: 1px solid var(--bz-hairline); }
+@media (max-width: 340px) {
+  .rail-fact { padding-left: var(--bz-sp-2); }
+}
 .rail-fact:first-child { padding-left: 0; border-left: 0; }
 .rail-fact > dt { font-size: var(--bz-fs-xs); font-weight: 500; line-height: 1.3; color: var(--bz-text-3); white-space: nowrap; }
 .rail-fact > dd {

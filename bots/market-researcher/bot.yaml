@@ -8,6 +8,7 @@ author:
   name: "Josh Kim"
   url: https://x.ai/bot/marketplace/bots/market-researcher
 templateUrl: https://x.ai/bot/xzkXiUbdYfPd7g30OhLGf
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "你的官网地址和一两个竞品名"

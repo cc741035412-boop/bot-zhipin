@@ -8,6 +8,7 @@ author:
   name: "Jay Sahnan"
   url: https://x.com/JaySahnan
 templateUrl: https://x.ai/bot/Dd6URqnf4w5hiVEs_vbRL
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "你的基线数据和流量；可选连 PostHog 读数据"

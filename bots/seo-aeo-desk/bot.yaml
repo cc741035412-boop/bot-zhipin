@@ -8,6 +8,7 @@ author:
   name: "Adam Tanguay"
   url: https://x.ai/bot/marketplace/bots/seo-aeo-desk
 templateUrl: https://x.ai/bot/0IhyZWxwbf2cFmsmroZQL
+templateVersion: 5
 addedAt: 2026-11-15
 prerequisites:
   - "你的网站网址"

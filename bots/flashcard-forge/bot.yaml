@@ -8,6 +8,7 @@ author:
   name: "Cypher Monkey"
   url: https://x.com/Cypher0x9
 templateUrl: https://x.ai/bot/-BGZTvUVjO6KWPTrLnS2Q
+templateVersion: 4
 addedAt: 2026-11-15
 prerequisites:
   - "粘贴笔记、上传文件或给公开网页就能开始"

@@ -8,6 +8,7 @@ author:
   name: "Ethan Ng"
   url: https://x.ai/bot/marketplace/bots/video-editor
 templateUrl: https://x.ai/bot/14O3EsptD43aAhoAzvfq3
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "原始素材和脚本；素材大就给网盘链接，聊天上传只适合短片段"

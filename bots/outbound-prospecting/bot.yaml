@@ -8,6 +8,7 @@ author:
   name: "Krista Letz"
   url: https://x.ai/bot/marketplace/bots/pg
 templateUrl: https://x.ai/bot/i03IaF768-ielyzegoGye
+templateVersion: 10
 addedAt: 2026-11-15
 prerequisites:
   - "说清你卖什么、卖给谁"

@@ -8,6 +8,7 @@ author:
   name: "Simon Lackowski"
   url: https://x.ai/bot/marketplace/bots/sequencer
 templateUrl: https://x.ai/bot/6xnxd_CHg0cXVMQCwnRrZ
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "连 Gmail，或粘贴几封你写过的开发信，让它学你的口吻"

@@ -7,6 +7,7 @@ author:
   name: "铁柱AGI"
   github: RongleCat
 templateUrl: https://x.ai/bot/WW-UbmTKXn79q0yXapvJE
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "无，本地记账不用账号"

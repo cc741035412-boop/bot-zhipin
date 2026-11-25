@@ -13,8 +13,8 @@ import BotMini from './BotMini.vue'
 import BotName from './BotName.vue'
 import DetailStarters from './DetailStarters.vue'
 import { heatState, loadHeat } from '../heat'
-// 哪些权限算「要连账号」「会自己跑」只在摘要那边定义一次（单测保证它们还在 schema 的权限枚举里），这里不另写。
-import { ACCOUNT_PERMISSIONS, SELF_RUNNING_PERMISSION } from '../../../../scripts/lib/bot-summary.mjs'
+// 侧栏用到的权限名从 Bot 摘要复用。
+import { ACCOUNT_PERMISSIONS, SELF_RUNNING_PERMISSION, SEND_PERMISSION } from '../../../../scripts/lib/bot-summary.mjs'
 // 读屏和替代文字里怎么称呼它：有中文叫法用中文叫法。
 import { displayName } from '../../../../scripts/lib/bot-name.mjs'
 import BzIcon from './BzIcon.vue'
@@ -22,7 +22,7 @@ import ExternalHint from './ExternalHint.vue'
 import LiveAnnouncer from './LiveAnnouncer.vue'
 import BotScreenshot from './BotScreenshot.vue'
 
-// 详情页是一份「简历」：左边主栏一块块往下读，右边侧栏吸顶（导入、三项属性、作者和来源）。
+// 详情页是一份「简历」：左边主栏一块块往下读，右边侧栏吸顶（导入、四项属性、作者和来源）。
 // related（同组的 Bot）和 lineups（所在小队的成员小头像）由路由参数给；投稿预览不传，对应的区块不出现。
 const props = defineProps({
   bot: { type: Object, required: true },
@@ -56,12 +56,14 @@ const skills = computed(() => realSkills.value.length
   : list(about.value.skills).filter((skill) => skill && skill.name).map((skill) => ({ name: skill.name, does: skill.does })))
 const hasRoutinesFile = computed(() => !props.bot.external && !!props.bot.hasRoutines)
 
-// 侧栏的三项属性：额度、要不要连账号、定时任务数。
+// 侧栏的四项属性：额度、要不要连账号、定时任务数、会不会代发消息。
 const quota = computed(() => text(props.bot.quotaCost))
 // 要连账号：权限里第一个算「要连账号」的那一项（它的说明放进悬停提示）；一项都没有就是不用连。
 const accountPermission = computed(() => permissions.value.find((item) => ACCOUNT_PERMISSIONS.includes(item)))
 // 只知道「有」、数不出几个的（有 routines.md 或带定时运行权限，但没写 about.routines）：显示一个对勾。
 const runsUncounted = computed(() => !routines.value.length && (hasRoutinesFile.value || permissions.value.includes(SELF_RUNNING_PERMISSION)))
+const canSend = computed(() => permissions.value.includes(SEND_PERMISSION))
+const sendDescription = computed(() => canSend.value ? props.copy.permissions[SEND_PERMISSION] : undefined)
 // 来源：外部收录分官方市场和社区收录；作者自己投稿的写「作者投稿」。
 const origin = computed(() => props.bot.external ? (props.bot.official ? '官方市场' : '社区收录') : '作者投稿')
 const heat = computed(() => heatState.values[props.bot.slug] ?? (heatState.status === 'ready' ? 0 : heatState.status === 'failed' ? '—' : '…'))
@@ -102,7 +104,7 @@ onBeforeUnmount(() => watcher?.disconnect())
         </div>
       </header>
 
-      <!-- 侧栏：一键导入、三项属性、作者和来源。宽屏吸顶；窄屏排在头部下面。 -->
+      <!-- 侧栏：一键导入、四项属性、作者和来源。宽屏吸顶；窄屏排在头部下面。 -->
       <aside class="detail-rail" data-testid="detail-rail" :aria-label="`${called} 的导入和基本信息`" @pointerenter="overRail(true, $event)" @pointerleave="overRail(false, $event)">
         <span v-if="!preview" class="rail-peek" data-testid="rail-peek" :data-show="String(headerGone)" aria-hidden="true"><BotMini :bot="bot" :size="28" :rest="railHover ? 'wide' : 'idle'" bare /></span>
         <BotActions :bot="bot" />
@@ -127,6 +129,10 @@ onBeforeUnmount(() => watcher?.disconnect())
               <template v-if="runsUncounted"><BzIcon name="check" /><span class="bz-sr-only">有</span></template>
               <template v-else>{{ routines.length }} 个</template>
             </dd>
+          </div>
+          <div class="rail-fact">
+            <dt>代发消息</dt>
+            <dd data-testid="fact-send" :class="{ none: !canSend }" :title="sendDescription" :aria-description="sendDescription"><BzIcon name="send" />{{ canSend ? '会' : '不会' }}</dd>
           </div>
         </dl>
         <dl class="rail-meta">

@@ -1,6 +1,15 @@
 import { expect, it } from 'vitest'
 import { parse } from 'yaml'
-import { applyServerFields } from '../../scripts/lib/submit-fields.mjs'
+import { applyServerFields, applyTemplateVersion, omitTemplateVersion } from '../../scripts/lib/submit-fields.mjs'
+
+it.each([
+  ['templateUrl: x # abc\nfoo: y', 'templateUrl: x # abc\ntemplateVersion: 3\nfoo: y'],
+  ['templateVersion: 2 # abc\n', 'templateVersion: 3 # abc\n'],
+  ['{templateUrl: x, other: z}', '{templateUrl: x, templateVersion: 3, other: z}'],
+  ['foo: x', 'foo: x\ntemplateVersion: 3\n'], ['{}', '{templateVersion: 3}'],
+])('逐字节保留 %j', (input, expected) => expect(applyTemplateVersion(input, 3)).toBe(expected))
+it.each([0, -1, 1.5, '3', 2 ** 53])('拒绝非法版本 %j', n => expect(() => applyTemplateVersion('{}', n)).toThrow())
+it.each(['templateVersion: 4\nfoo: 2\n', '{foo: 2, templateVersion: 4}', '{templateVersion: 4, foo: 2}'])('查不到时不信任自填值 %j', yaml => expect(parse(omitTemplateVersion(yaml))).toEqual({ foo: 2 }))
 
 const fields = { login: 'New-User', addedAt: '2026-11-15' }
 it('缺少 author 时新建 name 和 github', () => {

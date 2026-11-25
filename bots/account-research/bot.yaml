@@ -8,6 +8,7 @@ author:
   name: "Anoop Baliga"
   url: https://x.ai/bot/marketplace/bots/account-book
 templateUrl: https://x.ai/bot/O3iqVd_ZrdRtrDJpxcKss
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "要跟的公司名单，再说清你卖什么、卖给谁"

@@ -203,6 +203,7 @@ describe('网站数据：bots、squads、curation 三份对得上', () => {
         { permission: '外部账号', bots: ['demo-prd-reviewer'] },
         { permission: '联网', bots: ['demo-prd-reviewer'] },
         { permission: '定时自动运行', bots: ['demo-weekly-digest'] },
+        { permission: '代我发消息', bots: ['demo-weekly-digest'] },
       ],
       prerequisites: [{ bot: 'demo-prd-reviewer', items: ['一份写好的 PRD（文字或文档链接）', '飞书或 Notion 账号（可选，用来读在线文档）'] }],
     })

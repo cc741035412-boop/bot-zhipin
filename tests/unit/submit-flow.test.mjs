@@ -32,12 +32,26 @@ beforeEach(async () => {
     getContent: null, getPr: pr, createTree: '3'.repeat(40), createCommit: '4'.repeat(40),
     upsertRef: {}, findOpenPr: null, createPr: pr, updatePr: pr, enableAutoMerge: true,
   }).map(([name, result]) => [name, vi.fn(async () => { events.push(name); return result })]))
-  deps = { github: gh, db, now, secrets, origin: 'https://site.test', context: async () => context, dryRunUserIds: '123' }
+  deps = { templateMeta: async () => ({ ok: false, kind: 'error' }), github: gh, db, now, secrets, origin: 'https://site.test', context: async () => context, dryRunUserIds: '123' }
   input = { bundle: bundle(), screenshots: [await receipt()], license: true }
 })
 const noWrites = () => { for (const name of ['createTree', 'createCommit', 'upsertRef', 'createPr', 'updatePr', 'enableAutoMerge']) expect(gh[name]).not.toHaveBeenCalled() }
 
 describe('网站提交流程（纯注入，无网络）', () => {
+  it('查到模板版本时写入文件和 PR', async () => {
+    deps.templateMeta = async () => ({ ok: true, version: 3 })
+    await submitBot(input, user, deps)
+    expect(gh.createTree.mock.calls[0][0].entries.find(e => e.path === 'bot.yaml').content).toContain('\ntemplateVersion: 3\n')
+    expect(gh.createPr.mock.calls[0][0].body).toContain('- 模板版本：v3，已记进 templateVersion')
+  })
+  it.each([
+    ['error', '查询失败'],
+    ['not_found', 'x.ai 上找不到这个模板'],
+  ])('模板查询返回 %s 时照常投稿，PR 用中文提醒补记', async (kind, reason) => {
+    deps.templateMeta = async () => ({ ok: false, kind })
+    expect((await submitBot(input, user, deps)).ok).toBe(true)
+    expect(gh.createPr.mock.calls[0][0].body).toContain(`- 模板版本：没查到（${reason}），合并后上游核对会提醒补上`)
+  })
   it('按序限流、解包；新投稿改写署名和北京时间，写两层安全 tree、单提交、PR 和 upsert', async () => {
     const result = await submitBot(input, user, deps)
     expect(result).toMatchObject({ ok: true, update: false, slug: 'flow-demo', branch: 'submission/web-123-flow-demo', liveUrl: 'https://site.test/bots/flow-demo', autoMerge: true })

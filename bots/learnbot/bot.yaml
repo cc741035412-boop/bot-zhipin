@@ -8,6 +8,7 @@ author:
   name: "Grace Clarke"
   url: https://x.com/graceclarke
 templateUrl: https://x.ai/bot/2gmdsU86wH7HBvbB7_T2C
+templateVersion: 4
 addedAt: 2026-11-15
 prerequisites:
   - "导入时把时区设成北京时间，否则会在半夜推送"

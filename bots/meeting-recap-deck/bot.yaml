@@ -8,6 +8,7 @@ author:
   name: "Krista Letz"
   url: https://x.ai/bot/marketplace/bots/echo
 templateUrl: https://x.ai/bot/YklttiPpAHweKbOLV1TSF
+templateVersion: 12
 addedAt: 2026-11-15
 prerequisites:
   - "会议笔记或转写，粘贴或上传都行"

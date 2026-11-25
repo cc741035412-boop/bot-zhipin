@@ -49,6 +49,7 @@ function fakeAdapters() {
   const png = readFileSync(join(fixture, 'screenshots/review-result.png'))
   return {
     context: { repo: 'jakob52123/bot-zhipin', defaultBranch: 'main', template: '## 投稿检查\n' },
+    templateMeta: async () => ({ ok: false, kind: 'error' }),
     assertClean: vi.fn(), readExisting: vi.fn(() => null), download: vi.fn(() => png),
     writeFiles: vi.fn((plan) => {
       for (const [path, content] of Object.entries(plan.files)) {
@@ -142,13 +143,17 @@ describe('网站投稿链接', () => {
     expect(existsSync(copiedPath)).toBe(false)
   })
   it('没有 addedAt 时临时副本用北京时间当天，投稿包仍然不补', () => {
+    // 校验时会带上真实 bots/，假时钟不能早于它们的 addedAt，所以取「今天 17:00 UTC」：北京已是次日
+    const today = new Date()
+    const fakeNow = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 17))
+    const beijingDay = new Date(fakeNow.getTime() + 8 * 3600_000).toISOString().slice(0, 10)
     vi.useFakeTimers({ toFake: ['Date'] })
-    vi.setSystemTime(new Date('2026-11-14T17:00:00Z'))
+    vi.setSystemTime(fakeNow)
     const text = withoutGithub.replace(/^addedAt:.*\n/m, '')
     setYaml(text)
     const realValidate = validation.validateBots
     vi.spyOn(validation, 'validateBots').mockImplementation((options) => {
-      expect(YAML.parse(readFileSync(join(options.botsDir, slug, 'bot.yaml'), 'utf8')).addedAt).toBe('2026-11-15')
+      expect(YAML.parse(readFileSync(join(options.botsDir, slug, 'bot.yaml'), 'utf8')).addedAt).toBe(beijingDay)
       return realValidate(options)
     })
     expect(unpack(makeWebSubmissionLink(dir).bundle).files[yamlPath]).toBe(text)

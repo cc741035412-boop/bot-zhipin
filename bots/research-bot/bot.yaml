@@ -8,6 +8,7 @@ author:
   name: "Arthur MacWaters"
   url: https://x.com/ArthurMacwaters
 templateUrl: https://x.ai/bot/Nn0ykGa3vJ6YS7ib7F6yH
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "无，直接提问"

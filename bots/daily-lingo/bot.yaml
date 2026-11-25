@@ -8,6 +8,7 @@ author:
   name: "Joseph Snyder"
   url: https://x.com/BTC_Yogi
 templateUrl: https://x.ai/bot/pegWv3F8t7KSEwQ3sxd6A
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "无；第一次会问学哪门语言、母语和每天几点上课"

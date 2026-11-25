@@ -8,6 +8,7 @@ author:
   name: "Adam Tanguay"
   url: https://x.ai/bot/marketplace/bots/ai-search-visibility
 templateUrl: https://x.ai/bot/BFiw9Y7BzTQ-3jFBAro1X
+templateVersion: 3
 addedAt: 2026-11-15
 prerequisites:
   - "你的官网地址或一句话介绍，最好再准备几个竞品名字"

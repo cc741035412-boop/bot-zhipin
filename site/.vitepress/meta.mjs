@@ -96,6 +96,7 @@ export const FOOTER = {
   org: '深圳且曼学院',
   repoLabel: '开源项目',
   license: 'MIT 许可',
+  privacy: '隐私说明',
   thanksLabel: '鸣谢',
   thanks: '且曼学院',
 }

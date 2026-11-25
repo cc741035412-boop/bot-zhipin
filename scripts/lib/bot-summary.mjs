@@ -5,6 +5,7 @@ const OFFICIAL_MARKETPLACE_PREFIX = 'https://x.ai/bot/marketplace/bots/'
 // 卡片上的两个提示用到的权限。取值来自 schema 的权限枚举，单测保证它们还在枚举里。
 export const ACCOUNT_PERMISSIONS = ['外部账号', '浏览器 Cookie']
 export const SELF_RUNNING_PERMISSION = '定时自动运行'
+export const SEND_PERMISSION = '代我发消息'
 
 // 投稿预览里的数据可能还没通过校验，所以下面只认类型对的值，其余当作没写。
 const text = (value) => typeof value === 'string' && value ? value : null

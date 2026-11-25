@@ -6,6 +6,7 @@ category: 生活
 author:
   name: "Cola"
 templateUrl: https://x.ai/bot/MgvqAC7RBf-gsvQl6Jw6n
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "无，发照片就行"

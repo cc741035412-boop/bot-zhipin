@@ -28,7 +28,7 @@ requires:
 - POSIX shell 或 Windows PowerShell
 - Python 3（会话回查及快速钩子）
 source:
-  url: https://github.com/OthmanAdi/planning-with-files/tree/c37abd73ff25f309a7b1b5991ef2149d5858bc49/skills/planning-with-files
+  url: https://github.com/OthmanAdi/planning-with-files/tree/54afe6f86235a16b15e2828ac57aca1bf914552f/skills/planning-with-files
   name: OthmanAdi/planning-with-files
 author:
   name: Ahmad Othman Ammar Adi
