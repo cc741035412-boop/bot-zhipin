@@ -17,6 +17,7 @@ import BotName from './BotName.vue'
 import BzIcon from './BzIcon.vue'
 import ExternalHint from './ExternalHint.vue'
 import RoleMascot from './RoleMascot.vue'
+import { SEND_PERMISSION } from '../../../../scripts/lib/bot-summary.mjs'
 // showCategory：第三行最前面的分组标签。首页按分组分段显示时不要它（组头已经说了），专题筛选、投稿预览里要。
 const props = defineProps({ bot: { type: Object, required: true }, showCategory: { type: Boolean, default: true } })
 // 投稿预览里的数据可能还没通过校验，元信息只在取值像样时才显示。
@@ -25,6 +26,7 @@ const permissions = computed(() => Array.isArray(props.bot.permissions) ? props.
 // 门槛从权限现算：要连外部账号或借浏览器登录态的，算「要连账号」；带定时运行的，算「会自己跑」。
 const needsAccount = computed(() => !!permissions.value?.some((item) => item === '外部账号' || item === '浏览器 Cookie'))
 const selfRunning = computed(() => !!permissions.value?.includes('定时自动运行'))
+const canSend = computed(() => !!permissions.value?.includes(SEND_PERMISSION))
 // 来源：外部收录的写进作者行（官方市场 / 社区收录）；作者自己投稿的在名字右边挂「作者投稿」标签。
 const origin = computed(() => props.bot.external ? (props.bot.official ? '官方市场' : '社区收录') : '')
 </script>
@@ -52,7 +54,11 @@ const origin = computed(() => props.bot.external ? (props.bot.official ? '官方
         <span v-if="showCategory" class="bz-tag role category-tag" :style="categoryStyle(bot.category)"><RoleMascot :category="bot.category" :size="12" />{{ bot.category }}</span>
         <span v-if="quota" class="bot-stat stat-quota" :data-quota="quota"><BzIcon name="bolt" />额度 {{ quota }}</span>
         <span v-if="permissions" class="bot-stat stat-account"><BzIcon :name="needsAccount ? 'plug' : 'plug-off'" />{{ needsAccount ? '要连账号' : '不用连账号' }}</span>
-        <span v-if="selfRunning" class="bot-stat stat-auto"><BzIcon name="clock" />会自己跑</span>
+        <!-- 两项自动操作提醒一起换行，继续沿用卡片原有的间距和标识样式。 -->
+        <span v-if="selfRunning || canSend" class="bot-stats">
+          <span v-if="selfRunning" class="bot-stat stat-auto"><BzIcon name="clock" />会自己跑</span>
+          <span v-if="canSend" class="bot-stat stat-send"><BzIcon name="send" />会代你发消息</span>
+        </span>
         <BotHeat :slug="bot.slug" compact />
       </div>
       <BotActions :bot="bot" compact />

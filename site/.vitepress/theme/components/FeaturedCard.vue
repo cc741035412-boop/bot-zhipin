@@ -10,13 +10,14 @@ import { botPalette, categoryStyle } from '../color'
 import { track } from '../track'
 import { reportClick } from '../heat'
 import { nextPoke } from '../pitch'
+import { SEND_PERMISSION } from '../../../../scripts/lib/bot-summary.mjs'
 
 // 主推卡：活 Bot、名字、作者、介绍、编辑点评、分组和额度、导入。不带台词气泡，也不参与筛选。
 // 编辑点评（note）来自策展文件：只显示点评本身，前面一个引号图标，不写「编辑说」。
 // 整张卡可点进详情：名字那个链接用伪元素铺满整卡（样式在 home.css），砖（戳）、作者、导入在它上面。
 const props = defineProps<{
   bot: {
-    slug: string; name: string; nameZh?: string | null; tagline: string; avatar: string | null; category: string; quotaCost: string
+    slug: string; name: string; nameZh?: string | null; tagline: string; avatar: string | null; category: string; quotaCost: string; permissions: string[]
     templateUrl: string; detailUrl: string; author: { name: string; link: string; page: string | null }; external?: boolean; official?: boolean
   }
   note?: string | null
@@ -66,6 +67,7 @@ function importBot(event: MouseEvent) {
       <div class="bot-stats">
         <span class="bz-tag role category-tag" :style="categoryStyle(bot.category)"><RoleMascot :category="bot.category" :size="12" />{{ bot.category }}</span>
         <span class="bot-stat stat-quota" :data-quota="bot.quotaCost"><BzIcon name="bolt" />额度 {{ bot.quotaCost }}</span>
+        <span v-if="bot.permissions.includes(SEND_PERMISSION)" class="bot-stat stat-send"><BzIcon name="send" />会代你发消息</span>
       </div>
       <a data-testid="featured-import" class="bz-btn sm" :href="bot.templateUrl" target="_blank" rel="noopener noreferrer" data-track-own @click="importBot" @auxclick.middle="importBot"><BzIcon name="arrow-up-right" />导入<span class="bz-sr-only">（在新标签页打开）</span></a>
     </div>
