@@ -107,3 +107,6 @@ export const EVENT_LIMITS = {
 } as const
 
 export const EVENT_RETENTION_DAYS = 400
+// 搜索词原文比事件保留得短，清理时只移除 q，不影响搜索次数统计。
+export const QUERY_RETENTION_DAYS = 90
+export const QUERY_EVENTS = ['search', 'library_search'] as const satisfies readonly EventName[]
