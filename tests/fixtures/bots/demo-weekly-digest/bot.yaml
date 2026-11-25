@@ -12,4 +12,5 @@ quotaCost: 低
 permissions:
   - 云电脑文件
   - 定时自动运行
+  - 代我发消息
 forkedFrom: demo-prd-reviewer
