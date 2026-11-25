@@ -8,6 +8,7 @@ author:
   name: "Rich Silver"
   url: https://x.ai/bot/marketplace/bots/flora
 templateUrl: https://x.ai/bot/dGYdqS9vLSXpxoNCPBHys
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "告诉它你养了哪些植物就行，照片可发可不发"

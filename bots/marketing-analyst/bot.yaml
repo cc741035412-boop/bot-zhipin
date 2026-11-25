@@ -8,6 +8,7 @@ author:
   name: "Josh Kim"
   url: https://x.ai/bot/marketplace/bots/marketing-analyst
 templateUrl: https://x.ai/bot/1RbG9yW5MpQ55XcQlJ0aQ
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "在 Bot 浏览器里登录广告后台，或者贴各平台导出的 CSV"

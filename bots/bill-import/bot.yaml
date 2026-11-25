@@ -7,6 +7,7 @@ author:
   name: "Tony Chan"
   url: https://x.com/coolbat1999
 templateUrl: https://x.ai/bot/A3pcjyO0dAkvRGxD4VGeH
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "支付宝或微信导出的账单 CSV，或者账单截图"

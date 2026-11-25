@@ -8,6 +8,7 @@ author:
   name: "Lenny Rachitsky"
   url: https://x.ai/bot/marketplace/bots/overheard
 templateUrl: https://x.ai/bot/NIEguoGUjA648fUPle8F5
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "想盯的名字、品牌别名和你自己的网址"

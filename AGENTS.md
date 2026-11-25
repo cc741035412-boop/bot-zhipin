@@ -168,7 +168,7 @@ bots/<slug>/
 
 注意：
 
-- `bot.yaml`：`slug` 和文件夹名一模一样；`category` 只能是 9 个分组之一；`templateUrl` 必须以 `https://x.ai/bot/` 开头；`permissions` 一个都不用就写 `permissions: []`；可选字段不用就整行删掉，不要加 schema 里没有的字段（完整定义见 `schema/bot.schema.json`）。
+- `bot.yaml`：`slug` 和文件夹名一模一样；`category` 只能是 9 个分组之一；`templateUrl` 必须以 `https://x.ai/bot/` 开头；`permissions` 一个都不用就写 `permissions: []`；可选字段不用就整行删掉，不要加 schema 里没有的字段（完整定义见 `schema/bot.schema.json`）。`templateVersion` 不用填，投稿时网站会自动记下模板当前的版本号。
 - `SKILL.md`：开头必须是 frontmatter，`name` 和文件夹名一致（小写字母、数字、短横线）：
 
   ```markdown

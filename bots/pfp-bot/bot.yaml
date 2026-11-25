@@ -8,6 +8,7 @@ author:
   name: "Shub Gaur"
   url: https://x.ai/bot/marketplace/bots/pfp-bot
 templateUrl: https://x.ai/bot/eFnHzlDcKdoA406SzZbNZ
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "一到三张看得清脸的照片，或者你的 X 账号名"

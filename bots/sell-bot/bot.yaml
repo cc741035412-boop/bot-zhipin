@@ -8,6 +8,7 @@ author:
   name: "Shub Gaur"
   url: https://x.ai/bot/marketplace/bots/sell-bot
 templateUrl: https://x.ai/bot/znrhzY4AYMg4v3QTfU0IJ
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "建议连 Gmail 和 Google 日历；不连只给可复制的文本"

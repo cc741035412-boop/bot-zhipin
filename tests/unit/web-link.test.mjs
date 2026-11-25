@@ -49,6 +49,7 @@ function fakeAdapters() {
   const png = readFileSync(join(fixture, 'screenshots/review-result.png'))
   return {
     context: { repo: 'jakob52123/bot-zhipin', defaultBranch: 'main', template: '## 投稿检查\n' },
+    templateMeta: async () => ({ ok: false, kind: 'error' }),
     assertClean: vi.fn(), readExisting: vi.fn(() => null), download: vi.fn(() => png),
     writeFiles: vi.fn((plan) => {
       for (const [path, content] of Object.entries(plan.files)) {

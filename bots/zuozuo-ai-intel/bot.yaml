@@ -6,6 +6,7 @@ category: 学习
 author:
   name: "Bbbb Zuo"
 templateUrl: https://x.ai/bot/OqeUopbZ8pvjf6RyvRTQt
+templateVersion: 3
 addedAt: 2026-11-15
 prerequisites:
   - "无；可选连 X，让 X 账号那部分扫得更稳"

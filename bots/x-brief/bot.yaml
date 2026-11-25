@@ -8,6 +8,7 @@ author:
   name: "Dan McAteer"
   url: https://x.ai/bot/marketplace/bots/x-brief
 templateUrl: https://x.ai/bot/RO8GwQZFXL9O95i13epqF
+templateVersion: 7
 addedAt: 2026-11-15
 prerequisites:
   - "想盯的 X 账号或话题"

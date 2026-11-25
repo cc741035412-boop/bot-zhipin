@@ -8,6 +8,7 @@ author:
   name: "Mai Yang"
   url: https://x.com/MaiYangAI
 templateUrl: https://x.ai/bot/Ja9NzNTRz2ozzQLNfrJwI
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "讲稿标题、听众、时长和每页要点"

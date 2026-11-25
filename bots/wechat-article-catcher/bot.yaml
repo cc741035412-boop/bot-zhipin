@@ -7,6 +7,7 @@ author:
   name: "铁柱AGI"
   github: RongleCat
 templateUrl: https://x.ai/bot/J2AgMXbgmrqq2zyRt8y7g
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "一条公众号文章链接，不用登录微信"

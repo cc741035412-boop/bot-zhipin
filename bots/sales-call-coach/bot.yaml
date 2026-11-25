@@ -8,6 +8,7 @@ author:
   name: "Daniel Brill"
   url: https://x.ai/bot/marketplace/bots/sales-call-coach
 templateUrl: https://x.ai/bot/yZ5MFQFdl32vHt6fcIJAc
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "一通通话的转写文字或录音文件"

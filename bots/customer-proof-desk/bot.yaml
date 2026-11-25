@@ -8,6 +8,7 @@ author:
   name: "Anoop Baliga"
   url: https://x.ai/bot/marketplace/bots/customer-stories
 templateUrl: https://x.ai/bot/AamPlGjd2lIdDv6seEMXR
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "几份客户通话或访谈的文字稿，录音要先转成文字"

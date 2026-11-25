@@ -8,6 +8,7 @@ author:
   name: Ulysses Ng
   url: https://x.ai/bot/marketplace/bots/pm-bot
 templateUrl: https://x.ai/bot/FeeqMRMJr2jwixCROZcIh
+templateVersion: 4
 addedAt: 2026-11-15
 prerequisites:
   - 一份 PRD，直接粘贴也行

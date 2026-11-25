@@ -8,6 +8,7 @@ author:
   name: "This Week in AI"
   url: https://x.ai/bot/marketplace/bots/clip-bot
 templateUrl: https://x.ai/bot/-L1yFJ5mtwPgn3O_iYUo_
+templateVersion: 3
 addedAt: 2026-11-15
 prerequisites:
   - "要剪的录音或视频，上传最稳，公开链接也行"

@@ -8,6 +8,7 @@ author:
   name: "Miguel Cruz"
   url: https://x.ai/bot/marketplace/bots/leadsworth
 templateUrl: https://x.ai/bot/oPDkINUfpUXhJDdsfRZht
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "一份线索表（导出、表格或直接贴），再说清什么样的线索算好"
