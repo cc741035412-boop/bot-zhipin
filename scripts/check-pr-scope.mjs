@@ -4,6 +4,7 @@ import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
 import YAML from 'yaml'
+import { warningAnnotation } from './lib/actions-annotation.mjs'
 
 const trusted = new Set(['OWNER', 'MEMBER', 'COLLABORATOR'])
 const botFile = /^bots\/[a-z0-9]+(?:-[a-z0-9]+)*\/.+$/
@@ -33,9 +34,6 @@ function authorGithub(commit, file) {
   return githubLogin(readEntry(commit, file))?.toLowerCase()
 }
 
-const escapeMessage = text => text.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A')
-const escapeProperty = text => escapeMessage(text).replaceAll(',', '%2C').replaceAll(':', '%3A')
-
 function checkNewAuthor(commit, file, prAuthor, errors) {
   let entry, login
   try {
@@ -54,7 +52,7 @@ function checkNewAuthor(commit, file, prAuthor, errors) {
     const text = message(author, JSON.stringify(prAuthor).slice(1, -1))
     console.log(`⚠ ${text}`)
     if (process.env.GITHUB_ACTIONS === 'true') {
-      console.log(`::warning file=${escapeProperty(file)},title=${escapeProperty('小队作者不是 PR 作者')}::${escapeMessage(text)}`)
+      console.log(warningAnnotation(file, '小队作者不是 PR 作者', text))
     }
     return
   }

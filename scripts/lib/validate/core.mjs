@@ -2,6 +2,7 @@ import { validateSchema } from './schema.mjs'
 import { validateContent, validateTemplate } from './content.mjs'
 import { validateImages } from './images.mjs'
 import { redact, scanSecrets } from './secrets.mjs'
+import { scanPersonalInfo } from './pii.mjs'
 import { botYamlSizeError } from '../yaml-limits.mjs'
 import { hasChinese } from '../bot-name.mjs'
 
@@ -97,6 +98,7 @@ export function validateModels(bots, { template, now = new Date(), others = [], 
     validateImages(bot, report)
     validateTemplate(bot, template, report)
     scanSecrets(bot, report)
+    scanPersonalInfo(bot, report)
     if (omitted) errors.push({ file: `bots/${bot.slug}/`, where: '错误汇总',
       problem: `还有 ${omitted} 处问题没列出，先改完上面这些再校验`, fix: '先改完上面这些，再运行 npm run validate。' })
   }

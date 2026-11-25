@@ -1,6 +1,7 @@
 import { resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { BOTS_DIR } from './lib/load-bots.mjs'
+import { warningAnnotation } from './lib/actions-annotation.mjs'
 import { validateAll, validateBots, formatResult } from './lib/validate/index.mjs'
 
 export { validateAll, validateBots, formatResult }
@@ -18,6 +19,9 @@ function main(args) {
   try {
     const result = validateAll({ botsDir })
     console.log(formatResult(result))
+    if (process.env.GITHUB_ACTIONS === 'true') {
+      for (const { file, where, problem } of result.warnings) console.log(warningAnnotation(file, where, problem))
+    }
     process.exitCode = result.errors.length ? 1 : 0
   } catch {
     // I/O 异常可能含敏感文件名，不直接输出原始异常。
