@@ -55,6 +55,15 @@ fork PR 只要改了 `bots/<slug>/`、`squads/<slug>/squad.yaml` 以外的任何
 2. 在 `prompts/` 或 `skills/` 新建 `<slug>.yaml`，文件名与 `slug` 一致。对照对应 schema 选分类，写中文用途、场景、作者、许可和 `addedAt`。Prompt 不分许可，原文放在 `body`，英文另配本站译文 `bodyZh`；`copyright` 照原页填写（单行 1–200 字），原页没写就填「版权归原作者，原页未声明许可」。摘要和用法用自己的话写。Skill 写原名、确认支持的 agents、自写摘要、按顺序列 1–3 个安装命令（说明放 note）、必要依赖，不收 SKILL.md。
 3. 跑 `npm run check`，在列表点进详情核对分类、署名、来源与复制值；有中文译文时，核对主按钮复制译文，展开「英文原文」可单独复制原文；没有正文时仍显示仅摘要。原作者要求下架时删除对应 YAML 后重新校验、构建；列表、静态路径及下架兜底清单一起更新，无需改 Bot 计数。给 AI 用的 `/data/prompts/<slug>.json`、`/data/skills/<slug>.json` 由 `functions/data/*/[slug].ts` 按同一份清单兜底，删了 YAML 就立即 404，不用另外处理；装了 bot-zhipin skill 的人本机索引最多缓存 24 小时，这段时间里搜索结果还可能列出这条，但取详情会是 404。
 
+## 上游核对
+
+每天北京时间 09:17 核对一次，待复核项集中在带 `upstream-watch` 标签的 issue；本地只读核对用 `npm run upstream`。不会自动下架。
+
+- Bot `changed`：官方市场看 `https://x.ai/bot/marketplace/bots/<slug>` 的公开内容；社区模板在 Grok Bot 里导入新版，读一遍配置（可让 Codex computer use 代劳，只导入，不改已有 Bot，读完删除刚导入的副本）。没问题就提 PR 把 `templateVersion` 改为新版本；有问题按下节下架。带敏感权限的先看。
+- Bot `missing`：按 `npm run upstream -- --json` 的 `current` 补上版本。`gone`、`unpublished`：下架。
+- Skill `changed`：打开对比页，读落在该 Skill 路径下的改动，复核通过后将 `source.url` 的提交号换为复核过的新 SHA。`gone` 下架；`moved` 核实新地址；`archived` 判断是否仍适合安装；`unparsed` 补成固定提交的 tree 链接。
+- `error` 不是上游变动的证据，不改基线。重跑确认网络、限流和接口格式；任一类至少半数失败也会开 issue。
+
 ## 下架
 
 提一个 PR 删掉 `bots/<slug>/`，合并后约 1 分钟首页消失；详情页由 `functions/bots/[slug].ts` 兜底，立即返回 404；给 AI 用的 `/data/bots/<slug>.json` 由 `functions/data/bots/[slug].ts` 按同一份清单兜底。

@@ -8,6 +8,7 @@ author:
   name: "X Freeze"
   url: https://x.ai/bot/marketplace/bots/best-video-editor
 templateUrl: https://x.ai/bot/kGiyk73f5CF8XtBMIh0gW
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "要剪的视频文件，上传或公开链接"

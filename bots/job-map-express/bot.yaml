@@ -7,6 +7,7 @@ category: 产品
 author:
   name: "Mike Boysen"
 templateUrl: https://x.ai/bot/f8P45KE_1HnIUPSqM-EEX
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "告诉它要分析的任务、谁在做、要多细"

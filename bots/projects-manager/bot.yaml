@@ -8,6 +8,7 @@ author:
   name: "Eric Zakariasson"
   url: https://x.ai/bot/marketplace/bots/projects-manager
 templateUrl: https://x.ai/bot/AZKaQOsjrAa51Nb4xvTur
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "Notion 账号，并先建好 Projects 和 Tasks 两个数据库"

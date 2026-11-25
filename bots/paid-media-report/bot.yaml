@@ -8,6 +8,7 @@ author:
   name: "Miguel Cruz"
   url: https://x.ai/bot/marketplace/bots/tally
 templateUrl: https://x.ai/bot/qBFjPRQ3IbHG69qIFHblE
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "各广告平台的导出表，每周给它新的"

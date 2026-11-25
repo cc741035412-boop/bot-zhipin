@@ -8,6 +8,7 @@ author:
   name: "Shub Gaur"
   url: https://x.ai/bot/marketplace/bots/startup-qa-bot
 templateUrl: https://x.ai/bot/XBauviUoNcdi05-ExoOo4
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "一个浏览器能打开的网页产品，测试环境或线上都行"

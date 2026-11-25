@@ -8,6 +8,7 @@ author:
   name: "Tommy Hansen"
   url: https://x.ai/bot/marketplace/bots/sherlock
 templateUrl: https://x.ai/bot/vIX2YW6rr6nQnf8-Rhyzc
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "一份岗位 JD，粘贴或一句话描述都行"

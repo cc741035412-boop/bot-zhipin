@@ -8,6 +8,7 @@ author:
   name: "Josh Kim"
   url: https://x.ai/bot/marketplace/bots/marketing-project-manager
 templateUrl: https://x.ai/bot/AMa1ig4YyoxfYtWFe7PLi
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "一个有明确上线日期的营销活动或产品发布"

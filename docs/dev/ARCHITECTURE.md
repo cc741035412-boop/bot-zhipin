@@ -70,6 +70,9 @@
 
 ## 数据流
 
+网站和 Issue 投稿读取 x.ai 公开模板的 activeVersion，写入 `bot.yaml` 的 `templateVersion`；Skill 的审阅提交直接取自 `source.url`。
+定时任务逐项对照上游，将待复核项同步到一个 `upstream-watch` issue。只有人工复核后才更新条目，没有独立锁文件。
+
 ```
 x.ai 模板页 →（维护者跑 sync-faces）→ site/.vitepress/data/faces.json → 构建
 

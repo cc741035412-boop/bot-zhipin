@@ -8,6 +8,7 @@ author:
   name: "Shub Gaur"
   url: https://x.ai/bot/marketplace/bots/distro-bot
 templateUrl: https://x.ai/bot/XbN6iofs_Qjsi2Od1yjyI
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "要有在投的海外广告账户（Meta、Google、X 等）才用得上核心功能；没有也能先贴官网做定位和竞品分析"

@@ -8,6 +8,7 @@ author:
   name: "Josh Kim"
   url: https://x.ai/bot/marketplace/bots/product-marketer
 templateUrl: https://x.ai/bot/nXp4Rp2trKV8AK-RC1Ohf
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "产品官网链接，和三五段你认可的文案"

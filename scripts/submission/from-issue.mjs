@@ -1,3 +1,5 @@
+import { lookupVersion } from '../lib/template-meta.mjs'
+import { applyTemplateVersion, omitTemplateVersion } from '../lib/submit-fields.mjs'
 import { resolve } from 'node:path'
 import { SITE } from '../../site/.vitepress/meta.mjs'
 import { pathToFileURL } from 'node:url'
@@ -9,6 +11,10 @@ import { extractImageUrls, makeFilePlan } from './screenshots.mjs'
 export async function submitIssue(input, adapters) {
   try {
     const submission = parseSubmission(input)
+    const meta = await lookupVersion(submission.data.templateUrl, adapters.templateMeta)
+    const path = `bots/${submission.slug}/bot.yaml`
+    if (meta.ok) submission.bundle.files[path] = applyTemplateVersion(submission.bundle.files[path], meta.version)
+    else if (submission.data.templateVersion !== undefined) submission.bundle.files[path] = omitTemplateVersion(submission.bundle.files[path])
     await adapters.assertClean()
     const update = checkOwnership(submission, await adapters.readExisting(submission.slug))
     const urls = extractImageUrls(submission.fields.screenshots)

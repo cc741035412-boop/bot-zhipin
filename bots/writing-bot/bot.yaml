@@ -8,6 +8,7 @@ author:
   name: "Matt Palmer"
   url: https://x.ai/bot/marketplace/bots/writing-bot
 templateUrl: https://x.ai/bot/wtq-j01kD7o8gQFx7E9zv
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "无，直接贴稿子"

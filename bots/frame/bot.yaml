@@ -8,6 +8,7 @@ author:
   name: "Grady Allen"
   url: https://x.com/gradycwallen
 templateUrl: https://x.ai/bot/ChQQ0_tBNki9hZWJo0GjQ
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "一道案例题或你的拆解思路；拿真实工作材料来练前先脱敏"

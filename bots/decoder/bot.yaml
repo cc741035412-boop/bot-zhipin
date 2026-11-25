@@ -8,6 +8,7 @@ author:
   name: "cradrrat"
   url: https://x.com/cradrrat
 templateUrl: https://x.ai/bot/5N9HO674YlxHiZhyj9ND9
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "粘贴、上传或给公开链接"

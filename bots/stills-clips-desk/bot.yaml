@@ -8,6 +8,7 @@ author:
   name: "Matt Palmer"
   url: https://x.ai/bot/marketplace/bots/image-gen-bot
 templateUrl: https://x.ai/bot/V8XugyLxzbQXLM9o5b3B-
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "要处理的视频或截图"

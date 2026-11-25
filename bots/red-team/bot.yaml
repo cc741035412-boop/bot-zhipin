@@ -8,6 +8,7 @@ author:
   name: "Josh"
   url: https://x.com/nearbycoder
 templateUrl: https://x.ai/bot/0h3dhN9lfJ3raaAYvqn42
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "贴一份草稿、方案或决策就能开始"

@@ -76,9 +76,16 @@ function setup(options = {}) {
   const run = fakeCommands(options)
   const fetchImpl = vi.fn(async () => new Response(png))
   const adapters = createAdapters({ root, repo, defaultBranch: 'main', run, fetchImpl })
+  adapters.templateMeta = async () => ({ ok: false, kind: 'error' })
   adapters.validate = () => validateBots({ botsDir: join(root, 'bots'), now: '2026-11-14T04:00:00Z' })
   return { run, adapters, fetchImpl }
 }
+it('Issue 投稿将查到的模板版本写入 PR 文件', async () => {
+  const { adapters } = setup()
+  adapters.templateMeta = async () => ({ ok: true, version: 3 })
+  const result = await submitIssue(input(), adapters)
+  expect(result.plan.files[`${prefix}bot.yaml`]).toContain('\ntemplateVersion: 3\n')
+})
 function commentsWritten(run) {
   return run.mock.calls.filter(([file, args]) => file === 'gh' && args[0] === 'api' && args.includes('--input')).map(([, args, options]) => ({ args, body: JSON.parse(options.input).body }))
 }

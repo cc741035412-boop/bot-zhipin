@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process'
 import { lstatSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { validateBots } from '../lib/validate/index.mjs'
+import { fetchTemplateMeta } from '../lib/template-meta.mjs'
 import { assertFileSet, assertPath, assertSlug } from './bundle.mjs'
 import { COMMENT_MARKER, fail, SubmissionError } from './errors.mjs'
 import { checkOwnership, parseBotMetadata } from './issue.mjs'
@@ -76,6 +77,7 @@ export function createAdapters({ root, repo, defaultBranch, run, fetchImpl = fet
   }
   return {
     context: { repo, defaultBranch, template: readFileSync(join(root, '.github/pull_request_template.md'), 'utf8') },
+    templateMeta: id => fetchTemplateMeta(id, { fetch: fetchImpl }),
     assertClean() {
       if (git('status', '--porcelain=v1', '-z', '--untracked-files=all')) throw new Error('签出目录不干净')
       baseCommit = git('rev-parse', '--verify', 'HEAD')

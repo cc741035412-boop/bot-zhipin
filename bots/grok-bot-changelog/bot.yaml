@@ -7,6 +7,7 @@ author:
   name: "Mai Yang"
   url: https://x.com/MaiYangAI
 templateUrl: https://x.ai/bot/lIO-FUTrwcA2r7nbfaXx4
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "无；想看真实用例可以连 X，不连也能用"

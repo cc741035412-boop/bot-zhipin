@@ -8,6 +8,7 @@ author:
   name: Lauren Tan
   url: https://x.ai/bot/marketplace/bots/dr-eggbot-v2
 templateUrl: https://x.ai/bot/_jOdbfkB16zxu7MRcmReE
+templateVersion: 22
 addedAt: 2026-11-15
 prerequisites:
   - 自带两个定时体检，其中每个工作日读全部 Bot 对话的那个比较烧额度，用不上可以暂停

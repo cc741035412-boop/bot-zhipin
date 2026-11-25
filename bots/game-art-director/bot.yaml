@@ -8,6 +8,7 @@ author:
   name: "Danny Limanseta"
   url: https://x.ai/bot/marketplace/bots/sable-game-art
 templateUrl: https://x.ai/bot/KQnsHIvv4_Xk7HyhmewP3
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "有游戏截图、参考图或现成素材就直接发给它"

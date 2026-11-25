@@ -8,6 +8,7 @@ author:
   name: "Emma Weyrauch"
   url: https://x.ai/bot/marketplace/bots/event-request-desk
 templateUrl: https://x.ai/bot/hp7QlVUPuYUp09kc6IFAA
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "最近收到的几条邀约，粘贴、转发或截图都行"

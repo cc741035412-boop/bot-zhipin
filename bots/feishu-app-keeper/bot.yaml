@@ -7,6 +7,7 @@ author:
   name: 铁柱AGI
   github: RongleCat
 templateUrl: https://x.ai/bot/AJpUlCwa8tyMX7L5UHnuY
+templateVersion: 1
 addedAt: 2026-11-14
 prerequisites:
   - 一个能创建自建应用的飞书账号

@@ -8,6 +8,7 @@ author:
   name: "Matt Van Horn"
   url: https://x.ai/bot/marketplace/bots/last30days
 templateUrl: https://x.ai/bot/TxB-fy1KryaYJLYWBcGtT
+templateVersion: 3
 addedAt: 2026-11-15
 prerequisites:
   - "导入后会从 GitHub 安装一个第三方开源技能，装的是最新版，会自动更新"

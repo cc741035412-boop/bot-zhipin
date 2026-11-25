@@ -8,6 +8,7 @@ author:
   name: "Cypher Monkey"
   url: https://x.com/Cypher0x9
 templateUrl: https://x.ai/bot/vyTuuPU29wfM_8x19gAeu
+templateVersion: 3
 addedAt: 2026-11-15
 prerequisites:
   - "证书名称和版本，最好贴上官方考试大纲（PMP、云厂商认证、软考都行）"

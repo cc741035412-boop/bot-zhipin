@@ -7,6 +7,7 @@ category: 学习
 author:
   name: "Ed"
 templateUrl: https://x.ai/bot/IyZZrz9V7I1fUXKVFGQSP
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "什么都不用连就能学；可选连 Firecrawl 查资料，花的是你自己的点数"

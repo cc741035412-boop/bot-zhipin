@@ -1,7 +1,8 @@
 import { parseDocument } from 'yaml'
 import { modelFromBundle } from '../../scripts/lib/bot-model.mjs'
 import { validateModels } from '../../scripts/lib/validate/core.mjs'
-import { applyServerFields } from '../../scripts/lib/submit-fields.mjs'
+import { fetchTemplateMeta, lookupVersion } from '../../scripts/lib/template-meta.mjs'
+import { applyServerFields, applyTemplateVersion, omitTemplateVersion } from '../../scripts/lib/submit-fields.mjs'
 import { botYamlTooLarge, botYamlSizeError } from '../../scripts/lib/yaml-limits.mjs'
 import { unpack, LIMITS } from '../../scripts/submission/bundle-core.mjs'
 import { planScreenshots } from '../../scripts/submission/screenshot-plan.mjs'
@@ -26,6 +27,7 @@ interface Dependencies {
   context: () => Promise<SubmitContext>
   now: number
   secrets: Secrets
+  templateMeta?: (id: string) => Promise<{ ok: true; version: number } | { ok: false; kind: 'not_found' | 'error' }>
   dryRunUserIds?: string
   origin: string
 }
@@ -115,13 +117,14 @@ export async function computeSubmission(text: string, receipts: unknown, user: S
   return validateSubmission(bundle, images, user, addedAt, context, now)
 }
 
-function prBody(slug: string, user: SessionUser, update: boolean, warnings: Item[], legacyOwner: boolean): string {
+function prBody(slug: string, user: SessionUser, update: boolean, warnings: Item[], legacyOwner: boolean, versionNote: string): string {
   return `${legacyOwner ? '> ⚠ **这个 Bot 之前没有绑定作者数字 ID，只按 GitHub 用户名核对，请人工确认是原作者**\n\n' : ''}## 网站投稿
 
 - Bot：\`bots/${slug}/\`（${update ? '更新' : '新增'}）
 - 投稿人：@${user.login}（GitHub 账号已登录验证）
 - 提交作者记为投稿人，合并后计为贡献者。
 - 自动检查：校验器和密钥扫描在推送前已通过${warnings.length ? `，${warnings.length} 条提醒请复核` : ''}；构建以 validate-and-build 为准。
+- 模板版本：${versionNote}
 - 投稿人已在投稿页勾选 CC BY 4.0 授权，并确认内容有权公开。
 - 已开启自动合并：批准且检查通过后自动用普通合并合入。
 
@@ -191,6 +194,11 @@ export async function submitBot(body: Record<string, unknown>, user: SessionUser
   const prefix = `bots/${slug}/`
   const files = [...Object.keys(plan.files), ...plan.images.map((image: Receipt & { name: string }) => `${prefix}screenshots/${image.name}`)]
   if (body.dryRun === true) return { ok: true, dryRun: true, slug, update, files, warnings }
+  const meta = await lookupVersion(model.data.templateUrl, deps.templateMeta ?? ((id: string) => fetchTemplateMeta(id, { fetch, timeoutMs: 5000 })))
+  const yamlPath = `${prefix}bot.yaml`
+  if (meta.ok) plan.files[yamlPath] = applyTemplateVersion(plan.files[yamlPath], meta.version)
+  else if (model.data.templateVersion !== undefined) plan.files[yamlPath] = omitTemplateVersion(plan.files[yamlPath])
+  const versionNote = meta.ok ? `v${meta.version}，已记进 templateVersion` : `没查到（${meta.kind}），合并后上游核对会提醒补上`
   // Charge publishing quotas only after validation/secrets and the dryRun exit.
   await rate(db, 'submit', String(user.id), now)
   await rate(db, 'submit-all', '*', now)
@@ -208,7 +216,7 @@ export async function submitBot(body: Record<string, unknown>, user: SessionUser
   await gh.upsertRef(branch, commit)
   const open = await gh.findOpenPr(branch)
   const prInput = { title: legacyOwner ? `⚠ 更新已上架 Bot：${model.data.name}（网站投稿）` : title,
-    body: prBody(slug, user, update, warnings, legacyOwner) }
+    body: prBody(slug, user, update, warnings, legacyOwner, versionNote) }
   const pr = open ? await gh.updatePr(open.number, prInput) : await gh.createPr({ ...prInput, head: branch, base: 'main' })
   // No main Bot means a new submission: overwrite any obsolete binding only after PR success.
   await db.prepare(`INSERT INTO bot_owners (slug, user_id, updated_at) VALUES (?1, ?2, ?3)
