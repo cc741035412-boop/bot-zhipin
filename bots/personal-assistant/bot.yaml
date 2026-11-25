@@ -8,6 +8,7 @@ author:
   name: "Gabriel Abreu"
   url: https://x.com/gabe_onchain
 templateUrl: https://x.ai/bot/OWj_0o4Ik2FffupfloOwe
+templateVersion: 3
 addedAt: 2026-11-15
 prerequisites:
   - "无，直接把手头的事贴给它"

@@ -8,6 +8,7 @@ author:
   name: "Michael Gannotti"
   url: https://x.com/MichaelGannotti
 templateUrl: https://x.ai/bot/G48vC01p5cAxckACKFIaM
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "贴文字、链接或截图就能用，不用连任何应用"

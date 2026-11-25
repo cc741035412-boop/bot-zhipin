@@ -40,6 +40,11 @@
       "type": "string",
       "pattern": "^https://x\\.ai/bot/[A-Za-z0-9_-]+$"
     },
+    "templateVersion": {
+      "description": "审过的模板版本号（x.ai 模板的 activeVersion）。网站投稿和 Issue 投稿自动填，维护者复核后改；投稿人不用填。",
+      "type": "integer",
+      "minimum": 1
+    },
     "addedAt": {
       "description": "上架日期，YYYY-MM-DD，「最新」排序用",
       "type": "string",

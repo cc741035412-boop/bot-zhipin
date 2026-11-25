@@ -8,6 +8,7 @@ author:
   name: Shimecki
   url: https://x.ai/bot/marketplace/bots/competitor-watching
 templateUrl: https://x.ai/bot/aw0Zj54sIsAK7vMnajdz0
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - 一份要盯的竞品网址清单

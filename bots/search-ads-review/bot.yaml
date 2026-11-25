@@ -8,6 +8,7 @@ author:
   name: "Chris Everett"
   url: https://x.ai/bot/marketplace/bots/apple-search-ads-review
 templateUrl: https://x.ai/bot/gadc3bVOsg9iIwmzAGRve
+templateVersion: 3
 addedAt: 2026-11-15
 prerequisites:
   - "Apple Search Ads 账户，能导出 14 到 30 天的报表"

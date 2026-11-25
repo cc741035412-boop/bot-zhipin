@@ -7,6 +7,7 @@ category: 求职
 author:
   name: suddenlyjon
 templateUrl: https://x.ai/bot/slpciJwWffCdi6T1mR0ON
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - 岗位描述（贴文字）和一份简历，简历建议先去掉手机号等个人信息

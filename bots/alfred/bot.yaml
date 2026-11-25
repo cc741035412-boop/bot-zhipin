@@ -8,6 +8,7 @@ author:
   name: "Robin Delta"
   url: https://x.ai/bot/marketplace/bots/alfred
 templateUrl: https://x.ai/bot/p7Gh6HIrfv4AGzIow6-9X
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "已经有几个 Bot 在用时最有价值"

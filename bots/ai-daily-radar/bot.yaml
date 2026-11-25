@@ -8,6 +8,7 @@ author:
   name: "Michael Gannotti"
   url: https://x.com/MichaelGannotti
 templateUrl: https://x.ai/bot/EZ8RChmm9gSGmK3SXv-3M
+templateVersion: 3
 addedAt: 2026-11-15
 prerequisites:
   - "说清你用哪些 AI 工具、关心哪些模型，国产模型要点名"

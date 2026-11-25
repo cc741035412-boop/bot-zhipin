@@ -8,6 +8,7 @@ author:
   name: "Erika Cabrera"
   url: https://x.ai/bot/marketplace/bots/office-ops-desk
 templateUrl: https://x.ai/bot/afZj-XnYkThA4MB7GfZK6
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "一份快递、报修或同事生日清单，粘贴或表格都行"

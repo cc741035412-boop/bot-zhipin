@@ -2,6 +2,43 @@ import { parseDocument, isMap } from 'yaml'
 import { botYamlTooLarge, botYamlSizeError } from './yaml-limits.mjs'
 import { fail } from '../submission/errors.mjs'
 
+// 投稿人传来的旧值不是审阅凭证。查询失败时省略该键，让每日核对能报 missing。
+export function omitTemplateVersion(text) {
+  const map = parseDocument(text, { keepSourceTokens: true }).contents
+  const i = map.items.findIndex(pair => pair.key.value === 'templateVersion')
+  if (i < 0) return text
+  const pair = map.items[i]
+  let start = pair.key.range[0], end = pair.value.range[2]
+  if (map.flow) {
+    const commaBefore = pair.srcToken.start.find(t => t.type === 'comma')
+    if (commaBefore) start = commaBefore.offset
+    else {
+      const commaAfter = map.srcToken.items[i + 1]?.start.find(t => t.type === 'comma')
+      if (commaAfter) end = commaAfter.offset + 1
+    }
+  } else start = text.lastIndexOf('\n', start - 1) + 1
+  return text.slice(0, start) + text.slice(end)
+}
+
+export function applyTemplateVersion(text, version) {
+  if (!Number.isSafeInteger(version) || version < 1) throw new Error('模板版本必须是正安全整数')
+  const doc = parseDocument(text), map = doc.contents
+  if (doc.errors.length || !isMap(map)) throw new Error('bot.yaml 必须是映射')
+  const splice = (start, end, value) => text.slice(0, start) + value + text.slice(end)
+  const existing = map.get('templateVersion', true)
+  if (existing?.range) return splice(existing.range[0], existing.range[1], String(version))
+  const url = map.get('templateUrl', true), field = `templateVersion: ${version}`
+  if (map.flow) {
+    if (url) return splice(url.range[1], url.range[1], `, ${field}`)
+    const end = map.range[1] - 1
+    const separator = map.items.length && !text.slice(0, end).trimEnd().endsWith(',') ? ', ' : ''
+    return splice(end, end, separator + field)
+  }
+  const end = url?.range[2] ?? map.range[2], nl = text.includes('\r\n') ? '\r\n' : '\n'
+  const indent = ' '.repeat(map.items[0].key.range[0] - text.lastIndexOf('\n', map.items[0].key.range[0] - 1) - 1)
+  return splice(end, end, (text[end - 1] === '\n' ? '' : nl) + indent + field + nl)
+}
+
 /** 只改服务器拥有的字段；Document 保留注释、引号和未改字段的节点。 */
 export function applyServerFields(botYamlText, { login, addedAt }) {
   if (botYamlTooLarge(botYamlText)) fail('bot.yaml', botYamlSizeError.where, botYamlSizeError.problem, botYamlSizeError.fix)

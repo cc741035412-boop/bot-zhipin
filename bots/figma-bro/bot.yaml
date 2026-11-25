@@ -8,6 +8,7 @@ author:
   name: "John Bai"
   url: https://x.ai/bot/marketplace/bots/figma-bro
 templateUrl: https://x.ai/bot/pXNvc_U2cGyZmheYrUuF_
+templateVersion: 7
 addedAt: 2026-11-15
 prerequisites:
   - "Figma 账号；不连也能看截图，但数值是估的"

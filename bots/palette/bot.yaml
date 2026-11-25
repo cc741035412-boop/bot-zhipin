@@ -8,6 +8,7 @@ author:
   name: "Michael Davies"
   url: https://x.com/subforti
 templateUrl: https://x.ai/bot/yfrTgGSwB_DZNUxx0g05V
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "一张照片"

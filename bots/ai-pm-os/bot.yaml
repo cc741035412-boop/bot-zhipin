@@ -8,6 +8,7 @@ author:
   name: "George Nurijanian"
   url: https://x.com/nurijanian
 templateUrl: https://x.ai/bot/9dtfHw4LHmwc5uBC-a9vj
+templateVersion: 5
 addedAt: 2026-11-15
 prerequisites:
   - "把方案、需求或决策背景贴进聊天就能开始"

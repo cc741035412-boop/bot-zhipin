@@ -9,6 +9,7 @@ const ENDPOINT = '/api/events'
 const FLUSH_AT = 10
 const FLUSH_DELAY = 2000
 const MAX_BYTES = 16_000
+export const SESSION_IDLE_MS = 30 * 60_000
 const repoPath = '/jakob52123/bot-zhipin'
 const details = { bots: 'bot', squads: 'squad', prompts: 'prompt', skills: 'skill', authors: 'author' } as const
 
@@ -90,7 +91,7 @@ function touchSession() {
     landed = storage(store => store.getItem('bz-landed')) === '1'
   }
   if (!sid || !/^[A-Za-z0-9_-]{16,32}$/.test(sid) || day !== sessionDay ||
-      !Number.isFinite(lastActivity) || now - lastActivity > 30 * 60_000) {
+      !Number.isFinite(lastActivity) || now - lastActivity > SESSION_IDLE_MS) {
     if (!restoring) firstPageView = false
     flush() // 已排队的事件仍属于旧会话。
     const bytes = crypto.getRandomValues(new Uint8Array(16))

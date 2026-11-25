@@ -8,6 +8,7 @@ author:
   name: "Daniel Brill"
   url: https://x.ai/bot/marketplace/bots/call-follow-ups
 templateUrl: https://x.ai/bot/estQ8HWdKqhheDNmOGjcy
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "自动盯新通话要连 Gong 或 Granola；没有就把会议转录贴进来"

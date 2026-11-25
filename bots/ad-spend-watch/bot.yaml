@@ -8,6 +8,7 @@ author:
   name: "Miguel Cruz"
   url: https://x.ai/bot/marketplace/bots/fuse
 templateUrl: https://x.ai/bot/MK5zStpj_As8CsRwg3r6w
+templateVersion: 2
 addedAt: 2026-11-15
 prerequisites:
   - "广告平台导出表和月预算，告诉它什么算超线"

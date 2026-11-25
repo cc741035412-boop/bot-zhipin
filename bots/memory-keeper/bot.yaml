@@ -7,6 +7,7 @@ author:
   name: 铁柱AGI
   github: RongleCat
 templateUrl: https://x.ai/bot/9Tq1f0aSurCP7UJHm98zy
+templateVersion: 2
 addedAt: 2026-11-14
 prerequisites:
   - 一个私有 Git 仓库（比如 GitHub 私有仓库）

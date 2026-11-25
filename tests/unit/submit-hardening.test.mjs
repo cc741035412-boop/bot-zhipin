@@ -76,7 +76,7 @@ beforeEach(async () => {
   for (const [key, value] of Object.entries({ installationToken: '', getRef: { object: { sha: '1'.repeat(40) } }, getCommit: { tree: { sha: '2'.repeat(40) } },
     getContent: null, getPr: pr, getChecks: { check_runs: [] }, getReviews: [], createTree: '3'.repeat(40), createCommit: '4'.repeat(40),
     upsertRef: {}, findOpenPr: null, createPr: pr, updatePr: pr, enableAutoMerge: true })) gh[key] = vi.fn(async () => { events.push(key); return value })
-  deps = { github: gh, db: env.DB, context: async () => context, now, secrets: env, origin, dryRunUserIds: '123' }
+  deps = { templateMeta: async () => ({ ok: false, kind: 'error' }), github: gh, db: env.DB, context: async () => context, now, secrets: env, origin, dryRunUserIds: '123' }
   input = { bundle: bundle(), screenshots: [await sign(env.SESSION_SECRET, { t: 'r', v: 1, uid: user.id, ...images[0], exp: now + 86_400_000 })], license: true }
   cookie = (await sessionSetCookie(env, user, now)).split(';')[0]
 })

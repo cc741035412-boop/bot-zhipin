@@ -7,6 +7,7 @@ author:
   name: 铁柱AGI
   github: RongleCat
 templateUrl: https://x.ai/bot/gOdlWNIcvTPU_C8iHklMS
+templateVersion: 1
 addedAt: 2026-11-14
 prerequisites:
   - 一台能长期开机、跑定时脚本的电脑

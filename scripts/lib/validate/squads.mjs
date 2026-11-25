@@ -4,6 +4,7 @@ import { validate as checkCuration, schema as curationSchema } from './generated
 import { reportSchemaErrors } from './schema.mjs'
 import { validateDate } from './core.mjs'
 import { redact, scanSecrets } from './secrets.mjs'
+import { scanPersonalInfo } from './pii.mjs'
 
 /** flow 里代表用户本人的写法；它不是成员，所以也不能拿来当成员的 slug。 */
 export const YOU = 'you'
@@ -39,10 +40,12 @@ export function reportYaml(model, name, report, { tooLarge, missing }) {
   return true
 }
 
-// 只扫这一个文本文件；复用 Bot 的密钥规则。
-export function scan(name, raw, report) {
+// 策展和收录库也复用密钥规则；只有小队投稿启用隐私提醒。
+export function scan(name, raw, report, { personalInfo = false } = {}) {
   if (typeof raw !== 'string') return
-  scanSecrets({ files: [{ path: name, size: new TextEncoder().encode(raw).length, text: raw, format: null }] }, report)
+  const model = { files: [{ path: name, size: new TextEncoder().encode(raw).length, text: raw, format: null }] }
+  scanSecrets(model, report)
+  if (personalInfo) scanPersonalInfo(model, report)
 }
 
 const isMap = (value) => value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -117,7 +120,7 @@ export function validateSquads(squads, { botSlugs = [], now = new Date() } = {})
         }
       }
     }
-    scan(name, squad.raw, report)
+    scan(name, squad.raw, report, { personalInfo: true })
   }
   return { errors, warnings }
 }

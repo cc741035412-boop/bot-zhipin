@@ -8,6 +8,7 @@ author:
   name: "Josh Kim"
   url: https://x.ai/bot/marketplace/bots/website-ops
 templateUrl: https://x.ai/bot/NYDai_DOI_2pNDIKerrpD
+templateVersion: 1
 addedAt: 2026-11-15
 prerequisites:
   - "网站代码在 GitHub 上并连接 GitHub；不连只能做只读体检"
