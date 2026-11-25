@@ -1,6 +1,6 @@
 import { lookupVersion } from './template-meta.mjs'
 
-async function scan(items, check) {
+async function scan(items, check, concurrency = 4) {
   const results = new Array(items.length)
   let next = 0
   async function worker() {
@@ -9,7 +9,7 @@ async function scan(items, check) {
       results[i] = await check(items[i])
     }
   }
-  await Promise.all(Array.from({ length: Math.min(4, items.length) }, worker))
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, worker))
   return { total: items.length, findings: results.filter(Boolean) }
 }
 
@@ -58,7 +58,7 @@ function skillChecker(github) {
 }
 
 export async function checkUpstream({ bots, skills, templateMeta, github, checkedAt }) {
-  const [b, s] = await Promise.all([scan(bots, data => checkBot(data, templateMeta)), scan(skills, skillChecker(github))])
+  const [b, s] = await Promise.all([scan(bots, data => checkBot(data, templateMeta), 2), scan(skills, skillChecker(github))])
   const attention = [b, s].some(({ total, findings }) => findings.some(f => f.kind !== 'error') || (total > 0 && findings.length * 2 >= total))
   return { checkedAt, attention, bots: b, skills: s }
 }
@@ -125,12 +125,17 @@ export function report(result) {
 
 const findingKey = (type, f) => `${type.slice(0, -1)}:${f.slug}:${f.kind}:${f.current ?? f.reviewed ?? '-'}`
 
+function reviewFindings(result, map) {
+  // Temporary failures stay in the report but are not items to review.
+  return ['bots', 'skills'].flatMap(type => result[type].findings.filter(f => f.kind !== 'error').map(f => map(type, f)))
+}
+
 export function findingKeys(result) {
-  return ['bots', 'skills'].flatMap(type => result[type].findings.map(f => findingKey(type, f))).sort()
+  return reviewFindings(result, findingKey).sort()
 }
 
 export function findingLines(result) {
-  return new Map(['bots', 'skills'].flatMap(type => result[type].findings.map(f => [findingKey(type, f), findingLine(type, f)])))
+  return new Map(reviewFindings(result, (type, f) => [findingKey(type, f), findingLine(type, f)]))
 }
 
 export function planIssue({ open, attention, body, keys, lines }) {

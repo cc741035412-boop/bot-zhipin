@@ -35,7 +35,7 @@ async function syncIssue(result, body) {
 async function main(args) {
   if (args.length > 1 || (args.length && !['--json', '--issue'].includes(args[0]))) throw new Error('用法：npm run upstream -- [--json | --issue]')
   const result = await checkUpstream({ checkedAt: new Date().toISOString(), bots: loadAllBots().filter(isPublicBot).map(b => b.data),
-    skills: loadEntries('skill').map(s => s.data), github, templateMeta: id => fetchTemplateMeta(id, { fetch }) })
+    skills: loadEntries('skill').map(s => s.data), github, templateMeta: id => fetchTemplateMeta(id, { fetch, retries: 2 }) })
   const body = report(result)
   console.log(args[0] === '--json' ? JSON.stringify(result) : body)
   if (args[0] !== '--issue') return Number(result.attention)

@@ -9,6 +9,20 @@ it.each([[ok, 1, 'changed'], [ok, undefined, 'missing'], [{ ok: false, kind: 'no
   const r = await run({ bots: [{ ...bot, templateVersion }], templateMeta: async () => meta })
   expect(r.bots.findings).toMatchObject([{ kind, sensitive: true }]); expect(r.attention).toBe(true)
 })
+it('Bot 查询最多同时进行两项，结果仍按输入顺序排列', async () => {
+  let active = 0, peak = 0
+  const templateMeta = vi.fn(async () => {
+    peak = Math.max(peak, ++active)
+    await Promise.resolve()
+    active--
+    return ok
+  })
+  const bots = Array.from({ length: 5 }, (_, i) => ({ ...bot, slug: `b-${i}`, templateUrl: `${bot.templateUrl}-${i}` }))
+  const result = await run({ bots, templateMeta })
+  expect(peak).toBe(2)
+  expect(templateMeta).toHaveBeenCalledTimes(bots.length)
+  expect(result.bots.findings.map(f => f.slug)).toEqual(bots.map(b => b.slug))
+})
 const repo = { full_name: 'o/r', default_branch: 'main' }
 const diff = { files: [{ filename: 'docs/a' }], html_url: url, ahead_by: 4 }
 function gh(info = repo, compare = diff, commits = []) {
@@ -89,5 +103,22 @@ it('评论只列新增的报告行，正文仍用机器键比对', async () => {
   expect(actions).toEqual([
     { action: 'update', body: `${body}\n\n<!-- upstream-watch keys=["bot:b:changed:2","bot:old:changed:2"] -->` },
     { action: 'comment', body: `新增待复核：\n${rows(result)[0]}` },
+  ])
+})
+
+it.each([false, true])('同时有 Bot 和 Skill 查询失败；有新增待复核项：%s', async hasNew => {
+  const result = await run({
+    bots: [bot, { ...bot, slug: 'failed', templateUrl: 'https://x.ai/bot/failed' }],
+    templateMeta: async id => id === 'failed' ? { ok: false, kind: 'error', message: 'HTTP 429' } : ok,
+    skills: [skill('docs')], github: async () => { throw new Error('fetch failed') },
+  })
+  const previous = hasNew ? [] : ['bot:b:changed:2', 'bot:old:error:1']
+  const open = { body: `旧报告\n\n<!-- upstream-watch keys=${JSON.stringify(previous)} -->` }
+  const body = report(result), keys = findingKeys(result), lines = findingLines(result)
+  expect(body).toContain('## 核对失败\n\n- **Bot**（`failed`）：没查成（请求太频繁，被限流了）\n- **docs**（`docs`）：没查成（网络错误）')
+  expect([...lines.keys()]).toEqual(['bot:b:changed:2'])
+  expect(planIssue({ open, attention: result.attention, body, keys, lines })).toEqual([
+    { action: 'update', body: `${body}\n\n<!-- upstream-watch keys=["bot:b:changed:2"] -->` },
+    ...(hasNew ? [{ action: 'comment', body: `新增待复核：\n${botRow(`${botChange}，带「外部账号」 · ${botLinks}`)}` }] : []),
   ])
 })

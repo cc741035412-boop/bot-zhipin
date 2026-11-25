@@ -3,15 +3,21 @@ export function shareIdOf(url) {
   return typeof url === 'string' ? /^https:\/\/x\.ai\/bot\/([A-Za-z0-9_-]+)$/.exec(url)?.[1] ?? null : null
 }
 
+const retryDelays = [2000, 5000, 15000]
+
 export async function fetchTemplateMeta(shareId, { fetch, timeoutMs = 8000, retries = 1 } = {}) {
   for (let attempt = 0; ; attempt++) {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), timeoutMs)
-    let status = 0, result
+    let status = 0, result, retryAfterMs
     try {
       const response = await fetch(TEMPLATE_META_URL, { method: 'POST', signal: controller.signal,
         headers: { 'Content-Type': 'application/json', 'Connect-Protocol-Version': '1' }, body: JSON.stringify({ shareId }) })
       status = response.status
+      if (status === 429 || status === 503) {
+        const seconds = response.headers?.get('Retry-After')?.trim()
+        if (/^\d+$/.test(seconds)) retryAfterMs = Math.min(Number(seconds), 30) * 1000
+      }
       let body
       if (status !== 404) {
         try { body = await response.json() }
@@ -29,7 +35,8 @@ export async function fetchTemplateMeta(shareId, { fetch, timeoutMs = 8000, retr
       result = { ok: false, kind: 'error', status, message: controller.signal.aborted ? '查询超时' : '网络错误' }
     } finally { clearTimeout(timer) }
     if (attempt >= retries) return result
-    await new Promise(resolve => setTimeout(resolve, 2000))
+    const delay = retryAfterMs ?? retryDelays[Math.min(attempt, retryDelays.length - 1)]
+    await new Promise(resolve => setTimeout(resolve, delay))
   }
 }
 
