@@ -4,8 +4,9 @@ tagline: 新手养猫避坑指南，喂养驱虫和异常症状随时问
 category: 生活
 author:
   name: dabao
-  github: dabao
+  github: cc741035412-boop
 templateUrl: https://x.ai/bot/pUT_3ezd7TByALdSV-EG6
+templateVersion: 1
 addedAt: 2026-11-23
 prerequisites:
   - 无
