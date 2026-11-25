@@ -198,7 +198,7 @@ export async function submitBot(body: Record<string, unknown>, user: SessionUser
   const yamlPath = `${prefix}bot.yaml`
   if (meta.ok) plan.files[yamlPath] = applyTemplateVersion(plan.files[yamlPath], meta.version)
   else if (model.data.templateVersion !== undefined) plan.files[yamlPath] = omitTemplateVersion(plan.files[yamlPath])
-  const versionNote = meta.ok ? `v${meta.version}，已记进 templateVersion` : `没查到（${meta.kind}），合并后上游核对会提醒补上`
+  const versionNote = meta.ok ? `v${meta.version}，已记进 templateVersion` : `没查到（${meta.kind === 'not_found' ? 'x.ai 上找不到这个模板' : '查询失败'}），合并后上游核对会提醒补上`
   // Charge publishing quotas only after validation/secrets and the dryRun exit.
   await rate(db, 'submit', String(user.id), now)
   await rate(db, 'submit-all', '*', now)

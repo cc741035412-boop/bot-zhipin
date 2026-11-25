@@ -44,9 +44,13 @@ describe('网站提交流程（纯注入，无网络）', () => {
     expect(gh.createTree.mock.calls[0][0].entries.find(e => e.path === 'bot.yaml').content).toContain('\ntemplateVersion: 3\n')
     expect(gh.createPr.mock.calls[0][0].body).toContain('- 模板版本：v3，已记进 templateVersion')
   })
-  it('查询失败照常投稿，PR 提醒补记', async () => {
+  it.each([
+    ['error', '查询失败'],
+    ['not_found', 'x.ai 上找不到这个模板'],
+  ])('模板查询返回 %s 时照常投稿，PR 用中文提醒补记', async (kind, reason) => {
+    deps.templateMeta = async () => ({ ok: false, kind })
     expect((await submitBot(input, user, deps)).ok).toBe(true)
-    expect(gh.createPr.mock.calls[0][0].body).toContain('没查到（error），合并后上游核对会提醒补上')
+    expect(gh.createPr.mock.calls[0][0].body).toContain(`- 模板版本：没查到（${reason}），合并后上游核对会提醒补上`)
   })
   it('按序限流、解包；新投稿改写署名和北京时间，写两层安全 tree、单提交、PR 和 upsert', async () => {
     const result = await submitBot(input, user, deps)

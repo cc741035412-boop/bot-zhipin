@@ -4,7 +4,7 @@ import { loadAllBots } from './lib/load-bots.mjs'
 import { isPublicBot } from './lib/public-bot.mjs'
 import { loadEntries } from './lib/load-prompts-skills.mjs'
 import { fetchTemplateMeta } from './lib/template-meta.mjs'
-import { checkUpstream, report, findingKeys, planIssue } from './lib/upstream.mjs'
+import { checkUpstream, report, findingKeys, findingLines, planIssue } from './lib/upstream.mjs'
 
 const env = process.env
 http.setGlobalProxyFromEnv?.()
@@ -22,7 +22,7 @@ async function syncIssue(result, body) {
   const root = `/repos/${repo}`, issues = root + '/issues', label = 'upstream-watch'
   const open = (await github(`${issues}?labels=${label}&state=open`)).find(item => !item.pull_request)
   const path = `${issues}/${open?.number}`
-  for (const step of planIssue({ open, attention: result.attention, body, keys: findingKeys(result) })) {
+  for (const step of planIssue({ open, attention: result.attention, body, keys: findingKeys(result), lines: findingLines(result) })) {
     if (step.action === 'create') {
       try { await github(root + '/labels', 'POST', { name: label, color: 'd93f0b', description: '上游核对' }) }
       catch (error) { if (error.status !== 422) throw error }
