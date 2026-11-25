@@ -32,6 +32,19 @@
 | LB3 | 接真脸、全卡悬停、戳、睡醒、Hero 入场、空货架与 404 互动。 | LM1 | 待办 |
 | LB5 | 验收全过且用户看过成品后，提交推送并向 main 开 PR。 | LB3、总验收、用户点头 | 待办 |
 
+## 隐私加固（2026-11-25，决策 74）
+
+契约和验收脚本在维护者本地的 `2026-11-25-bot-zhipin-privacy/`。
+
+| ID | 任务 | 状态 |
+|---|---|---|
+| PV-WATCH | Bot 记 `templateVersion`，投稿自动填；每天核对 Bot 模板和 Skill 来源，结果进 `upstream-watch` issue | ✅ |
+| PV-RET | 搜索词原文只留 90 天，事件照常留 400 天 | ✅ |
+| PV-PAGE | 隐私说明页 `/privacy` 和页脚入口，页面数字由单测锁住 | ✅ |
+| PV-UI | 卡片、精选卡、详情页侧栏露出「会代你发消息」 | ✅ |
+| PV-PII | 投稿里疑似手机号、邮箱、身份证号打码提醒；示例邮箱换保留域名 | ✅ |
+| PV-REVIEW | 复核 `ai-claim-checker`、`ai-daily-radar`、`wechat-article-catcher` 的新版模板，复核后改 `templateVersion` | ⬜ |
+
 ## 第一期验收（来自需求）
 
 1. `npm run validate` 和 `npm run build` 本地通过。
